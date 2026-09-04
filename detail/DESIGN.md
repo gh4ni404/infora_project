@@ -68,27 +68,33 @@ graph TD
 
 ---
 
-## 4. 👥 Manajemen Peran & Hak Akses (Role-Based Access Control)
+## 4. 👥 Manajemen Akun Sivitas & User-Centric Menu Access
 
-INFORA memiliki 7 tingkatan peran pengguna:
+### 4.1. Empat Tipe Akun Utama (`user_type`)
+Untuk menjamin integritas data dan keamanan, platform mengelompokkan pengguna ke dalam 4 tipe akun utama pada tabel `users`:
+1. **`super_admin`:** Tim IT / Developer / Yayasan. Memiliki akses root (*bypass permission*), mengelola konfigurasi global, audit log, dan integrasi API bridging.
+2. **`admin`:** Staf Tata Usaha (TU) / Operator Sekolah. Mengelola master data sekolah (Rombel, TA, Mapel), akun guru/siswa, plotting jadwal, dan alokasi menu guru.
+3. **`guru`:** Pendidik & Tenaga Pengajar. Dapat memegang tugas tambahan majemuk (Guru Mapel, Wali Kelas, Pembimbing PKL, Tim Akreditasi, Guru BK).
+4. **`siswa`:** Peserta Didik Aktif (terhubung ke data orang tua). Mengakses informasi akademik, portofolio prestasi, dan jurnal mandiri PKL (SMK).
 
-```mermaid
-flowchart LR
-    A[Super Admin] --> B[Kepala Sekolah]
-    A --> C[Waka Kurikulum / Kesiswaan / Hubin]
-    C --> D[Guru / Wali Kelas]
-    D --> E[Siswa]
-    D --> F[Orang Tua / Wali]
-    A --> G[Asesor Akreditasi Guest]
-```
+### 4.2. Arsitektur Basis Data: *Single User Table + 1-to-1 Profile Relations*
+Menghindari kerumitan *multi-auth guard* dengan memusatkan otentikasi pada tabel `users` tunggal yang berelasi spesifik:
+- `users` (id, name, username, email, password, user_type, is_active, avatar)
+  - `student_profiles` (user_id, nisn, nis, rombel_id, angkatan, nama_ortu, no_telp_ortu)
+  - `teacher_profiles` (user_id, nip, nuptk, gelar_depan, gelar_belakang, no_hp)
+  - `staff_profiles` (user_id, nip, unit_kerja, jabatan_tu)
 
-1. **Super Admin (Tata Usaha/IT):** Manajemen sistem penuh, backup data, konfigurasi sekolah, master user.
-2. **Kepala Sekolah (Executive Dashboard):** Ringkasan keterlaksanaan KBM real-time, grafik performa akademik, audit mutu akreditasi.
-3. **Waka Kurikulum & Kesiswaan:** Manajemen jadwal, kurikulum (Merdeka/K13), rekap pelanggaran & prestasi.
-4. **Waka Hubin (Khusus SMK):** Manajemen kemitraan DUDI, ploting tempat PKL, monitoring jurnal magang.
-5. **Guru & Wali Kelas:** Penginputan jurnal KBM, evaluasi materi kelas, rekap capaian akademik, input nilai rapor.
-6. **Siswa & Orang Tua:** Akses jadwal, portofolio karya/prestasi, catatan BK, notifikasi agenda sekolah via WhatsApp/Email.
-7. **Asesor Akreditasi (Guest Auditor):** Akses baca khusus ke Bank Dokumen & Bukti Fisik Akreditasi.
+### 4.3. Autentikasi Fleksibel (Auto-Detect Login Identifier)
+Pengguna dapat masuk menggunakan pengenal yang familiar tanpa terbebani keharusan email:
+- **Siswa:** Login via **NISN** / NIS.
+- **Guru:** Login via **NIP / NUPTK** atau Email Resmi.
+- **Admin & Super Admin:** Login via **Username** atau Email.
+
+### 4.4. User-Centric Menu Access & De-Duplication System
+Untuk mengakomodasi realitas guru di sekolah yang sering merangkap banyak jabatan (misal: Guru Mapel + Wali Kelas + Pembimbing PKL + Tim Akreditasi):
+- **Akses Berbasis Pengguna (Granular Access):** Menu akses dialokasikan langsung ke akun user, bukan terikat kaku pada satu role tunggal.
+- **De-Duplication Otomatis:** Seluruh menu yang diizinkan untuk user dikompilasi dan disaring secara unik (`unique('key')`). Menu dijamin **100% tunggal, rapi, dan bebas duplikasi**, berapapun banyaknya tugas tambahan yang diemban.
+- **Role Presets:** Role berfungsi sebagai template/preset awal bagi Admin saat membuat akun baru untuk mempercepat pemilihan hak akses.
 
 ---
 

@@ -6,9 +6,9 @@
 
 ## 📌 Status Ringkasan Proyek
 - [x] Konsep & Penamaan Platform (**INFORA**)
-- [x] Filosofi Brand, Desain Logo & App Icon ([BRANDING.md](docs/BRANDING.md))
-- [x] Spesifikasi Desain & Arsitektur Sistem ([DESIGN.md](DESIGN.md))
-- [x] Inisialisasi Project Laravel & Docker Stack Multi-Platform ([README.md](../README.md))
+- [x] Filosofi Brand, Desain Logo & App Icon ([BRANDING.md](detail/docs/BRANDING.md))
+- [x] Spesifikasi Desain & Arsitektur Sistem ([DESIGN.md](detail/DESIGN.md))
+- [x] Inisialisasi Project Laravel & Docker Stack Multi-Platform ([README.md](README.md))
 - [x] Standarisasi Format Upload Base64 (Maks. 1MB) & Pola Penamaan Berkas Semantik
 - [ ] Arsitektur Akun Sivitas (4 Tipe Akun) & Sistem Menu Berbasis User (User-Centric & Anti-Duplicate)
 - [ ] Dedicated Layout Separation (Desktop & Mobile) & Reusable Global CSS System
@@ -119,6 +119,6 @@
 ---
 
 ## 📚 Rujukan Dokumen Terkait
-- 📖 **[README.md](../README.md):** Gambaran umum proyek, standar arsitektur, dan panduan Docker.
-- 🎨 **[DESIGN.md](DESIGN.md):** Spesifikasi arsitektur teknis, sistem peran (RBAC), skema basis data, dan UI/UX.
-- 🖼️ **[BRANDING.md](docs/BRANDING.md):** Filosofi penamaan brand, aset logo lockup, dan app icon.
+- 📖 **[README.md](README.md):** Gambaran umum proyek, standar arsitektur, dan panduan Docker.
+- 🎨 **[DESIGN.md](detail/DESIGN.md):** Spesifikasi arsitektur teknis, sistem peran (RBAC), skema basis data, dan UI/UX.
+- 🖼️ **[BRANDING.md](detail/docs/BRANDING.md):** Filosofi penamaan brand, aset logo lockup, dan app icon.
