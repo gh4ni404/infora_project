@@ -1,0 +1,135 @@
+#!/usr/bin/env bash
+
+# Helper script for Docker-based development
+# Usage: ./dev [command]
+
+set -e
+
+# Detect if TTY is available
+if [ -t 1 ]; then
+    DOCKER_EXEC="docker compose exec"
+else
+    DOCKER_EXEC="docker compose exec -T"
+fi
+
+is_app_running() {
+    docker compose ps --status running --format "{{.Service}}" 2>/dev/null | grep -q "^app$"
+}
+
+run_in_app() {
+    if is_app_running; then
+        $DOCKER_EXEC -u www-data app "$@"
+    else
+        docker compose run --rm -u www-data app "$@"
+    fi
+}
+
+run_in_app_root() {
+    if is_app_running; then
+        $DOCKER_EXEC app "$@"
+    else
+        docker compose run --rm app "$@"
+    fi
+}
+
+case "$1" in
+    start|up)
+        shift
+        docker compose up -d "$@"
+        echo "Containers started!"
+        echo "Web Application : http://localhost:8000"
+        echo "Vite HMR Server : http://localhost:5173"
+        ;;
+
+    stop|down)
+        shift
+        docker compose down "$@"
+        ;;
+
+    restart)
+        shift
+        docker compose restart "$@"
+        ;;
+
+    ps|status)
+        shift
+        docker compose ps "$@"
+        ;;
+
+    logs)
+        shift
+        docker compose logs -f "$@"
+        ;;
+
+    artisan|art)
+        shift
+        run_in_app php artisan "$@"
+        ;;
+
+    composer|comp)
+        shift
+        run_in_app composer "$@"
+        ;;
+
+    npm)
+        shift
+        run_in_app_root npm "$@"
+        ;;
+
+    test)
+        shift
+        run_in_app php artisan test "$@"
+        ;;
+
+    pint)
+        shift
+        run_in_app vendor/bin/pint "$@"
+        ;;
+
+    bash|shell)
+        shift
+        docker compose exec -it -u www-data app bash
+        ;;
+
+    root-bash)
+        shift
+        docker compose exec -it app bash
+        ;;
+
+    mysql)
+        shift
+        docker compose exec mysql mysql -ularavel -psecret laravel
+        ;;
+
+    help|--help|-h|"")
+        echo "=========================================================="
+        echo " Infora Project - Docker Development Helper"
+        echo "=========================================================="
+        echo "Usage: ./dev <command> [args]"
+        echo ""
+        echo "Service Management:"
+        echo "  start, up       Start all docker containers in background"
+        echo "  stop, down      Stop and remove containers"
+        echo "  restart         Restart containers"
+        echo "  ps, status      Show container status"
+        echo "  logs [service]  Tail container logs (e.g. ./dev logs app)"
+        echo ""
+        echo "Development & Tools:"
+        echo "  artisan <args>  Run artisan command (e.g. ./dev artisan migrate)"
+        echo "  composer <args> Run composer command (e.g. ./dev composer install)"
+        echo "  npm <args>      Run npm command (e.g. ./dev npm run build)"
+        echo "  test <args>     Run Pest/PHPUnit tests (e.g. ./dev test)"
+        echo "  pint <args>     Run Laravel Pint formatter"
+        echo ""
+        echo "Terminal & DB:"
+        echo "  bash            Open bash shell in PHP container (as www-data)"
+        echo "  root-bash       Open bash shell in PHP container (as root)"
+        echo "  mysql           Open MySQL CLI into local database"
+        echo "=========================================================="
+        ;;
+
+    *)
+        # Forward any unrecognized commands directly to docker compose
+        docker compose "$@"
+        ;;
+esac
