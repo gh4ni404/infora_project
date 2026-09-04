@@ -31,17 +31,18 @@
 
 ## 🔐 Fase 2: Design System, Arsitektur Akun & User-Centric Menu Access
 - [ ] **2.1. Desain Sistem & Arsitektur Dedicated Layout (Desktop & Mobile)**
-  - [ ] Integrasikan font `Plus Jakarta Sans` & `Inter`.
-  - [ ] Setup palet warna INFORA (Slate Dark `#0B132B`, Electric Cyan `#00D2FF`, Royal Blue `#3A7BD5`).
-  - [ ] Implementasi master layout terpisah: Desktop (`layouts/desktop.blade.php`) & Mobile (`layouts/mobile.blade.php`).
-  - [ ] Siapkan komponen UI master: Bottom Navigation Bar & Card Grid Launcher (Mobile), Sidebar adaptif collapsible & Topbar (Desktop).
-  - [ ] Standarisasi class CSS global terpusat di `resources/css/` (penerapan aturan reusable class global, larangan keras class khusus/ad-hoc, tanpa *inline style*, dan tanpa tag `<style>` pada view).
+  - [x] Setup palet warna INFORA (Slate Dark `#0B132B`, Electric Cyan `#00D2FF`, Royal Blue `#3A7BD5`) & tipografi `Plus Jakarta Sans`.
+  - [x] Standarisasi class CSS global terpusat di `resources/css/app.css` (reusable global utility & component classes, zero inline styles, zero `<style>` tags).
+  - [x] Master layout shell minimalis awal: `layouts/auth.blade.php` dan `layouts/app.blade.php`.
+  - [ ] Implementasi layout lanjutan khusus: Mobile App-like (`layouts/mobile.blade.php`) & Desktop Power-Dashboard (`layouts/desktop.blade.php`).
 - [ ] **2.2. Manajemen Akun Sivitas & Autentikasi Fleksibel (4 Tipe Akun)**
-  - [ ] Implementasi 4 Tipe Akun Utama (`user_type`):
-    - `super_admin`: Akses root/developer/yayasan, bypass permission, kelola konfigurasi global & log audit.
-    - `admin`: Staf Tata Usaha / Operator sekolah, kelola data sivitas, plotting, dan alokasi menu guru.
-    - `guru`: Pendidik/staf pengajar, wali kelas, pembimbing PKL, tim akreditasi.
-    - `siswa`: Peserta didik aktif (dan portal orang tua), profil akademik, jurnal mandiri PKL (SMK).
+  - [x] Migrasi kolom sistem tabel `users` (`username`, `user_type`, `is_active`, `avatar_path`).
+  - [x] Seeder default Super Admin (entitas pengembang platform: `superadmin` / `password`).
+  - [x] Login Controller multi-identifier (login via **Username** maupun **Email**).
+  - [x] SuperAdminMiddleware untuk proteksi route dashboard.
+  - [x] Dashboard Super Admin minimalis awal (1 menu tunggal: **Dashboard**).
+  - [ ] Skema database tabel profil sivitas sekolah (`student_profiles`, `teacher_profiles`, `staff_profiles`).
+  - [ ] Setup Laravel Sanctum untuk RESTful API Tokens.
   - [ ] Skema database *Single User Table + Specific Profile Relations* (1-to-1):
     - `student_profiles`: NISN, NIS, rombel_id, angkatan, kontak orang tua.
     - `teacher_profiles`: NIP, NUPTK, gelar_depan, gelar_belakang, no_hp.

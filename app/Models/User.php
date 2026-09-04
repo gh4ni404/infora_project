@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'username', 'email', 'password', 'user_type', 'is_active', 'avatar_path'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -27,6 +27,39 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
+    }
+
+    /**
+     * Check if the user is a Super Administrator (Platform/Developer entity).
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->user_type === 'super_admin';
+    }
+
+    /**
+     * Check if the user is a School Administrator / TU Operator.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->user_type === 'admin';
+    }
+
+    /**
+     * Check if the user is a Teacher.
+     */
+    public function isGuru(): bool
+    {
+        return $this->user_type === 'guru';
+    }
+
+    /**
+     * Check if the user is a Student.
+     */
+    public function isSiswa(): bool
+    {
+        return $this->user_type === 'siswa';
     }
 }

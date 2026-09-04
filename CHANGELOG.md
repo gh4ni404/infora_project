@@ -8,12 +8,26 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 
 ## [Unreleased]
 
-### Planned (Fase 2)
-- Master Dedicated Layouts: `layouts/desktop.blade.php` & `layouts/mobile.blade.php`.
-- Sistem styling global terpusat di `resources/css/` (reusable utility & component tokens).
-- Migrasi database 4 tipe akun sivitas (`users.user_type`: `super_admin`, `admin`, `guru`, `siswa`).
+### Added
+- **Modul Autentikasi Super Admin:**
+  - Login multi-identifier fleksibel via **Username** maupun **Email** dengan proteksi session fixation.
+  - Verifikasi status keaktifan akun (`is_active`).
+  - Fitur logout aman (session invalidation & token CSRF regeneration).
+  - Middleware `SuperAdminMiddleware` untuk membatasi akses khusus akun bertipe `super_admin`.
+- **Database & Model:**
+  - Migrasi penambahan kolom sistem pada tabel `users`: `username`, `user_type`, `is_active`, `avatar_path`.
+  - Seeder default Super Admin (`superadmin` / `password` / `superadmin@infora.test`).
+  - Helper methods pada model `User`: `isSuperAdmin()`, `isAdmin()`, `isGuru()`, `isSiswa()`.
+- **Design System & Antarmuka Awal:**
+  - Standardisasi class CSS global reusable di `resources/css/app.css` (bebas class ad-hoc, tanpa *inline styles*, dan tanpa tag `<style>`).
+  - Master layout `layouts/auth.blade.php` dan `layouts/app.blade.php`.
+  - Tampilan Dashboard awal Super Admin dengan **1 menu tunggal: Dashboard**.
+- **Automated Testing:**
+  - Feature test suite `SuperAdminAuthTest` mencakup 11 pengujian otomatis via Pest (100% lulus).
+
+### Planned (Tahap Berikutnya)
 - Skema tabel profil relasional 1-to-1 (`student_profiles`, `teacher_profiles`, `staff_profiles`).
-- Autentikasi fleksibel berbasis deteksi otomatis (NISN, NIP, Username, Email).
+- Dedicated Layout lanjutan: Mobile App-like (`layouts/mobile.blade.php`) & Desktop Power-Dashboard (`layouts/desktop.blade.php`).
 - Registry menu terpusat (`config/menu.php`) dengan alokasi hak akses *User-Centric* & de-duplikasi otomatis.
 
 ---
