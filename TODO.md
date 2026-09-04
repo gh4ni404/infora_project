@@ -120,5 +120,6 @@
 
 ## 📚 Rujukan Dokumen Terkait
 - 📖 **[README.md](README.md):** Gambaran umum proyek, standar arsitektur, dan panduan Docker.
+- 📝 **[CHANGELOG.md](CHANGELOG.md):** Catatan riwayat perubahan dan versi rilis platform.
 - 🎨 **[DESIGN.md](detail/DESIGN.md):** Spesifikasi arsitektur teknis, sistem peran (RBAC), skema basis data, dan UI/UX.
 - 🖼️ **[BRANDING.md](detail/docs/BRANDING.md):** Filosofi penamaan brand, aset logo lockup, dan app icon.

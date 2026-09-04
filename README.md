@@ -132,9 +132,10 @@ Gunakan helper script bawaan untuk kemudahan lintas OS:
 
 ## 📂 Struktur Dokumentasi Proyek
 
-Dokumentasi detail mengenai arsitektur, rencana kerja, dan identitas brand tersimpan di folder `detail/`:
+Dokumentasi detail mengenai arsitektur, rencana kerja, riwayat rilis, dan identitas brand:
+- 📋 **[TODO.md](TODO.md):** Roadmap pengembangan fase demi fase (Fase 1 sampai Fase 6).
+- 📝 **[CHANGELOG.md](CHANGELOG.md):** Riwayat perubahan dan rilis versi platform.
 - 🎨 **[DESIGN.md](detail/DESIGN.md):** Spesifikasi arsitektur sistem, identitas visual, palet warna, dan skema database.
-- 📋 **[TODO.md](detail/TODO.md):** Roadmap pengembangan fase demi fase (Fase 1 sampai Fase 6).
 - 🖼️ **[BRANDING.md](detail/docs/BRANDING.md):** Filosofi penamaan brand, aset logo lockup, dan app icon.
 
 ---

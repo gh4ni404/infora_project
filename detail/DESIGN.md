@@ -155,5 +155,6 @@ erDiagram
 
 ## 📚 8. Rujukan Dokumen Terkait
 - 📖 **[README.md](../README.md):** Gambaran umum proyek dan panduan quick start Docker.
-- 📋 **[TODO.md](TODO.md):** Roadmap tahapan implementasi dari Fase 1 hingga Fase 6.
+- 📋 **[TODO.md](../TODO.md):** Roadmap tahapan implementasi dari Fase 1 hingga Fase 6.
+- 📝 **[CHANGELOG.md](../CHANGELOG.md):** Catatan riwayat perubahan dan versi rilis platform.
 - 🖼️ **[BRANDING.md](docs/BRANDING.md):** Filosofi penamaan brand, aset logo lockup, dan app icon.
