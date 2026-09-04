@@ -11,7 +11,7 @@
     </div>
 
     <div class="card-body">
-        <div class="alert-danger">
+        <div class="alert-info">
             <strong>Catatan Otoritas:</strong> Akun ini berstatus <strong>Super Administrator</strong> (Entitas Pengembang / Pemilik Platform, bukan pihak sekolah). Seluruh pengaturan menu sekolah akan dikonfigurasi pada tahap pengembangan selanjutnya.
         </div>
 
