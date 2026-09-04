@@ -62,10 +62,15 @@ Dibangun dengan arsitektur **API-First & System Bridging**, **Pengembangan Berba
 - **Tanpa Inline Style (`style="..."`):** Dilarang keras menggunakan *inline style* langsung pada tag HTML untuk menjamin kebersihan kode (*clean markup*), kemudahan *maintenance*, dan konsistensi visual lintas halaman.
 - **Tanpa Tag `<style>` pada View/Komponen:** Jika memerlukan UI kustom, seluruh definisi CSS wajib ditempatkan sebagai class reusable pada berkas stylesheet global (`resources/css/`), tanpa pernah menyisipkan tag `<style>` di dalam template Blade.
 
-### 📸 8. Standar Upload Dokumentasi: Base64 & Kualitas Terjaga (Maks. 1MB)
+### 📸 8. Standar Upload Dokumentasi: Base64 & Naming Convention (Maks. 1MB)
 - **Format Upload Base64:** Seluruh pengunggahan foto dokumentasi (kegiatan KBM, berkas bukti akreditasi, sertifikat siswa, dan jurnal PKL) wajib menggunakan format string **Base64** di dalam payload request JSON, selaras dengan arsitektur *Pure JSON*.
 - **Batasan Ukuran Maksimal 1MB:** Ukuran payload foto per berkas dibatasi maksimal **1MB** untuk menjaga efisiensi bandwidth dan responsivitas API.
 - **Preservasi Kualitas Gambar:** Wajib menerapkan optimasi/kompresi cerdas sebelum konversi base64 sehingga ukuran berkas tetap di bawah 1MB tanpa mengorbankan ketajaman resolusi, keterbacaan teks dokumen, maupun fidelitas visual foto.
+- **Pola Penamaan File Semantik (Naming Convention):** Berkas hasil upload wajib dinamai secara otomatis mengikuti pola terstandarisasi:
+  ```text
+  {modul}_u{user_id}_{YYYYMMDD_His}_{random_8char}.{ekstensi}
+  ```
+  *(Contoh: `kbm_u7_20260905_143022_a7b9c1d2.webp`, `pkl_u142_20260905_152011_3c4d5e6f.webp`, `akr_u3_20260905_110545_f83e2a1b.pdf`)*. Format ini menjamin berkas bebas tabrakan nama (*collision-proof*), aman, serta dapat diaudit dan ditelusuri kepemilikannya secara instan.
 
 ---
 
@@ -73,7 +78,7 @@ Dibangun dengan arsitektur **API-First & System Bridging**, **Pengembangan Berba
 
 - **Backend:** Laravel (Versi Terbaru) — *Modular Monolith, RESTful API & Bridging Core*
 - **Data & Response Contract:** Pure JSON Responses (`application/json`), Eloquent API Resources, Zero HTML in Data Payloads
-- **Media & File Handling:** Base64 Image Uploads (Maksimal 1MB/file dengan preservasi kualitas visual)
+- **Media & File Handling:** Base64 Uploads (Maks. 1MB/file, Preservasi Kualitas, Pola Nama: `{modul}_u{user_id}_{timestamp}_{random8}.{ext}`)
 - **Styling & UI Convention:** Reusable Global CSS Classes (Strict No Ad-Hoc/Specific Classes), Zero Inline Styles (`style=""`), Zero `<style>` Tags in Views
 - **Database:** MySQL 8.0 & Redis Cache
 - **Web Server:** Nginx (Alpine Linux)

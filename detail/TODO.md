@@ -52,7 +52,7 @@
   - [ ] Alokasi Jam Mengajar Guru & Penyusunan Jadwal Mingguan per Kelas.
 - [ ] **3.3. Jurnal KBM Digital Guru**
   - [ ] Form input jurnal mengajar harian guru per jam tatap muka.
-  - [ ] Pencatatan topik/materi, kendala siswa di kelas, dan upload foto dokumentasi KBM (format Base64, maksimal 1MB per berkas dengan kualitas visual terjaga).
+  - [ ] Pencatatan topik/materi, kendala siswa di kelas, dan upload foto dokumentasi KBM (format Base64, maksimal 1MB per berkas dengan kualitas visual terjaga, pola penamaan semantik: `{modul}_u{user_id}_{YYYYMMDD_His}_{random_8char}.{ekstensi}`).
 - [ ] **3.4. Kesiswaan & Bimbingan Konseling (BK)**
   - [ ] Buku catatan pelanggaran tata tertib & kalkulasi poin disiplin.
   - [ ] Portofolio prestasi, sertifikat, dan kejuaraan siswa.
