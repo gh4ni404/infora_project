@@ -181,13 +181,7 @@ test('menus and submenus without .index suffix automatically resolve and match a
     $response->assertSee('is-open active-parent', false);
 });
 
-test('module and menu create views render visual icon picker with free Lucide catalog', function () {
-    $responseMod = $this->actingAs($this->user)->get(route('system.modules.create'));
-    $responseMod->assertOk();
-    $responseMod->assertSee('icon-picker-component', false);
-    $responseMod->assertSee('Katalog Ikon Navigasi');
-    $responseMod->assertSee('Pilih Ikon');
-
+test('menu create views render visual icon picker with free Lucide catalog', function () {
     $responseMenu = $this->actingAs($this->user)->get(route('system.menus.create'));
     $responseMenu->assertOk();
     $responseMenu->assertSee('icon-picker-component', false);

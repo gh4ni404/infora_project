@@ -56,7 +56,6 @@
                 <tr>
                     <th class="col-w-sm">Urutan</th>
                     <th>Nama Modul</th>
-                    <th>Ikon</th>
                     <th>Jumlah Menu</th>
                     <th>Status</th>
                     <th class="col-w-actions">Aksi</th>
@@ -70,12 +69,6 @@
                         </td>
                         <td>
                             <div class="table-cell-bold">{{ $module->name }}</div>
-                        </td>
-                        <td>
-                            <span class="badge-icon-preview">
-                                <x-icon :name="$module->icon" class="badge-icon-svg" />
-                                <code>{{ $module->icon ?: '-' }}</code>
-                            </span>
                         </td>
                         <td>
                             <a href="{{ route('system.menus.index', ['module_id' => $module->id]) }}" class="badge badge-cyan" title="Lihat menu modul ini">
@@ -113,7 +106,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6">
+                        <td colspan="5">
                             <div class="empty-state">
                                 <svg class="empty-state-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <circle cx="11" cy="11" r="8"></circle>
@@ -168,15 +161,6 @@
                         <div class="form-error">{{ $message }}</div>
                     @enderror
                     <div class="form-hint">Nama modul akan ditampilkan sebagai judul grup kategori pada sidebar.</div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Ikon Modul (Lucide)</label>
-                    <x-icon-picker name="icon" :value="old('icon', 'layers')" id="module_icon" />
-                    @error('icon')
-                        <div class="form-error">{{ $message }}</div>
-                    @enderror
-                    <div class="form-hint">Pilih ikon visual dari katalog resmi (100% gratis) untuk mewakili modul pada sidebar.</div>
                 </div>
 
                 <div class="form-group">

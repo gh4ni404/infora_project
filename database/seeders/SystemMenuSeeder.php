@@ -18,7 +18,6 @@ class SystemMenuSeeder extends Seeder
         $mainModule = Module::firstOrCreate(
             ['name' => 'Navigasi Utama'],
             [
-                'icon' => 'compass',
                 'order' => 0,
                 'is_active' => true,
             ]
@@ -41,7 +40,6 @@ class SystemMenuSeeder extends Seeder
         $systemModule = Module::firstOrCreate(
             ['name' => 'Tata Kelola Sistem'],
             [
-                'icon' => 'shield-check',
                 'order' => 1,
                 'is_active' => true,
             ]

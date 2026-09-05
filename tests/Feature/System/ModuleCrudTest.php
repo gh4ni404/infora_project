@@ -36,7 +36,6 @@ test('non super admin cannot access modules management', function () {
 test('super admin can view modules list with menu counts', function () {
     $module = Module::create([
         'name' => 'Akademik Khusus',
-        'icon' => 'layers',
         'order' => 1,
         'is_active' => true,
     ]);
@@ -69,7 +68,6 @@ test('super admin can view create module page', function () {
 test('super admin can store new module with valid data', function () {
     $payload = [
         'name' => 'Kesiswaan & Ekstrakurikuler',
-        'icon' => 'users',
         'order' => 3,
         'is_active' => '1',
     ];
@@ -81,7 +79,6 @@ test('super admin can store new module with valid data', function () {
 
     $this->assertDatabaseHas('modules', [
         'name' => 'Kesiswaan & Ekstrakurikuler',
-        'icon' => 'users',
         'order' => 3,
         'is_active' => true,
     ]);
@@ -116,7 +113,6 @@ test('module store allows duplicate names without unique constraint errors', fun
 test('super admin can view edit module page', function () {
     $module = Module::create([
         'name' => 'Modul Edit Test',
-        'icon' => 'layers',
         'order' => 2,
         'is_active' => true,
     ]);
@@ -131,14 +127,12 @@ test('super admin can view edit module page', function () {
 test('super admin can update existing module', function () {
     $module = Module::create([
         'name' => 'Modul Sebelum Edit',
-        'icon' => 'layers',
         'order' => 2,
         'is_active' => true,
     ]);
 
     $response = $this->actingAs($this->superAdmin)->put(route('system.modules.update', $module), [
         'name' => 'Modul Setelah Edit',
-        'icon' => 'shield-check',
         'order' => 5,
         'is_active' => '0',
     ]);
@@ -148,7 +142,6 @@ test('super admin can update existing module', function () {
 
     $module->refresh();
     expect($module->name)->toBe('Modul Setelah Edit')
-        ->and($module->icon)->toBe('shield-check')
         ->and($module->order)->toBe(5)
         ->and($module->is_active)->toBeFalse();
 });

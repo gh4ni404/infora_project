@@ -19,7 +19,6 @@ class ModuleFactory extends Factory
     {
         return [
             'name' => fake()->words(2, true),
-            'icon' => 'layers',
             'order' => fake()->numberBetween(0, 50),
             'is_active' => true,
         ];

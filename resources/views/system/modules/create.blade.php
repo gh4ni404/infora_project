@@ -44,15 +44,6 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">Ikon Modul (Lucide)</label>
-                <x-icon-picker name="icon" :value="old('icon', 'layers')" />
-                @error('icon')
-                    <div class="form-error">{{ $message }}</div>
-                @enderror
-                <div class="form-hint">Pilih ikon visual dari katalog resmi (100% gratis) untuk mewakili modul pada sidebar.</div>
-            </div>
-
-            <div class="form-group">
                 <label for="order" class="form-label">Urutan Tampil (Order)</label>
                 <input
                     type="number"
