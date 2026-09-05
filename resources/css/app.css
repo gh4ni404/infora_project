@@ -400,9 +400,10 @@ body {
 }
 
 .sidebar-header {
-    padding: 1.25rem 1.125rem;
+    padding: 1.25rem 17px;
     border-bottom: 1px solid var(--infora-border);
     white-space: nowrap;
+    overflow: hidden;
 }
 
 .sidebar-brand-link {
@@ -411,6 +412,7 @@ body {
     gap: 0.75rem;
     text-decoration: none;
     color: inherit;
+    min-width: max-content;
     transition: opacity 0.15s ease;
 }
 
@@ -435,20 +437,23 @@ body {
     display: flex;
     flex-direction: column;
     min-width: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 1;
+    transform: translateX(0);
 }
 
 .layout-sidebar.is-collapsed .sidebar-header {
-    padding: 1.25rem 0.5rem;
-    display: flex;
-    justify-content: center;
+    padding: 1.25rem 17px;
 }
 
 .layout-sidebar.is-collapsed .sidebar-brand-link {
-    justify-content: center;
+    justify-content: flex-start;
 }
 
 .layout-sidebar.is-collapsed .sidebar-brand-text {
-    display: none;
+    opacity: 0;
+    transform: translateX(-10px);
+    pointer-events: none;
 }
 
 .brand-title {
@@ -578,11 +583,19 @@ body {
 
 /* Sidebar Section Helper */
 .sidebar-search {
-    padding: 0.875rem 0.875rem 0.25rem;
+    padding: 0.875rem 16px 0.25rem;
+    transition: opacity 0.2s ease, padding 0.25s ease;
+}
+
+.layout-sidebar.is-collapsed .sidebar-search {
+    opacity: 0;
+    pointer-events: none;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 .sidebar-menu {
-    padding: 1rem 0.75rem;
+    padding: 1rem 16px;
     display: flex;
     flex-direction: column;
     gap: 0.375rem;
@@ -596,19 +609,30 @@ body {
     letter-spacing: 0.08em;
     text-transform: uppercase;
     padding: 0.5rem 0.75rem 0.25rem;
+    white-space: nowrap;
 }
 
 .nav-link-item {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.625rem 0.75rem;
+    padding: 0.625rem 10px;
     border-radius: 0.5rem;
     color: var(--infora-text-muted);
     text-decoration: none;
     font-size: 0.875rem;
     font-weight: 500;
-    transition: all 0.2s ease;
+    transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+    white-space: nowrap;
+}
+
+.nav-link-item svg {
+    flex-shrink: 0;
+}
+
+.nav-link-item span {
+    transition: opacity 0.2s ease;
+    opacity: 1;
 }
 
 .nav-link-item:hover {
@@ -621,6 +645,19 @@ body {
     background-color: var(--infora-brand-soft);
     border: 1px solid var(--infora-brand-border);
     font-weight: 600;
+}
+
+.layout-sidebar.is-collapsed .nav-link-item {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    box-sizing: border-box;
+    justify-content: center;
+    gap: 0;
+}
+
+.layout-sidebar.is-collapsed .nav-link-item span {
+    display: none;
 }
 
 .layout-content-wrapper {
