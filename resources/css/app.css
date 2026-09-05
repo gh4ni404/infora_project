@@ -825,103 +825,64 @@ body {
     display: none;
 }
 
-/* Sidebar Footer & User Profile Dropup */
-.sidebar-footer {
+/* ==========================================================================
+   Universal Dropdown Component System
+   Modular, accessible, and fully reusable across navigation, headers & tables
+   ========================================================================== */
+.dropdown {
     position: relative;
-    padding: 0.75rem 10px;
-    border-top: 1px solid var(--infora-border);
-    background-color: #FFFFFF;
-    flex-shrink: 0;
+    display: inline-block;
 }
 
-.sidebar-user-trigger {
-    display: flex;
-    align-items: center;
-    gap: 0.625rem;
+.dropdown.dropdown-full {
+    display: block;
     width: 100%;
-    padding: 0.5rem 0.5rem;
-    border-radius: 0.5rem;
-    background: transparent;
-    border: 1px solid transparent;
-    cursor: pointer;
-    text-align: left;
-    transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
-.sidebar-user-trigger:hover,
-.sidebar-user-trigger.active {
-    background-color: var(--infora-surface-muted);
-    border-color: var(--infora-border);
-}
-
-.sidebar-user-trigger .user-avatar-circle {
-    width: 36px;
-    height: 36px;
-    border-radius: 9999px;
-    background: linear-gradient(135deg, var(--infora-brand-cyan) 0%, var(--infora-brand-primary) 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 0.8125rem;
-    color: #FFFFFF;
-    flex-shrink: 0;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-}
-
-.sidebar-user-trigger .user-meta-info {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    flex: 1;
-    overflow: hidden;
-}
-
-.sidebar-user-trigger .user-name-text {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--infora-text-main);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.25;
-}
-
-.sidebar-user-trigger .brand-subtitle {
-    font-size: 0.6875rem;
-    color: var(--infora-text-dim);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.user-trigger-chevron {
-    color: var(--infora-text-dim);
-    transition: transform 0.2s ease;
-    flex-shrink: 0;
-    margin-left: auto;
-}
-
-.sidebar-user-trigger.active .user-trigger-chevron {
-    transform: rotate(180deg);
-}
-
-/* User Dropup Menu */
-.user-dropup-menu {
+.dropdown-menu {
     position: absolute;
-    bottom: calc(100% + 8px);
-    left: 8px;
-    right: 8px;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 200px;
     background-color: #FFFFFF;
     border: 1px solid var(--infora-border);
     border-radius: 0.75rem;
     box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08);
     padding: 0.375rem;
     z-index: 50;
-    animation: dropupSlideUp 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: dropdownSlideDown 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes dropupSlideUp {
+.dropdown-menu.dropdown-menu-up {
+    top: auto;
+    bottom: calc(100% + 8px);
+    animation: dropdownSlideUp 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dropdown-menu.dropdown-menu-end {
+    left: auto;
+    right: 0;
+}
+
+.dropdown-menu.dropdown-menu-full {
+    left: 0;
+    right: 0;
+    width: 100%;
+    min-width: 0;
+}
+
+@keyframes dropdownSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes dropdownSlideUp {
     from {
         opacity: 0;
         transform: translateY(6px);
@@ -932,57 +893,26 @@ body {
     }
 }
 
-.user-dropup-header {
+.dropdown-header {
     display: flex;
     align-items: center;
     gap: 0.625rem;
     padding: 0.5rem 0.625rem;
 }
 
-.user-avatar-sm {
-    width: 28px !important;
-    height: 28px !important;
-    font-size: 0.75rem !important;
-}
-
-.user-dropup-meta {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    flex: 1;
-}
-
-.user-dropup-name {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--infora-text-main);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.25;
-}
-
-.user-dropup-role {
-    font-size: 0.6875rem;
-    color: var(--infora-text-dim);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.user-dropup-divider {
+.dropdown-divider {
     height: 1px;
     background-color: var(--infora-border);
     margin: 0.375rem 0;
 }
 
-.user-dropup-items {
+.dropdown-list {
     display: flex;
     flex-direction: column;
     gap: 0.125rem;
 }
 
-.user-dropup-item {
+.dropdown-item {
     display: flex;
     align-items: center;
     gap: 0.625rem;
@@ -1000,61 +930,148 @@ body {
     transition: all 0.15s ease;
 }
 
-.user-dropup-item:hover {
+.dropdown-item:hover {
     background-color: var(--infora-surface-muted);
     color: var(--infora-text-main);
 }
 
-.user-dropup-item .dropup-item-icon {
+.dropdown-item svg {
     color: var(--infora-text-dim);
     flex-shrink: 0;
     transition: color 0.15s ease;
 }
 
-.user-dropup-item:hover .dropup-item-icon {
+.dropdown-item:hover svg {
     color: var(--infora-brand-primary);
 }
 
-.user-dropup-logout-form {
-    display: block;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-}
-
-.user-dropup-item-danger {
+.dropdown-item.is-danger {
     color: var(--infora-danger);
 }
 
-.user-dropup-item-danger .dropup-item-icon {
+.dropdown-item.is-danger svg {
     color: var(--infora-danger);
 }
 
-.user-dropup-item-danger:hover {
+.dropdown-item.is-danger:hover {
     background-color: var(--infora-danger-bg);
     color: var(--infora-danger);
 }
 
-.user-dropup-item-danger:hover .dropup-item-icon {
+.dropdown-item.is-danger:hover svg {
     color: var(--infora-danger);
 }
 
-/* Collapsed Sidebar State */
+/* ==========================================================================
+   User Identity Components & Sidebar Footer
+   ========================================================================== */
+.sidebar-footer {
+    position: relative;
+    padding: 0.75rem 12px;
+    border-top: 1px solid var(--infora-border);
+    background-color: #FFFFFF;
+    flex-shrink: 0;
+    overflow: visible;
+}
+
+.user-card-button {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.625rem;
+    width: 100%;
+    padding: 0.375rem 5px;
+    border-radius: 0.5rem;
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.user-card-button:hover,
+.user-card-button.active {
+    background-color: var(--infora-surface-muted);
+    border-color: var(--infora-border);
+}
+
+.user-avatar-circle.avatar-sm {
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+    box-shadow: none;
+}
+
+.user-card-button .user-avatar-circle {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    flex-shrink: 0;
+}
+
+.user-card-button .user-meta-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.user-card-button .user-name-text {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--infora-text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.25;
+}
+
+.user-card-button .brand-subtitle {
+    font-size: 0.6875rem;
+    color: var(--infora-text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chevron-icon {
+    color: var(--infora-text-dim);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    flex-shrink: 0;
+}
+
+.user-card-button .chevron-icon {
+    margin-left: auto;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.user-card-button.active .chevron-icon {
+    transform: rotate(180deg);
+}
+
+/* Collapsed Sidebar State - Anchored seamless transition */
 .layout-sidebar.is-collapsed .sidebar-footer {
-    padding: 0.75rem 8px;
+    padding: 0.75rem 12px;
 }
 
-.layout-sidebar.is-collapsed .sidebar-user-trigger {
-    justify-content: center;
-    padding: 0.5rem 0;
+.layout-sidebar.is-collapsed .user-card-button {
+    justify-content: flex-start;
+    padding: 0.375rem 5px;
 }
 
-.layout-sidebar.is-collapsed .sidebar-user-trigger .user-meta-info,
-.layout-sidebar.is-collapsed .sidebar-user-trigger .user-trigger-chevron {
-    display: none;
+.layout-sidebar.is-collapsed .user-card-button .user-meta-info,
+.layout-sidebar.is-collapsed .user-card-button .chevron-icon {
+    opacity: 0;
+    transform: translateX(-10px);
+    pointer-events: none;
 }
 
-.layout-sidebar.is-collapsed .user-dropup-menu {
+.layout-sidebar.is-collapsed .dropdown-menu-full {
     left: 76px;
     bottom: 8px;
     right: auto;
@@ -1137,23 +1154,19 @@ body {
     transform: rotate(180deg);
 }
 
-.topbar-user-section {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
+/* Global User Identity Classes */
 .user-avatar-circle {
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     border-radius: 9999px;
     background: linear-gradient(135deg, var(--infora-brand-cyan) 0%, var(--infora-brand-primary) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     color: #FFFFFF;
+    flex-shrink: 0;
 }
 
 .user-meta-info {
@@ -1162,7 +1175,7 @@ body {
 }
 
 .user-name-text {
-    font-size: 0.9375rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     color: var(--infora-text-main);
 }
