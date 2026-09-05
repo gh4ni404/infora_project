@@ -188,3 +188,12 @@ test('menu create views render visual icon picker with free Lucide catalog', fun
     $responseMenu->assertSee('Panduan Nama Rute');
     $responseMenu->assertSee('registered_routes_list', false);
 });
+
+test('sidebar renders logout button in the sidebar footer', function () {
+    $response = $this->actingAs($this->user)->get(route('dashboard'));
+
+    $response->assertOk();
+    $response->assertSee('sidebar-footer', false);
+    $response->assertSee('sidebar-logout-btn', false);
+    $response->assertSee(route('logout'), false);
+});

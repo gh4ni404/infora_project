@@ -123,6 +123,20 @@
                     <span class="empty-state-text">Menu tidak ditemukan</span>
                 </div>
             </nav>
+
+            <div class="sidebar-footer">
+                <form method="POST" action="{{ route('logout') }}" class="sidebar-logout-form">
+                    @csrf
+                    <button type="submit" class="sidebar-logout-btn" title="Keluar dari Sistem">
+                        <svg class="sidebar-logout-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" x2="9" y1="12" y2="12"></line>
+                        </svg>
+                        <span class="sidebar-logout-text">Keluar</span>
+                    </button>
+                </form>
+            </div>
         </aside>
 
         <!-- Main Content Area -->
@@ -148,18 +162,6 @@
                         <span class="user-name-text">{{ auth()->user()->name }}</span>
                         <span class="brand-subtitle">@<span>{{ auth()->user()->username ?? 'superadmin' }}</span></span>
                     </div>
-
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="btn-ghost-danger">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                                <polyline points="16 17 21 12 16 7"></polyline>
-                                <line x1="21" x2="9" y1="12" y2="12"></line>
-                            </svg>
-                            <span>Keluar</span>
-                        </button>
-                    </form>
                 </div>
             </header>
 
