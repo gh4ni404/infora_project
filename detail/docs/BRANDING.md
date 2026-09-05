@@ -37,10 +37,10 @@ Berkas gambar logo telah disimpan secara permanen di direktori proyek:
 1. **Pilar Huruf "I":** Melambangkan **Informasi**, **Integritas**, dan fondasi data sekolah yang kokoh.
 2. **Buku Terbuka & Simpul Infinity:** Simbol pendidikan berkelanjutan serta aliran data akademik, nilai, dan dokumen yang tersinkronisasi tanpa henti (*real-time data flow*).
 3. **Perisai Mutu (App Icon):** Melambangkan perlindungan kualitas mutu dan kesiapan menghadapi **Akreditasi Sekolah (BAN-SM / IASP)**.
-4. **Gradasi Cyan, Royal Blue & Aurora Violet:**
-   - **Electric Cyan (`#00D2FF`):** Inovasi, keterbukaan informasi, dan teknologi web modern.
-   - **Royal Blue (`#3A7BD5`):** Kestabilan, profesionalisme, dan kepercayaan.
-   - **Aurora Violet (`#8A2BE2`):** Prestasi, keunggulan mutu, dan karakter dinamis generasi muda.
+4. **Gradasi Sky Blue, Royal Blue & Latar Bersih:**
+   - **Sky Blue (`#0284C7`):** Kesegaran inovasi, ramah bagi guru & siswa, serta keterbukaan informasi.
+   - **Royal Blue (`#2563EB`):** Kepercayaan institusi pendidikan, stabilitas, dan profesionalisme tata kelola.
+   - **Latar Terang & Bersih (`#F8FAFC` & `#FFFFFF`):** Kemudahan membaca (*high readability*), ketenangan visual (*eye-friendly*), dan transparansi data sekolah.
 
 ---
 

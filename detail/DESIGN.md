@@ -17,31 +17,35 @@
 - **Tagline:** Era Baru Sistem Informasi Sekolah Menengah
 - **Brand Personality:** Modern, Sleek, Intelligent, Reliable, Student & Teacher Friendly.
 
-### 2.2. Palet Warna (Color Palette)
+### 2.2. Palet Warna (Color Palette - Light, Friendly & High-Readability)
 | Token | Kode Warna | Penggunaan |
 | :--- | :--- | :--- |
-| **Primary Base** | `#0B132B` | Dark Slate Background, Navbar, Header Kontras |
-| **Primary Surface** | `#1C2541` | Card Background, Sidebar Container |
-| **Accent Electric Cyan** | `#00D2FF` | Active States, Data Sync Indicators, Primary Buttons |
-| **Accent Royal Blue** | `#3A7BD5` | Gradient Fill, Chart Data, Interactive Elements |
-| **Accent Aurora Purple**| `#8A2BE2` | Highlight Badges, Status Akreditasi Unggul |
-| **Success Emerald** | `#10B981` | Status Kelulusan / Verifikasi, Validasi Dokumen |
-| **Warning Amber** | `#F59E0B` | Keterlambatan Berkas, Peringatan Kelengkapan Dokumen |
-| **Danger Rose** | `#EF4444` | Pelanggaran Disiplin, Peringatan Sistem |
-| **Text Primary** | `#0F172A` / `#F8FAFC` | Dark / Light Mode Primary Text |
-| **Text Muted** | `#64748B` / `#94A3B8` | Subtitle, Metadata, Timestamp |
+| **Canvas Background** | `#F8FAFC` (Slate 50) | Latar belakang kanvas aplikasi yang tenang, sejuk, dan tidak menyilaukan |
+| **Primary Surface** | `#FFFFFF` | Permukaan Card, Sidebar, Topbar, dan Elemen Konten Bersih |
+| **Muted Surface** | `#F1F5F9` (Slate 100) | Secondary Button, Input Background, Area Hover Subtil |
+| **Border / Divider** | `#E2E8F0` (Slate 200) | Garis batas komponen yang presisi, halus, dan elegan |
+| **Brand Primary** | `#2563EB` (Royal Blue) | Tombol Utama, Identitas Brand Institusi, Highlight Utama |
+| **Brand Cyan / Sky** | `#0284C7` (Sky Blue) | Gradien Aksen Brand (`#0284C7` ke `#2563EB`), Indikator Aktif |
+| **Brand Soft Tint** | `#EFF6FF` (Blue 50) | Latar menu navigasi aktif, chip badge, dan seleksi data |
+| **Success Emerald** | `#16A34A` / `#F0FDF4` | Status Verifikasi, Validasi Dokumen, Akun Aktif |
+| **Warning Amber** | `#D97706` / `#FFFBEB` | Peringatan Kelengkapan Dokumen, Keterlambatan |
+| **Danger Rose** | `#DC2626` / `#FEF2F2` | Pelanggaran Disiplin, Pesan Error, Peringatan Sistem |
+| **Text Primary (Readability)** | `#0F172A` (Slate 900) | Teks Utama dengan kontras tajam (WCAG AAA) mudah dibaca guru & siswa |
+| **Text Muted** | `#475569` (Slate 600) | Label Formulir, Sub-heading, Deskripsi Sekunder |
+| **Text Dim** | `#64748B` (Slate 500) | Metadata, Placeholder, Timestamp |
 
 ### 2.3. Tipografi
-- **Headings & Display:** `Plus Jakarta Sans` / `Outfit` (Modern, geometric, bold, dan ramah).
-- **Body & Data Tables:** `Inter` (Tingkat keterbacaan tinggi untuk tabel nilai, jadwal, dan data akreditasi).
+- **Headings & Display:** `Plus Jakarta Sans` (Modern, geometric, tegas, ramah, dan bersahabat bagi sivitas sekolah).
+- **Body & Data Tables:** `Inter` / `Plus Jakarta Sans` (Tingkat keterbacaan tinggi untuk tabel nilai, jurnal KBM, dan berkas akreditasi).
 - **Monospace (ID Siswa/NISN/Kode):** `JetBrains Mono` / `Fira Code`.
 
 ### 2.4. Prinsip UI/UX & Arsitektur Layout
-1. **Dedicated Layout Separation (Desktop vs Mobile):** Menggunakan pemisahan master layout secara terpisah (misal `layouts/desktop.blade.php` dan `layouts/mobile.blade.php`), bukan sekadar menyembunyikan elemen via CSS (`hidden md:block`). Pendekatan ini menjaga ukuran DOM tetap ramping dan interaksi terasa native.
-2. **Mobile First Experience:** Antarmuka ponsel pintar dirancang dengan *bottom bar navigation*, ramah gestur sentuh (touch target minimal 44px), dan kecepatan interaksi instan (<300ms) untuk guru dan siswa.
-3. **Desktop Power-Dashboard:** Menyajikan tata letak *high-density data* untuk staf administrasi, pimpinan sekolah, dan asesor akreditasi dengan *sidebar* navigasi fleksibel, tabel analitik bervolume besar, dan visualisasi grafik komprehensif.
-4. **Role-Adaptive Interface:** Tampilan menu dan widget otomatis beradaptasi sesuai peran pengguna yang login.
-5. **Reusable Global CSS Classes (Strict No Ad-Hoc Classes):** Seluruh styling antarmuka dikembangkan menggunakan nama class CSS global terstruktur dan reusable. Dilarang keras membuat class CSS khusus/ad-hoc sekali pakai, dilarang menggunakan *inline style* (`style="..."`), dan dilarang menyisipkan tag `<style>` di dalam berkas Blade view. Seluruh kustomisasi UI wajib didaftarkan sebagai class reusable melalui berkas stylesheet terpusat (`resources/css/`).
+1. **Nuansa Terang, Halus & Bersih (*Bright, Smooth & Clean*):** Antarmuka dirancang dengan latar terang yang menyejukkan mata (*eye-friendly*), transisi halus, serta sangat ramah bagi penggunaan harian guru dan siswa tanpa memicu kelelahan visual (*visual fatigue*).
+2. **Keterbacaan Tinggi (*High Readability*):** Mengutamakan ketajaman teks dengan rasio kontras tinggi antara teks gelap (`#0F172A`) dan latar bersih (`#FFFFFF`/`#F8FAFC`), memudahkan guru senior membaca formulir dan rekap data.
+3. **Dedicated Layout Separation (Desktop vs Mobile):** Menggunakan pemisahan master layout secara terpisah (`layouts/desktop.blade.php` dan `layouts/mobile.blade.php`), bukan sekadar menyembunyikan elemen via CSS (`hidden md:block`). Pendekatan ini menjaga ukuran DOM tetap ramping dan interaksi terasa native.
+4. **Mobile First Experience:** Antarmuka ponsel pintar dirancang dengan *bottom bar navigation*, ramah gestur sentuh (touch target minimal 44px), dan kecepatan interaksi instan (<300ms) untuk guru dan siswa.
+5. **Desktop Power-Dashboard:** Menyajikan tata letak *high-density data* untuk staf administrasi, pimpinan sekolah, dan asesor akreditasi dengan *sidebar* navigasi fleksibel, tabel analitik bervolume besar, dan visualisasi grafik komprehensif.
+6. **Reusable Global CSS Classes (Strict No Ad-Hoc Classes):** Seluruh styling antarmuka dikembangkan menggunakan nama class CSS global terstruktur dan reusable. Dilarang keras membuat class CSS khusus/ad-hoc sekali pakai, dilarang menggunakan *inline style* (`style="..."`), dan dilarang menyisipkan tag `<style>` di dalam berkas Blade view. Seluruh kustomisasi UI wajib didaftarkan sebagai class reusable melalui berkas stylesheet terpusat (`resources/css/`).
 
 ---
 

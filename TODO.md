@@ -31,7 +31,7 @@
 
 ## 🔐 Fase 2: Design System, Arsitektur Akun & User-Centric Menu Access
 - [ ] **2.1. Desain Sistem & Arsitektur Dedicated Layout (Desktop & Mobile)**
-  - [x] Setup palet warna INFORA (Slate Dark `#0B132B`, Electric Cyan `#00D2FF`, Royal Blue `#3A7BD5`) & tipografi `Plus Jakarta Sans`.
+  - [x] Setup palet warna INFORA Terang & Ramah Sivitas (Canvas `#F8FAFC`, Surface `#FFFFFF`, Sky/Royal Blue `#0284C7`/`#2563EB`, Teks Kontras Tinggi `#0F172A`) & tipografi `Plus Jakarta Sans`.
   - [x] Standarisasi class CSS global terpusat di `resources/css/app.css` (reusable global utility & component classes, zero inline styles, zero `<style>` tags).
   - [x] Master layout shell minimalis awal: `layouts/auth.blade.php` dan `layouts/app.blade.php`.
   - [ ] Implementasi layout lanjutan khusus: Mobile App-like (`layouts/mobile.blade.php`) & Desktop Power-Dashboard (`layouts/desktop.blade.php`).
