@@ -1273,7 +1273,7 @@ body {
 .icon-picker-modal-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 9999;
+    z-index: 10000;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1583,5 +1583,114 @@ body {
 .route-suggest-pill:hover {
     border-color: var(--infora-brand-primary);
     background-color: var(--infora-brand-soft);
+}
+
+/* ==========================================================================
+   Global Modal System
+   ========================================================================== */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(4px);
+    padding: 1.25rem;
+    opacity: 1;
+    transition: opacity 0.2s ease;
+}
+
+.modal-backdrop.hidden {
+    display: none !important;
+}
+
+.modal-dialog {
+    background-color: var(--infora-surface-card);
+    border: 1px solid var(--infora-border);
+    border-radius: 0.875rem;
+    width: 100%;
+    max-width: 580px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    animation: modalScaleUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-dialog.modal-lg {
+    max-width: 680px;
+}
+
+@keyframes modalScaleUp {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.modal-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--infora-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--infora-surface-card);
+}
+
+.modal-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--infora-text-main);
+    margin: 0;
+}
+
+.modal-subtitle {
+    font-size: 0.8125rem;
+    color: var(--infora-text-muted);
+    margin: 0.125rem 0 0 0;
+}
+
+.modal-close-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--infora-text-dim);
+    padding: 0.375rem;
+    border-radius: 0.375rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.modal-close-btn:hover {
+    color: var(--infora-text-main);
+    background-color: var(--infora-surface-muted);
+}
+
+.modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    max-height: calc(90vh - 140px);
+}
+
+.modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--infora-border);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    background-color: var(--infora-surface-muted);
 }
 

@@ -70,7 +70,8 @@
     - [x] Antarmuka manajemen lengkap (9 Blade views) dengan standardisasi komponen tabel data, form control, alerts, dan tombol aksi (100% bebas *inline styles*).
     - [x] Visual Icon Picker Component (`<x-icon-picker>`): dialog katalog visual dengan live preview, live search (Indonesia), filter kategori, dan 100% free Lucide Icons (~38 SVG icons).
     - [x] Panduan informatif nama rute dengan quick suggestion pills dan datalist rute terdaftar.
-    - [x] Automated Pest test suite (total 47 tests lulus 100%, 204 assertions).
+    - [x] Modal Interaktif Tambah Data: Tombol Tambah Modul, Tambah Menu, dan Tambah Sub-Menu memunculkan modal dialog interaktif langsung di atas tabel data (tanpa redirect halaman) dengan auto-reopen pada validasi error.
+    - [x] Automated Pest test suite (total 47 tests lulus 100%, 210 assertions).
 - [ ] **2.4. User-Centric Menu Access & Role Presets (Pengembangan Lanjutan)**
   - [ ] Registrasi katalog menu terpusat (`config/menu.php`) dengan atribut `key`, `title`, `icon`, `route`, `group`, dan filter tipe sekolah `school_type: ['sma', 'smk']`.
   - [ ] Alokasi menu berbasis pengguna (*User-Centric Access Control*): mengizinkan satu guru memegang berbagai penugasan tanpa batasan role kaku.

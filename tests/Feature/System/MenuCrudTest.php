@@ -42,6 +42,8 @@ test('super admin can view menus list and filter by module', function () {
 
     $response->assertOk();
     $response->assertSee('Tata Kelola Menu');
+    $response->assertSee('modalCreateMenu', false);
+    $response->assertSee('btnOpenCreateMenu', false);
     expect($response->viewData('menus')->pluck('name'))
         ->toContain('Menu Alpha')
         ->not->toContain('Menu Beta');

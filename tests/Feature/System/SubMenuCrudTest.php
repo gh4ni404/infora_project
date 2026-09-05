@@ -47,6 +47,8 @@ test('super admin can view sub-menus list and filter by menu', function () {
 
     $response->assertOk();
     $response->assertSee('Tata Kelola Sub-Menu');
+    $response->assertSee('modalCreateSubMenu', false);
+    $response->assertSee('btnOpenCreateSubMenu', false);
     expect($response->viewData('subMenus')->pluck('name'))
         ->toContain('SubMenu Pertama')
         ->not->toContain('SubMenu Kedua');

@@ -9,6 +9,11 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 ## [Unreleased]
 
 ### Added
+- **Modal Interaktif Formulir Tambah (Modul, Menu, & Sub-Menu):**
+  - Alih-alih berpindah/redirect ke halaman baru saat mengklik tombol "+ Tambah", sistem kini memunculkan modal dialog interaktif langsung pada halaman index (`system/modules`, `system/menus`, `system/sub-menus`).
+  - Arsitektur styling modal global reusable di `resources/css/app.css` (`.modal-backdrop`, `.modal-dialog`, `.modal-header`, `.modal-body`, `.modal-footer`).
+  - Layering Z-Index berlapis: Modal form berada pada `z-index: 9000` dan Modal Icon Picker berada pada `z-index: 10000`, memungkinkan katalog visual ikon dibuka di atas modal formulir secara mulus.
+  - Penanganan validasi cerdas: Modal otomatis terbuka kembali (*auto-reopen*) ketika terdapat kesalahan input dari server (`$errors->any()`).
 - **Visual Icon Picker Interaktif & Katalog Ikon Terkurasi (100% Free - Lucide Icons):**
   - Komponen Blade reusable `<x-icon-picker>` di `resources/views/components/icon-picker.blade.php` dengan live preview card terpilih, pencarian instan (nama/kata kunci Indonesia), filter kategori (Navigasi, Akademik, Data, Pengguna, Sistem, Umum), dan modal katalog visual yang mudah diklik tanpa perlu mengetik manual.
   - Konfigurasi katalog ikon resmi di `config/icons.php` berisi ~38 ikon Lucide SVG 100% gratis dan open-source (berlisensi ISC tanpa biaya/lisensi berbayar).

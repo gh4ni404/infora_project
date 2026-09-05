@@ -54,6 +54,8 @@ test('super admin can view modules list with menu counts', function () {
     $response->assertSee('Tata Kelola Modul');
     $response->assertSee('Akademik Khusus');
     $response->assertSee('1 Menu');
+    $response->assertSee('modalCreateModule', false);
+    $response->assertSee('btnOpenCreateModule', false);
 });
 
 test('super admin can view create module page', function () {
