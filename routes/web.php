@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\System\MenuController;
+use App\Http\Controllers\System\ModuleController;
+use App\Http\Controllers\System\SubMenuController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -16,4 +19,11 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth', 'super_admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+    // Tata Kelola Sistem (System Governance)
+    Route::prefix('system')->name('system.')->group(function () {
+        Route::resource('modules', ModuleController::class)->except(['show']);
+        Route::resource('menus', MenuController::class)->except(['show']);
+        Route::resource('sub-menus', SubMenuController::class)->except(['show']);
+    });
 });

@@ -28,8 +28,23 @@ test('sidebar renders seeded baseline modules and menus dynamically', function (
     $response->assertSee('Menu');
     $response->assertSee('Sub Menu');
 
-    // Baseline system menus route names are not yet registered, so their href must safely fallback to '#'
-    $response->assertSee('href="#"', false);
+    // Baseline system menus are now registered and link to their backend routes
+    $response->assertSee(route('system.modules.index'));
+    $response->assertSee(route('system.menus.index'));
+    $response->assertSee(route('system.sub-menus.index'));
+
+    // Verify unregistered routes fall back safely to '#'
+    $systemModule = Module::where('name', 'Tata Kelola Sistem')->first();
+    Menu::create([
+        'module_id' => $systemModule->id,
+        'name' => 'Menu Tanpa Rute',
+        'route_name' => 'unregistered.dummy.route',
+        'order' => 99,
+        'is_active' => true,
+    ]);
+
+    $responseWithDummy = $this->actingAs($this->user)->get('/dashboard');
+    $responseWithDummy->assertSee('href="#"', false);
 });
 
 test('sidebar correctly renders accordion group when a menu has sub-menus', function () {
