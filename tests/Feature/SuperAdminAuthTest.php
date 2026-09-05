@@ -80,6 +80,7 @@ test('super admin cannot authenticate with invalid password', function () {
     ]);
 
     $response->assertSessionHasErrors('login');
+    $response->assertSessionMissing('_old_input.password');
     $this->assertGuest();
 });
 
@@ -129,4 +130,20 @@ test('super admin can log out', function () {
 
     $response->assertRedirect('/login');
     $this->assertGuest();
+});
+
+test('user password and remember token are not exposed in array or json serialization', function () {
+    $user = User::factory()->create();
+
+    expect($user->toArray())
+        ->not->toHaveKey('password')
+        ->not->toHaveKey('remember_token');
+
+    expect($user->toJson())
+        ->not->toContain('password')
+        ->not->toContain('remember_token');
+
+    expect(json_encode($user))
+        ->not->toContain('password')
+        ->not->toContain('remember_token');
 });

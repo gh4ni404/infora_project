@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -40,24 +39,24 @@ class LoginController extends Controller
         $loginInput = trim($credentials['login']);
         $loginField = filter_var($loginInput, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
 
-        // Check if user exists and whether the account is active
-        $user = User::where($loginField, $loginInput)->first();
+        // 1. Attempt authentication with active account constraint
+        if (Auth::attempt([$loginField => $loginInput, 'password' => $credentials['password'], 'is_active' => true], $request->boolean('remember'))) {
+            $request->session()->regenerate();
 
-        if ($user && ! $user->is_active) {
+            return redirect()->intended(route('dashboard'));
+        }
+
+        // 2. If login failed, check if credentials match an inactive account (valid password required)
+        if (Auth::validate([$loginField => $loginInput, 'password' => $credentials['password']])) {
             throw ValidationException::withMessages([
                 'login' => 'Akun Anda berstatus non-aktif. Silakan hubungi pengelola sistem.',
             ]);
         }
 
-        if (! Auth::attempt([$loginField => $loginInput, 'password' => $credentials['password']], $request->boolean('remember'))) {
-            throw ValidationException::withMessages([
-                'login' => 'Kredensial yang diberikan tidak cocok dengan data kami.',
-            ]);
-        }
-
-        $request->session()->regenerate();
-
-        return redirect()->intended(route('dashboard'));
+        // 3. Otherwise return standard invalid credentials error
+        throw ValidationException::withMessages([
+            'login' => 'Kredensial yang diberikan tidak cocok dengan data kami.',
+        ]);
     }
 
     /**
