@@ -24,9 +24,11 @@ test('sidebar renders seeded baseline modules and menus dynamically', function (
     $response->assertSee('Navigasi Utama');
     $response->assertSee('Dashboard');
     $response->assertSee('Tata Kelola Sistem');
+    $response->assertSee('Sistem');
     $response->assertSee('Modul');
     $response->assertSee('Menu');
-    $response->assertSee('Sub Menu');
+    $response->assertSee('Sub-Menu');
+    $response->assertSee('nav-count-badge');
 
     // Baseline system menus are now registered and link to their backend routes
     $response->assertSee(route('system.modules.index'));

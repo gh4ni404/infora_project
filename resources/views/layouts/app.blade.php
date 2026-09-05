@@ -76,13 +76,21 @@
 
                                     if ($hasSubMenus) {
                                         foreach ($menu->subMenus as $sub) {
-                                            if ($sub->route_name && Route::has($sub->route_name) && request()->routeIs($sub->route_name)) {
-                                                $isMenuActive = true;
-                                                break;
+                                            if ($sub->route_name && Route::has($sub->route_name)) {
+                                                $basePattern = str_ends_with($sub->route_name, '.index')
+                                                    ? substr($sub->route_name, 0, -6) . '.*'
+                                                    : $sub->route_name;
+                                                if (request()->routeIs($sub->route_name) || request()->routeIs($basePattern)) {
+                                                    $isMenuActive = true;
+                                                    break;
+                                                }
                                             }
                                         }
                                     } else {
-                                        $isMenuActive = $menu->route_name && Route::has($menu->route_name) && request()->routeIs($menu->route_name);
+                                        $basePattern = str_ends_with($menu->route_name ?? '', '.index')
+                                            ? substr($menu->route_name, 0, -6) . '.*'
+                                            : $menu->route_name;
+                                        $isMenuActive = $menu->route_name && Route::has($menu->route_name) && (request()->routeIs($menu->route_name) || request()->routeIs($basePattern));
                                     }
                                 @endphp
 
@@ -91,6 +99,7 @@
                                         <button type="button" class="nav-group-trigger {{ $isMenuActive ? 'active' : '' }}" aria-expanded="{{ $isMenuActive ? 'true' : 'false' }}" title="{{ $menu->name }}">
                                             <x-icon :name="$menu->icon" class="nav-item-icon" />
                                             <span class="nav-item-title">{{ $menu->name }}</span>
+                                            <span class="nav-count-badge">{{ $menu->subMenus->count() }}</span>
                                             <svg class="nav-arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                                 <polyline points="6 9 12 15 18 9"></polyline>
                                             </svg>
@@ -98,7 +107,10 @@
                                         <div class="nav-submenu-list">
                                             @foreach ($menu->subMenus as $subMenu)
                                                 @php
-                                                    $isSubActive = $subMenu->route_name && Route::has($subMenu->route_name) && request()->routeIs($subMenu->route_name);
+                                                    $basePattern = str_ends_with($subMenu->route_name ?? '', '.index')
+                                                        ? substr($subMenu->route_name, 0, -6) . '.*'
+                                                        : $subMenu->route_name;
+                                                    $isSubActive = $subMenu->route_name && Route::has($subMenu->route_name) && (request()->routeIs($subMenu->route_name) || request()->routeIs($basePattern));
                                                     $subHref = ($subMenu->route_name && Route::has($subMenu->route_name)) ? route($subMenu->route_name) : '#';
                                                 @endphp
                                                 <a href="{{ $subHref }}" class="nav-submenu-item {{ $isSubActive ? 'active' : '' }}" title="{{ $subMenu->name }}">

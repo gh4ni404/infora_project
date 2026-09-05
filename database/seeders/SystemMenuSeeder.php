@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Menu;
 use App\Models\Module;
+use App\Models\SubMenu;
 use Illuminate\Database\Seeder;
 
 class SystemMenuSeeder extends Seeder
@@ -36,7 +37,7 @@ class SystemMenuSeeder extends Seeder
             ]
         );
 
-        // 2. Module: Tata Kelola Sistem (3 Menu Dasar)
+        // 2. Module: Tata Kelola Sistem
         $systemModule = Module::firstOrCreate(
             ['name' => 'Tata Kelola Sistem'],
             [
@@ -46,40 +47,52 @@ class SystemMenuSeeder extends Seeder
             ]
         );
 
-        Menu::firstOrCreate(
+        // Parent Accordion Menu: Sistem
+        $systemMenu = Menu::firstOrCreate(
             [
                 'module_id' => $systemModule->id,
-                'name' => 'Modul',
+                'name' => 'Sistem',
             ],
             [
-                'route_name' => 'system.modules.index',
-                'icon' => 'layers',
+                'route_name' => null,
+                'icon' => 'settings',
                 'order' => 1,
                 'is_active' => true,
             ]
         );
 
-        Menu::firstOrCreate(
+        // 3 Baseline Sub-Menus under "Sistem"
+        SubMenu::firstOrCreate(
             [
-                'module_id' => $systemModule->id,
+                'menu_id' => $systemMenu->id,
+                'name' => 'Modul',
+            ],
+            [
+                'route_name' => 'system.modules.index',
+                'order' => 1,
+                'is_active' => true,
+            ]
+        );
+
+        SubMenu::firstOrCreate(
+            [
+                'menu_id' => $systemMenu->id,
                 'name' => 'Menu',
             ],
             [
                 'route_name' => 'system.menus.index',
-                'icon' => 'menu',
                 'order' => 2,
                 'is_active' => true,
             ]
         );
 
-        Menu::firstOrCreate(
+        SubMenu::firstOrCreate(
             [
-                'module_id' => $systemModule->id,
-                'name' => 'Sub Menu',
+                'menu_id' => $systemMenu->id,
+                'name' => 'Sub-Menu',
             ],
             [
                 'route_name' => 'system.sub-menus.index',
-                'icon' => 'list-tree',
                 'order' => 3,
                 'is_active' => true,
             ]
