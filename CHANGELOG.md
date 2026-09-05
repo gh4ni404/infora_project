@@ -22,6 +22,7 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
   - Standardisasi class CSS global reusable di `resources/css/app.css` (bebas class ad-hoc, tanpa *inline styles*, dan tanpa tag `<style>`).
   - Master layout `layouts/auth.blade.php` dan `layouts/app.blade.php`.
   - Tampilan Dashboard awal Super Admin dengan **1 menu tunggal: Dashboard**.
+  - Fitur UX interaktif Lihat/Sembunyikan Kata Sandi (*Show/Hide Password Toggle*) dengan ikon SVG ramah aksesibilitas.
 - **Automated Testing:**
   - Feature test suite `SuperAdminAuthTest` mencakup 11 pengujian otomatis via Pest (100% lulus).
 

@@ -3,12 +3,14 @@
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
-test('guest can view the login screen', function () {
+test('guest can view the login screen with password toggle feature', function () {
     $response = $this->get('/login');
 
     $response->assertOk();
     $response->assertSee('INFORA');
     $response->assertSee('Masuk ke Sistem');
+    $response->assertSee('input-password-wrapper');
+    $response->assertSee('id="togglePassword"', false);
 });
 
 test('super admin can authenticate using username', function () {
