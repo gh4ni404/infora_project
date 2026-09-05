@@ -59,14 +59,18 @@
   - [x] Integrasi Frontend Sidebar Dinamis:
     - [x] View Composer `SidebarComposer` dengan *safeguard* `Schema::hasTable('modules')`.
     - [x] Dropdown Accordion sub-menu interaktif (`.nav-group-item`, `.nav-group-trigger`, `.nav-arrow-icon`, `.nav-submenu-list`).
+    - [x] Sub-menu bersih & rapi: bullet dot dihapus, digantikan indentasi bertingkat dan left accent indicator bar saat hover & aktif.
     - [x] Pencarian menu real-time multi-level (modul, menu, sub-menu dengan auto-expand parent).
     - [x] Collapsible sidebar dengan anchor kiri presisi 26px (tanpa pergeseran horizontal ikon / 0px jump).
+    - [x] Resolusi rute fleksibel pada model `Menu` & `SubMenu`: mendukung format hierarki sederhana `modul.menu` / `modul.menu.submenu` tanpa kewajiban akhiran `.index`.
   - [x] Backend CRUD Lengkap Tata Kelola Sistem:
     - [x] Resource routes `/system/modules`, `/system/menus`, `/system/sub-menus` di bawah proteksi `['auth', 'super_admin']`.
     - [x] Form Request validation layer berbahasa Indonesia (`StoreModuleRequest`, `UpdateModuleRequest`, dll).
     - [x] Controllers: `ModuleController`, `MenuController`, `SubMenuController`.
     - [x] Antarmuka manajemen lengkap (9 Blade views) dengan standardisasi komponen tabel data, form control, alerts, dan tombol aksi (100% bebas *inline styles*).
-    - [x] Automated Pest test suite (26 feature tests baru, total 45 tests lulus 100%, 190 assertions).
+    - [x] Visual Icon Picker Component (`<x-icon-picker>`): dialog katalog visual dengan live preview, live search (Indonesia), filter kategori, dan 100% free Lucide Icons (~38 SVG icons).
+    - [x] Panduan informatif nama rute dengan quick suggestion pills dan datalist rute terdaftar.
+    - [x] Automated Pest test suite (total 47 tests lulus 100%, 204 assertions).
 - [ ] **2.4. User-Centric Menu Access & Role Presets (Pengembangan Lanjutan)**
   - [ ] Registrasi katalog menu terpusat (`config/menu.php`) dengan atribut `key`, `title`, `icon`, `route`, `group`, dan filter tipe sekolah `school_type: ['sma', 'smk']`.
   - [ ] Alokasi menu berbasis pengguna (*User-Centric Access Control*): mengizinkan satu guru memegang berbagai penugasan tanpa batasan role kaku.

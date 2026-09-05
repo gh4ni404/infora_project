@@ -44,19 +44,12 @@
             </div>
 
             <div class="form-group">
-                <label for="icon" class="form-label">Nama Ikon (Lucide)</label>
-                <input
-                    type="text"
-                    id="icon"
-                    name="icon"
-                    class="form-input @error('icon') border-danger @enderror"
-                    placeholder="Contoh: shield-check, layers, settings, compass"
-                    value="{{ old('icon', 'layers') }}"
-                >
+                <label class="form-label">Ikon Modul (Lucide)</label>
+                <x-icon-picker name="icon" :value="old('icon', 'layers')" />
                 @error('icon')
                     <div class="form-error">{{ $message }}</div>
                 @enderror
-                <div class="form-hint">Daftar ikon yang didukung: <code>shield-check</code>, <code>layers</code>, <code>menu</code>, <code>list-tree</code>, <code>layout-dashboard</code>, <code>settings</code>.</div>
+                <div class="form-hint">Pilih ikon visual dari katalog resmi (100% gratis) untuk mewakili modul pada sidebar.</div>
             </div>
 
             <div class="form-group">

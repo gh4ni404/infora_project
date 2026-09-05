@@ -91,7 +91,7 @@ test('sidebar correctly renders accordion group when a menu has sub-menus', func
     $response->assertSee('nav-group-trigger', false);
     $response->assertSee('nav-submenu-list', false);
     $response->assertSee('nav-submenu-item', false);
-    $response->assertSee('nav-submenu-bullet', false);
+    $response->assertDontSee('nav-submenu-bullet', false);
 
     // Active parent highlighting because Silabus & RPP routes to current route 'dashboard'
     $response->assertSee('is-open active-parent', false);
@@ -143,4 +143,54 @@ test('sidebar hides inactive modules, menus, and submenus', function () {
     $response->assertDontSee('Modul Tersembunyi');
     $response->assertDontSee('Menu Nonaktif');
     $response->assertDontSee('Menu Dari Modul Nonaktif');
+});
+
+test('menus and submenus without .index suffix automatically resolve and match active route', function () {
+    $module = Module::create([
+        'name' => 'Sistem Pintar',
+        'icon' => 'school',
+        'order' => 1,
+        'is_active' => true,
+    ]);
+
+    // Parent menu with submenu having route 'system.modules' without .index
+    $parentMenu = Menu::create([
+        'module_id' => $module->id,
+        'name' => 'Kelola',
+        'route_name' => null,
+        'icon' => 'settings',
+        'order' => 1,
+        'is_active' => true,
+    ]);
+
+    SubMenu::create([
+        'menu_id' => $parentMenu->id,
+        'name' => 'Data Modul',
+        'route_name' => 'system.modules', // without .index
+        'order' => 1,
+        'is_active' => true,
+    ]);
+
+    // Visit /system/modules
+    $response = $this->actingAs($this->user)->get(route('system.modules.index'));
+
+    $response->assertOk();
+    // Sub-menu URL should resolve to system.modules.index
+    $response->assertSee(route('system.modules.index'));
+    // Parent should be marked active
+    $response->assertSee('is-open active-parent', false);
+});
+
+test('module and menu create views render visual icon picker with free Lucide catalog', function () {
+    $responseMod = $this->actingAs($this->user)->get(route('system.modules.create'));
+    $responseMod->assertOk();
+    $responseMod->assertSee('icon-picker-component', false);
+    $responseMod->assertSee('Katalog Ikon Navigasi');
+    $responseMod->assertSee('Pilih Ikon');
+
+    $responseMenu = $this->actingAs($this->user)->get(route('system.menus.create'));
+    $responseMenu->assertOk();
+    $responseMenu->assertSee('icon-picker-component', false);
+    $responseMenu->assertSee('Panduan Nama Rute');
+    $responseMenu->assertSee('registered_routes_list', false);
 });

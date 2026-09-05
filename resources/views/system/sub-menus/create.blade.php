@@ -70,14 +70,37 @@
                     type="text"
                     id="route_name"
                     name="route_name"
+                    list="registered_subroutes_list"
                     class="form-input @error('route_name') border-danger @enderror"
-                    placeholder="Contoh: system.modules.create, dashboard"
+                    placeholder="Contoh: system.modules, master.data.sekolah, atau dashboard"
                     value="{{ old('route_name') }}"
                 >
+                <datalist id="registered_subroutes_list">
+                    <option value="system.modules">Tata Kelola Modul</option>
+                    <option value="system.menus">Tata Kelola Menu</option>
+                    <option value="system.sub-menus">Tata Kelola Sub-Menu</option>
+                    <option value="dashboard">Dashboard Utama</option>
+                </datalist>
                 @error('route_name')
                     <div class="form-error">{{ $message }}</div>
                 @enderror
-                <div class="form-hint">Nama rute Laravel terdaftar yang dituju saat sub-menu ini diklik.</div>
+                <div class="route-guide-box">
+                    <div class="route-guide-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
+                        <span>Panduan Format Rute Sub-Menu</span>
+                    </div>
+                    <ul class="route-guide-list">
+                        <li>Cukup gunakan format hierarki praktis <code>modul.menu.submenu</code> (contoh: <code>system.modules</code> atau <code>master.data.sekolah</code>).</li>
+                        <li>Sistem otomatis mencocokkan ke rute index atau halaman yang sesuai tanpa Anda perlu repot menentukan akhiran teknis seperti <code>.index</code> atau <code>.create</code>.</li>
+                    </ul>
+                    <div class="route-suggest-pills">
+                        <span class="route-suggest-label">Pilihan Cepat Sistem:</span>
+                        <button type="button" class="route-suggest-pill" onclick="document.getElementById('route_name').value='system.modules'">system.modules</button>
+                        <button type="button" class="route-suggest-pill" onclick="document.getElementById('route_name').value='system.menus'">system.menus</button>
+                        <button type="button" class="route-suggest-pill" onclick="document.getElementById('route_name').value='system.sub-menus'">system.sub-menus</button>
+                        <button type="button" class="route-suggest-pill" onclick="document.getElementById('route_name').value='dashboard'">dashboard</button>
+                    </div>
+                </div>
             </div>
 
             <div class="form-group">

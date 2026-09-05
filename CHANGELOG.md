@@ -9,6 +9,17 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 ## [Unreleased]
 
 ### Added
+- **Visual Icon Picker Interaktif & Katalog Ikon Terkurasi (100% Free - Lucide Icons):**
+  - Komponen Blade reusable `<x-icon-picker>` di `resources/views/components/icon-picker.blade.php` dengan live preview card terpilih, pencarian instan (nama/kata kunci Indonesia), filter kategori (Navigasi, Akademik, Data, Pengguna, Sistem, Umum), dan modal katalog visual yang mudah diklik tanpa perlu mengetik manual.
+  - Konfigurasi katalog ikon resmi di `config/icons.php` berisi ~38 ikon Lucide SVG 100% gratis dan open-source (berlisensi ISC tanpa biaya/lisensi berbayar).
+  - Perluasan komponen `<x-icon>` dengan dukungan SVG path lengkap untuk seluruh koleksi ikon (`school`, `graduation-cap`, `book-open`, `award`, `database`, `users`, `compass`, `settings`, dll).
+  - Integrasi Icon Picker pada formulir Tambah/Edit Modul dan Menu.
+- **Resolusi Rute Fleksibel & Panduan Informatif Nama Rute:**
+  - Metode cerdas pada model `Menu` dan `SubMenu` (`getRouteUrlAttribute()`, `isRouteActive()`, `hasActiveSubMenu()`) yang otomatis mencocokkan format hierarki sederhana `modul.menu` atau `modul.menu.submenu` tanpa mewajibkan pengguna menambahkan akhiran teknis `.index`.
+  - Kotak panduan informatif (`.route-guide-box`) pada formulir Menu dan Sub-Menu yang menjelaskan kapan rute harus dikosongkan (menu induk dropdown) dan kapan harus diisi, dilengkapi *quick suggestion pills* dan `<datalist>` rute terdaftar.
+- **Penyempurnaan UI/UX Sub-Menu Sidebar:**
+  - Menghapus titik (*bullet dot*) pada sub-menu sidebar demi visual yang lebih bersih dan rapi.
+  - Mengganti bullet dengan indentasi bertingkat elegan dan indikator garis vertikal aksen (*left accent indicator bar*) saat di-hover dan aktif.
 - **Modul Autentikasi Super Admin:**
   - Login multi-identifier fleksibel via **Username** maupun **Email** dengan proteksi session fixation.
   - Verifikasi status keaktifan akun (`is_active`).

@@ -47,6 +47,12 @@
 5. **Desktop Power-Dashboard:** Menyajikan tata letak *high-density data* untuk staf administrasi, pimpinan sekolah, dan asesor akreditasi dengan *sidebar* navigasi fleksibel, tabel analitik bervolume besar, dan visualisasi grafik komprehensif.
 6. **Reusable Global CSS Classes (Strict No Ad-Hoc Classes):** Seluruh styling antarmuka dikembangkan menggunakan nama class CSS global terstruktur dan reusable. Dilarang keras membuat class CSS khusus/ad-hoc sekali pakai, dilarang menggunakan *inline style* (`style="..."`), dan dilarang menyisipkan tag `<style>` di dalam berkas Blade view. Seluruh kustomisasi UI wajib didaftarkan sebagai class reusable melalui berkas stylesheet terpusat (`resources/css/`).
 
+### 2.5. Sistem Ikonografi & Navigasi Hirarki (Iconography & Route Resolution)
+1. **100% Free & Open-Source Lucide Icons:** Menggunakan keluarga ikon Lucide Icons resmi (lisensi open source ISC) berbasis SVG murni yang di-render native via komponen `<x-icon>`. Bebas biaya lisensi dan tanpa ketergantungan font eksternal.
+2. **Visual Icon Picker Interaktif (`<x-icon-picker>`):** Formulir manajemen modul dan menu dilengkapi dialog katalog visual dengan live preview, pencarian kata kunci instan, dan tab filter kategori (Navigasi, Akademik, Data, Pengguna, Sistem, Umum) untuk meminimalisir kesalahan pengetikan manual.
+3. **Sub-Menu Hirarki Rapi (Tanpa Bullet Dot):** Sub-menu sidebar menggunakan tata letak berjenjang bersih dengan *left accent indicator bar* pada hover dan status aktif, menggantikan titik peluru (*bullet dot*) konvensional agar tampilan lebih modern dan nyaman dipandang.
+4. **Resolusi Rute Otomatis (Hierarchical Route Pattern):** Pengguna cukup mendefinisikan rute dengan pola hierarki sederhana `modul.menu` atau `modul.menu.submenu`. Model secara cerdas mencocokkan ketersediaan rute terdaftar baik dengan akhiran `.index` maupun rute langsung, serta mendeteksi status aktif pada seluruh sub-halaman terkait tanpa membebani pengguna.
+
 ---
 
 ## 3. 🏛️ Arsitektur Sistem & Tech Stack

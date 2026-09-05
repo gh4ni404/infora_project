@@ -70,30 +70,46 @@
                     type="text"
                     id="route_name"
                     name="route_name"
+                    list="registered_routes_list"
                     class="form-input @error('route_name') border-danger @enderror"
-                    placeholder="Contoh: system.modules.index, dashboard (kosongkan jika menu memiliki sub-menu)"
+                    placeholder="Contoh: system.modules, master.data, atau dashboard"
                     value="{{ old('route_name') }}"
                 >
+                <datalist id="registered_routes_list">
+                    <option value="dashboard">Dashboard Utama</option>
+                    <option value="system.modules">Tata Kelola Modul</option>
+                    <option value="system.menus">Tata Kelola Menu</option>
+                    <option value="system.sub-menus">Tata Kelola Sub-Menu</option>
+                </datalist>
                 @error('route_name')
                     <div class="form-error">{{ $message }}</div>
                 @enderror
-                <div class="form-hint">Nama rute Laravel terdaftar. Biarkan kosong jika menu ini hanya berfungsi sebagai induk accordion sub-menu.</div>
+                <div class="route-guide-box">
+                    <div class="route-guide-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
+                        <span>Panduan Nama Rute</span>
+                    </div>
+                    <ul class="route-guide-list">
+                        <li><strong>Menu Induk (Ber-Submenu):</strong> Biarkan <strong>kosong</strong> jika menu ini hanya menjadi induk dropdown accordion.</li>
+                        <li><strong>Menu Langsung:</strong> Cukup gunakan format hierarki <code>modul.menu</code> (contoh: <code>system.modules</code>). Sistem otomatis mencocokkan tanpa Anda perlu repot menentukan akhiran <code>.index</code>.</li>
+                    </ul>
+                    <div class="route-suggest-pills">
+                        <span class="route-suggest-label">Pilihan Cepat:</span>
+                        <button type="button" class="route-suggest-pill" onclick="document.getElementById('route_name').value='dashboard'">dashboard</button>
+                        <button type="button" class="route-suggest-pill" onclick="document.getElementById('route_name').value='system.modules'">system.modules</button>
+                        <button type="button" class="route-suggest-pill" onclick="document.getElementById('route_name').value='system.menus'">system.menus</button>
+                        <button type="button" class="route-suggest-pill" onclick="document.getElementById('route_name').value=''">[Kosongkan - Sebagai Induk]</button>
+                    </div>
+                </div>
             </div>
 
             <div class="form-group">
-                <label for="icon" class="form-label">Nama Ikon (Lucide)</label>
-                <input
-                    type="text"
-                    id="icon"
-                    name="icon"
-                    class="form-input @error('icon') border-danger @enderror"
-                    placeholder="Contoh: menu, layers, list-tree, layout-dashboard"
-                    value="{{ old('icon', 'menu') }}"
-                >
+                <label class="form-label">Ikon Menu (Lucide)</label>
+                <x-icon-picker name="icon" :value="old('icon', 'menu')" />
                 @error('icon')
                     <div class="form-error">{{ $message }}</div>
                 @enderror
-                <div class="form-hint">Daftar ikon yang didukung: <code>menu</code>, <code>layers</code>, <code>list-tree</code>, <code>layout-dashboard</code>, <code>shield-check</code>, <code>settings</code>.</div>
+                <div class="form-hint">Pilih ikon visual dari katalog resmi (100% gratis) untuk mewakili menu pada sidebar.</div>
             </div>
 
             <div class="form-group">

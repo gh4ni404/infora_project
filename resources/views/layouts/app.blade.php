@@ -71,27 +71,8 @@
 
                             @foreach ($module->menus as $menu)
                                 @php
-                                    $hasSubMenus = $menu->subMenus->isNotEmpty();
-                                    $isMenuActive = false;
-
-                                    if ($hasSubMenus) {
-                                        foreach ($menu->subMenus as $sub) {
-                                            if ($sub->route_name && Route::has($sub->route_name)) {
-                                                $basePattern = str_ends_with($sub->route_name, '.index')
-                                                    ? substr($sub->route_name, 0, -6) . '.*'
-                                                    : $sub->route_name;
-                                                if (request()->routeIs($sub->route_name) || request()->routeIs($basePattern)) {
-                                                    $isMenuActive = true;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    } else {
-                                        $basePattern = str_ends_with($menu->route_name ?? '', '.index')
-                                            ? substr($menu->route_name, 0, -6) . '.*'
-                                            : $menu->route_name;
-                                        $isMenuActive = $menu->route_name && Route::has($menu->route_name) && (request()->routeIs($menu->route_name) || request()->routeIs($basePattern));
-                                    }
+                                    $hasSubMenus = $menu->subMenus && $menu->subMenus->count() > 0;
+                                    $isMenuActive = $hasSubMenus ? $menu->hasActiveSubMenu() : $menu->isRouteActive();
                                 @endphp
 
                                 @if ($hasSubMenus)
@@ -107,24 +88,17 @@
                                         <div class="nav-submenu-list">
                                             @foreach ($menu->subMenus as $subMenu)
                                                 @php
-                                                    $basePattern = str_ends_with($subMenu->route_name ?? '', '.index')
-                                                        ? substr($subMenu->route_name, 0, -6) . '.*'
-                                                        : $subMenu->route_name;
-                                                    $isSubActive = $subMenu->route_name && Route::has($subMenu->route_name) && (request()->routeIs($subMenu->route_name) || request()->routeIs($basePattern));
-                                                    $subHref = ($subMenu->route_name && Route::has($subMenu->route_name)) ? route($subMenu->route_name) : '#';
+                                                    $isSubActive = $subMenu->isRouteActive();
+                                                    $subHref = $subMenu->route_url;
                                                 @endphp
                                                 <a href="{{ $subHref }}" class="nav-submenu-item {{ $isSubActive ? 'active' : '' }}" title="{{ $subMenu->name }}">
-                                                    <span class="nav-submenu-bullet"></span>
                                                     <span class="nav-submenu-text">{{ $subMenu->name }}</span>
                                                 </a>
                                             @endforeach
                                         </div>
                                     </div>
                                 @else
-                                    @php
-                                        $menuHref = ($menu->route_name && Route::has($menu->route_name)) ? route($menu->route_name) : '#';
-                                    @endphp
-                                    <a href="{{ $menuHref }}" class="nav-link-item {{ $isMenuActive ? 'active' : '' }}" title="{{ $menu->name }}">
+                                    <a href="{{ $menu->route_url }}" class="nav-link-item {{ $isMenuActive ? 'active' : '' }}" title="{{ $menu->name }}">
                                         <x-icon :name="$menu->icon" class="nav-item-icon" />
                                         <span>{{ $menu->name }}</span>
                                     </a>
