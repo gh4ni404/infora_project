@@ -77,14 +77,14 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 - **Fondasi Menu Hirarki Dinamis (Modul, Menu, Sub-Menu Tanpa Unique Constraint):**
   - Migrasi skema database terstruktur: tabel `modules`, `menus`, dan `sub_menus` tanpa kolom unik yang membebani (bebas bentrok penamaan, murni mengandalkan Primary Key ID).
   - Model Eloquent `Module`, `Menu`, `SubMenu` lengkap dengan relasi berjenjang `hasMany`/`belongsTo`, casts, dan factories pendukung.
-  - Seeder default `SystemMenuSeeder` yang mendaftarkan 3 menu sistem dasar (*Modul*, *Menu*, *Sub-Menu*) pada modul "Tata Kelola Sistem" serta menu "Dashboard" pada modul "Navigasi Utama".
+  - Seeder default `SystemMenuSeeder` yang mendaftarkan 3 menu sistem dasar (*Modul*, *Menu*, *Sub-Menu*) pada modul "Pengaturan Sistem" serta menu "Dashboard" pada modul "Navigasi Utama".
 - **Integrasi Sidebar Frontend Dinamis & Interaktif:**
   - View Composer `SidebarComposer` yang menginjeksi daftar modul, menu, dan sub-menu aktif ke `layouts.app` dengan proteksi tabel `Schema::hasTable('modules')`.
   - Dukungan render hierarki 3 tingkat (*Modules* ➔ *Menus* ➔ *Sub-Menus*) dengan komponen ikon `<x-icon>` yang mendukung ikon Lucide SVG (`layout-dashboard`, `layers`, `menu`, `list-tree`, `shield-check`, `settings`, dll).
   - Dropdown Accordion sub-menu interaktif (`.nav-group-item`, `.nav-group-trigger`, `.nav-arrow-icon`, `.nav-submenu-list`) dengan rotasi panah halus 180° dan auto-uncollapse sidebar saat menu ber-sub-menu diklik dari status *collapsed*.
   - Pencarian menu real-time multi-level cerdas yang mencakup nama modul, menu, hingga sub-menu, otomatis membuka parent accordion jika sub-menu cocok, dan menyembunyikan kategori modul yang tidak relevan.
   - Presisi koordinat anchor kiri 26px pada seluruh ikon navigasi, baik pada mode expanded (260px) maupun collapsed (72px), menghasilkan animasi transisi lipat sidebar yang mulus tanpa pergeseran horizontal (0px horizontal jump).
-- **Backend CRUD Lengkap Tata Kelola Sistem (Modul, Menu, Sub-Menu):**
+- **Backend CRUD Lengkap Pengaturan Sistem (Modul, Menu, Sub-Menu):**
   - Rute resource RESTful terproteksi: `/system/modules`, `/system/menus`, `/system/sub-menus` di bawah middleware `['auth', 'super_admin']`.
   - Form Request Validation Layer dengan pesan bahasa Indonesia: `StoreModuleRequest`, `UpdateModuleRequest`, `StoreMenuRequest`, `UpdateMenuRequest`, `StoreSubMenuRequest`, `UpdateSubMenuRequest` (bebas aturan *unique* untuk fleksibilitas maksimal sesuai kebutuhan user).
   - Controller CRUD lengkap di namespace `App\Http\Controllers\System`:

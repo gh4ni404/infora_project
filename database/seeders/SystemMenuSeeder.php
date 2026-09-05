@@ -36,9 +36,9 @@ class SystemMenuSeeder extends Seeder
             ]
         );
 
-        // 2. Module: Tata Kelola Sistem
+        // 2. Module: Pengaturan Sistem
         $systemModule = Module::firstOrCreate(
-            ['name' => 'Tata Kelola Sistem'],
+            ['name' => 'Pengaturan Sistem'],
             [
                 'order' => 1,
                 'is_active' => true,

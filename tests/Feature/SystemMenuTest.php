@@ -9,7 +9,7 @@ test('system menu seeder seeds baseline modules, sistem menu, and 3 sub-menus', 
     $this->seed(SystemMenuSeeder::class);
 
     $this->assertDatabaseHas('modules', [
-        'name' => 'Tata Kelola Sistem',
+        'name' => 'Pengaturan Sistem',
         'is_active' => true,
     ]);
 

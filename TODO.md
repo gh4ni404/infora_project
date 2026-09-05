@@ -52,10 +52,10 @@
     - Guru login via **NIP / NUPTK** atau Email.
     - Admin & Super Admin login via **Username** atau Email.
   - [ ] Setup Laravel Sanctum untuk otentikasi ganda (Web Session & RESTful API Tokens).
-- [x] **2.3. Fondasi Hierarki Navigasi & Tata Kelola Sistem (Modul, Menu, Sub-Menu)**
+- [x] **2.3. Fondasi Hierarki Navigasi & Pengaturan Sistem (Modul, Menu, Sub-Menu)**
   - [x] Skema database hierarki 3 level: tabel `modules`, `menus`, `sub_menus` tanpa constraint `unique` (bebas bentrok penamaan, mengandalkan Primary Key ID).
   - [x] Model Eloquent, Relasi Berjenjang (`hasMany`/`belongsTo`), Casts, dan Factories (`Module`, `Menu`, `SubMenu`).
-  - [x] Database Seeder `SystemMenuSeeder` (Modul "Navigasi Utama" & "Tata Kelola Sistem" berisi 3 menu dasar: Modul, Menu, Sub-Menu).
+  - [x] Database Seeder `SystemMenuSeeder` (Modul "Navigasi Utama" & "Pengaturan Sistem" berisi 3 menu dasar: Modul, Menu, Sub-Menu).
   - [x] Integrasi Frontend Sidebar Dinamis:
     - [x] View Composer `SidebarComposer` dengan *safeguard* `Schema::hasTable('modules')`.
     - [x] Dropdown Accordion sub-menu interaktif (`.nav-group-item`, `.nav-group-trigger`, `.nav-arrow-icon`, `.nav-submenu-list`).
@@ -63,7 +63,7 @@
     - [x] Pencarian menu real-time multi-level (modul, menu, sub-menu dengan auto-expand parent).
     - [x] Collapsible sidebar dengan anchor kiri presisi 26px (tanpa pergeseran horizontal ikon / 0px jump).
     - [x] Resolusi rute fleksibel pada model `Menu` & `SubMenu`: mendukung format hierarki sederhana `modul.menu` / `modul.menu.submenu` tanpa kewajiban akhiran `.index`.
-  - [x] Backend CRUD Lengkap Tata Kelola Sistem:
+  - [x] Backend CRUD Lengkap Pengaturan Sistem:
     - [x] Resource routes `/system/modules`, `/system/menus`, `/system/sub-menus` di bawah proteksi `['auth', 'super_admin']`.
     - [x] Form Request validation layer berbahasa Indonesia (`StoreModuleRequest`, `UpdateModuleRequest`, dll).
     - [x] Controllers: `ModuleController`, `MenuController`, `SubMenuController`.

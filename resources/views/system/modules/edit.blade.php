@@ -34,7 +34,7 @@
                     id="name"
                     name="name"
                     class="form-input @error('name') border-danger @enderror"
-                    placeholder="Contoh: Tata Kelola Sistem, Akademik, Kesiswaan"
+                    placeholder="Contoh: Pengaturan Sistem, Akademik, Kesiswaan"
                     value="{{ old('name', $module->name) }}"
                     required
                 >

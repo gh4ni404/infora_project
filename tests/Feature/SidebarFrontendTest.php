@@ -23,7 +23,7 @@ test('sidebar renders seeded baseline modules and menus dynamically', function (
     $response->assertOk();
     $response->assertSee('Navigasi Utama');
     $response->assertSee('Dashboard');
-    $response->assertSee('Tata Kelola Sistem');
+    $response->assertSee('Pengaturan Sistem');
     $response->assertSee('Sistem');
     $response->assertSee('Modul');
     $response->assertSee('Menu');
@@ -36,7 +36,7 @@ test('sidebar renders seeded baseline modules and menus dynamically', function (
     $response->assertSee(route('system.sub-menus.index'));
 
     // Verify unregistered routes fall back safely to '#'
-    $systemModule = Module::where('name', 'Tata Kelola Sistem')->first();
+    $systemModule = Module::where('name', 'Pengaturan Sistem')->first();
     Menu::create([
         'module_id' => $systemModule->id,
         'name' => 'Menu Tanpa Rute',

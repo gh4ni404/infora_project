@@ -20,7 +20,7 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-    // Tata Kelola Sistem (System Governance)
+    // Pengaturan Sistem (System Governance)
     Route::prefix('system')->name('system.')->group(function () {
         Route::resource('modules', ModuleController::class)->except(['show']);
         Route::resource('menus', MenuController::class)->except(['show']);
