@@ -280,6 +280,39 @@ body {
     width: 100%;
 }
 
+.btn-primary:disabled,
+.btn-secondary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    pointer-events: none;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Spinner & Button Loading State */
+@keyframes infora-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.spinner-icon {
+    animation: infora-spin 0.75s linear infinite;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.btn-loading {
+    pointer-events: none !important;
+    cursor: not-allowed !important;
+    opacity: 0.85;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
 /* Badges */
 .badge {
     display: inline-flex;

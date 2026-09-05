@@ -27,4 +27,40 @@ document.addEventListener('DOMContentLoaded', () => {
             passwordInput.focus();
         });
     }
+
+    // Login form submission loading indicator & anti-spam click
+    const loginForm = document.querySelector('form[action*="login"]');
+    const btnLogin = document.getElementById('btnLogin');
+
+    if (loginForm && btnLogin) {
+        loginForm.addEventListener('submit', (e) => {
+            // Respect HTML5 form validation (required, etc.)
+            if (loginForm.checkValidity && !loginForm.checkValidity()) {
+                return;
+            }
+
+            // Prevent spam clicks if already submitted
+            if (btnLogin.classList.contains('btn-loading')) {
+                e.preventDefault();
+                return;
+            }
+
+            const spinner = btnLogin.querySelector('.spinner-icon');
+            const btnText = btnLogin.querySelector('.btn-text');
+
+            if (spinner) {
+                spinner.classList.remove('hidden');
+            }
+            if (btnText) {
+                btnText.textContent = 'Memproses...';
+            }
+
+            btnLogin.classList.add('btn-loading');
+
+            // Asynchronously set disabled attribute so browser native form submission is not cancelled
+            setTimeout(() => {
+                btnLogin.disabled = true;
+            }, 0);
+        });
+    }
 });

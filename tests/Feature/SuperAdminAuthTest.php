@@ -11,6 +11,8 @@ test('guest can view the login screen with password toggle feature', function ()
     $response->assertSee('Masuk ke Sistem');
     $response->assertSee('input-password-wrapper');
     $response->assertSee('id="togglePassword"', false);
+    $response->assertSee('id="btnLogin"', false);
+    $response->assertSee('spinner-icon');
 });
 
 test('super admin can authenticate using username', function () {
