@@ -27,8 +27,12 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
   - Fitur pencarian menu real-time pada sidebar Dashboard dengan standardisasi komponen reusable `.search-box`, `.search-icon`, `.search-input`, `.search-clear` serta `.empty-state` untuk feedback saat menu tidak ditemukan.
   - Fitur Collapsible Sidebar interaktif pada layout dashboard: tombol toggle panel (`#sidebarToggle`) dengan class reusable `.btn-icon` di topbar, transisi lebar halus (260px ke 72px), tampilan branding kompak, animasi rotasi ikon panah, dan persistensi status via `localStorage`.
   - Integrasi identitas brand visual resmi pada header sidebar menggunakan aset emblem badge simetris presisi (`public/images/infora-emblem-badge.png`) berpadu dengan tipografi tajam Plus Jakarta Sans (Opsi 1 Hybrid).
+- **Fondasi Menu Hirarki Dinamis (Modul, Menu, Sub-Menu Tanpa Unique Constraint):**
+  - Migrasi skema database terstruktur: tabel `modules`, `menus`, dan `sub_menus` tanpa kolom unik yang membebani (bebas bentrok penamaan, murni mengandalkan Primary Key ID).
+  - Model Eloquent `Module`, `Menu`, `SubMenu` lengkap dengan relasi berjenjang `hasMany`/`belongsTo`, casts, dan factories pendukung.
+  - Seeder default `SystemMenuSeeder` yang mendaftarkan 3 menu sistem dasar (*Modul*, *Menu*, *Sub-Menu*) pada modul "Tata Kelola Sistem" serta menu "Dashboard" pada modul "Navigasi Utama".
 - **Automated Testing:**
-  - Feature test suite `SuperAdminAuthTest` mencakup 11 pengujian otomatis via Pest (100% lulus).
+  - Feature test suite `SuperAdminAuthTest` (12 tests) dan `SystemMenuTest` (4 tests) via Pest (100% lulus, 65 assertions).
 
 ### Changed
 - **Transformasi Desain Sistem ke Nuansa Terang, Ramah & Keterbacaan Tinggi:**
