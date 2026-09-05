@@ -31,8 +31,28 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
   - Migrasi skema database terstruktur: tabel `modules`, `menus`, dan `sub_menus` tanpa kolom unik yang membebani (bebas bentrok penamaan, murni mengandalkan Primary Key ID).
   - Model Eloquent `Module`, `Menu`, `SubMenu` lengkap dengan relasi berjenjang `hasMany`/`belongsTo`, casts, dan factories pendukung.
   - Seeder default `SystemMenuSeeder` yang mendaftarkan 3 menu sistem dasar (*Modul*, *Menu*, *Sub-Menu*) pada modul "Tata Kelola Sistem" serta menu "Dashboard" pada modul "Navigasi Utama".
-- **Automated Testing:**
-  - Feature test suite `SuperAdminAuthTest` (12 tests) dan `SystemMenuTest` (4 tests) via Pest (100% lulus, 65 assertions).
+- **Integrasi Sidebar Frontend Dinamis & Interaktif:**
+  - View Composer `SidebarComposer` yang menginjeksi daftar modul, menu, dan sub-menu aktif ke `layouts.app` dengan proteksi tabel `Schema::hasTable('modules')`.
+  - Dukungan render hierarki 3 tingkat (*Modules* ➔ *Menus* ➔ *Sub-Menus*) dengan komponen ikon `<x-icon>` yang mendukung ikon Lucide SVG (`layout-dashboard`, `layers`, `menu`, `list-tree`, `shield-check`, `settings`, dll).
+  - Dropdown Accordion sub-menu interaktif (`.nav-group-item`, `.nav-group-trigger`, `.nav-arrow-icon`, `.nav-submenu-list`) dengan rotasi panah halus 180° dan auto-uncollapse sidebar saat menu ber-sub-menu diklik dari status *collapsed*.
+  - Pencarian menu real-time multi-level cerdas yang mencakup nama modul, menu, hingga sub-menu, otomatis membuka parent accordion jika sub-menu cocok, dan menyembunyikan kategori modul yang tidak relevan.
+  - Presisi koordinat anchor kiri 26px pada seluruh ikon navigasi, baik pada mode expanded (260px) maupun collapsed (72px), menghasilkan animasi transisi lipat sidebar yang mulus tanpa pergeseran horizontal (0px horizontal jump).
+- **Backend CRUD Lengkap Tata Kelola Sistem (Modul, Menu, Sub-Menu):**
+  - Rute resource RESTful terproteksi: `/system/modules`, `/system/menus`, `/system/sub-menus` di bawah middleware `['auth', 'super_admin']`.
+  - Form Request Validation Layer dengan pesan bahasa Indonesia: `StoreModuleRequest`, `UpdateModuleRequest`, `StoreMenuRequest`, `UpdateMenuRequest`, `StoreSubMenuRequest`, `UpdateSubMenuRequest` (bebas aturan *unique* untuk fleksibilitas maksimal sesuai kebutuhan user).
+  - Controller CRUD lengkap di namespace `App\Http\Controllers\System`:
+    - `ModuleController`: daftar modul dengan hitungan relasi menu (`menus_count`), pencarian, form tambah/edit, dan cascade delete.
+    - `MenuController`: daftar menu dengan relasi modul dan hitungan sub-menu (`sub_menus_count`), filter dropdown modul, dan cascade delete.
+    - `SubMenuController`: daftar sub-menu dengan relasi induk menu & modul, filter dropdown menu, dan form tambah/edit.
+  - Komponen Desain Global & Antarmuka Manajemen (9 views di `resources/views/system/`):
+    - Komponen tabel data elegan (`.table-card`, `.table-toolbar`, `.data-table`, `.table-actions`, `.table-footer`).
+    - Alert notifikasi sukses/gagal (`.alert-success`, `.alert-danger`).
+    - Komponen form input, select, checkbox, hint, dan tombol aksi (`.btn-edit`, `.btn-delete`, `.btn-primary`, `.btn-secondary`).
+    - 100% mematuhi aturan strict arsitektur: **Zero inline styles (`style=""`) dan Zero tag `<style>`**.
+- **Automated Testing & Jaminan Kualitas:**
+  - Penambahan 29 feature tests baru (`SidebarFrontendTest`, `ModuleCrudTest`, `MenuCrudTest`, `SubMenuCrudTest`).
+  - Total test suite mencapai **45 tests lulus 100% (190 assertions)**.
+  - 100% lulus standardisasi formatting Laravel Pint (PSR-12).
 
 ### Changed
 - **Transformasi Desain Sistem ke Nuansa Terang, Ramah & Keterbacaan Tinggi:**

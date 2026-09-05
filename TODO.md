@@ -52,7 +52,22 @@
     - Guru login via **NIP / NUPTK** atau Email.
     - Admin & Super Admin login via **Username** atau Email.
   - [ ] Setup Laravel Sanctum untuk otentikasi ganda (Web Session & RESTful API Tokens).
-- [ ] **2.3. User-Centric Menu Access & De-Duplication System**
+- [x] **2.3. Fondasi Hierarki Navigasi & Tata Kelola Sistem (Modul, Menu, Sub-Menu)**
+  - [x] Skema database hierarki 3 level: tabel `modules`, `menus`, `sub_menus` tanpa constraint `unique` (bebas bentrok penamaan, mengandalkan Primary Key ID).
+  - [x] Model Eloquent, Relasi Berjenjang (`hasMany`/`belongsTo`), Casts, dan Factories (`Module`, `Menu`, `SubMenu`).
+  - [x] Database Seeder `SystemMenuSeeder` (Modul "Navigasi Utama" & "Tata Kelola Sistem" berisi 3 menu dasar: Modul, Menu, Sub-Menu).
+  - [x] Integrasi Frontend Sidebar Dinamis:
+    - [x] View Composer `SidebarComposer` dengan *safeguard* `Schema::hasTable('modules')`.
+    - [x] Dropdown Accordion sub-menu interaktif (`.nav-group-item`, `.nav-group-trigger`, `.nav-arrow-icon`, `.nav-submenu-list`).
+    - [x] Pencarian menu real-time multi-level (modul, menu, sub-menu dengan auto-expand parent).
+    - [x] Collapsible sidebar dengan anchor kiri presisi 26px (tanpa pergeseran horizontal ikon / 0px jump).
+  - [x] Backend CRUD Lengkap Tata Kelola Sistem:
+    - [x] Resource routes `/system/modules`, `/system/menus`, `/system/sub-menus` di bawah proteksi `['auth', 'super_admin']`.
+    - [x] Form Request validation layer berbahasa Indonesia (`StoreModuleRequest`, `UpdateModuleRequest`, dll).
+    - [x] Controllers: `ModuleController`, `MenuController`, `SubMenuController`.
+    - [x] Antarmuka manajemen lengkap (9 Blade views) dengan standardisasi komponen tabel data, form control, alerts, dan tombol aksi (100% bebas *inline styles*).
+    - [x] Automated Pest test suite (26 feature tests baru, total 45 tests lulus 100%, 190 assertions).
+- [ ] **2.4. User-Centric Menu Access & Role Presets (Pengembangan Lanjutan)**
   - [ ] Registrasi katalog menu terpusat (`config/menu.php`) dengan atribut `key`, `title`, `icon`, `route`, `group`, dan filter tipe sekolah `school_type: ['sma', 'smk']`.
   - [ ] Alokasi menu berbasis pengguna (*User-Centric Access Control*): mengizinkan satu guru memegang berbagai penugasan tanpa batasan role kaku.
   - [ ] Mekanisme *De-Duplication* otomatis (`unique('key')`) agar menu di sidebar/mobile drawer tidak pernah muncul ganda.

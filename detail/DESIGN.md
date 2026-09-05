@@ -129,6 +129,8 @@ Untuk mengakomodasi realitas guru di sekolah yang sering merangkap banyak jabata
 
 ```mermaid
 erDiagram
+    MODULES ||--o{ MENUS : contains
+    MENUS ||--o{ SUB_MENUS : contains
     USERS ||--o{ STUDENT_PROFILES : has
     USERS ||--o{ TEACHER_PROFILES : has
     CLASSES ||--o{ STUDENT_PROFILES : enrolls
@@ -140,11 +142,15 @@ erDiagram
 
 ### Tabel-Tabel Kunci:
 1. `users`: Autentikasi, peran, status aktif, username/email/no_hp.
-2. `students` & `teachers`: Profil lengkap, NISN/NIP, biodata, foto profil.
-3. `classes` & `majors`: Struktur rombel dan jurusan/peminatan (TKJ, RPL, IPA, IPS, dll.).
-4. `schedules` & `journals`: Jadwal mata pelajaran dan catatan jurnal KBM harian guru.
-5. `internships` (PKL): Data penempatan industri, guru pembimbing, nilai instruktur industri.
-6. `accreditation_evidences`: Dokumen bukti fisik terhubung ke butir standar akreditasi.
+2. `modules`: Modul kategori navigasi sistem (`id`, `name`, `icon`, `order`, `is_active`).
+3. `menus`: Menu navigasi utama di bawah modul (`id`, `module_id`, `name`, `route_name`, `icon`, `order`, `is_active`).
+4. `sub_menus`: Item sub-menu berjenjang di bawah menu (`id`, `menu_id`, `name`, `route_name`, `order`, `is_active`).
+   > *Catatan Prinsip Skema Navigasi:* Tidak menggunakan constraint `unique` pada kolom teks (`name`, `route_name`) untuk menjamin fleksibilitas operasional input/edit data tanpa bentrok validasi, sepenuhnya mengandalkan integritas relasional Primary Key ID & Foreign Key dengan *cascade delete*.
+5. `students` & `teachers`: Profil lengkap, NISN/NIP, biodata, foto profil.
+6. `classes` & `majors`: Struktur rombel dan jurusan/peminatan (TKJ, RPL, IPA, IPS, dll.).
+7. `schedules` & `journals`: Jadwal mata pelajaran dan catatan jurnal KBM harian guru.
+8. `internships` (PKL): Data penempatan industri, guru pembimbing, nilai instruktur industri.
+9. `accreditation_evidences`: Dokumen bukti fisik terhubung ke butir standar akreditasi.
 
 ---
 
