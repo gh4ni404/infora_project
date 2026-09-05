@@ -23,18 +23,50 @@
 <body>
     <div class="layout-container">
         <!-- Sidebar Navigation -->
-        <aside class="layout-sidebar">
+        <aside class="layout-sidebar" id="layoutSidebar">
             <div class="sidebar-header">
-                <h1 class="brand-title">INFORA</h1>
+                <h1 class="brand-title">
+                    <span class="brand-text-full">INFORA</span>
+                    <span class="brand-text-compact">IN</span>
+                </h1>
                 <div class="brand-subtitle">Platform Governance Core</div>
             </div>
 
-            <nav class="sidebar-menu">
+            <div class="sidebar-search">
+                <div class="search-box">
+                    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input
+                        type="text"
+                        id="sidebarMenuSearch"
+                        class="search-input"
+                        placeholder="Cari menu..."
+                        autocomplete="off"
+                        aria-label="Cari menu di sidebar"
+                    >
+                    <button
+                        type="button"
+                        id="sidebarSearchClear"
+                        class="search-clear hidden"
+                        aria-label="Bersihkan pencarian"
+                        title="Bersihkan pencarian"
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <nav class="sidebar-menu" id="sidebarNavMenu">
                 <div class="menu-category-label">Menu Utama</div>
 
                 <!-- Single Menu Item: Dashboard -->
-                <a href="{{ route('dashboard') }}" class="nav-link-item active">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <a href="{{ route('dashboard') }}" class="nav-link-item active" title="Dashboard">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <rect width="7" height="9" x="3" y="3" rx="1"></rect>
                         <rect width="7" height="5" x="14" y="3" rx="1"></rect>
                         <rect width="7" height="9" x="14" y="12" rx="1"></rect>
@@ -42,6 +74,15 @@
                     </svg>
                     <span>Dashboard</span>
                 </a>
+
+                <div id="menuSearchEmpty" class="empty-state hidden">
+                    <svg class="empty-state-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        <line x1="8" y1="11" x2="14" y2="11"></line>
+                    </svg>
+                    <span class="empty-state-text">Menu tidak ditemukan</span>
+                </div>
             </nav>
         </aside>
 
@@ -49,7 +90,14 @@
         <div class="layout-content-wrapper">
             <!-- Topbar Header -->
             <header class="topbar-header">
-                <div>
+                <div class="topbar-left">
+                    <button type="button" id="sidebarToggle" class="btn-icon" aria-label="Buka / Tutup Sidebar" title="Buka / Tutup Sidebar">
+                        <svg class="icon-toggle-sidebar" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                            <path d="M9 3v18"></path>
+                            <path class="toggle-arrow" d="m14 9-3 3 3 3"></path>
+                        </svg>
+                    </button>
                     <span class="badge badge-cyan">Entitas Pengembang Platform</span>
                 </div>
 

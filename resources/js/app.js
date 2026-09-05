@@ -77,4 +77,83 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Sidebar menu real-time search
+    const menuSearchInput = document.getElementById('sidebarMenuSearch');
+    const menuSearchClear = document.getElementById('sidebarSearchClear');
+    const sidebarNavMenu = document.getElementById('sidebarNavMenu');
+    const menuSearchEmpty = document.getElementById('menuSearchEmpty');
+
+    if (menuSearchInput && sidebarNavMenu) {
+        const navLinks = sidebarNavMenu.querySelectorAll('.nav-link-item');
+        const categoryLabels = sidebarNavMenu.querySelectorAll('.menu-category-label');
+
+        const filterMenu = () => {
+            const query = menuSearchInput.value.trim().toLowerCase();
+            let matchCount = 0;
+
+            if (menuSearchClear) {
+                menuSearchClear.classList.toggle('hidden', query.length === 0);
+            }
+
+            navLinks.forEach((link) => {
+                const text = link.textContent.trim().toLowerCase();
+                const matches = query === '' || text.includes(query);
+                link.classList.toggle('hidden', !matches);
+                if (matches) {
+                    matchCount++;
+                }
+            });
+
+            // Handle category labels visibility
+            categoryLabels.forEach((label) => {
+                if (query === '') {
+                    label.classList.remove('hidden');
+                } else {
+                    label.classList.toggle('hidden', matchCount === 0);
+                }
+            });
+
+            if (menuSearchEmpty) {
+                menuSearchEmpty.classList.toggle('hidden', matchCount > 0 || navLinks.length === 0);
+            }
+        };
+
+        menuSearchInput.addEventListener('input', filterMenu);
+
+        if (menuSearchClear) {
+            menuSearchClear.addEventListener('click', () => {
+                menuSearchInput.value = '';
+                filterMenu();
+                menuSearchInput.focus();
+            });
+        }
+
+        // Clear on Escape key
+        menuSearchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && menuSearchInput.value.length > 0) {
+                e.preventDefault();
+                menuSearchInput.value = '';
+                filterMenu();
+            }
+        });
+    }
+
+    // Sidebar collapsible toggle & state persistence
+    const sidebarToggleBtn = document.getElementById('sidebarToggle');
+    const layoutSidebar = document.getElementById('layoutSidebar');
+
+    if (sidebarToggleBtn && layoutSidebar) {
+        const isCollapsed = localStorage.getItem('infora_sidebar_collapsed') === 'true';
+        if (isCollapsed) {
+            layoutSidebar.classList.add('is-collapsed');
+            sidebarToggleBtn.classList.add('active');
+        }
+
+        sidebarToggleBtn.addEventListener('click', () => {
+            const nowCollapsed = layoutSidebar.classList.toggle('is-collapsed');
+            sidebarToggleBtn.classList.toggle('active', nowCollapsed);
+            localStorage.setItem('infora_sidebar_collapsed', nowCollapsed ? 'true' : 'false');
+        });
+    }
 });

@@ -101,6 +101,10 @@ test('authenticated super admin can access dashboard', function () {
     $response->assertOk();
     $response->assertSee('Dashboard Super Administrator');
     $response->assertSee('Entitas Pengembang Platform');
+    $response->assertSee('id="sidebarMenuSearch"', false);
+    $response->assertSee('search-box');
+    $response->assertSee('id="sidebarToggle"', false);
+    $response->assertSee('id="layoutSidebar"', false);
 });
 
 test('guest cannot access dashboard and is redirected to login', function () {
