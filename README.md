@@ -73,11 +73,24 @@ Dibangun dengan arsitektur **API-First & System Bridging**, **Pengembangan Berba
   ```
   *(Contoh: `kbm_u7_20260905_143022_a7b9c1d2.webp`, `pkl_u142_20260905_152011_3c4d5e6f.webp`, `akr_u3_20260905_110545_f83e2a1b.pdf`)*. Format ini menjamin berkas bebas tabrakan nama (*collision-proof*), aman, serta dapat diaudit dan ditelusuri kepemilikannya secara instan.
 
+### 🗂️ 9. Sistem Navigasi Berbasis Data & Pendekatan 3 Menu Dasar (System-Driven Hierarchy)
+- **Hierarki Navigasi Dinamis (Modul ➔ Menu ➔ Sub-Menu):** Seluruh navigasi sidebar tidak lagi di-hardcode secara statis di template Blade, melainkan terstruktur secara dinamis di basis data.
+- **Pendekatan 3 Menu Dasar Sistem (Bootstrap Baseline):** Sistem diawali dengan **3 menu dasar bawaan/seeded** di bawah modul "Tata Kelola Sistem" (**Modul**, **Menu**, dan **Sub-Menu**). Ketiga menu inilah yang menjadi pintu gerbang utama untuk mendaftarkan dan menata seluruh modul dan fitur baru ke depan (input data melalui sistem terlebih dahulu, baru kemudian dikembangkan sisi frontend dan backend-nya).
+- **Interaktivitas Sidebar Modern:**
+  - View Composer `SidebarComposer` dengan *eager loading* dan *safeguard* tabel.
+  - Dropdown accordion sub-menu dengan rotasi ikon panah 180° dan penataan left-anchoring presisi **26px** (0px horizontal jump).
+  - Pencarian menu real-time multi-level (modul, menu, sub-menu) dengan auto-expand parent group.
+
+### 🛡️ 10. Prinsip Reduksi Batasan Unik (Zero 'unique' Constraints on Entity Text Attributes)
+- **Rasionalisasi:** Penggunaan constraint `unique` pada kolom teks (seperti nama modul, nama menu, slug, atau route) dihindari dalam skema database maupun layer validasi Form Request. Pendekatan ini dipilih untuk mencegah kerumitan implementasi dan berbagai *edge cases* validasi CRUD (misalnya: konflik saat pembaruan data tanpa mengubah nama, isu duplikasi nama pada modul yang berbeda, atau rute bersyarat).
+- **Integritas Berbasis Primary Key ID:** Seluruh identitas entitas dan relasi hierarki murni mengandalkan **Primary Key ID (Auto-Increment)** dan **Foreign Key dengan Cascade Delete**. Validasi berfokus pada tipe data, kelengkapan (*presence*), dan keberadaan relasi (*exists*), sehingga pengalaman pengelolaan data menjadi jauh lebih sederhana, fleksibel, dan minim galat operasional.
+
 ---
 
 ## 💻 Tech Stack & Arsitektur
 
 - **Backend:** Laravel (Versi Terbaru) — *Modular Monolith, RESTful API & Bridging Core*
+- **Navigation & Hierarchy:** System-Driven Dynamic Navigation (Modul ➔ Menu ➔ Sub-Menu), 3 Baseline Bootstrap Menus, Non-Unique Entity Convention
 - **Data & Response Contract:** Pure JSON Responses (`application/json`), Eloquent API Resources, Zero HTML in Data Payloads
 - **Media & File Handling:** Base64 Uploads (Maks. 1MB/file, Preservasi Kualitas, Pola Nama: `{modul}_u{user_id}_{timestamp}_{random8}.{ext}`)
 - **Styling & UI Convention:** Reusable Global CSS Classes (Light, Smooth & Clean Theme, Strict No Ad-Hoc/Specific Classes), Zero Inline Styles (`style=""`), Zero `<style>` Tags in Views
