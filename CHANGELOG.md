@@ -9,6 +9,27 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 ## [Unreleased]
 
 ### Added
+- **Seksi Profil Pengguna & Dropup Popover Interaktif di Sidebar Footer:**
+  - Memindahkan informasi profil pengguna dan aksi keluar dari topbar ke bagian bawah sidebar (*sidebar footer*), menghadirkan topbar yang bersih, fokus, dan lapang.
+  - Kartu pengguna interaktif (`#userProfileTrigger`) yang memicu popover menu melayang ke atas (*dropup*) saat diklik, dilengkapi indikator panah *chevron* yang berputar 180° saat terbuka.
+  - Menu popover lengkap: Header ringkasan akun dengan avatar inisial, opsi **Pengaturan Profile**, **Ubah Password**, **Bantuan** (Pusat Bantuan INFORA), serta tombol **Keluar / Logout** aman berbalut aksi destruktif (*danger styling*).
+  - Interaksi aksesibel: Menutup otomatis via tombol `Escape`, menutup saat mengklik area di luar (*click outside*), dan notifikasi melayang (*floating toast*) non-intrusif pada fitur yang sedang dipersiapkan.
+  - Responsif pada sidebar ciut: Saat sidebar diciutkan (72px), menu otomatis melayang ke arah samping kanan (`left: 76px; bottom: 8px; width: 230px`) sehingga seluruh navigasi tetap dapat dijangkau dengan mudah.
+
+### Changed & Refactored
+- **Standarisasi Sistem Class Global Universal Dropdown (`resources/css/app.css`):**
+  - Merefaktor seluruh penamaan class ad-hoc (seperti `.user-dropup-*`) ke sistem komponen dropdown modular universal: `.dropdown`, `.dropdown.dropdown-full`, `.dropdown-menu`, `.dropdown-menu-up`, `.dropdown-menu-end`, `.dropdown-menu-full`, `.dropdown-header`, `.dropdown-divider`, `.dropdown-list`, `.dropdown-item`, dan `.dropdown-item.is-danger`.
+  - Mengimplementasikan komponen kartu profil universal `.user-card-button` dan standarisasi avatar global `.user-avatar-circle` (38px) serta varian `.user-avatar-circle.avatar-sm` (28px).
+  - Menegakkan kepatuhan 100% pada aturan arsitektur *Strict No Ad-Hoc Classes* (bebas class sekali pakai, tanpa inline styles, dan tanpa tag `<style>`).
+- **Perbaikan Penjangkaran Animasi Transisi Sidebar (*Anchored Symmetrical Transition*):**
+  - Mengeliminasi bug transisi di mana elemen pengguna sempat memusatkan diri ke tengah lalu bergeser ke kiri (*auto ketengah baru ke kiri*) saat toggle sidebar ciut/buka.
+  - Mengunci posisi avatar pada koordinat horizontal tetap 17px dari tepi kiri layar (`padding: 0.75rem 12px` pada footer + `padding: 0.375rem 5px` pada kartu = 17px), identik dengan margin emblem logo header (`padding: 1.25rem 17px`).
+  - Menjaga alignment selalu `justify-content: flex-start` (tanpa pernah berganti ke `center`).
+  - Menerapkan transisi halus `opacity: 0.2s ease` dan `transform: translateX(-10px)` pada nama pengguna dan ikon chevron, sehingga teks memudar mulus selaras dengan penyusutan lebar sidebar (260px ke 72px).
+- **Pemisah Modul Classic Minimalist & Eliminasi Opsi Icon Modul:**
+  - Menerapkan desain pemisah kategori modul *Classic Minimalist* (`.menu-category-label` dengan garis pembatas tipis atas dan tipografi uppercase elegan) yang rapi dan profesional.
+  - Menghapus atribut dan kolom `icon` dari tabel database `modules`, model, factory, seeder, Form Requests, dan views modul karena kategori modul berfungsi sebagai header pengelompokan yang tidak menampilkan icon di sidebar.
+
 - **Modal Interaktif Formulir Tambah (Modul, Menu, & Sub-Menu):**
   - Alih-alih berpindah/redirect ke halaman baru saat mengklik tombol "+ Tambah", sistem kini memunculkan modal dialog interaktif langsung pada halaman index (`system/modules`, `system/menus`, `system/sub-menus`).
   - Arsitektur styling modal global reusable di `resources/css/app.css` (`.modal-backdrop`, `.modal-dialog`, `.modal-header`, `.modal-body`, `.modal-footer`).

@@ -60,6 +60,7 @@ Dibangun dengan arsitektur **API-First & System Bridging**, **Pengembangan Berba
 ### 🎨 7. Standar Styling: Reusable Global CSS Classes (Strict No Ad-Hoc Classes)
 - **Nuansa Terang, Halus & Ramah Sivitas (Bright, Smooth & Clean):** Antarmuka dirancang dengan latar kanvas sejuk (`#F8FAFC`), permukaan kartu putih bersih (`#FFFFFF`), teks berkontras tinggi (`#0F172A`) yang mudah dibaca guru & siswa, serta aksen biru inspiratif (`#0284C7` & `#2563EB`).
 - **Reusable Global Classes (Dilarang Keras Class Khusus/Ad-hoc):** Dilarang keras membuat class CSS khusus sekali pakai (*one-off / page-specific classes*) yang hanya dipakai pada elemen atau halaman tertentu. Seluruh styling antarmuka wajib memanfaatkan sistem class global yang bersifat dapat digunakan kembali (*reusable design tokens & utilities*).
+- **Sistem Komponen UI Universal Terpusat:** Menyediakan sistem komponen siap pakai seperti Dropdown universal (`.dropdown`, `.dropdown-menu`, `.dropdown-item`), Kartu Pengguna (`.user-card-button`, `.user-avatar-circle`), serta Modal Dialog (`.modal-backdrop`, `.modal-dialog`).
 - **Tanpa Inline Style (`style="..."`):** Dilarang keras menggunakan *inline style* langsung pada tag HTML untuk menjamin kebersihan kode (*clean markup*), kemudahan *maintenance*, dan konsistensi visual lintas halaman.
 - **Tanpa Tag `<style>` pada View/Komponen:** Jika memerlukan UI kustom, seluruh definisi CSS wajib ditempatkan sebagai class reusable pada berkas stylesheet global (`resources/css/`), tanpa pernah menyisipkan tag `<style>` di dalam template Blade.
 
@@ -76,9 +77,12 @@ Dibangun dengan arsitektur **API-First & System Bridging**, **Pengembangan Berba
 ### 🗂️ 9. Sistem Navigasi Berbasis Data & Pendekatan 3 Menu Dasar (System-Driven Hierarchy)
 - **Hierarki Navigasi Dinamis (Modul ➔ Menu ➔ Sub-Menu):** Seluruh navigasi sidebar tidak lagi di-hardcode secara statis di template Blade, melainkan terstruktur secara dinamis di basis data.
 - **Pendekatan 3 Menu Dasar Sistem (Bootstrap Baseline):** Sistem diawali dengan **3 menu dasar bawaan/seeded** di bawah modul "Tata Kelola Sistem" (**Modul**, **Menu**, dan **Sub-Menu**). Ketiga menu inilah yang menjadi pintu gerbang utama untuk mendaftarkan dan menata seluruh modul dan fitur baru ke depan (input data melalui sistem terlebih dahulu, baru kemudian dikembangkan sisi frontend dan backend-nya).
-- **Interaktivitas Sidebar Modern:**
+- **Pemisah Modul Classic Minimalist:** Label modul berfungsi sebagai pemisah kategori yang rapi dan elegan (`.menu-category-label` dengan garis pembatas tipis atas dan tipografi uppercase) tanpa memerlukan ikon modul yang berlebihan.
+- **Seksi Pengguna & Dropup Popover di Sidebar Footer:** Profil akun pengguna dan aksi logout ditempatkan di bagian bawah sidebar (`.sidebar-footer`) menggunakan kartu interaktif (`.user-card-button`) yang memunculkan popover menu melayang ke atas (*dropup*) berisi Pengaturan Profile, Ubah Password, Bantuan, dan Keluar.
+- **Interaktivitas Sidebar Modern & Anchored Transition:**
   - View Composer `SidebarComposer` dengan *eager loading* dan *safeguard* tabel.
-  - Dropdown accordion sub-menu dengan rotasi ikon panah 180° dan penataan left-anchoring presisi **26px** (0px horizontal jump).
+  - Dropdown accordion sub-menu dengan rotasi ikon panah 180°.
+  - Penataan penjangkaran simetris (*Anchored Symmetrical Transition*): Posisi avatar dan ikon terkunci presisi pada margin kiri **17px** (0px horizontal jump) baik saat terbuka (260px) maupun ciut (72px), menghilangkan efek *auto-centering* yang mengganggu saat animasi berjalan.
   - Pencarian menu real-time multi-level (modul, menu, sub-menu) dengan auto-expand parent group.
 
 ### 🛡️ 10. Prinsip Reduksi Batasan Unik (Zero 'unique' Constraints on Entity Text Attributes)

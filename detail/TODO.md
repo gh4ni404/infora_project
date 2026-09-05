@@ -71,7 +71,12 @@
     - [x] Visual Icon Picker Component (`<x-icon-picker>`): dialog katalog visual dengan live preview, live search (Indonesia), filter kategori, dan 100% free Lucide Icons (~38 SVG icons).
     - [x] Panduan informatif nama rute dengan quick suggestion pills dan datalist rute terdaftar.
     - [x] Modal Interaktif Tambah Data: Tombol Tambah Modul, Tambah Menu, dan Tambah Sub-Menu memunculkan modal dialog interaktif langsung di atas tabel data (tanpa redirect halaman) dengan auto-reopen pada validasi error.
-    - [x] Automated Pest test suite (total 47 tests lulus 100%, 210 assertions).
+    - [x] Classic Minimalist Sidebar Divider: Label modul berfungsi sebagai pemisah kategori yang rapi dan elegan (`.menu-category-label` dengan garis pembatas tipis atas dan tipografi uppercase) serta eliminasi kolom/opsi icon modul yang redundan.
+    - [x] Relokasi Profil Pengguna & Logout ke Sidebar Footer: Topbar dibersihkan dan difokuskan, seksi akun pengguna dipindahkan ke bawah sidebar (`.sidebar-footer`).
+    - [x] Dropup Popover Menu Interaktif: Kartu profil pengguna (`#userProfileTrigger`) memicu popover menu melayang ke atas (*dropup*) berisi Pengaturan Profile, Ubah Password, Bantuan, dan Keluar.
+    - [x] Standarisasi Sistem Class Global Modular Dropdown: Merefaktor styling ke class universal reusable (`.dropdown`, `.dropdown-menu`, `.dropdown-item`, `.user-card-button`) sesuai standar *Strict No Ad-Hoc Classes*.
+    - [x] Penjangkaran Simetris Animasi Sidebar (*Anchored Symmetrical Transition*): Posisi avatar 38px terkunci presisi pada margin kiri tetap 17px (0px horizontal jump) baik saat expanded (260px) maupun collapsed (72px), menghilangkan glitch *auto-centering*.
+    - [x] Automated Pest test suite (total 48 tests lulus 100%, 214 assertions).
 - [ ] **2.4. User-Centric Menu Access & Role Presets (Pengembangan Lanjutan)**
   - [ ] Registrasi katalog menu terpusat (`config/menu.php`) dengan atribut `key`, `title`, `icon`, `route`, `group`, dan filter tipe sekolah `school_type: ['sma', 'smk']`.
   - [ ] Alokasi menu berbasis pengguna (*User-Centric Access Control*): mengizinkan satu guru memegang berbagai penugasan tanpa batasan role kaku.

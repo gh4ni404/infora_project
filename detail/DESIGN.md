@@ -45,7 +45,10 @@
 3. **Dedicated Layout Separation (Desktop vs Mobile):** Menggunakan pemisahan master layout secara terpisah (`layouts/desktop.blade.php` dan `layouts/mobile.blade.php`), bukan sekadar menyembunyikan elemen via CSS (`hidden md:block`). Pendekatan ini menjaga ukuran DOM tetap ramping dan interaksi terasa native.
 4. **Mobile First Experience:** Antarmuka ponsel pintar dirancang dengan *bottom bar navigation*, ramah gestur sentuh (touch target minimal 44px), dan kecepatan interaksi instan (<300ms) untuk guru dan siswa.
 5. **Desktop Power-Dashboard:** Menyajikan tata letak *high-density data* untuk staf administrasi, pimpinan sekolah, dan asesor akreditasi dengan *sidebar* navigasi fleksibel, tabel analitik bervolume besar, dan visualisasi grafik komprehensif.
-6. **Reusable Global CSS Classes (Strict No Ad-Hoc Classes):** Seluruh styling antarmuka dikembangkan menggunakan nama class CSS global terstruktur dan reusable. Dilarang keras membuat class CSS khusus/ad-hoc sekali pakai, dilarang menggunakan *inline style* (`style="..."`), dan dilarang menyisipkan tag `<style>` di dalam berkas Blade view. Seluruh kustomisasi UI wajib didaftarkan sebagai class reusable melalui berkas stylesheet terpusat (`resources/css/`).
+6. **Reusable Global CSS Classes (Strict No Ad-Hoc Classes):** Seluruh styling antarmuka dikembangkan menggunakan nama class CSS global terstruktur dan reusable. Dilarang keras membuat class CSS khusus/ad-hoc sekali pakai, dilarang menggunakan *inline style* (`style="..."`), dan dilarang menyisipkan tag `<style>` di dalam berkas Blade view. Seluruh kustomisasi UI wajib didaftarkan sebagai class reusable melalui berkas stylesheet terpusat (`resources/css/`). Termasuk di dalamnya komponen universal: Dropdown (`.dropdown`, `.dropdown-menu`, `.dropdown-item`), Kartu Pengguna (`.user-card-button`), dan Modal Dialog (`.modal-backdrop`, `.modal-dialog`).
+7. **Pemisah Modul Classic Minimalist:** Label modul berfungsi sebagai pemisah kategori yang rapi dan elegan (`.menu-category-label` dengan garis pembatas tipis atas dan tipografi uppercase) tanpa memerlukan opsi icon modul yang redundan.
+8. **Seksi Profil Pengguna & Dropup Popover di Sidebar Footer:** Profil pengguna dan aksi logout ditempatkan di bagian bawah sidebar (`.sidebar-footer`) menggunakan kartu interaktif (`.user-card-button`) yang memicu popover menu melayang ke atas (*dropup*) berisi Pengaturan Profile, Ubah Password, Bantuan, dan Keluar.
+9. **Penjangkaran Simetris Animasi Sidebar (*Anchored Symmetrical Transition*):** Posisi avatar pengguna dan ikon navigasi dikunci secara permanen pada margin kiri tetap 17px baik saat sidebar terbuka (260px) maupun ciut (72px). Menghindari penggunaan `justify-content: center` saat ciut untuk mencegah pergeseran horizontal (*auto ketengah baru ke kiri*), serta menerapkan transisi `opacity: 0.2s ease` dan `transform: translateX(-10px)` pada teks metadata.
 
 ### 2.5. Sistem Ikonografi & Navigasi Hirarki (Iconography & Route Resolution)
 1. **100% Free & Open-Source Lucide Icons:** Menggunakan keluarga ikon Lucide Icons resmi (lisensi open source ISC) berbasis SVG murni yang di-render native via komponen `<x-icon>`. Bebas biaya lisensi dan tanpa ketergantungan font eksternal.
@@ -148,7 +151,7 @@ erDiagram
 
 ### Tabel-Tabel Kunci:
 1. `users`: Autentikasi, peran, status aktif, username/email/no_hp.
-2. `modules`: Modul kategori navigasi sistem (`id`, `name`, `icon`, `order`, `is_active`).
+2. `modules`: Modul kategori navigasi sistem (`id`, `name`, `order`, `is_active`).
 3. `menus`: Menu navigasi utama di bawah modul (`id`, `module_id`, `name`, `route_name`, `icon`, `order`, `is_active`).
 4. `sub_menus`: Item sub-menu berjenjang di bawah menu (`id`, `menu_id`, `name`, `route_name`, `order`, `is_active`).
    > *Catatan Prinsip Skema Navigasi:* Tidak menggunakan constraint `unique` pada kolom teks (`name`, `route_name`) untuk menjamin fleksibilitas operasional input/edit data tanpa bentrok validasi, sepenuhnya mengandalkan integritas relasional Primary Key ID & Foreign Key dengan *cascade delete*.
