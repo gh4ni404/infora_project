@@ -51,7 +51,7 @@ test('super admin can view modules list with menu counts', function () {
 
     $response->assertOk();
     $response->assertSee('Tata Kelola Modul');
-    $response->assertSee('Akademik Khusus');
+    $response->assertSee('AKADEMIK KHUSUS');
     $response->assertSee('1 Menu');
     $response->assertSee('modalCreateModule', false);
     $response->assertSee('btnOpenCreateModule', false);
@@ -78,9 +78,22 @@ test('super admin can store new module with valid data', function () {
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('modules', [
-        'name' => 'Kesiswaan & Ekstrakurikuler',
+        'name' => 'KESISWAAN & EKSTRAKURIKULER',
         'order' => 3,
         'is_active' => true,
+    ]);
+});
+
+test('module store automatically formats name to uppercase', function () {
+    $response = $this->actingAs($this->superAdmin)->post(route('system.modules.store'), [
+        'name' => 'akademik dan kurikulum smk',
+        'order' => 4,
+        'is_active' => true,
+    ]);
+
+    $response->assertRedirect(route('system.modules.index'));
+    $this->assertDatabaseHas('modules', [
+        'name' => 'AKADEMIK DAN KURIKULUM SMK',
     ]);
 });
 
@@ -107,7 +120,7 @@ test('module store allows duplicate names without unique constraint errors', fun
     ]);
 
     $response->assertRedirect(route('system.modules.index'));
-    expect(Module::where('name', 'Modul Sama')->count())->toBe(2);
+    expect(Module::where('name', 'MODUL SAMA')->count())->toBe(2);
 });
 
 test('super admin can view edit module page', function () {
@@ -120,8 +133,8 @@ test('super admin can view edit module page', function () {
     $response = $this->actingAs($this->superAdmin)->get(route('system.modules.edit', $module));
 
     $response->assertOk();
-    $response->assertSee('Edit Modul: Modul Edit Test');
-    $response->assertSee('value="Modul Edit Test"', false);
+    $response->assertSee('Edit Modul: MODUL EDIT TEST');
+    $response->assertSee('value="MODUL EDIT TEST"', false);
 });
 
 test('super admin can update existing module', function () {
@@ -141,7 +154,7 @@ test('super admin can update existing module', function () {
     $response->assertSessionHas('success');
 
     $module->refresh();
-    expect($module->name)->toBe('Modul Setelah Edit')
+    expect($module->name)->toBe('MODUL SETELAH EDIT')
         ->and($module->order)->toBe(5)
         ->and($module->is_active)->toBeFalse();
 });

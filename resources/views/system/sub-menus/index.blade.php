@@ -201,14 +201,15 @@
                         id="modal_sub_name"
                         name="name"
                         class="form-input @error('name') border-danger @enderror"
-                        placeholder="Contoh: Tambah Data, Rekapitulasi, Riwayat"
+                        data-transform="title-case"
+                        placeholder="Contoh: Modul, Menu, Sub-Menu, Rekapitulasi"
                         value="{{ old('name') }}"
                         required
                     >
                     @error('name')
                         <div class="form-error">{{ $message }}</div>
                     @enderror
-                    <div class="form-hint">Label nama sub-menu yang tampil di sidebar.</div>
+                    <div class="form-hint">Nama item sub-menu otomatis diformat Capitalize Each Word (Title Case).</div>
                 </div>
 
                 <div class="form-group">

@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Support\TextFormatter;
 use Database\Factories\MenuFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +15,17 @@ class Menu extends Model
 {
     /** @use HasFactory<MenuFactory> */
     use HasFactory;
+
+    /**
+     * Interact with the menu's name.
+     * Always stored in Capitalize Each Word (Title Case) format with acronym preservation.
+     */
+    protected function name(): Attribute
+    {
+        return Attribute::make(
+            set: fn (?string $value) => TextFormatter::titleCase($value),
+        );
+    }
 
     /**
      * The attributes that are mass assignable.

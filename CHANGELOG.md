@@ -96,9 +96,18 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
     - Alert notifikasi sukses/gagal (`.alert-success`, `.alert-danger`).
     - Komponen form input, select, checkbox, hint, dan tombol aksi (`.btn-edit`, `.btn-delete`, `.btn-primary`, `.btn-secondary`).
     - 100% mematuhi aturan strict arsitektur: **Zero inline styles (`style=""`) dan Zero tag `<style>`**.
+- **Sistem Otomatisasi Kapitalisasi Teks Input (UPPERCASE Modul & Title Case Menu/Sub-Menu):**
+  - Helper terpusat `App\Support\TextFormatter` untuk pemformatan teks konsisten: metode `upper()` dan `titleCase()` yang cerdas mempertahankan akronim standar pendidikan & teknologi (`SMK`, `SMA`, `SIM`, `PKL`, `KBM`, `GTK`, `BAN-SM`, `RPP`, `IT`, `TU`, dll.).
+  - Eloquent Attribute Mutators pada Model `Module` (nama otomatis tersimpan dalam format **UPPERCASE**) serta `Menu` dan `SubMenu` (nama otomatis tersimpan dalam format **Capitalize Each Word / Title Case** dengan preservasi akronim).
+  - Integrasi Frontend Reaktif & CSS Utilitas:
+    - Atribut `data-transform="uppercase"` pada formulir modul dengan auto-uppercase instan saat mengetik tanpa merusak posisi kursor (*caret range*).
+    - Atribut `data-transform="title-case"` pada formulir menu & sub-menu dengan pemformatan otomatis saat event `blur` dan sebelum `submit`.
+    - Kelas utilitas CSS `.text-uppercase` dan `.text-capitalize` di `resources/css/app.css` untuk feedback visual seketika.
+  - Pembaruan seeder baseline `SystemMenuSeeder` dengan nama modul berformat kapital (`NAVIGASI UTAMA` & `PENGATURAN SISTEM`).
+  - Unit test baru `TextFormatterTest` dan peningkatan test suite hingga **54 tests lulus 100% (242 assertions)**.
 - **Automated Testing & Jaminan Kualitas:**
-  - Penambahan 29 feature tests baru (`SidebarFrontendTest`, `ModuleCrudTest`, `MenuCrudTest`, `SubMenuCrudTest`).
-  - Total test suite mencapai **45 tests lulus 100% (190 assertions)**.
+  - Penambahan feature dan unit tests baru (`TextFormatterTest`, `SidebarFrontendTest`, `ModuleCrudTest`, `MenuCrudTest`, `SubMenuCrudTest`).
+  - Total test suite mencapai **54 tests lulus 100% (242 assertions)**.
   - 100% lulus standardisasi formatting Laravel Pint (PSR-12).
 
 ### Changed

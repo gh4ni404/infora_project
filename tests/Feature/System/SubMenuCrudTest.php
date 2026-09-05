@@ -30,7 +30,7 @@ beforeEach(function () {
 test('super admin can view sub-menus list and filter by menu', function () {
     $sub1 = SubMenu::create([
         'menu_id' => $this->menu->id,
-        'name' => 'SubMenu Pertama',
+        'name' => 'Sub-Menu Pertama',
         'order' => 1,
         'is_active' => true,
     ]);
@@ -38,7 +38,7 @@ test('super admin can view sub-menus list and filter by menu', function () {
     $otherMenu = Menu::create(['module_id' => $this->module->id, 'name' => 'Menu Lain', 'order' => 2, 'is_active' => true]);
     $sub2 = SubMenu::create([
         'menu_id' => $otherMenu->id,
-        'name' => 'SubMenu Kedua',
+        'name' => 'Sub-Menu Kedua',
         'order' => 1,
         'is_active' => true,
     ]);
@@ -50,8 +50,8 @@ test('super admin can view sub-menus list and filter by menu', function () {
     $response->assertSee('modalCreateSubMenu', false);
     $response->assertSee('btnOpenCreateSubMenu', false);
     expect($response->viewData('subMenus')->pluck('name'))
-        ->toContain('SubMenu Pertama')
-        ->not->toContain('SubMenu Kedua');
+        ->toContain('Sub-Menu Pertama')
+        ->not->toContain('Sub-Menu Kedua');
 });
 
 test('super admin can view create sub-menu page', function () {
@@ -85,6 +85,21 @@ test('super admin can store new sub-menu with valid data', function () {
     ]);
 });
 
+test('sub-menu store automatically formats name to title case with acronyms', function () {
+    $response = $this->actingAs($this->superAdmin)->post(route('system.sub-menus.store'), [
+        'menu_id' => $this->menu->id,
+        'name' => 'laporan pkl smk & rekapitulasi ban-sm',
+        'order' => 2,
+        'is_active' => true,
+    ]);
+
+    $response->assertRedirect(route('system.sub-menus.index'));
+    $this->assertDatabaseHas('sub_menus', [
+        'menu_id' => $this->menu->id,
+        'name' => 'Laporan PKL SMK & Rekapitulasi BAN-SM',
+    ]);
+});
+
 test('sub-menu store validation requires menu_id and name', function () {
     $response = $this->actingAs($this->superAdmin)->post(route('system.sub-menus.store'), [
         'menu_id' => 88888, // non-existent menu
@@ -97,26 +112,26 @@ test('sub-menu store validation requires menu_id and name', function () {
 test('sub-menu store allows duplicate names without unique constraint errors', function () {
     SubMenu::create([
         'menu_id' => $this->menu->id,
-        'name' => 'SubMenu Duplikat',
+        'name' => 'Sub-Menu Duplikat',
         'order' => 1,
         'is_active' => true,
     ]);
 
     $response = $this->actingAs($this->superAdmin)->post(route('system.sub-menus.store'), [
         'menu_id' => $this->menu->id,
-        'name' => 'SubMenu Duplikat',
+        'name' => 'Sub-Menu Duplikat',
         'order' => 2,
         'is_active' => true,
     ]);
 
     $response->assertRedirect(route('system.sub-menus.index'));
-    expect(SubMenu::where('name', 'SubMenu Duplikat')->count())->toBe(2);
+    expect(SubMenu::where('name', 'Sub-Menu Duplikat')->count())->toBe(2);
 });
 
 test('super admin can view edit sub-menu page', function () {
     $sub = SubMenu::create([
         'menu_id' => $this->menu->id,
-        'name' => 'SubMenu Edit Test',
+        'name' => 'Sub-Menu Edit Test',
         'order' => 1,
         'is_active' => true,
     ]);
@@ -124,8 +139,8 @@ test('super admin can view edit sub-menu page', function () {
     $response = $this->actingAs($this->superAdmin)->get(route('system.sub-menus.edit', $sub));
 
     $response->assertOk();
-    $response->assertSee('Edit Sub-Menu: SubMenu Edit Test');
-    $response->assertSee('value="SubMenu Edit Test"', false);
+    $response->assertSee('Edit Sub-Menu: Sub-Menu Edit Test');
+    $response->assertSee('value="Sub-Menu Edit Test"', false);
 });
 
 test('super admin can update existing sub-menu', function () {

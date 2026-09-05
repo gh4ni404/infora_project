@@ -55,14 +55,15 @@
                     id="name"
                     name="name"
                     class="form-input @error('name') border-danger @enderror"
-                    placeholder="Contoh: Modul, Menu, Data Siswa, Mata Pelajaran"
+                    data-transform="title-case"
+                    placeholder="Contoh: Dashboard, Sistem, Jurnal KBM, Data Siswa"
                     value="{{ old('name', $menu->name) }}"
                     required
                 >
                 @error('name')
                     <div class="form-error">{{ $message }}</div>
                 @enderror
-                <div class="form-hint">Nama item menu yang akan tampil di sidebar.</div>
+                <div class="form-hint">Nama item menu otomatis diformat Capitalize Each Word (Title Case).</div>
             </div>
 
             <div class="form-group">

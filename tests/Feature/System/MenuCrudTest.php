@@ -54,7 +54,7 @@ test('super admin can view create menu page with module list', function () {
 
     $response->assertOk();
     $response->assertSee('Tambah Menu Baru');
-    $response->assertSee('Tata Kelola Pengujian');
+    $response->assertSee('TATA KELOLA PENGUJIAN');
 });
 
 test('super admin can store new menu with valid data', function () {
@@ -79,6 +79,21 @@ test('super admin can store new menu with valid data', function () {
         'icon' => 'users',
         'order' => 2,
         'is_active' => true,
+    ]);
+});
+
+test('menu store automatically formats name to title case with acronyms', function () {
+    $response = $this->actingAs($this->superAdmin)->post(route('system.menus.store'), [
+        'module_id' => $this->module->id,
+        'name' => 'jurnal kbm & pkl smk',
+        'order' => 3,
+        'is_active' => true,
+    ]);
+
+    $response->assertRedirect(route('system.menus.index'));
+    $this->assertDatabaseHas('menus', [
+        'module_id' => $this->module->id,
+        'name' => 'Jurnal KBM & PKL SMK',
     ]);
 });
 

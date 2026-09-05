@@ -33,14 +33,15 @@
                     id="name"
                     name="name"
                     class="form-input @error('name') border-danger @enderror"
-                    placeholder="Contoh: Pengaturan Sistem, Akademik, Kesiswaan"
+                    data-transform="uppercase"
+                    placeholder="Contoh: PENGATURAN SISTEM, AKADEMIK, KESISWAAN"
                     value="{{ old('name') }}"
                     required
                 >
                 @error('name')
                     <div class="form-error">{{ $message }}</div>
                 @enderror
-                <div class="form-hint">Nama modul akan ditampilkan sebagai judul grup kategori pada sidebar.</div>
+                <div class="form-hint">Nama modul otomatis diformat kapital (UPPERCASE) dan ditampilkan sebagai pemisah kategori pada sidebar.</div>
             </div>
 
             <div class="form-group">

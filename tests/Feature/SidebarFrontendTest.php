@@ -21,9 +21,9 @@ test('sidebar renders seeded baseline modules and menus dynamically', function (
     $response = $this->actingAs($this->user)->get('/dashboard');
 
     $response->assertOk();
-    $response->assertSee('Navigasi Utama');
+    $response->assertSee('NAVIGASI UTAMA');
     $response->assertSee('Dashboard');
-    $response->assertSee('Pengaturan Sistem');
+    $response->assertSee('PENGATURAN SISTEM');
     $response->assertSee('Sistem');
     $response->assertSee('Modul');
     $response->assertSee('Menu');
@@ -36,7 +36,7 @@ test('sidebar renders seeded baseline modules and menus dynamically', function (
     $response->assertSee(route('system.sub-menus.index'));
 
     // Verify unregistered routes fall back safely to '#'
-    $systemModule = Module::where('name', 'Pengaturan Sistem')->first();
+    $systemModule = Module::where('name', 'PENGATURAN SISTEM')->first();
     Menu::create([
         'module_id' => $systemModule->id,
         'name' => 'Menu Tanpa Rute',
@@ -83,7 +83,7 @@ test('sidebar correctly renders accordion group when a menu has sub-menus', func
     $response = $this->actingAs($this->user)->get('/dashboard');
 
     $response->assertOk();
-    $response->assertSee('Akademik & Pembelajaran');
+    $response->assertSee('AKADEMIK & PEMBELAJARAN');
     $response->assertSee('Kurikulum');
     $response->assertSee('Silabus & RPP');
     $response->assertSee('Jadwal Pelajaran');
@@ -137,10 +137,10 @@ test('sidebar hides inactive modules, menus, and submenus', function () {
     $response = $this->actingAs($this->user)->get('/dashboard');
 
     $response->assertOk();
-    $response->assertSee('Modul Terlihat');
+    $response->assertSee('MODUL TERLIHAT');
     $response->assertSee('Menu Aktif');
 
-    $response->assertDontSee('Modul Tersembunyi');
+    $response->assertDontSee('MODUL TERSEMBUNYI');
     $response->assertDontSee('Menu Nonaktif');
     $response->assertDontSee('Menu Dari Modul Nonaktif');
 });

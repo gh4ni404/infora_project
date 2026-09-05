@@ -336,6 +336,80 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // =========================================================================
+    // Auto Text Transformation System (UPPERCASE for Modules, Title Case for Menus)
+    // =========================================================================
+    const textTransformAcronyms = new Set([
+        'smk', 'sma', 'smp', 'sd', 'sim', 'pkl', 'kbm', 'gtk',
+        'ban-sm', 'rpp', 'it', 'tu', 'uks', 'osis', 'bk', 'bkk',
+        'id', 'api', 'crud', 'ui', 'ux', 'ipk', 'sk', 'kd', 'cp', 'tp', 'atp', 'p5',
+        'nip', 'nisn', 'nis', 'nuptk'
+    ]);
+
+    const formatTitleCaseText = (str) => {
+        if (!str) return str;
+        return str.replace(/[^\s-]+/g, (word) => {
+            const lower = word.toLowerCase();
+            if (textTransformAcronyms.has(lower)) {
+                return lower.toUpperCase();
+            }
+            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        });
+    };
+
+    // Live uppercase transform on input with caret position preserved
+    document.addEventListener('input', (e) => {
+        const target = e.target;
+        if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) {
+            return;
+        }
+
+        if (target.getAttribute('data-transform') === 'uppercase') {
+            const start = target.selectionStart;
+            const end = target.selectionEnd;
+            target.value = target.value.toUpperCase();
+            if (start !== null && end !== null) {
+                target.setSelectionRange(start, end);
+            }
+        }
+    });
+
+    // Format title-case on blur when user finishes editing the field
+    document.addEventListener('blur', (e) => {
+        const target = e.target;
+        if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) {
+            return;
+        }
+
+        const transform = target.getAttribute('data-transform');
+        if (transform === 'title-case') {
+            target.value = formatTitleCaseText(target.value);
+        } else if (transform === 'uppercase') {
+            target.value = target.value.toUpperCase();
+        }
+    }, true);
+
+    // Final sweep on form submission so submitted values are cleanly formatted
+    document.addEventListener('submit', (e) => {
+        const form = e.target;
+        if (!(form instanceof HTMLFormElement)) {
+            return;
+        }
+
+        const transformInputs = form.querySelectorAll('[data-transform]');
+        transformInputs.forEach((input) => {
+            if (!(input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement)) {
+                return;
+            }
+            const transform = input.getAttribute('data-transform');
+            if (transform === 'uppercase') {
+                input.value = input.value.toUpperCase();
+            } else if (transform === 'title-case') {
+                input.value = formatTitleCaseText(input.value);
+            }
+        });
+    });
 });
 
 // Lightweight global toast feedback notification

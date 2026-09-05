@@ -77,7 +77,8 @@
     - [x] Standarisasi Sistem Class Global Modular Dropdown: Merefaktor styling ke class universal reusable (`.dropdown`, `.dropdown-menu`, `.dropdown-item`, `.user-card-button`) sesuai standar *Strict No Ad-Hoc Classes*.
     - [x] Penjangkaran Simetris Animasi Sidebar (*Anchored Symmetrical Transition*): Posisi avatar 38px (17px margin) dan seluruh ikon menu (26px margin) terkunci presisi tanpa pergeseran horizontal (0px horizontal jump) baik saat expanded (260px) maupun collapsed (72px), menghilangkan glitch *auto-centering*.
     - [x] Tombol Pencarian Interaktif Mode Ciut & Shortcut `Ctrl+K`: Kotak pencarian otomatis berubah menjadi tombol ikon 40px di atas Dashboard saat sidebar diciutkan; mengkliknya otomatis membuka sidebar dan memfokuskan input pencarian.
-    - [x] Automated Pest test suite (total 48 tests lulus 100%, 214 assertions).
+    - [x] Otomatisasi Kapitalisasi Teks Input & Integritas Data: Frontend real-time auto-transform via `[data-transform]` + helper `TextFormatter` & Eloquent mutators (UPPERCASE untuk Modul, Title Case / Capitalize Each Word untuk Menu & Sub-Menu dengan preservasi akronim pendidikan & teknologi).
+    - [x] Automated Pest test suite (total 54 tests lulus 100%, 242 assertions).
 - [ ] **2.4. User-Centric Menu Access & Role Presets (Pengembangan Lanjutan)**
   - [ ] Registrasi katalog menu terpusat (`config/menu.php`) dengan atribut `key`, `title`, `icon`, `route`, `group`, dan filter tipe sekolah `school_type: ['sma', 'smk']`.
   - [ ] Alokasi menu berbasis pengguna (*User-Centric Access Control*): mengizinkan satu guru memegang berbagai penugasan tanpa batasan role kaku.

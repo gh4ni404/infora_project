@@ -2071,3 +2071,16 @@ body {
     background-color: var(--infora-surface-muted);
 }
 
+/* ==========================================================================
+   Text Transform Input Utilities
+   ========================================================================== */
+input[data-transform="uppercase"],
+.text-uppercase {
+    text-transform: uppercase;
+}
+
+input[data-transform="title-case"],
+.text-capitalize {
+    text-transform: capitalize;
+}
+

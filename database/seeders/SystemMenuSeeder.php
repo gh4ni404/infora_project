@@ -14,9 +14,9 @@ class SystemMenuSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Module: Navigasi Utama
+        // 1. Module: NAVIGASI UTAMA
         $mainModule = Module::firstOrCreate(
-            ['name' => 'Navigasi Utama'],
+            ['name' => 'NAVIGASI UTAMA'],
             [
                 'order' => 0,
                 'is_active' => true,
@@ -36,9 +36,9 @@ class SystemMenuSeeder extends Seeder
             ]
         );
 
-        // 2. Module: Pengaturan Sistem
+        // 2. Module: PENGATURAN SISTEM
         $systemModule = Module::firstOrCreate(
-            ['name' => 'Pengaturan Sistem'],
+            ['name' => 'PENGATURAN SISTEM'],
             [
                 'order' => 1,
                 'is_active' => true,

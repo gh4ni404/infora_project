@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Support\TextFormatter;
 use Database\Factories\SubMenuFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +14,17 @@ class SubMenu extends Model
 {
     /** @use HasFactory<SubMenuFactory> */
     use HasFactory;
+
+    /**
+     * Interact with the sub-menu's name.
+     * Always stored in Capitalize Each Word (Title Case) format with acronym preservation.
+     */
+    protected function name(): Attribute
+    {
+        return Attribute::make(
+            set: fn (?string $value) => TextFormatter::titleCase($value),
+        );
+    }
 
     /**
      * The attributes that are mass assignable.
