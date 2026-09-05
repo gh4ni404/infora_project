@@ -64,18 +64,69 @@
             </div>
 
             <nav class="sidebar-menu" id="sidebarNavMenu">
-                <div class="menu-category-label">Menu Utama</div>
+                @if (isset($sidebarModules) && $sidebarModules->isNotEmpty())
+                    @foreach ($sidebarModules as $module)
+                        @if ($module->menus->isNotEmpty())
+                            <div class="menu-category-label" data-module-id="{{ $module->id }}">{{ $module->name }}</div>
 
-                <!-- Single Menu Item: Dashboard -->
-                <a href="{{ route('dashboard') }}" class="nav-link-item active" title="Dashboard">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <rect width="7" height="9" x="3" y="3" rx="1"></rect>
-                        <rect width="7" height="5" x="14" y="3" rx="1"></rect>
-                        <rect width="7" height="9" x="14" y="12" rx="1"></rect>
-                        <rect width="7" height="5" x="3" y="16" rx="1"></rect>
-                    </svg>
-                    <span>Dashboard</span>
-                </a>
+                            @foreach ($module->menus as $menu)
+                                @php
+                                    $hasSubMenus = $menu->subMenus->isNotEmpty();
+                                    $isMenuActive = false;
+
+                                    if ($hasSubMenus) {
+                                        foreach ($menu->subMenus as $sub) {
+                                            if ($sub->route_name && Route::has($sub->route_name) && request()->routeIs($sub->route_name)) {
+                                                $isMenuActive = true;
+                                                break;
+                                            }
+                                        }
+                                    } else {
+                                        $isMenuActive = $menu->route_name && Route::has($menu->route_name) && request()->routeIs($menu->route_name);
+                                    }
+                                @endphp
+
+                                @if ($hasSubMenus)
+                                    <div class="nav-group-item {{ $isMenuActive ? 'is-open active-parent' : '' }}" data-menu-id="{{ $menu->id }}">
+                                        <button type="button" class="nav-group-trigger {{ $isMenuActive ? 'active' : '' }}" aria-expanded="{{ $isMenuActive ? 'true' : 'false' }}" title="{{ $menu->name }}">
+                                            <x-icon :name="$menu->icon" class="nav-item-icon" />
+                                            <span class="nav-item-title">{{ $menu->name }}</span>
+                                            <svg class="nav-arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <polyline points="6 9 12 15 18 9"></polyline>
+                                            </svg>
+                                        </button>
+                                        <div class="nav-submenu-list">
+                                            @foreach ($menu->subMenus as $subMenu)
+                                                @php
+                                                    $isSubActive = $subMenu->route_name && Route::has($subMenu->route_name) && request()->routeIs($subMenu->route_name);
+                                                    $subHref = ($subMenu->route_name && Route::has($subMenu->route_name)) ? route($subMenu->route_name) : '#';
+                                                @endphp
+                                                <a href="{{ $subHref }}" class="nav-submenu-item {{ $isSubActive ? 'active' : '' }}" title="{{ $subMenu->name }}">
+                                                    <span class="nav-submenu-bullet"></span>
+                                                    <span class="nav-submenu-text">{{ $subMenu->name }}</span>
+                                                </a>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @else
+                                    @php
+                                        $menuHref = ($menu->route_name && Route::has($menu->route_name)) ? route($menu->route_name) : '#';
+                                    @endphp
+                                    <a href="{{ $menuHref }}" class="nav-link-item {{ $isMenuActive ? 'active' : '' }}" title="{{ $menu->name }}">
+                                        <x-icon :name="$menu->icon" class="nav-item-icon" />
+                                        <span>{{ $menu->name }}</span>
+                                    </a>
+                                @endif
+                            @endforeach
+                        @endif
+                    @endforeach
+                @else
+                    <div class="menu-category-label">Menu Utama</div>
+                    <a href="{{ route('dashboard') }}" class="nav-link-item active" title="Dashboard">
+                        <x-icon name="layout-dashboard" class="nav-item-icon" />
+                        <span>Dashboard</span>
+                    </a>
+                @endif
 
                 <div id="menuSearchEmpty" class="empty-state hidden">
                     <svg class="empty-state-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
