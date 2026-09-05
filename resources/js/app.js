@@ -62,5 +62,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnLogin.disabled = true;
             }, 0);
         });
+
+        // Reset button state if user navigates back via bfcache
+        window.addEventListener('pageshow', () => {
+            btnLogin.classList.remove('btn-loading');
+            btnLogin.disabled = false;
+            const spinner = btnLogin.querySelector('.spinner-icon');
+            const btnText = btnLogin.querySelector('.btn-text');
+            if (spinner) {
+                spinner.classList.add('hidden');
+            }
+            if (btnText) {
+                btnText.textContent = 'Masuk ke Dashboard';
+            }
+        });
     }
 });

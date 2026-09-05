@@ -170,7 +170,7 @@ body {
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 .form-error {
@@ -301,8 +301,12 @@ body {
 
 .spinner-icon {
     animation: infora-spin 0.75s linear infinite;
-    display: inline-block;
+    display: none;
     flex-shrink: 0;
+}
+
+.spinner-icon.hidden {
+    display: none !important;
 }
 
 .btn-loading {
@@ -311,6 +315,10 @@ body {
     opacity: 0.85;
     box-shadow: none !important;
     transform: none !important;
+}
+
+.btn-loading .spinner-icon {
+    display: inline-block !important;
 }
 
 /* Badges */
