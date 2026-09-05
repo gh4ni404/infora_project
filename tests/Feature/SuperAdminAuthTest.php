@@ -105,6 +105,7 @@ test('authenticated super admin can access dashboard', function () {
     $response->assertSee('search-box');
     $response->assertSee('id="sidebarToggle"', false);
     $response->assertSee('id="layoutSidebar"', false);
+    $response->assertSee('brand-badge-img');
 });
 
 test('guest cannot access dashboard and is redirected to login', function () {

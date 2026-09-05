@@ -25,11 +25,13 @@
         <!-- Sidebar Navigation -->
         <aside class="layout-sidebar" id="layoutSidebar">
             <div class="sidebar-header">
-                <h1 class="brand-title">
-                    <span class="brand-text-full">INFORA</span>
-                    <span class="brand-text-compact">IN</span>
-                </h1>
-                <div class="brand-subtitle">Platform Governance Core</div>
+                <a href="{{ route('dashboard') }}" class="sidebar-brand-link" title="INFORA - Platform Governance Core">
+                    <img src="{{ asset('images/infora-emblem-badge.png') }}" alt="INFORA Logo" class="brand-badge-img">
+                    <div class="sidebar-brand-text">
+                        <h1 class="brand-title">INFORA</h1>
+                        <div class="brand-subtitle">Platform Governance Core</div>
+                    </div>
+                </a>
             </div>
 
             <div class="sidebar-search">
