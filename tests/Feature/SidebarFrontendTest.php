@@ -189,14 +189,16 @@ test('menu create views render visual icon picker with free Lucide catalog', fun
     $responseMenu->assertSee('registered_routes_list', false);
 });
 
-test('sidebar renders user profile and logout button in the sidebar footer', function () {
+test('sidebar renders user profile trigger and dropup menu with profile settings, change password, help, and logout', function () {
     $response = $this->actingAs($this->user)->get(route('dashboard'));
 
     $response->assertOk();
     $response->assertSee('sidebar-footer', false);
-    $response->assertSee('sidebar-user-card', false);
-    $response->assertSee('user-avatar-circle', false);
-    $response->assertSee('sidebar-logout-icon-btn', false);
+    $response->assertSee('userProfileTrigger', false);
+    $response->assertSee('userDropupMenu', false);
+    $response->assertSee('Pengaturan Profile');
+    $response->assertSee('Ubah Password');
+    $response->assertSee('Bantuan');
     $response->assertSee(route('logout'), false);
     $response->assertDontSee('topbar-user-section', false);
 });

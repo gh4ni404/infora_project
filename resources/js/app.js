@@ -266,4 +266,68 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('infora_sidebar_collapsed', nowCollapsed ? 'true' : 'false');
         });
     }
+
+    // Sidebar User Profile Dropup Menu
+    const userProfileTrigger = document.getElementById('userProfileTrigger');
+    const userDropupMenu = document.getElementById('userDropupMenu');
+
+    if (userProfileTrigger && userDropupMenu) {
+        const toggleUserMenu = (forceState) => {
+            const shouldOpen = typeof forceState === 'boolean' 
+                ? forceState 
+                : userDropupMenu.classList.contains('hidden');
+            
+            userDropupMenu.classList.toggle('hidden', !shouldOpen);
+            userProfileTrigger.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+            userProfileTrigger.classList.toggle('active', shouldOpen);
+        };
+
+        userProfileTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleUserMenu();
+        });
+
+        // Close on click outside
+        document.addEventListener('click', (e) => {
+            if (!userDropupMenu.contains(e.target) && !userProfileTrigger.contains(e.target)) {
+                toggleUserMenu(false);
+            }
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !userDropupMenu.classList.contains('hidden')) {
+                toggleUserMenu(false);
+                userProfileTrigger.focus();
+            }
+        });
+    }
 });
+
+// Lightweight global toast feedback notification
+window.showToast = function (message) {
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-pill';
+    toast.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        <span>${message}</span>
+    `;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => toast.remove(), 250);
+    }, 3000);
+};

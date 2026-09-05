@@ -124,26 +124,70 @@
                 </div>
             </nav>
 
-            <div class="sidebar-footer">
-                <div class="sidebar-user-card">
-                    <div class="user-avatar-circle" title="{{ auth()->user()->name }} (@{{ auth()->user()->username ?? 'superadmin' }})">
-                        {{ strtoupper(substr(auth()->user()->name ?? 'SA', 0, 2)) }}
+            <div class="sidebar-footer" id="sidebarFooter">
+                <!-- User Dropup Popover -->
+                <div id="userDropupMenu" class="user-dropup-menu hidden" role="menu" aria-orientation="vertical" aria-labelledby="userProfileTrigger">
+                    <div class="user-dropup-header">
+                        <div class="user-avatar-circle user-avatar-sm">
+                            {{ strtoupper(substr(auth()->user()->name ?? 'SA', 0, 2)) }}
+                        </div>
+                        <div class="user-dropup-meta">
+                            <div class="user-dropup-name">{{ auth()->user()->name }}</div>
+                            <div class="user-dropup-role">Super Administrator</div>
+                        </div>
                     </div>
-                    <div class="user-meta-info">
-                        <span class="user-name-text" title="{{ auth()->user()->name }}">{{ auth()->user()->name }}</span>
-                        <span class="brand-subtitle">@<span>{{ auth()->user()->username ?? 'superadmin' }}</span></span>
+                    <div class="user-dropup-divider"></div>
+                    <div class="user-dropup-items">
+                        <a href="#pengaturan-profile" class="user-dropup-item" role="menuitem" onclick="event.preventDefault(); window.showToast ? window.showToast('Fitur Pengaturan Profile segera hadir.') : null;">
+                            <svg class="dropup-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            <span>Pengaturan Profile</span>
+                        </a>
+                        <a href="#ubah-password" class="user-dropup-item" role="menuitem" onclick="event.preventDefault(); window.showToast ? window.showToast('Fitur Ubah Password segera hadir.') : null;">
+                            <svg class="dropup-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            <span>Ubah Password</span>
+                        </a>
+                        <a href="#bantuan" class="user-dropup-item" role="menuitem" onclick="event.preventDefault(); window.showToast ? window.showToast('Pusat Bantuan INFORA segera hadir.') : null;">
+                            <svg class="dropup-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                            <span>Bantuan</span>
+                        </a>
                     </div>
-                    <form method="POST" action="{{ route('logout') }}" class="sidebar-logout-form">
+                    <div class="user-dropup-divider"></div>
+                    <form method="POST" action="{{ route('logout') }}" class="user-dropup-logout-form">
                         @csrf
-                        <button type="submit" class="sidebar-logout-icon-btn" title="Keluar dari Sistem" aria-label="Keluar dari Sistem">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <button type="submit" class="user-dropup-item user-dropup-item-danger" role="menuitem">
+                            <svg class="dropup-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                                 <polyline points="16 17 21 12 16 7"></polyline>
                                 <line x1="21" x2="9" y1="12" y2="12"></line>
                             </svg>
+                            <span>Keluar</span>
                         </button>
                     </form>
                 </div>
+
+                <!-- User Section Button Trigger -->
+                <button type="button" class="sidebar-user-trigger" id="userProfileTrigger" aria-haspopup="true" aria-expanded="false" title="Menu Pengguna">
+                    <div class="user-avatar-circle">
+                        {{ strtoupper(substr(auth()->user()->name ?? 'SA', 0, 2)) }}
+                    </div>
+                    <div class="user-meta-info">
+                        <span class="user-name-text">{{ auth()->user()->name }}</span>
+                        <span class="brand-subtitle">@<span>{{ auth()->user()->username ?? 'superadmin' }}</span></span>
+                    </div>
+                    <svg class="user-trigger-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m18 15-6-6-6 6"></path>
+                    </svg>
+                </button>
             </div>
         </aside>
 
