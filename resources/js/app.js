@@ -265,6 +265,40 @@ document.addEventListener('DOMContentLoaded', () => {
             sidebarToggleBtn.classList.toggle('active', nowCollapsed);
             localStorage.setItem('infora_sidebar_collapsed', nowCollapsed ? 'true' : 'false');
         });
+
+        // Click search box when sidebar is collapsed to auto-expand & focus input
+        const sidebarSearchBox = document.getElementById('sidebarSearchBox');
+        if (sidebarSearchBox) {
+            sidebarSearchBox.addEventListener('click', () => {
+                if (layoutSidebar.classList.contains('is-collapsed')) {
+                    layoutSidebar.classList.remove('is-collapsed');
+                    sidebarToggleBtn.classList.remove('active');
+                    localStorage.setItem('infora_sidebar_collapsed', 'false');
+                    setTimeout(() => {
+                        if (menuSearchInput) {
+                            menuSearchInput.focus();
+                        }
+                    }, 180);
+                }
+            });
+        }
+
+        // Global shortcut (Ctrl+K or /) to focus search
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey && e.key === 'k') || (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName))) {
+                if (menuSearchInput) {
+                    e.preventDefault();
+                    if (layoutSidebar.classList.contains('is-collapsed')) {
+                        layoutSidebar.classList.remove('is-collapsed');
+                        sidebarToggleBtn.classList.remove('active');
+                        localStorage.setItem('infora_sidebar_collapsed', 'false');
+                    }
+                    setTimeout(() => {
+                        menuSearchInput.focus();
+                    }, 180);
+                }
+            }
+        });
     }
 
     // Sidebar User Profile Dropup Menu

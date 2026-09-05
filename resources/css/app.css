@@ -494,14 +494,6 @@ body {
     white-space: nowrap;
 }
 
-.layout-sidebar.is-collapsed .sidebar-search {
-    display: none;
-}
-
-.layout-sidebar.is-collapsed .menu-category-label {
-    display: none;
-}
-
 /* Search Component (Reusable for Sidebar, Topbar, Table Filters) */
 .search-box {
     position: relative;
@@ -591,14 +583,44 @@ body {
 /* Sidebar Section Helper */
 .sidebar-search {
     padding: 0.875rem 16px 0.25rem;
-    transition: opacity 0.2s ease, padding 0.25s ease;
+    transition: padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .layout-sidebar.is-collapsed .sidebar-search {
-    opacity: 0;
-    pointer-events: none;
-    padding-left: 0;
-    padding-right: 0;
+    padding: 0.875rem 16px 0.25rem;
+}
+
+.layout-sidebar.is-collapsed .sidebar-search .search-box {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    justify-content: center;
+    cursor: pointer;
+    border-color: transparent;
+    background-color: transparent;
+    border-radius: 0.5rem;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.layout-sidebar.is-collapsed .sidebar-search .search-box:hover {
+    background-color: var(--infora-surface-muted);
+    border-color: var(--infora-border);
+}
+
+.layout-sidebar.is-collapsed .sidebar-search .search-box:hover .search-icon {
+    color: var(--infora-brand-primary);
+    transform: scale(1.1);
+}
+
+.layout-sidebar.is-collapsed .sidebar-search .search-icon {
+    margin-right: 0;
+    width: 18px;
+    height: 18px;
+}
+
+.layout-sidebar.is-collapsed .sidebar-search .search-input,
+.layout-sidebar.is-collapsed .sidebar-search .search-clear {
+    display: none;
 }
 
 .sidebar-menu {
@@ -630,6 +652,10 @@ body {
     margin-top: 0.875rem;
     border-top: 1px solid var(--infora-border);
     white-space: nowrap;
+    overflow: hidden;
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1), margin 0.25s cubic-bezier(0.4, 0, 0.2, 1), padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    max-height: 40px;
+    opacity: 1;
 }
 
 .menu-category-label:first-child,
@@ -639,10 +665,33 @@ body {
     padding-top: 0.25rem;
 }
 
+.layout-sidebar.is-collapsed .menu-category-label {
+    max-height: 1px;
+    padding: 0;
+    margin-top: 0.5rem;
+    margin-bottom: 0.375rem;
+    border-top: 1px solid var(--infora-border);
+    opacity: 0.8;
+    color: transparent;
+    pointer-events: none;
+}
+
+.layout-sidebar.is-collapsed .menu-category-label:first-child,
+.layout-sidebar.is-collapsed .sidebar-menu > .menu-category-label:first-of-type {
+    max-height: 0;
+    margin: 0;
+    border-top: none;
+    opacity: 0;
+}
+
 .nav-link-item {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: 0.75rem;
+    width: 100%;
+    height: 40px;
+    box-sizing: border-box;
     padding: 0.625rem 10px;
     border-radius: 0.5rem;
     color: var(--infora-text-muted);
@@ -651,17 +700,24 @@ body {
     font-weight: 500;
     transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
     white-space: nowrap;
+    overflow: hidden;
     border: 1px solid transparent;
 }
 
 .nav-link-item svg,
 .nav-group-trigger svg.nav-item-icon {
+    width: 20px;
+    height: 20px;
     flex-shrink: 0;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.15s ease;
 }
 
 .nav-link-item span {
-    transition: opacity 0.2s ease;
+    flex: 1;
+    min-width: 0;
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     opacity: 1;
+    transform: translateX(0);
 }
 
 .nav-link-item:hover {
@@ -685,7 +741,11 @@ body {
 .nav-group-trigger {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: 0.75rem;
+    width: 100%;
+    height: 40px;
+    box-sizing: border-box;
     padding: 0.625rem 10px;
     border-radius: 0.5rem;
     color: var(--infora-text-muted);
@@ -695,10 +755,10 @@ body {
     font-weight: 500;
     font-family: inherit;
     cursor: pointer;
-    width: 100%;
     text-align: left;
     transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
     white-space: nowrap;
+    overflow: hidden;
 }
 
 .nav-group-trigger:hover {
@@ -716,8 +776,10 @@ body {
 
 .nav-group-trigger .nav-item-title {
     flex: 1;
-    transition: opacity 0.2s ease;
+    min-width: 0;
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     opacity: 1;
+    transform: translateX(0);
 }
 
 .nav-count-badge {
@@ -729,8 +791,10 @@ body {
     color: var(--infora-text-dim);
     margin-left: auto;
     margin-right: 0.375rem;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition: background-color 0.15s ease, color 0.15s ease, opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     flex-shrink: 0;
+    opacity: 1;
+    transform: translateX(0);
 }
 
 .nav-group-item.active-parent .nav-count-badge,
@@ -742,7 +806,8 @@ body {
 .nav-arrow-icon {
     flex-shrink: 0;
     color: var(--infora-text-dim);
-    transition: transform 0.2s ease, color 0.15s ease;
+    transition: transform 0.2s ease, color 0.15s ease, opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 1;
 }
 
 .nav-group-item.active-parent > .nav-group-trigger .nav-arrow-icon {
@@ -803,26 +868,33 @@ body {
     border-left-color: var(--infora-brand-primary);
 }
 
-/* Collapsed Sidebar Navigation */
+/* Collapsed Sidebar Navigation - Anchored 26px Fixed Slot & Smooth Fade */
 .layout-sidebar.is-collapsed .nav-link-item,
 .layout-sidebar.is-collapsed .nav-group-trigger {
-    width: 40px;
+    width: 100%;
     height: 40px;
-    padding: 0;
+    padding: 0.625rem 10px;
     box-sizing: border-box;
-    justify-content: center;
-    gap: 0;
+    justify-content: flex-start;
+    gap: 0.75rem;
 }
 
 .layout-sidebar.is-collapsed .nav-link-item span,
 .layout-sidebar.is-collapsed .nav-group-trigger .nav-item-title,
 .layout-sidebar.is-collapsed .nav-group-trigger .nav-arrow-icon,
 .layout-sidebar.is-collapsed .nav-count-badge {
-    display: none;
+    opacity: 0;
+    transform: translateX(-10px);
+    pointer-events: none;
 }
 
 .layout-sidebar.is-collapsed .nav-submenu-list {
-    display: none;
+    max-height: 0 !important;
+    opacity: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    pointer-events: none;
+    overflow: hidden;
 }
 
 /* ==========================================================================

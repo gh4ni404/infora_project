@@ -9,6 +9,10 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 ## [Unreleased]
 
 ### Added
+- **Ikon Pencarian Interaktif pada Sidebar Ciut & Shortcut Keyboard (`Ctrl+K`):**
+  - Mengubah kotak pencarian (`.sidebar-search .search-box`) menjadi tombol ikon 40px x 40px interaktif saat sidebar dalam keadaan ciut (72px), mengisi ruang kosong di atas menu Dashboard dengan fungsi yang produktif dan estetik.
+  - Mengklik tombol pencarian pada mode ciut akan langsung membuka sidebar secara otomatis dan memfokuskan kursor ke input pencarian (`#sidebarMenuSearch`).
+  - Dukungan shortcut keyboard global `Ctrl+K` atau `/` (saat tidak sedang mengetik di input/textarea) untuk membuka sidebar dan memfokuskan pencarian menu dari mana saja di dalam aplikasi.
 - **Seksi Profil Pengguna & Dropup Popover Interaktif di Sidebar Footer:**
   - Memindahkan informasi profil pengguna dan aksi keluar dari topbar ke bagian bawah sidebar (*sidebar footer*), menghadirkan topbar yang bersih, fokus, dan lapang.
   - Kartu pengguna interaktif (`#userProfileTrigger`) yang memicu popover menu melayang ke atas (*dropup*) saat diklik, dilengkapi indikator panah *chevron* yang berputar 180° saat terbuka.
@@ -17,6 +21,12 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
   - Responsif pada sidebar ciut: Saat sidebar diciutkan (72px), menu otomatis melayang ke arah samping kanan (`left: 76px; bottom: 8px; width: 230px`) sehingga seluruh navigasi tetap dapat dijangkau dengan mudah.
 
 ### Changed & Refactored
+- **Penyempurnaan Animasi Menu Ikon & Penjangkaran 26px (*Buttery Smooth Anchored Transition*):**
+  - Mengeliminasi efek hentakan visual (*abrupt jump*) pada ikon-ikon navigasi menu saat sidebar diciutkan atau dibuka.
+  - Menjaga koordinat horizontal ikon terkunci stabil pada margin 26px dari tepi kiri (`16px padding container + 10px padding tombol = 26px`), baik saat terbuka (260px) maupun ciut (72px) tanpa mengubah padding menjadi 0 atau memaksakan `justify-content: center`.
+  - Menggantikan `display: none` pada teks menu, badge jumlah, dan panah accordion dengan transisi kurva halus `opacity: 0.2s` dan `transform: translateX(-10px)`.
+  - Penutupan halus accordion submenu yang sedang terbuka (`max-height: 0; opacity: 0; padding: 0`) saat sidebar diciutkan.
+  - Transformasi halus pemisah modul (`.menu-category-label`) menjadi garis pembatas tipis 1px yang rapi di mode ciut.
 - **Standarisasi Sistem Class Global Universal Dropdown (`resources/css/app.css`):**
   - Merefaktor seluruh penamaan class ad-hoc (seperti `.user-dropup-*`) ke sistem komponen dropdown modular universal: `.dropdown`, `.dropdown.dropdown-full`, `.dropdown-menu`, `.dropdown-menu-up`, `.dropdown-menu-end`, `.dropdown-menu-full`, `.dropdown-header`, `.dropdown-divider`, `.dropdown-list`, `.dropdown-item`, dan `.dropdown-item.is-danger`.
   - Mengimplementasikan komponen kartu profil universal `.user-card-button` dan standarisasi avatar global `.user-avatar-circle` (38px) serta varian `.user-avatar-circle.avatar-sm` (28px).

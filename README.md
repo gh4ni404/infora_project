@@ -81,9 +81,10 @@ Dibangun dengan arsitektur **API-First & System Bridging**, **Pengembangan Berba
 - **Seksi Pengguna & Dropup Popover di Sidebar Footer:** Profil akun pengguna dan aksi logout ditempatkan di bagian bawah sidebar (`.sidebar-footer`) menggunakan kartu interaktif (`.user-card-button`) yang memunculkan popover menu melayang ke atas (*dropup*) berisi Pengaturan Profile, Ubah Password, Bantuan, dan Keluar.
 - **Interaktivitas Sidebar Modern & Anchored Transition:**
   - View Composer `SidebarComposer` dengan *eager loading* dan *safeguard* tabel.
-  - Dropdown accordion sub-menu dengan rotasi ikon panah 180°.
-  - Penataan penjangkaran simetris (*Anchored Symmetrical Transition*): Posisi avatar dan ikon terkunci presisi pada margin kiri **17px** (0px horizontal jump) baik saat terbuka (260px) maupun ciut (72px), menghilangkan efek *auto-centering* yang mengganggu saat animasi berjalan.
-  - Pencarian menu real-time multi-level (modul, menu, sub-menu) dengan auto-expand parent group.
+  - Dropdown accordion sub-menu dengan rotasi ikon panah 180° dan penutupan mulus saat ciut.
+  - Penataan penjangkaran simetris (*Anchored Symmetrical Transition*): Posisi avatar (17px margin) dan seluruh ikon menu (26px margin) terkunci presisi tanpa pergeseran horizontal (0px horizontal jump) baik saat terbuka (260px) maupun ciut (72px), menghilangkan efek *auto-centering* atau lompatan visual saat animasi berjalan.
+  - Tombol Pencarian pada Mode Ciut: Kotak pencarian otomatis bertransformasi menjadi tombol ikon 40px yang elegan di atas Dashboard saat sidebar diciutkan; mengkliknya akan langsung membuka sidebar dan memfokuskan input pencarian.
+  - Pencarian menu real-time multi-level (modul, menu, sub-menu) dengan auto-expand parent group dan shortcut global `Ctrl+K`.
 
 ### 🛡️ 10. Prinsip Reduksi Batasan Unik (Zero 'unique' Constraints on Entity Text Attributes)
 - **Rasionalisasi:** Penggunaan constraint `unique` pada kolom teks (seperti nama modul, nama menu, slug, atau route) dihindari dalam skema database maupun layer validasi Form Request. Pendekatan ini dipilih untuk mencegah kerumitan implementasi dan berbagai *edge cases* validasi CRUD (misalnya: konflik saat pembaruan data tanpa mengubah nama, isu duplikasi nama pada modul yang berbeda, atau rute bersyarat).
