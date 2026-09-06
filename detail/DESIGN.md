@@ -105,11 +105,13 @@ Pengguna dapat masuk menggunakan pengenal yang familiar tanpa terbebani keharusa
 - **Guru:** Login via **NIP / NUPTK** atau Email Resmi.
 - **Admin & Super Admin:** Login via **Username** atau Email.
 
-### 4.4. User-Centric Menu Access & De-Duplication System
-Untuk mengakomodasi realitas guru di sekolah yang sering merangkap banyak jabatan (misal: Guru Mapel + Wali Kelas + Pembimbing PKL + Tim Akreditasi):
-- **Akses Berbasis Pengguna (Granular Access):** Menu akses dialokasikan langsung ke akun user, bukan terikat kaku pada satu role tunggal.
-- **De-Duplication Otomatis:** Seluruh menu yang diizinkan untuk user dikompilasi dan disaring secara unik (`unique('key')`). Menu dijamin **100% tunggal, rapi, dan bebas duplikasi**, berapapun banyaknya tugas tambahan yang diemban.
-- **Role Presets:** Role berfungsi sebagai template/preset awal bagi Admin saat membuat akun baru untuk mempercepat pemilihan hak akses.
+### 4.4. User-Centric Menu Access & Dynamic Role Templates
+Untuk mengakomodasi realitas sivitas sekolah di mana guru dan siswa sering memiliki sub-peran majemuk (contoh guru: Guru Pengajar, Wali Kelas, Pembimbing PKL, Wakasek Kurikulum/Kesiswaan, Guru Piket; contoh siswa: Siswa Reguler Kelas 10-11 vs Siswa PKL SMK Kelas 12):
+- **Otorisasi Berbasis Pengguna (Granular User-Level Access):** Menu akses dikonfigurasi per akun user pada tabel `user_menu_permissions` dengan 4 hak aksi granular: **Lihat** (`can_view`), **Tambah** (`can_create`), **Ubah** (`can_edit`), dan **Hapus** (`can_delete`).
+- **Template Peran Dinamis (Configurable Role Templates):** Disimpan pada tabel `menu_access_templates`, memungkinkan Super Admin menentukan dan mengubah menu bawaan untuk setiap sub-peran kapan saja melalui antarmuka khusus tanpa hardcoded rules.
+- **Penerapan Template 1-Klik (Preset Application):** Super Admin dapat menyalin hak akses template peran ke pengguna secara instan saat mengelola akun, lalu menyesuaikan izin khusus perorangan sesuai kebutuhan.
+- **Filtering Sidebar Cerdas (`SidebarComposer`):** Sidebar secara otomatis memfilter menu dan sub-menu yang diizinkan untuk pengguna non-super admin secara in-memory (bebas N+1 queries). Akun `super_admin` memiliki *root bypass* permanen untuk mengakses seluruh fitur.
+- **Rute Resmi Pengelolaan:** Dikelola pada rute `/sistem/menu-akses` (`sistem.menu-akses`) di bawah modul Pengaturan Sistem.
 
 ---
 

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\System\MenuAccessController;
 use App\Http\Controllers\System\MenuController;
 use App\Http\Controllers\System\ModuleController;
 use App\Http\Controllers\System\SubMenuController;
@@ -27,5 +28,15 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
         Route::resource('modules', ModuleController::class)->except(['show']);
         Route::resource('menus', MenuController::class)->except(['show']);
         Route::resource('sub-menus', SubMenuController::class)->except(['show']);
+    });
+
+    // Tata Kelola Menu Akses & Template Peran
+    Route::prefix('sistem')->name('sistem.')->group(function () {
+        Route::get('/menu-akses', [MenuAccessController::class, 'index'])->name('menu-akses');
+        Route::get('/menu-akses/user/{user}', [MenuAccessController::class, 'editUser'])->name('menu-akses.user');
+        Route::put('/menu-akses/user/{user}', [MenuAccessController::class, 'updateUser'])->name('menu-akses.user.update');
+        Route::post('/menu-akses/user/{user}/apply-template', [MenuAccessController::class, 'applyTemplateToUser'])->name('menu-akses.user.apply-template');
+        Route::get('/menu-akses/template/{roleKey}', [MenuAccessController::class, 'editTemplate'])->name('menu-akses.template');
+        Route::put('/menu-akses/template/{roleKey}', [MenuAccessController::class, 'updateTemplate'])->name('menu-akses.template.update');
     });
 });

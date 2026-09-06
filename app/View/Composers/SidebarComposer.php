@@ -37,6 +37,32 @@ class SidebarComposer
             ])
             ->get();
 
+        $user = auth()->user();
+
+        if ($user && ! $user->isSuperAdmin()) {
+            $user->loadMissing('menuPermissions');
+            $allowedMenuIds = $user->menuPermissions->where('can_view', true)->pluck('menu_id')->filter()->flip()->all();
+            $allowedSubMenuIds = $user->menuPermissions->where('can_view', true)->pluck('sub_menu_id')->filter()->flip()->all();
+
+            $sidebarModules = $sidebarModules->filter(function (Module $module) use ($allowedMenuIds, $allowedSubMenuIds) {
+                $filteredMenus = $module->menus->filter(function ($menu) use ($allowedMenuIds, $allowedSubMenuIds) {
+                    if ($menu->subMenus->isNotEmpty()) {
+                        $menu->setRelation('subMenus', $menu->subMenus->filter(
+                            fn ($sub) => isset($allowedSubMenuIds[$sub->id])
+                        ));
+
+                        return $menu->subMenus->isNotEmpty() || isset($allowedMenuIds[$menu->id]);
+                    }
+
+                    return isset($allowedMenuIds[$menu->id]);
+                });
+
+                $module->setRelation('menus', $filteredMenus);
+
+                return $module->menus->isNotEmpty();
+            });
+        }
+
         $view->with('sidebarModules', $sidebarModules);
     }
 }

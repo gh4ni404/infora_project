@@ -84,11 +84,15 @@
       - [x] Controller `UnderDevelopmentController` & View `resources/views/system/under-development.blade.php` dengan breadcrumb hierarki, kartu status, dan developer scaffolding blueprint (`php artisan make:controller ...`).
       - [x] Preservasi state aktif sidebar (accordion induk tetap terbuka dan item disorot aktif saat berada di halaman placeholder).
     - [x] Automated Pest test suite (total 59 tests lulus 100%, 261 assertions).
-- [ ] **2.4. User-Centric Menu Access & Role Presets (Pengembangan Lanjutan)**
-  - [ ] Registrasi katalog menu terpusat (`config/menu.php`) dengan atribut `key`, `title`, `icon`, `route`, `group`, dan filter tipe sekolah `school_type: ['sma', 'smk']`.
-  - [ ] Alokasi menu berbasis pengguna (*User-Centric Access Control*): mengizinkan satu guru memegang berbagai penugasan tanpa batasan role kaku.
-  - [ ] Mekanisme *De-Duplication* otomatis (`unique('key')`) agar menu di sidebar/mobile drawer tidak pernah muncul ganda.
-  - [ ] Fitur *Role Presets* (Template menu awal untuk mempercepat admin TU saat membuat akun guru/staf baru).
+- [x] **2.4. Tata Kelola Menu Akses & Dynamic Role Templates (User-Centric Granular Permissions)**
+  - [x] Skema database: tabel `user_menu_permissions` & `menu_access_templates` tanpa constraint `unique` pada teks.
+  - [x] Model Eloquent `UserMenuPermission`, `MenuAccessTemplate`, serta relasi dan helper otorisasi di `User.php` (`hasMenuAccess()`, `hasSubMenuAccess()`).
+  - [x] Seeder awal `MenuAccessTemplateSeeder` untuk preset beragam peran guru (Pengajar, Wali Kelas, Wakasek) dan siswa (Reguler, PKL).
+  - [x] Form Requests & Controller: `MenuAccessController`, `UpdateUserPermissionsRequest`, `UpdateTemplatePermissionsRequest`.
+  - [x] Antarmuka manajemen lengkap di `resources/views/system/menu-access/` (Tab Hak Akses per Pengguna, Tab Template Peran Sistem, Form Matriks Izin User, Form Matriks Template Peran).
+  - [x] Fitur 1-Klik Salin Template Peran ke Akun Pengguna (*Apply Preset*).
+  - [x] Integrasi filtering dinamis pada `SidebarComposer` (non-super admin hanya melihat menu yang diizinkan, super admin root bypass).
+  - [x] Automated Pest test suite `MenuAccessTest.php` (total 67 tests lulus 100%, 299 assertions).
 
 ---
 

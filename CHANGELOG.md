@@ -9,6 +9,13 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 ## [Unreleased]
 
 ### Added
+- **Sistem Tata Kelola Menu Akses & Dynamic Role Templates (User-Centric Granular Permissions):**
+  - Mengimplementasikan otorisasi navigasi berbasis pengguna pada rute `/sistem/menu-akses` (`sistem.menu-akses`) lengkap dengan 4 hak aksi granular: Lihat (`can_view`), Tambah (`can_create`), Ubah (`can_edit`), dan Hapus (`can_delete`).
+  - Sistem template peran dinamis (`menu_access_templates`) yang dapat dikonfigurasi penuh oleh Super Admin untuk beragam peran (Guru Pengajar, Wali Kelas, Wakasek Kurikulum, Wakasek Kesiswaan, Staf TU, Siswa Reguler, Siswa PKL) melalui antarmuka khusus.
+  - Fitur 1-Klik Salin Template Peran (*Apply Preset*) saat mengelola izin pengguna untuk pengisian hak akses instan dalam 1 detik.
+  - Antarmuka manajemen lengkap di `resources/views/system/menu-access/` dengan kepatuhan arsitektur 100% bebas *inline style* dan bebas tag `<style>`.
+  - Integrasi filtering dinamis pada `SidebarComposer` dengan proteksi *root bypass* permanen untuk Super Admin.
+  - Test suite terintegrasi Pest `MenuAccessTest.php` (total 67 tests aplikasi lulus 100%, 299 assertions).
 - **Halaman Placeholder "Fitur Dalam Pengembangan" & Dynamic Fallback (Zero Dead Links):**
   - Mengeliminasi tautan mati (`href="#"`) di sidebar: Setiap menu atau sub-menu yang dibuat oleh Super Admin namun belum memiliki rute implementasi aktif di `routes/web.php` secara otomatis mengarah ke halaman pratinjau `/system/under-development?type={menu|submenu}&id={id}`.
   - Implementasi `UnderDevelopmentController` yang mengekstrak informasi hierarki entitas navigasi (Modul, Menu, Sub-Menu) dan menghasilkan saran cetak biru (*blueprint*) pengembang berupa snippet rute Laravel dan perintah CLI `php artisan make:controller ...`.

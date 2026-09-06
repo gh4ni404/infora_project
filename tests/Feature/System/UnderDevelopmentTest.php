@@ -31,8 +31,8 @@ test('super admin can access under-development page for a submenu without regist
     ]);
     $subMenu = SubMenu::create([
         'menu_id' => $menu->id,
-        'name' => 'Menu Akses',
-        'route_name' => 'sistem.menu-akses',
+        'name' => 'Data Siswa Baru',
+        'route_name' => 'unregistered.dummy.submenu',
         'order' => 3,
         'is_active' => true,
     ]);
@@ -43,11 +43,11 @@ test('super admin can access under-development page for a submenu without regist
     $response = $this->actingAs($this->user)->get($subMenu->route_url);
 
     $response->assertOk();
-    $response->assertSee('Menu Akses');
+    $response->assertSee('Data Siswa Baru');
     $response->assertSee('PENGATURAN SISTEM');
     $response->assertSee('Sistem');
     $response->assertSee('Status Fitur: Dalam Tahap Pengembangan');
-    $response->assertSee('sistem.menu-akses');
+    $response->assertSee('unregistered.dummy.submenu');
     $response->assertSee('php artisan make:controller');
 });
 
@@ -90,8 +90,8 @@ test('isRouteActive returns true on under-development page for the corresponding
     ]);
     $subMenu = SubMenu::create([
         'menu_id' => $menu->id,
-        'name' => 'Menu Akses',
-        'route_name' => 'sistem.menu-akses',
+        'name' => 'Laporan Khusus',
+        'route_name' => 'unregistered.laporan.khusus',
         'order' => 1,
         'is_active' => true,
     ]);
