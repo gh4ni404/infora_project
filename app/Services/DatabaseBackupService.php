@@ -535,10 +535,10 @@ class DatabaseBackupService
 
         // 2. Create symlink via Artisan or fallback to native symlink
         try {
-            Artisan::call('storage:link');
+            Artisan::call('storage:link', ['--relative' => true]);
         } catch (\Throwable) {
             if (! file_exists($link)) {
-                @symlink($target, $link);
+                @symlink('../storage/app/public', $link);
             }
         }
 

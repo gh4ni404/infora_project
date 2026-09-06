@@ -51,6 +51,10 @@
 9. **Penjangkaran Simetris Animasi Sidebar (*Anchored Symmetrical Transition*):** Posisi avatar pengguna (17px margin) dan seluruh ikon menu (26px margin) dikunci secara permanen baik saat sidebar terbuka (260px) maupun ciut (72px). Menghindari penggunaan `justify-content: center` saat ciut untuk mencegah pergeseran horizontal (*0px horizontal jump*), serta menerapkan transisi kurva halus `opacity: 0.2s cubic-bezier(0.4, 0, 0.2, 1)` dan `transform: translateX(-10px)` pada teks judul menu, badge, dan panah accordion.
 10. **Tombol Pencarian Interaktif Mode Ciut & Shortcut Global (`Ctrl+K`):** Pada mode sidebar ciut (72px), kotak pencarian otomatis bertransformasi menjadi tombol ikon 40px x 40px yang bersih dan responsif di atas menu Dashboard. Mengklik tombol ini otomatis memperluas sidebar ke 260px dan memfokuskan input pencarian. Didukung shortcut global `Ctrl+K` atau `/`.
 11. **Universal Smooth Progressive Loading Screen (`window.InforaProgress` & `<x-progress-modal />`):** Sistem indikator loading global terpadu yang dapat dipanggil oleh seluruh modul platform. Desain minimalis tanpa elemen kaku dengan kartu melayang ber-backdrop blur, ambient status orb berdenyut lembut, judul & teks aktivitas ringkas dinamis, serta bar progres ramping (9px) dengan sapuan gradien bercahaya (*ambient gradient shimmer*) yang bergerak sangat halus (*buttery smooth*).
+12. **Arsitektur Dialog Modal Flexbox & Spacing Standard:**
+    - Seluruh dialog modal menggunakan struktur flex column `.modal-dialog form { display: flex; flex-direction: column; flex: 1; min-height: 0; }` dengan `.modal-header` dan `.modal-footer` terproteksi `flex-shrink: 0`, menjamin tombol aksi tidak pernah terpotong (*zero-clipping sticky footers*) pada ketinggian layar apa pun.
+    - Area `.modal-body` memanfaatkan *dynamic vertical scroll* dengan *custom slim scrollbar* (6px) dan normalisasi margin input (`.modal-body .form-group { margin-bottom: 0; }`) untuk mencegah penumpukan jarak ganda.
+    - Pembatas seksi form `.form-section-divider` menggunakan warna border standar sistem desain (`border-top: 1px solid var(--infora-border)`), dipadukan dengan label seksi edukasi `.form-section-label` berformat badge khas INFORA dengan indikator titik biru.
 
 ### 2.5. Sistem Ikonografi & Navigasi Hirarki (Iconography & Route Resolution)
 1. **100% Free & Open-Source Lucide Icons:** Menggunakan keluarga ikon Lucide Icons resmi (lisensi open source ISC) berbasis SVG murni yang di-render native via komponen `<x-icon>`. Bebas biaya lisensi dan tanpa ketergantungan font eksternal.
@@ -118,6 +122,11 @@ Untuk mengakomodasi realitas sivitas sekolah di mana guru dan siswa sering memil
 
 ## 5. 🧩 Modul Fungsional Platform
 
+### 5.0. Modul Master Data Administrasi (Registri Sekolah & Multi-Unit)
+- **Registri Sekolah Multi-Record (`schools`):** Manajemen daftar sekolah SMA & SMK (Negeri/Swasta) dengan data identitas resmi, akreditasi, alamat, kontak, pimpinan, dan yayasan.
+- **Kesiapan Bridging API Dapodik:** Kolom `npsn` di-index secara optimal sebagai *secondary natural key* untuk sinkronisasi data nasional tanpa mengorbankan fleksibilitas operasional (non-unique pada level DBMS).
+- **Pipeline Logo Sekolah Base64 (Maks. 1MB):** Pengunggahan logo format Base64 terintegrasi langsung di form modal create dan halaman edit, dengan penamaan berkas collision-proof di `storage/app/public/logos`.
+
 ### 5.1. Modul 1: Manajemen Akademik & Kesiswaan (SMA & SMK)
 - Manajemen Tahun Ajaran, Semester, Rombel/Kelas, dan Mata Pelajaran.
 - Pembagian Konsentrasi Keahlian (SMK) dan Peminatan/Fase (SMA).
@@ -145,6 +154,7 @@ Untuk mengakomodasi realitas sivitas sekolah di mana guru dan siswa sering memil
 erDiagram
     MODULES ||--o{ MENUS : contains
     MENUS ||--o{ SUB_MENUS : contains
+    SCHOOLS ||--o{ CLASSES : hosts
     USERS ||--o{ STUDENT_PROFILES : has
     USERS ||--o{ TEACHER_PROFILES : has
     CLASSES ||--o{ STUDENT_PROFILES : enrolls
@@ -161,11 +171,12 @@ erDiagram
 4. `sub_menus`: Item sub-menu berjenjang di bawah menu (`id`, `menu_id`, `name`, `route_name`, `order`, `is_active`).
    > *Catatan Prinsip Skema Navigasi:* Tidak menggunakan constraint `unique` pada kolom teks (`name`, `route_name`) untuk menjamin fleksibilitas operasional input/edit data tanpa bentrok validasi, sepenuhnya mengandalkan integritas relasional Primary Key ID & Foreign Key dengan *cascade delete*.
    > *Standar Kapitalisasi Teks Entitas Navigasi:* Nama modul wajib disimpan dalam format **HURUF KAPITAL SEMUA (UPPERCASE)** untuk visualisasi pemisah kategori yang tegas. Nama menu dan sub-menu wajib disimpan dalam format **Capitalize Each Word (Title Case)** dengan preservasi akronim standar (SMK, SMA, SIM, PKL, KBM, GTK, BAN-SM, RPP, IT, TU). Seluruh pemformatan ini berjalan otomatis dua lapis melalui atribut `data-transform` di antarmuka pengguna serta Eloquent Mutator di backend.
-5. `students` & `teachers`: Profil lengkap, NISN/NIP, biodata, foto profil.
-6. `classes` & `majors`: Struktur rombel dan jurusan/peminatan (TKJ, RPL, IPA, IPS, dll.).
-7. `schedules` & `journals`: Jadwal mata pelajaran dan catatan jurnal KBM harian guru.
-8. `internships` (PKL): Data penempatan industri, guru pembimbing, nilai instruktur industri.
-9. `accreditation_evidences`: Dokumen bukti fisik terhubung ke butir standar akreditasi.
+5. `schools`: Registri profil sekolah SMA & SMK (`id`, `name`, `npsn`, `nss`, `school_type`, `status`, `accreditation`, `address`, `village`, `district`, `city`, `province`, `postal_code`, `phone`, `fax`, `email`, `website`, `principal_name`, `principal_nip`, `foundation_name`, `logo_path`, `is_active`). Kolom `npsn` di-index tanpa constraint unique kaku untuk mendukung prinsip reduksi batasan teks unik.
+6. `students` & `teachers`: Profil lengkap, NISN/NIP, biodata, foto profil.
+7. `classes` & `majors`: Struktur rombel dan jurusan/peminatan (TKJ, RPL, IPA, IPS, dll.).
+8. `schedules` & `journals`: Jadwal mata pelajaran dan catatan jurnal KBM harian guru.
+9. `internships` (PKL): Data penempatan industri, guru pembimbing, nilai instruktur industri.
+10. `accreditation_evidences`: Dokumen bukti fisik terhubung ke butir standar akreditasi.
 
 ---
 
@@ -179,7 +190,7 @@ erDiagram
   - Pembuatan paket arsip `.zip` mandiri berisi skema dan data database (`database.sql`), seluruh berkas/gambar unggahan pengguna (`storage/app/public/`), serta `manifest.json`.
   - Pengecualian otomatis direktori `vendor/`, `node_modules/`, `.git/`, dan `storage/framework/` demi efisiensi ukuran berkas dan kompatibilitas OS.
   - Penyimpanan arsip terisolasi di direktori privat server (`storage/app/backups/`) dengan perlindungan *path traversal* (`basename()` sanitization).
-  - Pengecekan cerdas kesehatan *symbolic link* storage (`public/storage`): memeriksa validitas sambungan terlebih dahulu sebelum melakukan reparasi (`Artisan::call('storage:link')`), menjamin seluruh aset gambar dan berkas tidak mengalami 404 saat migrasi server.
+  - Pengecekan cerdas kesehatan *symbolic link* storage (`public/storage`): memeriksa validitas sambungan terlebih dahulu sebelum melakukan reparasi (`Artisan::call('storage:link', ['--relative' => true])`), menjamin seluruh aset gambar dan berkas tidak mengalami 404 atau 403 Forbidden saat migrasi server dan beroperasi serasi lintas container Docker maupun mesin host.
   - Protokol pemulihan data (*restore*) dengan validasi ganda, pembatasan unggahan 250 MB (256.000 KB), dan dialog modal bahaya interaktif (*Danger Confirmation Modal*) yang mewajibkan input konfirmasi kata kunci `"PULIHKAN"` sebelum eksekusi dijalankan.
   - **Arsitektur Real-Time Progress Stream (SSE & Native HTML5 Progress Bar):** Umpan balik kemajuan pemrosesan backup dan restore dipancarkan secara riil langsung dari siklus backend via SSE (`text/event-stream`), mencerminkan status pengeksporan tabel, penghitungan berkas, ekstraksi arsip, hingga reparasi symlink. Dirender di antarmuka menggunakan elemen native HTML5 `<progress>` dengan nol atribut inline style dan kepatuhan desain Infora (Royal Blue & Cyan gradients).
   - **Sinkronisasi Zona Waktu Server:** Seluruh konfigurasi PHP (`docker/php/php.ini`), Nginx, dan aplikasi Laravel diselaraskan pada zona waktu **`Asia/Makassar`** (WITA / GMT+8).

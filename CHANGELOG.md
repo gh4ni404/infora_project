@@ -9,6 +9,29 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 ## [Unreleased]
 
 ### Added
+- **Fitur Master Data Sekolah (Multi-Record Registry & Kesiapan Bridging):**
+  - Membangun fitur manajemen registri sekolah pada rute `/master/data-sekolah` (`master.data-sekolah.*`) di bawah modul Administrasi ➔ Master ➔ Data Sekolah.
+  - Mendukung multi-record registri sekolah (SMA dan SMK, berstatus Negeri maupun Swasta) untuk kebutuhan pengelolaan multi-unit yayasan serta kesiapan bridging API Dapodik.
+  - **Skema Basis Data (`schools`)**: Menyimpan identitas resmi (`name`, `npsn`, `nss`, `school_type`, `status`, `accreditation`), alamat lengkap (`address`, `village`, `district`, `city`, `province`, `postal_code`), kontak (`phone`, `fax`, `email`, `website`), pimpinan (`principal_name`, `principal_nip`), yayasan (`foundation_name`), `logo_path`, dan `is_active`.
+  - Mengimplementasikan prinsip reduksi batasan unik: kolom `npsn` di-index tanpa `unique` constraint sesuai kebutuhan fleksibilitas operasional.
+  - **Model & Mutator**: Model `School` dilengkapi mutator otomatis `TextFormatter::titleCase()` pada kolom `name` untuk menjamin konsistensi huruf kapital (Title Case) dan preservasi akronim (`SMA`, `SMK`).
+  - **Pipeline Unggah Logo Base64 (Maks. 1MB)**: Mendukung pengunggahan logo sekolah format string Base64 via JSON/form dengan live preview, validasi ukuran maks. 1MB, dan penyimpanan ke storage publik (`storage/app/public/logos`) dengan penamaan semantik collision-proof: `sekolah_u{user_id}_{timestamp}_{random8}.{ext}`.
+  - **Antarmuka Pengguna Terpadu**:
+    - Data Table dengan pencarian dinamis (nama sekolah, NPSN, kota), dropdown filter jenis sekolah (SMA/SMK), badge warna status/akreditasi/jenis (`badge-purple`, `badge-cyan`, `badge-success`, `badge-amber`), dan paginasi 15/halaman.
+    - Modal interaktif tambah sekolah (`modalCreateSchool`) dengan auto-reopen saat validasi error.
+    - Halaman terpisah formulir edit data sekolah (`master.data-sekolah.edit`) berbalut `card-surface`.
+  - **15 Automated Pest Feature Tests**: Test suite `SchoolTest.php` mencakup autentikasi & otorisasi super admin, listing & empty state, pencarian & filter jenis, validasi form, mutator title-case, Base64 logo upload & storage, update & hapus logo, penghapusan data & berkas fisik, serta verifikasi zero inline styles (15 passed, 63 assertions). Total pengujian aplikasi mencapai 101 tests lulus 100%.
+
+### Changed & Refactored
+- **Penyempurnaan Sistem Dialog Modal & Normalisasi Margin/Padding UI (`resources/css/app.css`):**
+  - **Arsitektur Flexbox Terpadu**: Menambahkan aturan `.modal-dialog form { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; margin: 0; }` serta `.modal-header` & `.modal-footer { flex-shrink: 0; }`. Memastikan footer modal (tombol Batal & Simpan) selalu utuh, tidak pernah terpotong di bagian bawah dialog pada resolusi/tinggi layar berapa pun.
+  - **Eliminasi Margin Ganda (Double Spacing)**: Menormalkan `.modal-body .form-group { margin-bottom: 0; gap: 0.375rem; }` dan `.form-grid-2col .form-group { margin-bottom: 0; }`, menghilangkan jarak vertikal berlebih antar-input yang sebelumnya mencapai 40px akibat tumpukan `gap` dan `margin-bottom`.
+  - **Divider & Label Seksi Form Terstandarisasi**: Mengatur `.form-section-divider` dengan warna border standar desain aplikasi (`border-top: 1px solid var(--infora-border); width: 100%; height: 0;`), serta mentransformasikan `.form-section-label` menjadi badge edukasi khas INFORA dengan indikator titik biru (`--infora-brand-soft` background, `--infora-brand-border`, dan `--infora-brand-primary`).
+  - **Pelebaran Modal Dialog**: Meningkatkan lebar `.modal-dialog.modal-lg` menjadi `760px` agar form 2-kolom memiliki proporsi visual yang lega, serta menambahkan *slim scrollbar* 6px berujung bulat pada `.modal-body`.
+- **Portabilitas Symlink Storage Relatif (*Docker & Host Relative Symlink Preservation*)**:
+  - Mengonfigurasi pembuatan symbolic link `public/storage` menggunakan path relatif (`../storage/app/public` via `storage:link --relative`) pada skrip dan `DatabaseBackupService::ensureStorageLink()`.
+  - Mengeliminasi galat 403 Forbidden pada Nginx container saat mencoba membaca symlink yang sebelumnya mengarah ke path absolut mesin host (`/home/...`), menjamin berkas gambar/logo publik dapat diakses mulus dari browser baik di dalam Docker maupun di luar container.
+
 - **Universal Smooth Real-Time Progressive Loading Screen (*Global System Indicator Engine*):**
   - Mentransformasikan indikator proses menjadi mesin *Universal Progressive Loading Screen* yang dapat dipanggil dan digunakan kembali oleh seluruh modul dan fitur aplikasi INFORA (bukan hanya Backup & Restore).
   - Menyediakan antarmuka visual minimalis, elegan, dan tenang tanpa elemen kaku: menggantikan *stepper* bertingkat dan kotak log teknis dengan kartu melayang modern berbalut *backdrop blur*, *ambient status orb* berdenyut lembut, judul & teks aktivitas ringkas dinamis, serta bar progres ramping (*sleek pill bar*) 9px.

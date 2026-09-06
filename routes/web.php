@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Master\SchoolController;
 use App\Http\Controllers\System\BackupRestoreController;
 use App\Http\Controllers\System\MenuAccessController;
 use App\Http\Controllers\System\MenuController;
@@ -39,6 +40,11 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
         Route::post('/menu-akses/user/{user}/apply-template', [MenuAccessController::class, 'applyTemplateToUser'])->name('menu-akses.user.apply-template');
         Route::get('/menu-akses/template/{roleKey}', [MenuAccessController::class, 'editTemplate'])->name('menu-akses.template');
         Route::put('/menu-akses/template/{roleKey}', [MenuAccessController::class, 'updateTemplate'])->name('menu-akses.template.update');
+    });
+
+    // Master Data Administrasi
+    Route::prefix('master')->name('master.')->group(function () {
+        Route::resource('data-sekolah', SchoolController::class)->except(['show', 'create']);
     });
 
     // Cadangan & Pemulihan Basis Data (Backup & Restore)

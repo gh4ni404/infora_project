@@ -124,13 +124,22 @@ Dibangun dengan arsitektur **API-First & System Bridging**, **Pengembangan Berba
 - **Dukungan Streaming SSE Terintegrasi:** Dilengkapi pembaca stream *Server-Sent Events* (`InforaProgress.stream(url, formData)`) untuk menyajikan progres riil langsung dari backend secara otomatis.
 - **100% Bebas Inline Styles & Bebas Tag `<style>`:** Seluruh styling visual terpusat di `resources/css/app.css` tanpa satupun atribut `style="..."`.
 
+### 🏫 15. Master Data Sekolah (Multi-Record Registry & Kesiapan Bridging)
+- **Registri Sekolah Fleksibel (SMA & SMK):** Mendukung pengelolaan daftar banyak sekolah (multi-unit yayasan) dengan atribut lengkap: identitas resmi (Nama Sekolah, NPSN, NSS, Jenis Sekolah SMA/SMK, Status Negeri/Swasta, Akreditasi A/B/C/Belum), alamat komprehensif, kontak, pimpinan sekolah & NIP, serta yayasan naungan.
+- **Kesiapan Bridging Ekosistem Dapodik:** Kolom `npsn` di-index secara optimal sebagai kunci unik alternatif (*secondary natural key*) untuk integrasi API bridging ekosistem nasional pada fase lanjutan, tanpa mengunci constraint unik kaku pada level DBMS sesuai prinsip reduksi batasan teks unik.
+- **Manajemen Visual & Upload Logo Base64 (Maks. 1MB):** Dilengkapi sistem unggah logo format Base64 terintegrasi langsung di form modal create dan edit terpisah, live preview instan, validasi ukuran 1MB, dan penyimpanan otomatis ke disk publik dengan tata nama collision-proof: `sekolah_u{user_id}_{timestamp}_{random8}.{ext}`.
+- **Pencarian Dinamis & Filter Jenis:** Pencarian instan berdasarkan nama sekolah, NPSN, maupun kota/kabupaten dengan filter dropdown jenis sekolah (Semua, SMA, SMK) dan paginasi 15 data per halaman.
+- **Akses Rute Resmi:** Dikelola pada rute `/master/data-sekolah` (`master.data-sekolah.*`) di bawah modul Administrasi ➔ Master ➔ Data Sekolah.
+
 ---
 
 ## 💻 Tech Stack & Arsitektur
 
 - **Backend:** Laravel (Versi Terbaru) — *Modular Monolith, RESTful API & Bridging Core*
 - **Navigation & Hierarchy:** System-Driven Dynamic Navigation (Modul ➔ Menu ➔ Sub-Menu), 3 Baseline Bootstrap Menus, User-Centric Menu Access Control, Configurable Role Templates, Dynamic Under-Development Fallback (Zero Dead Links), Non-Unique Entity Convention
+- **School Master Registry:** Multi-Record School Management (SMA & SMK, Public & Private), Dynamic Filtering, Base64 Logo Pipeline, Title-Case Auto Formatting, Bridging-Ready Architecture
 - **Global Indicator Engine:** Universal Smooth Real-Time Progressive Indicator (`window.InforaProgress`, `<x-progress-modal />`, SSE Stream Reader, Zero Inline Styles)
+- **Universal Modal & Form UI:** Flexbox-Driven Modal Architecture (Zero-Clipping Sticky Footers, Dynamic Scrolling Body), Margin Normalization, Standard Design Border Dividers, Accessible Slim Scrollbar
 - **Data & Response Contract:** Pure JSON Responses (`application/json`), Eloquent API Resources, Zero HTML in Data Payloads
 - **Media & File Handling:** Base64 Uploads (Maks. 1MB/file, Preservasi Kualitas, Pola Nama: `{modul}_u{user_id}_{timestamp}_{random8}.{ext}`)
 - **Styling & UI Convention:** Reusable Global CSS Classes (Light, Smooth & Clean Theme, Strict No Ad-Hoc/Specific Classes), Zero Inline Styles (`style=""`), Zero `<style>` Tags in Views
@@ -176,7 +185,7 @@ Gunakan helper script bawaan untuk kemudahan lintas OS:
 # Windows (PowerShell)
 .\dev.ps1 artisan migrate
 ```
-*(Opsional: `./dev artisan storage:link` untuk menghubungkan storage publik)*
+*(Wajib dijalankan saat instalasi awal: `./dev artisan storage:link --relative` untuk membuat symbolic link storage publik yang portabel dan kompatibel antara host dan container Docker)*
 
 ### 5. Akses Aplikasi
 - **Aplikasi Web INFORA:** [http://localhost:8000](http://localhost:8000)

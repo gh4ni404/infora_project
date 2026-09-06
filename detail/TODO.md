@@ -10,6 +10,7 @@
 - [x] Spesifikasi Desain & Arsitektur Sistem ([DESIGN.md](DESIGN.md))
 - [x] Inisialisasi Project Laravel & Docker Stack Multi-Platform ([README.md](../README.md))
 - [x] Standarisasi Format Upload Base64 (Maks. 1MB) & Pola Penamaan Berkas Semantik
+- [x] Master Data Sekolah (Multi-Record Registry SMA & SMK)
 - [ ] Arsitektur Akun Sivitas (4 Tipe Akun) & Sistem Menu Berbasis User (User-Centric & Anti-Duplicate)
 - [ ] Dedicated Layout Separation (Desktop & Mobile) & Reusable Global CSS System
 - [ ] Implementasi Modul Akademik & Tata Kelola Utama
@@ -109,12 +110,19 @@
 ---
 
 ## 🏫 Fase 3: Modul Master Data Sekolah & Manajemen Akademik (SMA & SMK)
-- [ ] **3.1. Master Data Sekolah & Sivitas**
+- [x] **3.1. Master Data Sekolah (Multi-Record Registry & Kesiapan Bridging)**
+  - [x] Skema database tabel `schools`: kolom identitas resmi (nama, NPSN non-unique terindeks, NSS, jenjang SMA/SMK, status Negeri/Swasta, akreditasi A/B/C/Belum), alamat lengkap, kontak telepon/email/web, pimpinan/NIP, yayasan, dan status aktif.
+  - [x] Model `School` dengan Title Case auto-mutator (`TextFormatter::titleCase()` preservasi akronim), boolean casting, dan helper query.
+  - [x] Form Requests & Controller CRUD lengkap (`Master\SchoolController`, `StoreSchoolRequest`, `UpdateSchoolRequest`) dengan validasi bahasa Indonesia dan dukungan Base64 logo upload (maks. 1MB).
+  - [x] Antarmuka manajemen terpadu: Data Table dengan pencarian (nama/NPSN/kota), filter jenis sekolah, paginasi, thumbnail logo, modal interaktif tambah sekolah, dan formulir edit terpisah.
+  - [x] Standarisasi sistem dialog modal: arsitektur flexbox (eliminasi footer clipping), normalisasi margin/padding, divider `var(--infora-border)` standar desain, dan badge seksi edukasi.
+  - [x] Automated Pest test suite `SchoolTest.php` (15 skenario pengujian feature test lulus 100%, total suite 101 tests lulus).
+- [ ] **3.2. Master Data Akademik & Sivitas**
   - [ ] CRUD Data Jurusan/Konsentrasi Keahlian (SMK) & Peminatan/Fase (SMA).
   - [ ] CRUD Data Rombel/Kelas & Ruangan Belajar.
   - [ ] Manajemen Data Siswa terhubung ke `student_profiles`.
   - [ ] Manajemen Data Guru & Pegawai terhubung ke `teacher_profiles` & `staff_profiles`.
-- [ ] **3.2. Kalender & Jadwal Pelajaran**
+- [ ] **3.3. Kalender & Jadwal Pelajaran**
   - [ ] Manajemen Tahun Ajaran, Semester, & Kalender Akademik.
   - [ ] Alokasi Jam Mengajar Guru & Penyusunan Jadwal Mingguan per Kelas.
 - [ ] **3.3. Jurnal KBM Digital Guru**
