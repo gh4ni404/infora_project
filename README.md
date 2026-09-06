@@ -74,9 +74,9 @@ Dibangun dengan arsitektur **API-First & System Bridging**, **Pengembangan Berba
   ```
   *(Contoh: `kbm_u7_20260905_143022_a7b9c1d2.webp`, `pkl_u142_20260905_152011_3c4d5e6f.webp`, `akr_u3_20260905_110545_f83e2a1b.pdf`)*. Format ini menjamin berkas bebas tabrakan nama (*collision-proof*), aman, serta dapat diaudit dan ditelusuri kepemilikannya secara instan.
 
-### 🗂️ 9. Sistem Navigasi Berbasis Data & Pendekatan 3 Menu Dasar (System-Driven Hierarchy)
+### 🗂️ 9. Sistem Navigasi Berbasis Data & Menu Dasar Bawaan Sistem (Bootstrap Baseline)
 - **Hierarki Navigasi Dinamis (Modul ➔ Menu ➔ Sub-Menu):** Seluruh navigasi sidebar tidak lagi di-hardcode secara statis di template Blade, melainkan terstruktur secara dinamis di basis data.
-- **Pendekatan 3 Menu Dasar Sistem (Bootstrap Baseline):** Sistem diawali dengan **3 menu dasar bawaan/seeded** di bawah modul "Pengaturan Sistem" (**Modul**, **Menu**, dan **Sub-Menu**). Ketiga menu inilah yang menjadi pintu gerbang utama untuk mendaftarkan dan menata seluruh modul dan fitur baru ke depan (input data melalui sistem terlebih dahulu, baru kemudian dikembangkan sisi frontend dan backend-nya).
+- **Menu Dasar Bawaan Sistem (Bootstrap Baseline):** Sistem diawali dengan menu dasar bawaan/seeded di bawah modul "Pengaturan Sistem" (**Modul**, **Menu**, **Sub-Menu**, dan **Backup & Restore**). Menu-menu inilah yang menjadi pintu gerbang utama untuk mengelola navigasi serta memulihkan data sistem lama secara instan saat pertama kali instalasi baru dijalankan (`php artisan migrate:fresh --seed`).
 - **Pemisah Modul Classic Minimalist:** Label modul berfungsi sebagai pemisah kategori yang rapi dan elegan (`.menu-category-label` dengan garis pembatas tipis atas dan tipografi uppercase) tanpa memerlukan ikon modul yang berlebihan.
 - **Seksi Pengguna & Dropup Popover di Sidebar Footer:** Profil akun pengguna dan aksi logout ditempatkan di bagian bawah sidebar (`.sidebar-footer`) menggunakan kartu interaktif (`.user-card-button`) yang memunculkan popover menu melayang ke atas (*dropup*) berisi Pengaturan Profile, Ubah Password, Bantuan, dan Keluar.
 - **Interaktivitas Sidebar Modern & Anchored Transition:**

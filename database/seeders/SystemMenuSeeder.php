@@ -95,5 +95,19 @@ class SystemMenuSeeder extends Seeder
                 'is_active' => true,
             ]
         );
+
+        // Direct Menu: Backup & Restore
+        Menu::firstOrCreate(
+            [
+                'module_id' => $systemModule->id,
+                'name' => 'Backup & Restore',
+            ],
+            [
+                'route_name' => 'backup-restore',
+                'icon' => 'folder',
+                'order' => 2,
+                'is_active' => true,
+            ]
+        );
     }
 }
