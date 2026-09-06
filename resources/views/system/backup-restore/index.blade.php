@@ -8,7 +8,7 @@
     </div>
     <div class="page-actions page-actions-group">
         <!-- Cadangan Lengkap ZIP (Primary) -->
-        <form method="POST" action="{{ route('backup-restore.create') }}" class="form-inline-action form-backup-trigger">
+        <form method="POST" action="{{ route('backup-restore.create') }}" class="form-inline-action form-backup-trigger" data-progress-stream>
             @csrf
             <input type="hidden" name="type" value="full">
             <button type="submit" class="btn-primary" id="btnCreateFullBackup" title="Buat arsip ZIP terpadu berisi basis data dan seluruh berkas aset pengguna">
@@ -22,7 +22,7 @@
         </form>
 
         <!-- Cadangan Database SQL (Secondary Outline) -->
-        <form method="POST" action="{{ route('backup-restore.create') }}" class="form-inline-action form-backup-trigger">
+        <form method="POST" action="{{ route('backup-restore.create') }}" class="form-inline-action form-backup-trigger" data-progress-stream>
             @csrf
             <input type="hidden" name="type" value="database">
             <button type="submit" class="btn-outline-primary" id="btnCreateDbBackup" title="Ekspor dump skema dan data basis data saja">
@@ -254,7 +254,7 @@
             <span class="badge badge-amber">Maks 250MB</span>
         </div>
         <div class="card-body">
-            <form method="POST" action="{{ route('backup-restore.restore') }}" enctype="multipart/form-data" id="formUploadRestore">
+            <form method="POST" action="{{ route('backup-restore.restore') }}" enctype="multipart/form-data" id="formUploadRestore" data-progress-stream>
                 @csrf
                 <div class="form-group">
                     <label for="backupFileInput" class="form-label">Pilih Berkas Cadangan (.zip atau .sql)</label>
@@ -300,7 +300,7 @@
             </button>
         </div>
 
-        <form method="POST" action="{{ route('backup-restore.restore') }}" id="formConfirmRestore">
+        <form method="POST" action="{{ route('backup-restore.restore') }}" id="formConfirmRestore" data-progress-stream>
             @csrf
             <input type="hidden" name="filename" id="restoreFilenameInput" value="">
 

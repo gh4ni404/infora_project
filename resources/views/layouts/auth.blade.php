@@ -24,5 +24,8 @@
     <div class="auth-page-container">
         @yield('content')
     </div>
+
+    {{-- Universal Progress Modal (juga digunakan di halaman login) --}}
+    <x-progress-modal />
 </body>
 </html>
