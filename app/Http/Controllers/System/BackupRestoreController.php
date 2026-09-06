@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BackupRestoreController extends Controller
 {
@@ -37,10 +38,52 @@ class BackupRestoreController extends Controller
     /**
      * Trigger generation of a fresh full snapshot (.zip) or database dump (.sql).
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|StreamedResponse
     {
+        $type = (string) $request->input('type', 'full');
+
+        if ($request->boolean('stream') || $request->header('Accept') === 'text/event-stream') {
+            return response()->stream(function () use ($type): void {
+                @set_time_limit(600);
+
+                $sendEvent = function (int $percent, string $stage, string $detail, string $status = 'running', ?string $message = null): void {
+                    echo 'data: '.json_encode([
+                        'percent' => $percent,
+                        'stage' => $stage,
+                        'detail' => $detail,
+                        'status' => $status,
+                        'message' => $message,
+                    ], JSON_UNESCAPED_SLASHES)."\n\n";
+
+                    if (ob_get_level() > 0) {
+                        ob_flush();
+                    }
+                    flush();
+                };
+
+                try {
+                    $backup = $this->backupService->createBackup($type, function (int $pct, string $stage, string $detail) use ($sendEvent): void {
+                        $sendEvent($pct, $stage, $detail, 'running');
+                    });
+
+                    $label = $backup['type'] === 'full'
+                        ? 'Cadangan lengkap sistem (Basis Data & Berkas Aset)'
+                        : 'Cadangan basis data';
+
+                    $msg = "{$label} berhasil dibuat: {$backup['filename']} ({$backup['size_human']}).";
+                    $sendEvent(100, 'Selesai', $msg, 'completed', $msg);
+                } catch (\Throwable $e) {
+                    $sendEvent(100, 'Gagal', $e->getMessage(), 'error', 'Gagal membuat cadangan sistem: '.$e->getMessage());
+                }
+            }, 200, [
+                'Content-Type' => 'text/event-stream',
+                'Cache-Control' => 'no-cache, no-store, must-revalidate',
+                'X-Accel-Buffering' => 'no',
+                'Connection' => 'keep-alive',
+            ]);
+        }
+
         try {
-            $type = $request->input('type', 'full');
             $backup = $this->backupService->createBackup($type);
 
             $label = $backup['type'] === 'full'
@@ -87,8 +130,79 @@ class BackupRestoreController extends Controller
     /**
      * Restore the system from an existing archive or an uploaded .zip / .sql file.
      */
-    public function restore(RestoreBackupRequest $request): RedirectResponse
+    public function restore(RestoreBackupRequest $request): RedirectResponse|StreamedResponse
     {
+        if ($request->boolean('stream') || $request->header('Accept') === 'text/event-stream') {
+            return response()->stream(function () use ($request): void {
+                @set_time_limit(600);
+
+                $sendEvent = function (int $percent, string $stage, string $detail, string $status = 'running', ?string $message = null): void {
+                    echo 'data: '.json_encode([
+                        'percent' => $percent,
+                        'stage' => $stage,
+                        'detail' => $detail,
+                        'status' => $status,
+                        'message' => $message,
+                    ], JSON_UNESCAPED_SLASHES)."\n\n";
+
+                    if (ob_get_level() > 0) {
+                        ob_flush();
+                    }
+                    flush();
+                };
+
+                $tempPath = null;
+                try {
+                    if ($request->hasFile('backup_file')) {
+                        $uploadedFile = $request->file('backup_file');
+                        $realPath = $uploadedFile->getRealPath();
+                        $originalName = $uploadedFile->getClientOriginalName();
+                        $ext = strtolower($uploadedFile->getClientOriginalExtension());
+                        $tempPath = storage_path('app/temp_upload_'.uniqid().'.'.$ext);
+                        copy($realPath, $tempPath);
+
+                        $sendEvent(5, 'Inisialisasi', "Mempersiapkan berkas unggahan: {$originalName}...");
+
+                        $result = $this->backupService->restoreBackup($tempPath, function (int $pct, string $stage, string $detail) use ($sendEvent): void {
+                            $sendEvent($pct, $stage, $detail, 'running');
+                        });
+
+                        $prefix = $result['type'] === 'full' ? 'Pemulihan Sistem Lengkap' : 'Pemulihan Basis Data';
+                        $msg = "{$prefix} berhasil dari berkas unggahan: {$originalName}. {$result['message']}";
+                        $sendEvent(100, 'Selesai', $msg, 'completed', $msg);
+                    } else {
+                        $filename = (string) $request->input('filename');
+                        $path = $this->backupService->getBackupPath($filename);
+
+                        if (! $path) {
+                            throw new Exception('Berkas cadangan terpilih tidak ditemukan di server.');
+                        }
+
+                        $sendEvent(5, 'Inisialisasi', "Mempersiapkan pemulihan dari berkas: {$filename}...");
+
+                        $result = $this->backupService->restoreBackup($path, function (int $pct, string $stage, string $detail) use ($sendEvent): void {
+                            $sendEvent($pct, $stage, $detail, 'running');
+                        });
+
+                        $prefix = $result['type'] === 'full' ? 'Pemulihan Sistem Lengkap' : 'Pemulihan Basis Data';
+                        $msg = "{$prefix} berhasil dari arsip server: {$filename}. {$result['message']}";
+                        $sendEvent(100, 'Selesai', $msg, 'completed', $msg);
+                    }
+                } catch (\Throwable $e) {
+                    $sendEvent(100, 'Gagal', $e->getMessage(), 'error', 'Gagal memulihkan sistem: '.$e->getMessage());
+                } finally {
+                    if ($tempPath && file_exists($tempPath)) {
+                        @unlink($tempPath);
+                    }
+                }
+            }, 200, [
+                'Content-Type' => 'text/event-stream',
+                'Cache-Control' => 'no-cache, no-store, must-revalidate',
+                'X-Accel-Buffering' => 'no',
+                'Connection' => 'keep-alive',
+            ]);
+        }
+
         try {
             if ($request->hasFile('backup_file')) {
                 $uploadedFile = $request->file('backup_file');

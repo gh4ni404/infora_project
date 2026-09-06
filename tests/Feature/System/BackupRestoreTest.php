@@ -258,3 +258,60 @@ test('restore request fails if uploaded file is not zip, sql, or txt', function 
 
     $response->assertSessionHasErrors(['backup_file']);
 });
+
+test('super admin can stream backup creation with real-time SSE progress events', function () {
+    $response = $this->actingAs($this->superAdmin)->post(
+        route('backup-restore.create'),
+        ['type' => 'database'],
+        ['Accept' => 'text/event-stream']
+    );
+
+    $response->assertOk();
+    expect($response->headers->get('Content-Type'))->toContain('text/event-stream');
+
+    $content = $response->streamedContent();
+    expect($content)->toContain('data: {')
+        ->toContain('"stage":"Ekspor Basis Data"')
+        ->toContain('"status":"completed"')
+        ->toContain('"percent":100');
+});
+
+test('super admin can stream database restoration with real-time SSE progress events', function () {
+    $dummyFilename = 'test_stream_restore.sql';
+    $dummyPath = $this->backupDir.DIRECTORY_SEPARATOR.$dummyFilename;
+    File::put($dummyPath, "SELECT 1;\n");
+
+    $response = $this->actingAs($this->superAdmin)->post(
+        route('backup-restore.restore'),
+        ['filename' => $dummyFilename],
+        ['Accept' => 'text/event-stream']
+    );
+
+    $response->assertOk();
+    expect($response->headers->get('Content-Type'))->toContain('text/event-stream');
+
+    $content = $response->streamedContent();
+    expect($content)->toContain('data: {')
+        ->toContain('"stage":"Pemulihan Basis Data"')
+        ->toContain('"status":"completed"')
+        ->toContain('"percent":100');
+});
+
+test('backup-restore page contains real-time progress bar, stepper, and zero inline styles', function () {
+    $response = $this->actingAs($this->superAdmin)->get('/backup-restore');
+
+    $response->assertOk();
+    $content = $response->getContent();
+
+    // Verify progress elements
+    $response->assertSee('id="modalSystemProgress"', false);
+    $response->assertSee('id="systemProgressBar"', false);
+    $response->assertSee('class="infora-progress"', false);
+    $response->assertSee('id="systemProgressPercent"', false);
+    $response->assertSee('id="systemProgressStepper"', false);
+    $response->assertSee('id="systemProgressStage"', false);
+    $response->assertSee('id="systemProgressDetail"', false);
+
+    // Verify ZERO inline style="..." attributes in HTML elements
+    expect(preg_match('/<[a-z0-9\-]+[^>]*\sstyle=["\'][^"\']*["\']/i', $content))->toBe(0);
+});

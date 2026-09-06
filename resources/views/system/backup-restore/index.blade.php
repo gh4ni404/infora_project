@@ -8,7 +8,7 @@
     </div>
     <div class="page-actions page-actions-group">
         <!-- Cadangan Lengkap ZIP (Primary) -->
-        <form method="POST" action="{{ route('backup-restore.create') }}" class="form-inline-action">
+        <form method="POST" action="{{ route('backup-restore.create') }}" class="form-inline-action form-backup-trigger">
             @csrf
             <input type="hidden" name="type" value="full">
             <button type="submit" class="btn-primary" id="btnCreateFullBackup" title="Buat arsip ZIP terpadu berisi basis data dan seluruh berkas aset pengguna">
@@ -22,7 +22,7 @@
         </form>
 
         <!-- Cadangan Database SQL (Secondary Outline) -->
-        <form method="POST" action="{{ route('backup-restore.create') }}" class="form-inline-action">
+        <form method="POST" action="{{ route('backup-restore.create') }}" class="form-inline-action form-backup-trigger">
             @csrf
             <input type="hidden" name="type" value="database">
             <button type="submit" class="btn-outline-primary" id="btnCreateDbBackup" title="Ekspor dump skema dan data basis data saja">
@@ -251,7 +251,7 @@
                 <span class="table-cell-bold">Unggah & Pulihkan Eksternal</span>
                 <div class="form-hint">Migrasi dari server lain / pulihkan berkas lokal</div>
             </div>
-            <span class="badge badge-amber">Maks 200MB</span>
+            <span class="badge badge-amber">Maks 250MB</span>
         </div>
         <div class="card-body">
             <form method="POST" action="{{ route('backup-restore.restore') }}" enctype="multipart/form-data" id="formUploadRestore">
@@ -266,7 +266,7 @@
                         class="form-input"
                         required
                     >
-                    <div class="form-hint">Mendukung paket snapshot lengkap (ZIP) atau skrip SQL basis data maksimal 200 megabyte.</div>
+                    <div class="form-hint">Mendukung paket snapshot lengkap (ZIP) atau skrip SQL basis data maksimal 250 megabyte.</div>
                 </div>
 
                 <div class="form-group">
@@ -347,42 +347,112 @@
     </div>
 </div>
 
+<!-- Modal Real-Time Progressive Indicator (Zero Inline Styles) -->
+<div class="modal-backdrop hidden" id="modalSystemProgress" role="dialog" aria-modal="true" aria-labelledby="systemProgressTitle">
+    <div class="progress-dialog">
+        <div class="progress-header">
+            <div class="progress-status-badge" id="systemProgressStatusBadge">
+                <span class="pulse-dot"></span>
+                <span id="systemProgressStatusText">Memproses...</span>
+            </div>
+            <span class="progress-percent-label" id="systemProgressPercent">0%</span>
+        </div>
+
+        <div>
+            <h3 class="progress-title" id="systemProgressTitle">Memproses Operasi Sistem</h3>
+            <p class="progress-subtitle" id="systemProgressSubtitle">Mohon jangan menutup jendela atau mematikan peramban selama operasi berlangsung.</p>
+        </div>
+
+        <div class="progress-bar-container">
+            <progress id="systemProgressBar" class="infora-progress" value="0" max="100"></progress>
+        </div>
+
+        <div class="progress-details-box">
+            <div class="progress-stage-name" id="systemProgressStage">Inisialisasi</div>
+            <div class="progress-detail-text" id="systemProgressDetail">Menyiapkan parameter sistem...</div>
+        </div>
+
+        <!-- Multi-stage Stepper -->
+        <div class="progress-stepper" id="systemProgressStepper">
+            <div class="stepper-item is-active" id="progressStep1">
+                <span class="stepper-icon">1</span>
+                <span class="stepper-label">Inisialisasi</span>
+            </div>
+            <div class="stepper-item" id="progressStep2">
+                <span class="stepper-icon">2</span>
+                <span class="stepper-label">Basis Data</span>
+            </div>
+            <div class="stepper-item" id="progressStep3">
+                <span class="stepper-icon">3</span>
+                <span class="stepper-label">Berkas Storage</span>
+            </div>
+            <div class="stepper-item" id="progressStep4">
+                <span class="stepper-icon">4</span>
+                <span class="stepper-label">Selesai</span>
+            </div>
+        </div>
+
+        <div class="progress-error-actions hidden" id="systemProgressErrorActions">
+            <button type="button" class="btn-secondary" id="btnCloseProgressModal">Tutup & Periksa Status</button>
+        </div>
+    </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById('modalRestoreConfirmation');
-    const btnClose = document.getElementById('btnCloseRestoreModal');
-    const btnCancel = document.getElementById('btnCancelRestoreModal');
+    // Confirmation modal elements
+    const modalConfirm = document.getElementById('modalRestoreConfirmation');
+    const btnCloseConfirm = document.getElementById('btnCloseRestoreModal');
+    const btnCancelConfirm = document.getElementById('btnCancelRestoreModal');
     const filenameInput = document.getElementById('restoreFilenameInput');
     const targetFilenameText = document.getElementById('restoreTargetFilenameText');
     const targetMetaText = document.getElementById('restoreTargetMetaText');
     const keywordInput = document.getElementById('restoreConfirmKeyword');
-    const submitBtn = document.getElementById('btnSubmitRestore');
+    const submitConfirmBtn = document.getElementById('btnSubmitRestore');
     const restoreTriggers = document.querySelectorAll('.btn-trigger-restore');
 
     // Upload & restore elements
     const btnTriggerUploadRestore = document.getElementById('btnTriggerUploadRestore');
     const backupFileInput = document.getElementById('backupFileInput');
     const formUploadRestore = document.getElementById('formUploadRestore');
+    const formConfirm = document.getElementById('formConfirmRestore');
+
+    // Progressive modal elements
+    const modalProgress = document.getElementById('modalSystemProgress');
+    const progressBar = document.getElementById('systemProgressBar');
+    const progressPercent = document.getElementById('systemProgressPercent');
+    const progressStatusBadge = document.getElementById('systemProgressStatusBadge');
+    const progressStatusText = document.getElementById('systemProgressStatusText');
+    const progressTitle = document.getElementById('systemProgressTitle');
+    const progressSubtitle = document.getElementById('systemProgressSubtitle');
+    const progressStage = document.getElementById('systemProgressStage');
+    const progressDetail = document.getElementById('systemProgressDetail');
+    const step1 = document.getElementById('progressStep1');
+    const step2 = document.getElementById('progressStep2');
+    const step3 = document.getElementById('progressStep3');
+    const step4 = document.getElementById('progressStep4');
+    const errorActions = document.getElementById('systemProgressErrorActions');
+    const btnCloseProgressModal = document.getElementById('btnCloseProgressModal');
 
     let activeRestoreMode = 'server'; // 'server' or 'upload'
 
     function openRestoreModal(filename, metaText, mode) {
-        if (!modal) return;
+        if (!modalConfirm) return;
         activeRestoreMode = mode;
         filenameInput.value = filename || '';
         targetFilenameText.textContent = filename || 'Berkas Unggahan Komputer';
         targetMetaText.textContent = metaText || '';
         keywordInput.value = '';
-        submitBtn.disabled = true;
+        submitConfirmBtn.disabled = true;
 
-        modal.classList.remove('hidden');
+        modalConfirm.classList.remove('hidden');
         document.body.classList.add('modal-open');
         setTimeout(() => keywordInput.focus(), 50);
     }
 
     function closeRestoreModal() {
-        if (!modal) return;
-        modal.classList.add('hidden');
+        if (!modalConfirm) return;
+        modalConfirm.classList.add('hidden');
         document.body.classList.remove('modal-open');
     }
 
@@ -411,34 +481,219 @@ document.addEventListener('DOMContentLoaded', function() {
 
     keywordInput && keywordInput.addEventListener('input', function() {
         if (keywordInput.value.trim().toUpperCase() === 'PULIHKAN') {
-            submitBtn.disabled = false;
+            submitConfirmBtn.disabled = false;
         } else {
-            submitBtn.disabled = true;
+            submitConfirmBtn.disabled = true;
         }
     });
 
-    const formConfirm = document.getElementById('formConfirmRestore');
-    if (formConfirm) {
-        formConfirm.addEventListener('submit', function(e) {
-            if (activeRestoreMode === 'upload') {
-                e.preventDefault();
-                closeRestoreModal();
-                formUploadRestore.submit();
-            }
-        });
-    }
+    btnCloseConfirm && btnCloseConfirm.addEventListener('click', closeRestoreModal);
+    btnCancelConfirm && btnCancelConfirm.addEventListener('click', closeRestoreModal);
 
-    btnClose && btnClose.addEventListener('click', closeRestoreModal);
-    btnCancel && btnCancel.addEventListener('click', closeRestoreModal);
-
-    modal && modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
+    modalConfirm && modalConfirm.addEventListener('click', function(e) {
+        if (e.target === modalConfirm) {
             closeRestoreModal();
         }
     });
 
+    // =========================================================================
+    // Real-Time Progress Stream Engine
+    // =========================================================================
+
+    function handleStreamEvent(data) {
+        if (typeof data.percent === 'number') {
+            progressBar.value = data.percent;
+            progressPercent.textContent = data.percent + '%';
+        }
+
+        if (data.stage) {
+            progressStage.textContent = data.stage;
+        }
+
+        if (data.detail) {
+            progressDetail.textContent = data.detail;
+        }
+
+        const stage = (data.stage || '').toLowerCase();
+        if (stage.includes('inisialisasi')) {
+            step1.className = 'stepper-item is-active';
+            step2.className = 'stepper-item';
+            step3.className = 'stepper-item';
+            step4.className = 'stepper-item';
+        } else if (stage.includes('basis data')) {
+            step1.className = 'stepper-item is-completed';
+            step2.className = 'stepper-item is-active';
+            step3.className = 'stepper-item';
+            step4.className = 'stepper-item';
+        } else if (stage.includes('berkas') || stage.includes('media') || stage.includes('storage') || stage.includes('arsip')) {
+            step1.className = 'stepper-item is-completed';
+            step2.className = 'stepper-item is-completed';
+            step3.className = 'stepper-item is-active';
+            step4.className = 'stepper-item';
+        } else if (stage.includes('finalisasi') || stage.includes('symlink') || stage.includes('pembersihan')) {
+            step1.className = 'stepper-item is-completed';
+            step2.className = 'stepper-item is-completed';
+            step3.className = 'stepper-item is-completed';
+            step4.className = 'stepper-item is-active';
+        }
+
+        if (data.status === 'completed') {
+            progressBar.value = 100;
+            progressPercent.textContent = '100%';
+            step1.className = 'stepper-item is-completed';
+            step2.className = 'stepper-item is-completed';
+            step3.className = 'stepper-item is-completed';
+            step4.className = 'stepper-item is-completed';
+
+            progressStatusBadge.className = 'progress-status-badge is-success';
+            progressStatusText.textContent = 'Selesai';
+            progressTitle.textContent = 'Operasi Selesai Berhasil';
+            progressSubtitle.textContent = data.message || data.detail;
+
+            setTimeout(function() {
+                window.location.reload();
+            }, 1200);
+        } else if (data.status === 'error') {
+            handleStreamError(data.message || data.detail || 'Terjadi galat saat memproses operasi sistem.');
+        }
+    }
+
+    function handleStreamError(errorMessage) {
+        progressStatusBadge.className = 'progress-status-badge is-error';
+        progressStatusText.textContent = 'Terjadi Galat';
+        progressTitle.textContent = 'Operasi Tidak Berhasil Dilanjutkan';
+        progressSubtitle.textContent = 'Terjadi kesalahan teknis pada sistem:';
+        progressDetail.textContent = errorMessage;
+        errorActions.classList.remove('hidden');
+    }
+
+    async function startSystemProgressStream(url, formData, operationTitle) {
+        if (!modalProgress) return;
+
+        // Reset state
+        progressBar.value = 0;
+        progressPercent.textContent = '0%';
+        progressStatusBadge.className = 'progress-status-badge';
+        progressStatusText.textContent = 'Memproses...';
+        progressTitle.textContent = operationTitle;
+        progressSubtitle.textContent = 'Mohon jangan menutup jendela atau mematikan peramban selama operasi berlangsung.';
+        progressStage.textContent = 'Inisialisasi';
+        progressDetail.textContent = 'Menyiapkan koneksi dan parameter sistem...';
+
+        step1.className = 'stepper-item is-active';
+        step2.className = 'stepper-item';
+        step3.className = 'stepper-item';
+        step4.className = 'stepper-item';
+
+        errorActions.classList.add('hidden');
+        modalProgress.classList.remove('hidden');
+        document.body.classList.add('modal-open');
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'text/event-stream, application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            });
+
+            if (!response.ok) {
+                let errorText = 'Terjadi galat pada server (Status ' + response.status + ')';
+                try {
+                    const errData = await response.json();
+                    if (errData.message) errorText = errData.message;
+                    if (errData.errors) {
+                        const firstKey = Object.keys(errData.errors)[0];
+                        if (firstKey && errData.errors[firstKey][0]) {
+                            errorText = errData.errors[firstKey][0];
+                        }
+                    }
+                } catch (_) {}
+                throw new Error(errorText);
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let buffer = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop();
+
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (!trimmed.startsWith('data:')) continue;
+                    const jsonStr = trimmed.substring(5).trim();
+                    if (!jsonStr) continue;
+
+                    try {
+                        const eventData = JSON.parse(jsonStr);
+                        handleStreamEvent(eventData);
+                    } catch (e) {
+                        console.error('Gagal membaca event JSON:', line, e);
+                    }
+                }
+            }
+        } catch (err) {
+            handleStreamError(err.message || 'Koneksi ke server terputus.');
+        }
+    }
+
+    // Attach stream handler to backup generation forms
+    const backupForms = document.querySelectorAll('.form-backup-trigger');
+    backupForms.forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const type = form.querySelector('input[name="type"]')?.value || 'full';
+            const title = type === 'full'
+                ? 'Membuat Cadangan Lengkap Sistem (ZIP)'
+                : 'Membuat Cadangan Basis Data (SQL)';
+            const formData = new FormData(form);
+            formData.append('stream', '1');
+            startSystemProgressStream(form.action, formData, title);
+        });
+    });
+
+    // Attach stream handler to confirmed restore action
+    if (formConfirm) {
+        formConfirm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            closeRestoreModal();
+
+            if (activeRestoreMode === 'upload') {
+                const formData = new FormData(formUploadRestore);
+                formData.append('stream', '1');
+                startSystemProgressStream(
+                    formUploadRestore.action,
+                    formData,
+                    'Memulihkan Sistem dari Berkas Unggahan'
+                );
+            } else {
+                const formData = new FormData(formConfirm);
+                formData.append('stream', '1');
+                startSystemProgressStream(
+                    formConfirm.action,
+                    formData,
+                    'Memulihkan Sistem dari Arsip Server'
+                );
+            }
+        });
+    }
+
+    btnCloseProgressModal && btnCloseProgressModal.addEventListener('click', function() {
+        modalProgress.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+        window.location.reload();
+    });
+
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+        if (e.key === 'Escape' && modalConfirm && !modalConfirm.classList.contains('hidden')) {
             closeRestoreModal();
         }
     });

@@ -30,40 +30,52 @@ class DatabaseBackupService
     /**
      * Create a backup according to specified type ('full' for ZIP or 'database' for SQL).
      *
+     * @param  (callable(int, string, string): void)|null  $progressCallback
      * @return array{filename: string, path: string, size_bytes: int, size_human: string, created_at: Carbon, type: string}
      */
-    public function createBackup(string $type = 'full'): array
+    public function createBackup(string $type = 'full', ?callable $progressCallback = null): array
     {
         if ($type === 'database') {
-            return $this->createDatabaseBackup();
+            return $this->createDatabaseBackup(null, $progressCallback);
         }
 
-        return $this->createFullBackup();
+        return $this->createFullBackup($progressCallback);
     }
 
     /**
      * Create a full portable snapshot (.zip) containing database.sql, storage assets, and manifest.json.
      *
+     * @param  (callable(int, string, string): void)|null  $progressCallback
      * @return array{filename: string, path: string, size_bytes: int, size_human: string, created_at: Carbon, type: string, files_count: int}
      */
-    public function createFullBackup(): array
+    public function createFullBackup(?callable $progressCallback = null): array
     {
         if (! class_exists(ZipArchive::class)) {
             throw new RuntimeException('Ekstensi PHP ZipArchive tidak terpasang di server.');
         }
+
+        $report = function (int $pct, string $stage, string $detail) use ($progressCallback): void {
+            if (is_callable($progressCallback)) {
+                $progressCallback($pct, $stage, $detail);
+            }
+        };
+
+        $report(5, 'Inisialisasi', 'Menyiapkan direktori dan parameter pencadangan penuh...');
 
         $backupDir = $this->getBackupDirectory();
         $timestamp = Carbon::now()->format('Ymd_His');
         $zipFilename = "backup_infora_full_{$timestamp}.zip";
         $zipPath = $backupDir.DIRECTORY_SEPARATOR.$zipFilename;
 
-        // 1. Generate temporary database dump
+        // 1. Generate temporary database dump (10% - 50%)
         $tempSqlFilename = "temp_db_{$timestamp}.sql";
-        $dbDump = $this->createDatabaseBackup($tempSqlFilename);
+        $dbDump = $this->createDatabaseBackup($tempSqlFilename, $progressCallback, 10, 50);
         $tempSqlPath = $dbDump['path'];
 
         $publicStoragePath = storage_path('app/public');
         File::ensureDirectoryExists($publicStoragePath);
+
+        $report(52, 'Pengarsipan Berkas', 'Menyiapkan berkas arsip ZIP dan menautkan skrip SQL...');
 
         $zip = new ZipArchive;
         if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
@@ -75,28 +87,33 @@ class DatabaseBackupService
             // 2. Add database dump to ZIP root
             $zip->addFile($tempSqlPath, 'database.sql');
 
-            // 3. Collect & add all user uploaded files from storage/app/public/
+            // 3. Collect & add all user uploaded files from storage/app/public/ (55% - 85%)
             $storageFilesCount = 0;
             $storageSizeBytes = 0;
 
             if (File::isDirectory($publicStoragePath)) {
-                $iterator = new RecursiveIteratorIterator(
-                    new RecursiveDirectoryIterator($publicStoragePath, RecursiveDirectoryIterator::SKIP_DOTS),
-                    RecursiveIteratorIterator::LEAVES_ONLY
-                );
+                $allFiles = File::allFiles($publicStoragePath);
+                $totalFiles = count($allFiles);
 
-                foreach ($iterator as $file) {
-                    if (! $file->isDir()) {
-                        $filePath = $file->getRealPath();
-                        $relativePath = 'storage/'.substr($filePath, strlen($publicStoragePath) + 1);
-                        $zip->addFile($filePath, $relativePath);
-                        $storageFilesCount++;
-                        $storageSizeBytes += (int) $file->getSize();
+                $report(55, 'Pengarsipan Berkas', "Mendeteksi {$totalFiles} berkas di penyimpanan publik...");
+
+                foreach ($allFiles as $idx => $file) {
+                    $filePath = $file->getRealPath();
+                    $relativePath = 'storage/'.substr($filePath, strlen($publicStoragePath) + 1);
+                    $zip->addFile($filePath, $relativePath);
+                    $storageFilesCount++;
+                    $storageSizeBytes += (int) $file->getSize();
+
+                    if ($idx % 10 === 0 || $idx === $totalFiles - 1) {
+                        $filePct = 55 + (int) round((($idx + 1) / max(1, $totalFiles)) * 30);
+                        $report($filePct, 'Pengarsipan Berkas', "Mengarsipkan berkas: {$file->getFilename()} (".($idx + 1)."/{$totalFiles})...");
                     }
                 }
             }
 
-            // 4. Compile manifest.json
+            // 4. Compile manifest.json (88% - 95%)
+            $report(88, 'Finalisasi Arsip', 'Menyusun berkas manifest.json dan informasi metadata...');
+
             $manifest = [
                 'app_name' => config('app.name', 'INFORA Platform'),
                 'backup_type' => 'full',
@@ -121,6 +138,8 @@ class DatabaseBackupService
             ];
 
             $zip->addFromString('manifest.json', json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+            $report(95, 'Finalisasi Arsip', 'Mengompresi dan mengunci berkas arsip ZIP...');
         } finally {
             $zip->close();
             // Clean up temporary database dump
@@ -128,6 +147,8 @@ class DatabaseBackupService
         }
 
         $sizeBytes = (int) File::size($zipPath);
+
+        $report(100, 'Selesai', "Cadangan lengkap ZIP berhasil dibuat ({$this->formatBytes($sizeBytes)}).");
 
         return [
             'filename' => $zipFilename,
@@ -143,10 +164,23 @@ class DatabaseBackupService
     /**
      * Create a fresh database-only SQL dump.
      *
+     * @param  (callable(int, string, string): void)|null  $progressCallback
      * @return array{filename: string, path: string, size_bytes: int, size_human: string, created_at: Carbon, type: string}
      */
-    public function createDatabaseBackup(?string $customFilename = null): array
-    {
+    public function createDatabaseBackup(
+        ?string $customFilename = null,
+        ?callable $progressCallback = null,
+        int $startPercent = 0,
+        int $endPercent = 100
+    ): array {
+        $report = function (int $pct, string $stage, string $detail) use ($progressCallback): void {
+            if (is_callable($progressCallback)) {
+                $progressCallback($pct, $stage, $detail);
+            }
+        };
+
+        $report($startPercent + 1, 'Ekspor Basis Data', 'Menginisialisasi berkas penampung SQL...');
+
         $directory = $this->getBackupDirectory();
         $filename = $customFilename ?: 'backup_infora_db_'.Carbon::now()->format('Ymd_His').'.sql';
         $filePath = $directory.DIRECTORY_SEPARATOR.$filename;
@@ -180,8 +214,14 @@ class DatabaseBackupService
 
             // Fetch all base tables
             $tables = $this->getAllTables();
+            $totalTables = count($tables);
 
-            foreach ($tables as $table) {
+            $report($startPercent + 2, 'Ekspor Basis Data', "Mengidentifikasi tabel ({$totalTables} tabel terdeteksi)...");
+
+            foreach ($tables as $index => $table) {
+                $tablePct = $startPercent + (int) round((($index + 1) / max(1, $totalTables)) * ($endPercent - $startPercent - 3));
+                $report($tablePct, 'Ekspor Basis Data', "Mengekspor struktur dan baris tabel `{$table}` (".($index + 1)."/{$totalTables})...");
+
                 // Table schema
                 fwrite($handle, "-- --------------------------------------------------------\n");
                 fwrite($handle, "-- Struktur Tabel untuk `{$table}`\n");
@@ -238,6 +278,10 @@ class DatabaseBackupService
         }
 
         $sizeBytes = (int) File::size($filePath);
+
+        if ($endPercent === 100) {
+            $report(100, 'Selesai', "Ekspor basis data berhasil ({$this->formatBytes($sizeBytes)}).");
+        }
 
         return [
             'filename' => $filename,
@@ -315,19 +359,20 @@ class DatabaseBackupService
     /**
      * Restore system from an SQL script or full ZIP archive.
      *
+     * @param  (callable(int, string, string): void)|null  $progressCallback
      * @return array{type: string, message: string}
      */
-    public function restoreBackup(string $filePath): array
+    public function restoreBackup(string $filePath, ?callable $progressCallback = null): array
     {
         if (! File::exists($filePath) || ! File::isReadable($filePath)) {
             throw new RuntimeException('Berkas cadangan tidak ditemukan atau tidak dapat dibaca.');
         }
 
         if (str_ends_with($filePath, '.zip')) {
-            return $this->restoreFromZip($filePath);
+            return $this->restoreFromZip($filePath, $progressCallback);
         }
 
-        $this->restoreDatabaseFromSql($filePath);
+        $this->restoreDatabaseFromSql($filePath, $progressCallback);
 
         return [
             'type' => 'database',
@@ -337,34 +382,58 @@ class DatabaseBackupService
 
     /**
      * Restore database from raw SQL file.
+     *
+     * @param  (callable(int, string, string): void)|null  $progressCallback
      */
-    public function restoreDatabaseFromSql(string $filePath): void
+    public function restoreDatabaseFromSql(string $filePath, ?callable $progressCallback = null): void
     {
+        $report = function (int $pct, string $stage, string $detail) use ($progressCallback): void {
+            if (is_callable($progressCallback)) {
+                $progressCallback($pct, $stage, $detail);
+            }
+        };
+
+        $report(10, 'Pemulihan Basis Data', 'Membaca dan memverifikasi isi skrip SQL cadangan...');
+
         $sqlContent = File::get($filePath);
 
         if (trim($sqlContent) === '') {
             throw new RuntimeException('Berkas cadangan basis data kosong.');
         }
 
+        $report(25, 'Pemulihan Basis Data', 'Menonaktifkan kunci relasi basis data...');
         $this->disableForeignKeys();
 
         try {
+            $report(45, 'Pemulihan Basis Data', 'Mengeksekusi skema dan record data ke dalam basis data...');
             DB::unprepared($sqlContent);
+            $report(85, 'Pemulihan Basis Data', 'Mengaktifkan kembali kunci relasi basis data...');
         } finally {
             $this->enableForeignKeys();
         }
+
+        $report(100, 'Pemulihan Basis Data', 'Basis data berhasil dipulihkan sepenuhnya.');
     }
 
     /**
      * Restore full snapshot (database + storage public files + symlink auto-link) from a ZIP archive.
      *
+     * @param  (callable(int, string, string): void)|null  $progressCallback
      * @return array{type: string, message: string}
      */
-    protected function restoreFromZip(string $zipPath): array
+    protected function restoreFromZip(string $zipPath, ?callable $progressCallback = null): array
     {
         if (! class_exists(ZipArchive::class)) {
             throw new RuntimeException('Ekstensi PHP ZipArchive tidak terpasang di server.');
         }
+
+        $report = function (int $pct, string $stage, string $detail) use ($progressCallback): void {
+            if (is_callable($progressCallback)) {
+                $progressCallback($pct, $stage, $detail);
+            }
+        };
+
+        $report(5, 'Inisialisasi', 'Membuka dan memeriksa integritas arsip ZIP...');
 
         $zip = new ZipArchive;
         if ($zip->open($zipPath) !== true) {
@@ -375,33 +444,66 @@ class DatabaseBackupService
         File::ensureDirectoryExists($tempExtractDir);
 
         try {
+            $report(15, 'Ekstraksi Arsip', 'Mengekstrak paket arsip ke direktori sementara...');
             $zip->extractTo($tempExtractDir);
             $zip->close();
 
-            // 1. Restore database if database.sql is present
+            $report(30, 'Ekstraksi Arsip', 'Ekstraksi arsip selesai. Memverifikasi struktur paket...');
+
+            // 1. Restore database if database.sql is present (30% - 70%)
             $sqlFile = $tempExtractDir.DIRECTORY_SEPARATOR.'database.sql';
             if (File::exists($sqlFile)) {
-                $this->restoreDatabaseFromSql($sqlFile);
+                $report(35, 'Pemulihan Basis Data', 'Memproses skrip SQL basis data...');
+                $this->restoreDatabaseFromSql($sqlFile, function (int $pct, string $stg, string $det) use ($report): void {
+                    $mappedPct = 35 + (int) round(($pct / 100) * 35);
+                    $report($mappedPct, $stg, $det);
+                });
+                $report(70, 'Pemulihan Basis Data', 'Struktur dan record basis data berhasil diperbarui.');
             }
 
-            // 2. Restore storage files to storage/app/public/
+            // 2. Restore storage files to storage/app/public/ (70% - 88%)
             $extractedStorageDir = $tempExtractDir.DIRECTORY_SEPARATOR.'storage';
             $destinationStorageDir = storage_path('app/public');
             File::ensureDirectoryExists($destinationStorageDir);
 
             if (File::isDirectory($extractedStorageDir)) {
-                File::copyDirectory($extractedStorageDir, $destinationStorageDir);
+                $allStorageFiles = File::allFiles($extractedStorageDir);
+                $totalStorageFiles = count($allStorageFiles);
+
+                $report(72, 'Sinkronisasi Media', "Menyinkronkan {$totalStorageFiles} berkas aset ke penyimpanan publik...");
+
+                foreach ($allStorageFiles as $idx => $file) {
+                    $rel = substr($file->getPathname(), strlen($extractedStorageDir) + 1);
+                    $destPath = $destinationStorageDir.DIRECTORY_SEPARATOR.$rel;
+                    File::ensureDirectoryExists(dirname($destPath));
+                    File::copy($file->getPathname(), $destPath);
+
+                    if ($idx % 10 === 0 || $idx === $totalStorageFiles - 1) {
+                        $filePct = 72 + (int) round((($idx + 1) / max(1, $totalStorageFiles)) * 16);
+                        $report($filePct, 'Sinkronisasi Media', "Menyalin berkas: {$file->getFilename()} (".($idx + 1)."/{$totalStorageFiles})...");
+                    }
+                }
             }
 
-            // 3. Check and ensure storage symlink is healthy
+            // 3. Check and ensure storage symlink is healthy (88% - 96%)
+            $report(90, 'Verifikasi Symlink', 'Memeriksa dan memvalidasi tautan simbolik public/storage...');
             $this->ensureStorageLink();
+            $report(95, 'Verifikasi Symlink', 'Tautan simbolik storage telah diverifikasi dan aktif.');
+
+            // 4. Clean up temporary extraction folder
+            $report(98, 'Pembersihan', 'Membersihkan berkas sementara ekstraksi...');
+            File::deleteDirectory($tempExtractDir);
+
+            $report(100, 'Selesai', 'Seluruh sistem (basis data, aset media, symlink) berhasil dipulihkan!');
 
             return [
                 'type' => 'full',
                 'message' => 'Seluruh sistem (basis data dan berkas aset penyimpanan) berhasil dipulihkan, serta symlink storage telah diverifikasi.',
             ];
         } finally {
-            File::deleteDirectory($tempExtractDir);
+            if (File::isDirectory($tempExtractDir)) {
+                File::deleteDirectory($tempExtractDir);
+            }
         }
     }
 

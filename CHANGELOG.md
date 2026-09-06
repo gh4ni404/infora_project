@@ -9,6 +9,15 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 ## [Unreleased]
 
 ### Added
+- **Mesin Indikator Kemajuan Multi-Tahap Real-Time (*Real-Time Multi-Stage Progressive Bar Overlay*):**
+  - Mengimplementasikan sistem pelaporan progres riil langsung dari backend ke frontend melalui koneksi *stream* Server-Sent Events (SSE / `text/event-stream`) dan `ReadableStream` reader pada seluruh proses pencadangan dan pemulihan sistem (`/backup-restore`).
+  - Progress bar benar-benar mencerminkan tahapan proses aktual di server (bukan estimasi timer palsu / *fake timer animation*), melaporkan nama tabel database yang sedang diekspor, jumlah baris tabel, berkas aset yang sedang diarsipkan, status ekstraksi ZIP, penonaktifan foreign keys, serta verifikasi symlink secara interaktif.
+  - Tampilan visual modern berupa dialog modal progres dengan komponen native HTML5 `<progress class="infora-progress" value="0" max="100">`, indikator persentase numerik (0% - 100%), *badge* status berdenyut (*pulsing status badge*), dan *stepper* 4 tahap (Inisialisasi, Basis Data, Berkas Storage, Selesai).
+  - **Kepatuhan Desain Arsitektur 100% Bebas Inline Styles:** Seluruh styling antarmuka dan animasi gradien Royal Blue (`#2563EB`) ke Cyan (`#06B6D4`) dikembangkan menggunakan class CSS terstruktur di `resources/css/app.css` tanpa satupun atribut `style="..."` maupun tag `<style>`.
+  - Penanganan galat tangguh (*graceful error handling*) yang menampilkan pesan galat spesifik dan tombol penutup dialog jika terjadi kegagalan sistem atau pembatalan koneksi.
+  - Penyesuaian batas unggahan berkas cadangan menjadi **250 MB** pada `RestoreBackupRequest` (256.000 KB), konfigurasi Nginx (`client_max_body_size 250M;`), dan PHP-FPM (`upload_max_filesize = 250M`, `post_max_size = 250M`).
+  - Sinkronisasi zona waktu server dan aplikasi ke **`Asia/Makassar`** (Waktu Indonesia Tengah / WITA, GMT+8) di `docker/php/php.ini`, `config/app.php`, `.env`, dan `.env.example`.
+  - Test suite diperluas dengan pengujian streaming backup & restore dan verifikasi elemen progres bebas inline styles (total 86 tests aplikasi lulus 100%, 398 assertions).
 - **Sistem Cadangan & Pemulihan Sistem Lengkap (*Full System Snapshot & Server Migration Ready*):**
   - Meningkatkan fitur Backup & Restore pada rute `/backup-restore` (`backup-restore`) di bawah modul PENGATURAN SISTEM dari sekadar dump database menjadi snapshot sistem terpadu berformat `.zip`.
   - Mengemas basis data (`database.sql`), seluruh berkas/gambar unggahan pengguna (`storage/app/public/`), dan berkas `manifest.json` metadata ke dalam satu arsip portabel mandiri via native PHP `ZipArchive`.

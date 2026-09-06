@@ -173,13 +173,15 @@ erDiagram
 - **Rate Limiting & Throttling:** Perlindungan endpoint sensitif dan form submit dari serangan brute force.
 - **Input Sanitization & CSRF:** Proteksi bawaan terhadap serangan SQL Injection, Cross-Site Scripting (XSS), dan CSRF.
 - **Base64 Media Upload Pipeline & Naming Standard:** Pengunggahan foto dokumentasi menggunakan Base64 di payload JSON (maksimal 1MB per berkas) dengan optimasi kompresi agar kualitas gambar bukti fisik tetap jernih dan tajam. Seluruh berkas tersimpan wajib mengikuti format penamaan semantik: `{modul}_u{user_id}_{YYYYMMDD_His}_{random_8char}.{ekstensi}` (contoh: `kbm_u7_20260905_143022_a7b9c1d2.webp`).
-- **Disaster Recovery & Full System Backup / Restore Engine:**
+- **Disaster Recovery, Real-Time Progress Stream & Server Migration Engine:**
   - Mesin backup mandiri (*pure native PHP/PDO & ZipArchive*) tanpa dependensi eksternal, beroperasi portabel pada lingkungan Docker maupun server hosting produksi.
   - Pembuatan paket arsip `.zip` mandiri berisi skema dan data database (`database.sql`), seluruh berkas/gambar unggahan pengguna (`storage/app/public/`), serta `manifest.json`.
   - Pengecualian otomatis direktori `vendor/`, `node_modules/`, `.git/`, dan `storage/framework/` demi efisiensi ukuran berkas dan kompatibilitas OS.
   - Penyimpanan arsip terisolasi di direktori privat server (`storage/app/backups/`) dengan perlindungan *path traversal* (`basename()` sanitization).
   - Pengecekan cerdas kesehatan *symbolic link* storage (`public/storage`): memeriksa validitas sambungan terlebih dahulu sebelum melakukan reparasi (`Artisan::call('storage:link')`), menjamin seluruh aset gambar dan berkas tidak mengalami 404 saat migrasi server.
-  - Protokol pemulihan data (*restore*) dengan validasi ganda, pembatasan unggahan 200 MB, dan dialog modal bahaya interaktif (*Danger Confirmation Modal*) yang mewajibkan input konfirmasi kata kunci `"PULIHKAN"` sebelum eksekusi dijalankan.
+  - Protokol pemulihan data (*restore*) dengan validasi ganda, pembatasan unggahan 250 MB (256.000 KB), dan dialog modal bahaya interaktif (*Danger Confirmation Modal*) yang mewajibkan input konfirmasi kata kunci `"PULIHKAN"` sebelum eksekusi dijalankan.
+  - **Arsitektur Real-Time Progress Stream (SSE & Native HTML5 Progress Bar):** Umpan balik kemajuan pemrosesan backup dan restore dipancarkan secara riil langsung dari siklus backend via SSE (`text/event-stream`), mencerminkan status pengeksporan tabel, penghitungan berkas, ekstraksi arsip, hingga reparasi symlink. Dirender di antarmuka menggunakan elemen native HTML5 `<progress>` dengan nol atribut inline style dan kepatuhan desain Infora (Royal Blue & Cyan gradients).
+  - **Sinkronisasi Zona Waktu Server:** Seluruh konfigurasi PHP (`docker/php/php.ini`), Nginx, dan aplikasi Laravel diselaraskan pada zona waktu **`Asia/Makassar`** (WITA / GMT+8).
 - **Automated Daily Backup:** Pencadangan basis data dan dokumen digital secara terjadwal.
 
 ---

@@ -24,7 +24,7 @@ class RestoreBackupRequest extends FormRequest
     {
         return [
             'filename' => ['nullable', 'string', 'regex:/^[a-zA-Z0-9_\-]+\.(sql|zip)$/'],
-            'backup_file' => ['nullable', 'file', 'max:204800', 'mimes:sql,txt,zip'],
+            'backup_file' => ['nullable', 'file', 'max:256000', 'mimes:sql,txt,zip'],
         ];
     }
 
@@ -63,7 +63,7 @@ class RestoreBackupRequest extends FormRequest
         return [
             'filename.regex' => 'Format nama berkas cadangan tidak valid (harus .sql atau .zip).',
             'backup_file.file' => 'Berkas unggahan harus berupa berkas valid.',
-            'backup_file.max' => 'Ukuran berkas cadangan maksimal adalah 200 MB.',
+            'backup_file.max' => 'Ukuran berkas cadangan maksimal adalah 250 MB.',
             'backup_file.mimes' => 'Berkas cadangan harus berekstensi .zip, .sql, atau .txt.',
         ];
     }
