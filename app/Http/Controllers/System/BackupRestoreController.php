@@ -7,6 +7,7 @@ use App\Http\Requests\System\RestoreBackupRequest;
 use App\Services\DatabaseBackupService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -20,7 +21,7 @@ class BackupRestoreController extends Controller
     ) {}
 
     /**
-     * Display a listing of database backups and system database statistics.
+     * Display a listing of database & full system backups, storage usage, and system stats.
      */
     public function index(): View
     {
@@ -34,25 +35,30 @@ class BackupRestoreController extends Controller
     }
 
     /**
-     * Trigger generation of a fresh database backup dump.
+     * Trigger generation of a fresh full snapshot (.zip) or database dump (.sql).
      */
-    public function store(): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
         try {
-            $backup = $this->backupService->createBackup();
+            $type = $request->input('type', 'full');
+            $backup = $this->backupService->createBackup($type);
+
+            $label = $backup['type'] === 'full'
+                ? 'Cadangan lengkap sistem (Basis Data & Berkas Aset)'
+                : 'Cadangan basis data';
 
             return redirect()
                 ->route('backup-restore')
-                ->with('success', "Cadangan basis data berhasil dibuat: {$backup['filename']} ({$backup['size_human']}).");
+                ->with('success', "{$label} berhasil dibuat: {$backup['filename']} ({$backup['size_human']}).");
         } catch (Exception $e) {
             return redirect()
                 ->route('backup-restore')
-                ->with('error', 'Gagal membuat cadangan basis data: '.$e->getMessage());
+                ->with('error', 'Gagal membuat cadangan sistem: '.$e->getMessage());
         }
     }
 
     /**
-     * Download an existing backup file to the client machine.
+     * Download an existing backup file (.zip or .sql) to the client machine.
      */
     public function download(string $filename): BinaryFileResponse|RedirectResponse
     {
@@ -65,8 +71,10 @@ class BackupRestoreController extends Controller
                     ->with('error', 'Berkas cadangan tidak ditemukan di server.');
             }
 
+            $mimeType = str_ends_with($filename, '.zip') ? 'application/zip' : 'application/sql';
+
             return response()->download($path, $filename, [
-                'Content-Type' => 'application/sql',
+                'Content-Type' => $mimeType,
                 'Content-Disposition' => "attachment; filename=\"{$filename}\"",
             ]);
         } catch (Exception $e) {
@@ -77,7 +85,7 @@ class BackupRestoreController extends Controller
     }
 
     /**
-     * Restore the database from an existing archive or an uploaded .sql file.
+     * Restore the system from an existing archive or an uploaded .zip / .sql file.
      */
     public function restore(RestoreBackupRequest $request): RedirectResponse
     {
@@ -87,11 +95,24 @@ class BackupRestoreController extends Controller
                 $realPath = $uploadedFile->getRealPath();
                 $originalName = $uploadedFile->getClientOriginalName();
 
-                $this->backupService->restoreBackup($realPath);
+                // If uploaded file is a zip or sql, preserve extension in temporary target for extension checks
+                $ext = strtolower($uploadedFile->getClientOriginalExtension());
+                $tempPath = storage_path('app/temp_upload_'.uniqid().'.'.$ext);
+                copy($realPath, $tempPath);
+
+                try {
+                    $result = $this->backupService->restoreBackup($tempPath);
+                } finally {
+                    if (file_exists($tempPath)) {
+                        @unlink($tempPath);
+                    }
+                }
+
+                $prefix = $result['type'] === 'full' ? 'Pemulihan Sistem Lengkap' : 'Pemulihan Basis Data';
 
                 return redirect()
                     ->route('backup-restore')
-                    ->with('success', "Basis data berhasil dipulihkan dari berkas unggahan: {$originalName}.");
+                    ->with('success', "{$prefix} berhasil dari berkas unggahan: {$originalName}. {$result['message']}");
             }
 
             $filename = (string) $request->input('filename');
@@ -103,15 +124,16 @@ class BackupRestoreController extends Controller
                     ->with('error', 'Berkas cadangan terpilih tidak ditemukan.');
             }
 
-            $this->backupService->restoreBackup($path);
+            $result = $this->backupService->restoreBackup($path);
+            $prefix = $result['type'] === 'full' ? 'Pemulihan Sistem Lengkap' : 'Pemulihan Basis Data';
 
             return redirect()
                 ->route('backup-restore')
-                ->with('success', "Basis data berhasil dipulihkan dari cadangan server: {$filename}.");
+                ->with('success', "{$prefix} berhasil dari arsip server: {$filename}. {$result['message']}");
         } catch (Exception $e) {
             return redirect()
                 ->route('backup-restore')
-                ->with('error', 'Gagal memulihkan basis data: '.$e->getMessage());
+                ->with('error', 'Gagal memulihkan sistem: '.$e->getMessage());
         }
     }
 

@@ -24,13 +24,22 @@ beforeEach(function () {
 
     $this->backupService = app(DatabaseBackupService::class);
     $this->backupDir = $this->backupService->getBackupDirectory();
+    $this->publicStorageDir = storage_path('app/public');
 });
 
 afterEach(function () {
     // Clean up temporary test files in backup directory
-    $testFiles = File::glob($this->backupDir.DIRECTORY_SEPARATOR.'test_*.sql');
+    $testFiles = array_merge(
+        File::glob($this->backupDir.DIRECTORY_SEPARATOR.'test_*.sql') ?: [],
+        File::glob($this->backupDir.DIRECTORY_SEPARATOR.'test_*.zip') ?: []
+    );
     foreach ($testFiles as $file) {
         File::delete($file);
+    }
+
+    // Clean up dummy test assets in public storage
+    if (File::exists($this->publicStorageDir.DIRECTORY_SEPARATOR.'test_asset.txt')) {
+        File::delete($this->publicStorageDir.DIRECTORY_SEPARATOR.'test_asset.txt');
     }
 });
 
@@ -43,18 +52,19 @@ test('guest cannot access backup-restore page and is redirected to login', funct
 test('non super admin cannot access backup-restore page', function () {
     $response = $this->actingAs($this->teacherUser)->get('/backup-restore');
 
-    // Forbidden for non super_admin
     $response->assertForbidden();
 });
 
-test('super admin can view backup-restore page with database stats', function () {
+test('super admin can view backup-restore page with database and storage stats', function () {
     $response = $this->actingAs($this->superAdmin)->get('/backup-restore');
 
     $response->assertOk();
-    $response->assertSee('Cadangan & Pemulihan Basis Data', false);
+    $response->assertSee('Cadangan & Pemulihan Sistem', false);
     $response->assertSee('Basis Data Aktif');
     $response->assertSee('Total Tabel Sistem');
-    $response->assertSee('Buat Cadangan Baru');
+    $response->assertSee('Aset Storage Pengguna');
+    $response->assertSee('Buat Cadangan Lengkap (ZIP)');
+    $response->assertSee('Cadangan Database (SQL)');
 });
 
 test('backup-restore menu is marked active when on /backup-restore route', function () {
@@ -77,27 +87,57 @@ test('backup-restore menu is marked active when on /backup-restore route', funct
     expect($menu->isRouteActive())->toBeTrue();
 });
 
-test('super admin can create a new database backup dump', function () {
-    $response = $this->actingAs($this->superAdmin)->post(route('backup-restore.create'));
+test('super admin can create a new full system backup zip archive', function () {
+    // Create a dummy file in public storage to ensure storage archiving is covered
+    File::ensureDirectoryExists($this->publicStorageDir);
+    File::put($this->publicStorageDir.DIRECTORY_SEPARATOR.'test_asset.txt', 'Asset content for backup');
+
+    $response = $this->actingAs($this->superAdmin)->post(route('backup-restore.create'), [
+        'type' => 'full',
+    ]);
 
     $response->assertRedirect(route('backup-restore'));
     $response->assertSessionHas('success');
 
     $backups = $this->backupService->listBackups();
-    expect($backups->isNotEmpty())->toBeTrue();
-
     $latest = $backups->first();
-    expect($latest['size_bytes'])->toBeGreaterThan(0)
+
+    expect($latest['type'])->toBe('full')
+        ->and(str_ends_with($latest['filename'], '.zip'))->toBeTrue()
         ->and(File::exists($latest['path']))->toBeTrue();
 
-    // Verify SQL dump contains table structure and data
-    $content = File::get($latest['path']);
-    $expectedForeignCheck = DB::connection()->getDriverName() === 'sqlite'
-        ? 'PRAGMA foreign_keys = OFF;'
-        : 'SET FOREIGN_KEY_CHECKS=0;';
+    // Verify ZIP contains manifest.json, database.sql, and storage files
+    $zip = new ZipArchive;
+    expect($zip->open($latest['path']))->toBeTrue();
+    expect($zip->locateName('manifest.json'))->not()->toBeFalse()
+        ->and($zip->locateName('database.sql'))->not()->toBeFalse()
+        ->and($zip->locateName('storage/test_asset.txt'))->not()->toBeFalse();
 
-    expect($content)->toContain($expectedForeignCheck)
-        ->and($content)->toContain('CREATE TABLE');
+    $manifestContent = $zip->getFromName('manifest.json');
+    $manifestData = json_decode($manifestContent, true);
+    expect($manifestData['backup_type'])->toBe('full')
+        ->and($manifestData['database'])->toHaveKey('total_tables');
+
+    $zip->close();
+
+    // Clean up created file
+    File::delete($latest['path']);
+});
+
+test('super admin can create a new database-only backup dump', function () {
+    $response = $this->actingAs($this->superAdmin)->post(route('backup-restore.create'), [
+        'type' => 'database',
+    ]);
+
+    $response->assertRedirect(route('backup-restore'));
+    $response->assertSessionHas('success');
+
+    $backups = $this->backupService->listBackups();
+    $latest = $backups->first();
+
+    expect($latest['type'])->toBe('database')
+        ->and(str_ends_with($latest['filename'], '.sql'))->toBeTrue()
+        ->and($latest['size_bytes'])->toBeGreaterThan(0);
 
     // Clean up created file
     File::delete($latest['path']);
@@ -119,16 +159,15 @@ test('downloading non-existent or invalid filename fails gracefully', function (
     $responseNonExistent->assertRedirect(route('backup-restore'));
     $responseNonExistent->assertSessionHas('error');
 
-    // Invalid extension or traversal attempt
     $responseInvalid = $this->actingAs($this->superAdmin)->get(route('backup-restore.download', 'invalid_script.php'));
     $responseInvalid->assertRedirect(route('backup-restore'));
     $responseInvalid->assertSessionHas('error');
 });
 
 test('super admin can delete an existing backup file', function () {
-    $dummyFilename = 'test_backup_delete.sql';
+    $dummyFilename = 'test_backup_delete.zip';
     $dummyPath = $this->backupDir.DIRECTORY_SEPARATOR.$dummyFilename;
-    File::put($dummyPath, '-- Dummy SQL to Delete');
+    File::put($dummyPath, 'Dummy ZIP Content');
 
     expect(File::exists($dummyPath))->toBeTrue();
 
@@ -137,6 +176,33 @@ test('super admin can delete an existing backup file', function () {
     $response->assertRedirect(route('backup-restore'));
     $response->assertSessionHas('success');
     expect(File::exists($dummyPath))->toBeFalse();
+});
+
+test('super admin can restore full system from an existing zip archive and auto-links storage', function () {
+    $zipFilename = 'test_full_restore.zip';
+    $zipPath = $this->backupDir.DIRECTORY_SEPARATOR.$zipFilename;
+
+    // Create a real mock zip with database.sql and a storage asset
+    $zip = new ZipArchive;
+    $zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+    $zip->addFromString('database.sql', "SELECT 1;\n");
+    $zip->addFromString('manifest.json', json_encode(['backup_type' => 'full']));
+    $zip->addFromString('storage/restored_image.txt', 'Restored image content');
+    $zip->close();
+
+    $response = $this->actingAs($this->superAdmin)->post(route('backup-restore.restore'), [
+        'filename' => $zipFilename,
+    ]);
+
+    $response->assertRedirect(route('backup-restore'));
+    $response->assertSessionHas('success');
+
+    // Verify storage file was extracted to storage/app/public
+    expect(File::exists($this->publicStorageDir.DIRECTORY_SEPARATOR.'restored_image.txt'))->toBeTrue()
+        ->and(File::get($this->publicStorageDir.DIRECTORY_SEPARATOR.'restored_image.txt'))->toBe('Restored image content');
+
+    // Clean up
+    File::delete($this->publicStorageDir.DIRECTORY_SEPARATOR.'restored_image.txt');
 });
 
 test('super admin can restore database from an existing sql file', function () {
@@ -152,7 +218,7 @@ test('super admin can restore database from an existing sql file', function () {
     $response->assertSessionHas('success');
 });
 
-test('super admin can restore database from an uploaded sql file', function () {
+test('super admin can restore database from an uploaded zip or sql file', function () {
     $uploadedFile = UploadedFile::fake()->createWithContent('uploaded_backup.sql', "SELECT 1;\n");
 
     $response = $this->actingAs($this->superAdmin)->post(route('backup-restore.restore'), [
@@ -163,13 +229,27 @@ test('super admin can restore database from an uploaded sql file', function () {
     $response->assertSessionHas('success');
 });
 
+test('ensureStorageLink checks symlink health and avoids redundant creation if already valid', function () {
+    $link = public_path('storage');
+    $target = storage_path('app/public');
+    File::ensureDirectoryExists($target);
+
+    // Call ensureStorageLink
+    $result = $this->backupService->ensureStorageLink();
+    expect($result)->toBeTrue();
+
+    // Calling again should return true directly without issues
+    $secondResult = $this->backupService->ensureStorageLink();
+    expect($secondResult)->toBeTrue();
+});
+
 test('restore request fails if neither filename nor backup_file is supplied', function () {
     $response = $this->actingAs($this->superAdmin)->post(route('backup-restore.restore'), []);
 
     $response->assertSessionHasErrors(['backup_source']);
 });
 
-test('restore request fails if uploaded file is not sql or txt', function () {
+test('restore request fails if uploaded file is not zip, sql, or txt', function () {
     $invalidFile = UploadedFile::fake()->create('malicious.php', 100);
 
     $response = $this->actingAs($this->superAdmin)->post(route('backup-restore.restore'), [

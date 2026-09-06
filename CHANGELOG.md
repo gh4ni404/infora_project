@@ -9,15 +9,14 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 ## [Unreleased]
 
 ### Added
-- **Sistem Cadangan & Pemulihan Basis Data (*Backup & Restore / Disaster Recovery*):**
-  - Mengimplementasikan fitur manajemen cadangan dan pemulihan data sistem untuk Super Administrator pada rute `/backup-restore` (`backup-restore`) di bawah modul PENGATURAN SISTEM.
-  - Mesin ekspor mandiri (*pure native PHP/PDO*) tanpa ketergantungan paket eksternal: mengekspor seluruh struktur tabel (`SHOW CREATE TABLE`) dan data baris per baris dengan sanitasi escaping PDO yang aman, disertai kontrol integritas relasi `SET FOREIGN_KEY_CHECKS=0/1` (dan kompatibilitas SQLite `PRAGMA foreign_keys = OFF/ON`).
-  - Manajemen arsip cadangan tersimpan di direktori privat server (`storage/app/backups/`) dengan informasi ukuran berkas dan waktu pembuatan yang diurutkan otomatis.
-  - Pengunduhan berkas cadangan (`.sql`) ke komputer lokal dan penghapusan arsip dengan perlindungan pencegahan *directory traversal*.
-  - Fitur pemulihan data (*restore*) dari berkas arsip yang ada di server maupun dari unggahan berkas eksternal (`.sql`) hingga batas 50 MB melalui `RestoreBackupRequest`.
-  - Protokol keamanan tinggi: Dialog modal konfirmasi bahaya interaktif (*Danger Confirmation Modal*) yang mewajibkan pengetikan kata sandi verifikasi `"PULIHKAN"` sebelum eksekusi pemulihan data dijalankan.
-  - Tampilan antarmuka estetik 100% menggunakan reusable class CSS di `resources/css/app.css`, bebas *inline styles*, dan bebas tag `<style>`.
-  - Feature test suite Pest lengkap `BackupRestoreTest.php` (total 79 tests aplikasi lulus 100%, 341 assertions).
+- **Sistem Cadangan & Pemulihan Sistem Lengkap (*Full System Snapshot & Server Migration Ready*):**
+  - Meningkatkan fitur Backup & Restore pada rute `/backup-restore` (`backup-restore`) di bawah modul PENGATURAN SISTEM dari sekadar dump database menjadi snapshot sistem terpadu berformat `.zip`.
+  - Mengemas basis data (`database.sql`), seluruh berkas/gambar unggahan pengguna (`storage/app/public/`), dan berkas `manifest.json` metadata ke dalam satu arsip portabel mandiri via native PHP `ZipArchive`.
+  - Pengecualian cerdas pada folder `vendor/`, `node_modules/`, `.git/`, dan `storage/framework/` agar ukuran arsip tetap ringkas dan bebas konflik binary OS antar server.
+  - **Pencegahan Otomatis Gambar 404 (*Symlink Health Check & Auto-Repair*)**: Saat pemulihan (*restore*), sistem memeriksa kesehatan symlink `public/storage`; jika sudah terhubung valid ke target lokal, sistem melanjutkan tanpa operasi berlebih; jika belum ada atau rusak (*broken link* dari server lama), sistem otomatis membuat ulang symlink (`Artisan::call('storage:link')`).
+  - Opsi ganda pada antarmuka: **Buat Cadangan Lengkap (ZIP)** untuk migrasi server / disaster recovery, dan **Cadangan Database (SQL)** untuk pencadangan cepat harian.
+  - Peningkatan batas unggahan pemulihan hingga 200 MB via `RestoreBackupRequest` dengan deteksi cerdas tipe berkas `.zip` atau `.sql`.
+  - Feature test suite Pest diperluas pada `BackupRestoreTest.php` (total 82 tests aplikasi lulus 100%, 360 assertions).
 - **Sistem Tata Kelola Menu Akses & Dynamic Role Templates (User-Centric Granular Permissions):**
   - Mengimplementasikan otorisasi navigasi berbasis pengguna pada rute `/sistem/menu-akses` (`sistem.menu-akses`) lengkap dengan 4 hak aksi granular: Lihat (`can_view`), Tambah (`can_create`), Ubah (`can_edit`), dan Hapus (`can_delete`).
   - Sistem template peran dinamis (`menu_access_templates`) yang dapat dikonfigurasi penuh oleh Super Admin untuk beragam peran (Guru Pengajar, Wali Kelas, Wakasek Kurikulum, Wakasek Kesiswaan, Staf TU, Siswa Reguler, Siswa PKL) melalui antarmuka khusus.

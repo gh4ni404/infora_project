@@ -3,19 +3,35 @@
 @section('content')
 <div class="page-header">
     <div>
-        <h2 class="page-title">Cadangan & Pemulihan Basis Data</h2>
-        <div class="page-subtitle">Manajemen disaster recovery, pencadangan otomatis & pemulihan data sistem INFORA</div>
+        <h2 class="page-title">Cadangan & Pemulihan Sistem</h2>
+        <div class="page-subtitle">Pencadangan portabel (basis data & berkas aset) untuk migrasi server dan disaster recovery INFORA</div>
     </div>
-    <div class="page-actions">
+    <div class="page-actions page-actions-group">
+        <!-- Cadangan Lengkap ZIP (Primary) -->
         <form method="POST" action="{{ route('backup-restore.create') }}" class="form-inline-action">
             @csrf
-            <button type="submit" class="btn-primary" id="btnCreateBackup">
+            <input type="hidden" name="type" value="full">
+            <button type="submit" class="btn-primary" id="btnCreateFullBackup" title="Buat arsip ZIP terpadu berisi basis data dan seluruh berkas aset pengguna">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                     <polyline points="7 10 12 15 17 10"></polyline>
                     <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
-                <span>Buat Cadangan Baru</span>
+                <span>Buat Cadangan Lengkap (ZIP)</span>
+            </button>
+        </form>
+
+        <!-- Cadangan Database SQL (Secondary Outline) -->
+        <form method="POST" action="{{ route('backup-restore.create') }}" class="form-inline-action">
+            @csrf
+            <input type="hidden" name="type" value="database">
+            <button type="submit" class="btn-outline-primary" id="btnCreateDbBackup" title="Ekspor dump skema dan data basis data saja">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                </svg>
+                <span>Cadangan Database (SQL)</span>
             </button>
         </form>
     </div>
@@ -96,8 +112,8 @@
             </svg>
         </div>
         <div class="backup-stat-content">
-            <span class="backup-stat-label">Arsip Cadangan</span>
-            <span class="backup-stat-value">{{ $stats['backup_count'] }} Berkas</span>
+            <span class="backup-stat-label">Aset Storage Pengguna</span>
+            <span class="backup-stat-value">{{ $stats['public_storage_file_count'] }} Berkas ({{ $stats['public_storage_human'] }})</span>
         </div>
     </div>
 
@@ -110,8 +126,8 @@
             </svg>
         </div>
         <div class="backup-stat-content">
-            <span class="backup-stat-label">Kapasitas Arsip</span>
-            <span class="backup-stat-value">{{ $stats['total_storage_human'] }}</span>
+            <span class="backup-stat-label">Arsip Cadangan Tersimpan</span>
+            <span class="backup-stat-value">{{ $stats['backup_count'] }} Berkas ({{ $stats['total_storage_human'] }})</span>
         </div>
     </div>
 </div>
@@ -126,8 +142,8 @@
         </svg>
     </div>
     <div class="backup-danger-text">
-        <div class="backup-danger-title">Perhatian Khusus Pemulihan Data (*Database Restore*)</div>
-        Operasi pemulihan basis data bersifat <strong>destruktif menyeluruh</strong>. Data pada tabel aktif saat ini akan digantikan sepenuhnya oleh data yang berada di dalam berkas cadangan. Sangat dianjurkan untuk membuat cadangan baru sebelum melakukan proses pemulihan.
+        <div class="backup-danger-title">Perhatian Khusus Pemulihan Data (*Full System Restore*)</div>
+        Operasi pemulihan sistem bersifat <strong>destruktif menyeluruh</strong>. Data pada tabel dan berkas di dalam <code>storage/app/public/</code> akan digantikan oleh data dari berkas cadangan. Sistem secara otomatis memverifikasi dan menyambungkan kembali <em>symbolic link</em> storage agar seluruh aset gambar tetap terhubung dan bebas galat 404.
     </div>
 </div>
 
@@ -145,6 +161,7 @@
                 <thead>
                     <tr>
                         <th>Nama Berkas</th>
+                        <th>Tipe Cadangan</th>
                         <th>Ukuran</th>
                         <th>Waktu Pembuatan</th>
                         <th class="col-w-actions">Aksi</th>
@@ -157,7 +174,14 @@
                                 <div class="table-cell-bold">{{ $backup['filename'] }}</div>
                             </td>
                             <td>
-                                <span class="badge badge-cyan">{{ $backup['size_human'] }}</span>
+                                @if ($backup['type'] === 'full')
+                                    <span class="badge badge-purple" title="Snapshot Lengkap: Basis Data + Seluruh Berkas Aset">Full Snapshot (ZIP)</span>
+                                @else
+                                    <span class="badge badge-cyan" title="Hanya Skema & Data Basis Data">Database Saja (SQL)</span>
+                                @endif
+                            </td>
+                            <td>
+                                <span class="table-cell-bold">{{ $backup['size_human'] }}</span>
                             </td>
                             <td>
                                 <span class="table-cell-muted">{{ $backup['created_at']->translatedFormat('d M Y, H:i') }}</span>
@@ -177,9 +201,10 @@
                                         type="button"
                                         class="btn-restore btn-trigger-restore"
                                         data-filename="{{ $backup['filename'] }}"
+                                        data-type="{{ $backup['type_label'] }}"
                                         data-size="{{ $backup['size_human'] }}"
                                         data-date="{{ $backup['created_at']->translatedFormat('d M Y, H:i:s') }}"
-                                        title="Pulihkan Basis Data dari Berkas Ini"
+                                        title="Pulihkan Sistem dari Berkas Ini"
                                     >
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
@@ -188,7 +213,7 @@
                                         <span>Pulihkan</span>
                                     </button>
 
-                                    <form method="POST" action="{{ route('backup-restore.destroy', $backup['filename']) }}" onsubmit="return confirm('Hapus permanen berkas cadangan {{ $backup['filename'] }} dari penyimpanan server?');" class="form-inline-action">
+                                    <form method="POST" action="{{ route('backup-restore.destroy', $backup['filename']) }}" onsubmit="return confirm('Hapus permanen berkas cadangan {{ $backup['filename'] }} dari server?');" class="form-inline-action">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn-delete" title="Hapus Berkas Cadangan">
@@ -204,12 +229,12 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4">
+                            <td colspan="5">
                                 <div class="empty-state">
                                     <svg class="empty-state-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                                     </svg>
-                                    <span class="empty-state-text">Belum ada berkas cadangan di server. Klik "Buat Cadangan Baru" untuk membuat cadangan pertama Anda.</span>
+                                    <span class="empty-state-text">Belum ada berkas cadangan di server. Klik "Buat Cadangan Lengkap (ZIP)" untuk membuat cadangan portabel pertama Anda.</span>
                                 </div>
                             </td>
                         </tr>
@@ -224,24 +249,24 @@
         <div class="card-header">
             <div>
                 <span class="table-cell-bold">Unggah & Pulihkan Eksternal</span>
-                <div class="form-hint">Pulihkan database dari file .sql eksternal</div>
+                <div class="form-hint">Migrasi dari server lain / pulihkan berkas lokal</div>
             </div>
-            <span class="badge badge-amber">Maks 50MB</span>
+            <span class="badge badge-amber">Maks 200MB</span>
         </div>
         <div class="card-body">
             <form method="POST" action="{{ route('backup-restore.restore') }}" enctype="multipart/form-data" id="formUploadRestore">
                 @csrf
                 <div class="form-group">
-                    <label for="backupFileInput" class="form-label">Pilih Berkas Cadangan (.sql)</label>
+                    <label for="backupFileInput" class="form-label">Pilih Berkas Cadangan (.zip atau .sql)</label>
                     <input
                         type="file"
                         id="backupFileInput"
                         name="backup_file"
-                        accept=".sql,.txt"
+                        accept=".zip,.sql,.txt"
                         class="form-input"
                         required
                     >
-                    <div class="form-hint">Format yang didukung: SQL Script dump (*.sql) maksimal 50 megabyte.</div>
+                    <div class="form-hint">Mendukung paket snapshot lengkap (ZIP) atau skrip SQL basis data maksimal 200 megabyte.</div>
                 </div>
 
                 <div class="form-group">
@@ -264,8 +289,8 @@
     <div class="modal-dialog">
         <div class="modal-header">
             <div>
-                <h3 class="modal-title text-danger" id="modalRestoreTitle">Konfirmasi Bahaya Pemulihan Data</h3>
-                <p class="modal-subtitle">Tindakan ini akan menimpa seluruh tabel pada basis data aktif</p>
+                <h3 class="modal-title text-danger" id="modalRestoreTitle">Konfirmasi Bahaya Pemulihan Sistem</h3>
+                <p class="modal-subtitle">Tindakan ini akan menimpa basis data aktif dan menyelaraskan berkas penyimpanan</p>
             </div>
             <button type="button" class="modal-close-btn" id="btnCloseRestoreModal" aria-label="Tutup Dialog">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -364,16 +389,17 @@ document.addEventListener('DOMContentLoaded', function() {
     restoreTriggers.forEach(function(btn) {
         btn.addEventListener('click', function() {
             const filename = btn.getAttribute('data-filename');
+            const type = btn.getAttribute('data-type');
             const size = btn.getAttribute('data-size');
             const date = btn.getAttribute('data-date');
-            openRestoreModal(filename, 'Ukuran: ' + size + ' | Dibuat: ' + date, 'server');
+            openRestoreModal(filename, 'Tipe: ' + type + ' | Ukuran: ' + size + ' | Dibuat: ' + date, 'server');
         });
     });
 
     if (btnTriggerUploadRestore) {
         btnTriggerUploadRestore.addEventListener('click', function() {
             if (!backupFileInput.files || backupFileInput.files.length === 0) {
-                alert('Silakan pilih berkas .sql terlebih dahulu.');
+                alert('Silakan pilih berkas .zip atau .sql terlebih dahulu.');
                 backupFileInput.focus();
                 return;
             }

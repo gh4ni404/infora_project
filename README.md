@@ -108,11 +108,12 @@ Dibangun dengan arsitektur **API-First & System Bridging**, **Pengembangan Berba
 - **Filtering Dinamis pada Sidebar (`SidebarComposer`):** Sidebar hanya menampilkan modul, menu, dan sub-menu yang diizinkan (`can_view = true`) untuk pengguna yang sedang login. Akun `super_admin` secara permanen mempertahankan akses penuh (*root bypass*).
 - **Akses Rute Resmi:** Tersedia di URL `/sistem/menu-akses` dengan nama rute `sistem.menu-akses`.
 
-### 💾 13. Sistem Cadangan & Pemulihan Basis Data (Backup & Restore / Disaster Recovery)
-- **Otomasi Pembuatan Cadangan Satu Klik:** Mengekspor seluruh struktur skema basis data dan baris data ke berkas SQL dump (`.sql`) yang tersimpan di direktori privat server (`storage/app/backups/`).
-- **Mesin Mandiri Pure Native PHP/PDO:** Dirancang tanpa ketergantungan paket berat pihak ketiga, menjamin kompatibilitas tinggi lintas platform (Docker, server staging, dan hosting produksi) dengan proteksi penanganan foreign keys otomatis.
+### 💾 13. Sistem Cadangan & Pemulihan Sistem Lengkap (Full System Snapshot & Server Migration Ready)
+- **Snapshot Portabel Satu-Klik (.zip):** Mengekspor seluruh struktur skema basis data (`database.sql`) dan seluruh berkas/gambar unggahan pengguna (`storage/app/public/`) ke dalam satu arsip ZIP mandiri berformat standar yang dilengkapi `manifest.json`.
+- **Mesin Mandiri Pure Native PHP/PDO & ZipArchive:** Dirancang tanpa ketergantungan paket berat pihak ketiga, menjamin kompatibilitas tinggi lintas platform (Docker, server staging, dan hosting produksi) dengan proteksi penanganan foreign keys otomatis.
+- **Pengecekan & Reparasi Cerdas Symlink (*Zero Broken Images / Anti-404*):** Saat proses restore di server baru, sistem memeriksa validitas symlink `public/storage`; jika sudah terhubung sehat ke path target lokal maka dilanjutkan langsung, dan jika belum ada atau rusak/putus (*broken link* dari server lama), sistem otomatis membuat ulang symlink (`Artisan::call('storage:link')`).
 - **Tata Kelola Arsip & Unduhan Lokal:** Memantau daftar berkas cadangan tersimpan, kapasitas penyimpanan yang terpakai, serta menyediakan tombol unduh aman ke komputer lokal maupun penghapusan berkas dengan sanitasi *anti-directory traversal*.
-- **Pemulihan Data Fleksibel (*Flexible Restore*):** Mendukung pemulihan langsung dari berkas cadangan yang ada di server maupun dari berkas `.sql` eksternal melalui formulir unggah berkas (hingga 50 MB).
+- **Pemulihan Fleksibel (*Full ZIP & SQL Dump*):** Mendukung pemulihan dari berkas cadangan di server maupun dari unggahan berkas eksternal hingga 200 MB via formulir unggah.
 - **Protokol Keamanan Ketat (*Danger Confirmation Modal*):** Mengingat proses pemulihan bersifat destruktif terhadap data aktif, sistem memproteksi aksi restore dengan dialog modal interaktif yang mewajibkan pengetikan kata kunci verifikasi `"PULIHKAN"` sebelum tombol eksekusi terbuka.
 - **Akses Rute Mandiri:** Berada pada URL `/backup-restore` dengan nama rute `backup-restore` (sesuai nama rute pada menu mandiri sistem).
 

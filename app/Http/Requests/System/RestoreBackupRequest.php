@@ -23,8 +23,8 @@ class RestoreBackupRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'filename' => ['nullable', 'string', 'regex:/^[a-zA-Z0-9_\-]+\.sql$/'],
-            'backup_file' => ['nullable', 'file', 'max:51200', 'mimes:sql,txt'],
+            'filename' => ['nullable', 'string', 'regex:/^[a-zA-Z0-9_\-]+\.(sql|zip)$/'],
+            'backup_file' => ['nullable', 'file', 'max:204800', 'mimes:sql,txt,zip'],
         ];
     }
 
@@ -35,7 +35,7 @@ class RestoreBackupRequest extends FormRequest
     {
         $validator->after(function ($validator) {
             if (blank($this->input('filename')) && ! $this->hasFile('backup_file')) {
-                $validator->errors()->add('backup_source', 'Silakan pilih berkas cadangan dari daftar atau unggah berkas .sql baru.');
+                $validator->errors()->add('backup_source', 'Silakan pilih berkas cadangan dari daftar atau unggah berkas .zip / .sql baru.');
             }
         });
     }
@@ -61,10 +61,10 @@ class RestoreBackupRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'filename.regex' => 'Format nama berkas cadangan tidak valid.',
+            'filename.regex' => 'Format nama berkas cadangan tidak valid (harus .sql atau .zip).',
             'backup_file.file' => 'Berkas unggahan harus berupa berkas valid.',
-            'backup_file.max' => 'Ukuran berkas cadangan maksimal adalah 50 MB.',
-            'backup_file.mimes' => 'Berkas cadangan harus berekstensi .sql atau .txt.',
+            'backup_file.max' => 'Ukuran berkas cadangan maksimal adalah 200 MB.',
+            'backup_file.mimes' => 'Berkas cadangan harus berekstensi .zip, .sql, atau .txt.',
         ];
     }
 }
