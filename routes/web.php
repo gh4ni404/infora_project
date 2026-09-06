@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\System\MenuController;
 use App\Http\Controllers\System\ModuleController;
 use App\Http\Controllers\System\SubMenuController;
+use App\Http\Controllers\System\UnderDevelopmentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -22,6 +23,7 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
 
     // Pengaturan Sistem (System Governance)
     Route::prefix('system')->name('system.')->group(function () {
+        Route::get('/under-development', [UnderDevelopmentController::class, 'show'])->name('under-development');
         Route::resource('modules', ModuleController::class)->except(['show']);
         Route::resource('menus', MenuController::class)->except(['show']);
         Route::resource('sub-menus', SubMenuController::class)->except(['show']);

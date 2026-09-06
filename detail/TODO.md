@@ -78,7 +78,12 @@
     - [x] Penjangkaran Simetris Animasi Sidebar (*Anchored Symmetrical Transition*): Posisi avatar 38px (17px margin) dan seluruh ikon menu (26px margin) terkunci presisi tanpa pergeseran horizontal (0px horizontal jump) baik saat expanded (260px) maupun collapsed (72px), menghilangkan glitch *auto-centering*.
     - [x] Tombol Pencarian Interaktif Mode Ciut & Shortcut `Ctrl+K`: Kotak pencarian otomatis berubah menjadi tombol ikon 40px di atas Dashboard saat sidebar diciutkan; mengkliknya otomatis membuka sidebar dan memfokuskan input pencarian.
     - [x] Otomatisasi Kapitalisasi Teks Input & Integritas Data: Frontend real-time auto-transform via `[data-transform]` + helper `TextFormatter` & Eloquent mutators (UPPERCASE untuk Modul, Title Case / Capitalize Each Word untuk Menu & Sub-Menu dengan preservasi akronim pendidikan & teknologi).
-    - [x] Automated Pest test suite (total 54 tests lulus 100%, 242 assertions).
+    - [x] Halaman Placeholder "Fitur Dalam Pengembangan" & Dynamic Navigation Fallback:
+      - [x] Eliminasi tautan mati (`href="#"`) di sidebar untuk menu/sub-menu tanpa rute terdaftar.
+      - [x] Fallback otomatis model `Menu` & `SubMenu` ke rute `system.under-development?type={menu|submenu}&id={id}` jika rute belum diimplementasikan di `routes/web.php`.
+      - [x] Controller `UnderDevelopmentController` & View `resources/views/system/under-development.blade.php` dengan breadcrumb hierarki, kartu status, dan developer scaffolding blueprint (`php artisan make:controller ...`).
+      - [x] Preservasi state aktif sidebar (accordion induk tetap terbuka dan item disorot aktif saat berada di halaman placeholder).
+    - [x] Automated Pest test suite (total 59 tests lulus 100%, 261 assertions).
 - [ ] **2.4. User-Centric Menu Access & Role Presets (Pengembangan Lanjutan)**
   - [ ] Registrasi katalog menu terpusat (`config/menu.php`) dengan atribut `key`, `title`, `icon`, `route`, `group`, dan filter tipe sekolah `school_type: ['sma', 'smk']`.
   - [ ] Alokasi menu berbasis pengguna (*User-Centric Access Control*): mengizinkan satu guru memegang berbagai penugasan tanpa batasan role kaku.

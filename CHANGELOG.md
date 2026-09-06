@@ -9,6 +9,12 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 ## [Unreleased]
 
 ### Added
+- **Halaman Placeholder "Fitur Dalam Pengembangan" & Dynamic Fallback (Zero Dead Links):**
+  - Mengeliminasi tautan mati (`href="#"`) di sidebar: Setiap menu atau sub-menu yang dibuat oleh Super Admin namun belum memiliki rute implementasi aktif di `routes/web.php` secara otomatis mengarah ke halaman pratinjau `/system/under-development?type={menu|submenu}&id={id}`.
+  - Implementasi `UnderDevelopmentController` yang mengekstrak informasi hierarki entitas navigasi (Modul, Menu, Sub-Menu) dan menghasilkan saran cetak biru (*blueprint*) pengembang berupa snippet rute Laravel dan perintah CLI `php artisan make:controller ...`.
+  - Tampilan antarmuka profesional `resources/views/system/under-development.blade.php` dengan tema visual Infora, breadcrumbs navigasi, badge status *Under Development*, kartu detail entitas, dan tombol aksi cepat (*Edit Konfigurasi* & *Kembali ke Dashboard*).
+  - Preservasi state aktif sidebar: Saat halaman placeholder diakses, accordion menu induk otomatis tetap terbuka (`is-open active-parent`) dan sub-menu bersangkutan disorot aktif (`active`).
+  - Suite pengujian fitur otomatis (`UnderDevelopmentTest.php`) dan penyesuaian assertions pada `SidebarFrontendTest.php`, seluruh 59 test suite aplikasi lulus 100% (261 assertions).
 - **Ikon Pencarian Interaktif pada Sidebar Ciut & Shortcut Keyboard (`Ctrl+K`):**
   - Mengubah kotak pencarian (`.sidebar-search .search-box`) menjadi tombol ikon 40px x 40px interaktif saat sidebar dalam keadaan ciut (72px), mengisi ruang kosong di atas menu Dashboard dengan fungsi yang produktif dan estetik.
   - Mengklik tombol pencarian pada mode ciut akan langsung membuka sidebar secara otomatis dan memfokuskan kursor ke input pencarian (`#sidebarMenuSearch`).

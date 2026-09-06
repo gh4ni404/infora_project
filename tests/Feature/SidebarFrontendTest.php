@@ -35,9 +35,9 @@ test('sidebar renders seeded baseline modules and menus dynamically', function (
     $response->assertSee(route('system.menus.index'));
     $response->assertSee(route('system.sub-menus.index'));
 
-    // Verify unregistered routes fall back safely to '#'
+    // Verify unregistered routes fall back to under-development placeholder page
     $systemModule = Module::where('name', 'PENGATURAN SISTEM')->first();
-    Menu::create([
+    $dummyMenu = Menu::create([
         'module_id' => $systemModule->id,
         'name' => 'Menu Tanpa Rute',
         'route_name' => 'unregistered.dummy.route',
@@ -46,7 +46,7 @@ test('sidebar renders seeded baseline modules and menus dynamically', function (
     ]);
 
     $responseWithDummy = $this->actingAs($this->user)->get('/dashboard');
-    $responseWithDummy->assertSee('href="#"', false);
+    $responseWithDummy->assertSee(route('system.under-development', ['type' => 'menu', 'id' => $dummyMenu->id]));
 });
 
 test('sidebar correctly renders accordion group when a menu has sub-menus', function () {

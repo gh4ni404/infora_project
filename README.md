@@ -93,12 +93,19 @@ Dibangun dengan arsitektur **API-First & System Bridging**, **Pengembangan Berba
 - **Rasionalisasi:** Penggunaan constraint `unique` pada kolom teks (seperti nama modul, nama menu, slug, atau route) dihindari dalam skema database maupun layer validasi Form Request. Pendekatan ini dipilih untuk mencegah kerumitan implementasi dan berbagai *edge cases* validasi CRUD (misalnya: konflik saat pembaruan data tanpa mengubah nama, isu duplikasi nama pada modul yang berbeda, atau rute bersyarat).
 - **Integritas Berbasis Primary Key ID:** Seluruh identitas entitas dan relasi hierarki murni mengandalkan **Primary Key ID (Auto-Increment)** dan **Foreign Key dengan Cascade Delete**. Validasi berfokus pada tipe data, kelengkapan (*presence*), dan keberadaan relasi (*exists*), sehingga pengalaman pengelolaan data menjadi jauh lebih sederhana, fleksibel, dan minim galat operasional.
 
+### 🚧 11. Halaman Placeholder "Fitur Dalam Pengembangan" & Dynamic Navigation Fallback (Zero Dead Links)
+- **Eliminasi Tautan Mati (`href="#"`):** Seluruh item menu dan sub-menu yang dibuat oleh Super Admin namun belum memiliki rute implementasi aktif di `routes/web.php` tidak lagi menjadi link mati yang tidak responsif.
+- **Dynamic Fallback Otomatis:** Model `Menu` dan `SubMenu` secara otomatis mengarahkan klik navigasi ke rute terpusat `/system/under-development?type={menu|submenu}&id={id}`.
+- **Halaman Antarmuka Profesional & Informatif:** Menyajikan halaman bertema Infora yang elegan dengan breadcrumb hierarki navigasi (`MODUL ➔ MENU ➔ SUB-MENU`), status visibilitas, dan kartu detail entitas.
+- **Blueprint & Scaffolding Developer:** Menampilkan panduan instan bagi pengembang untuk mengaktifkan fitur tersebut, mencakup contoh baris kode registrasi di `routes/web.php` dan perintah CLI `php artisan make:controller ...`.
+- **Preservasi Status Aktif Sidebar:** Saat berada di halaman placeholder, accordion menu induk tetap terbuka dan item sub-menu bersangkutan disorot aktif secara visual.
+
 ---
 
 ## 💻 Tech Stack & Arsitektur
 
 - **Backend:** Laravel (Versi Terbaru) — *Modular Monolith, RESTful API & Bridging Core*
-- **Navigation & Hierarchy:** System-Driven Dynamic Navigation (Modul ➔ Menu ➔ Sub-Menu), 3 Baseline Bootstrap Menus, Non-Unique Entity Convention
+- **Navigation & Hierarchy:** System-Driven Dynamic Navigation (Modul ➔ Menu ➔ Sub-Menu), 3 Baseline Bootstrap Menus, Dynamic Under-Development Fallback (Zero Dead Links), Non-Unique Entity Convention
 - **Data & Response Contract:** Pure JSON Responses (`application/json`), Eloquent API Resources, Zero HTML in Data Payloads
 - **Media & File Handling:** Base64 Uploads (Maks. 1MB/file, Preservasi Kualitas, Pola Nama: `{modul}_u{user_id}_{timestamp}_{random8}.{ext}`)
 - **Styling & UI Convention:** Reusable Global CSS Classes (Light, Smooth & Clean Theme, Strict No Ad-Hoc/Specific Classes), Zero Inline Styles (`style=""`), Zero `<style>` Tags in Views

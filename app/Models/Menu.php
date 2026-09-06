@@ -76,20 +76,22 @@ class Menu extends Model
 
     /**
      * Resolve the target URL for this menu.
-     * Supports exact route names, .index fallback, or returns '#'.
+     * Supports exact route names, .index fallback, or system.under-development placeholder.
      */
     public function getRouteUrlAttribute(): string
     {
-        if (blank($this->route_name)) {
-            return '#';
+        if (! blank($this->route_name)) {
+            if (Route::has($this->route_name)) {
+                return route($this->route_name);
+            }
+
+            if (Route::has($this->route_name.'.index')) {
+                return route($this->route_name.'.index');
+            }
         }
 
-        if (Route::has($this->route_name)) {
-            return route($this->route_name);
-        }
-
-        if (Route::has($this->route_name.'.index')) {
-            return route($this->route_name.'.index');
+        if (Route::has('system.under-development')) {
+            return route('system.under-development', ['type' => 'menu', 'id' => $this->id]);
         }
 
         return '#';
@@ -100,6 +102,10 @@ class Menu extends Model
      */
     public function isRouteActive(): bool
     {
+        if (request()->routeIs('system.under-development') && request('type') === 'menu' && (int) request('id') === $this->id) {
+            return true;
+        }
+
         if (blank($this->route_name)) {
             return false;
         }
