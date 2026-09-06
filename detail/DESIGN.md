@@ -173,6 +173,11 @@ erDiagram
 - **Rate Limiting & Throttling:** Perlindungan endpoint sensitif dan form submit dari serangan brute force.
 - **Input Sanitization & CSRF:** Proteksi bawaan terhadap serangan SQL Injection, Cross-Site Scripting (XSS), dan CSRF.
 - **Base64 Media Upload Pipeline & Naming Standard:** Pengunggahan foto dokumentasi menggunakan Base64 di payload JSON (maksimal 1MB per berkas) dengan optimasi kompresi agar kualitas gambar bukti fisik tetap jernih dan tajam. Seluruh berkas tersimpan wajib mengikuti format penamaan semantik: `{modul}_u{user_id}_{YYYYMMDD_His}_{random_8char}.{ekstensi}` (contoh: `kbm_u7_20260905_143022_a7b9c1d2.webp`).
+- **Disaster Recovery & Database Backup / Restore Engine:**
+  - Mesin backup mandiri (*pure native PHP/PDO*) tanpa dependensi eksternal, beroperasi portabel pada lingkungan Docker maupun server hosting produksi.
+  - Ekspor skema tabel lengkap (`SHOW CREATE TABLE`) dan data baris per baris dengan sanitasi nilai `PDO::quote()` serta proteksi foreign key constraint.
+  - Penyimpanan arsip terisolasi di direktori privat server (`storage/app/backups/`) dengan perlindungan *path traversal* (`basename()` sanitization).
+  - Protokol pemulihan data (*restore*) dengan validasi ganda, pembatasan unggahan 50 MB, dan dialog modal bahaya interaktif (*Danger Confirmation Modal*) yang mewajibkan input konfirmasi kata kunci `"PULIHKAN"` sebelum eksekusi dijalankan.
 - **Automated Daily Backup:** Pencadangan basis data dan dokumen digital secara terjadwal.
 
 ---

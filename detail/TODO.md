@@ -93,6 +93,14 @@
   - [x] Fitur 1-Klik Salin Template Peran ke Akun Pengguna (*Apply Preset*).
   - [x] Integrasi filtering dinamis pada `SidebarComposer` (non-super admin hanya melihat menu yang diizinkan, super admin root bypass).
   - [x] Automated Pest test suite `MenuAccessTest.php` (total 67 tests lulus 100%, 299 assertions).
+- [x] **2.5. Cadangan & Pemulihan Basis Data (*Backup & Restore / Disaster Recovery*)**
+  - [x] Arsitektur rute mandiri `/backup-restore` (`backup-restore`) di bawah middleware proteksi Super Admin.
+  - [x] Mesin backup mandiri (*pure native PHP/PDO*) tanpa dependensi pihak ketiga (`DatabaseBackupService`) dengan dukungan multi-driver (MySQL/MariaDB & SQLite).
+  - [x] Manajemen berkas arsip di `storage/app/backups/`: pembuatan dump satu-klik, pengunduhan `.sql`, dan penghapusan aman dari path traversal.
+  - [x] Pemulihan basis data (*restore*) dari berkas server maupun dari unggahan berkas eksternal hingga 50 MB via `RestoreBackupRequest`.
+  - [x] Dialog modal bahaya (*Danger Confirmation Modal*) dengan kata kunci `"PULIHKAN"` untuk mencegah eksekusi tidak sengaja.
+  - [x] Tampilan antarmuka estetik 100% menggunakan reusable class di `resources/css/app.css` (bebas inline styles dan tag style).
+  - [x] Automated Pest test suite `BackupRestoreTest.php` (total 79 tests aplikasi lulus 100%, 341 assertions).
 
 ---
 

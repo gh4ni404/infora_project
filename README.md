@@ -108,6 +108,14 @@ Dibangun dengan arsitektur **API-First & System Bridging**, **Pengembangan Berba
 - **Filtering Dinamis pada Sidebar (`SidebarComposer`):** Sidebar hanya menampilkan modul, menu, dan sub-menu yang diizinkan (`can_view = true`) untuk pengguna yang sedang login. Akun `super_admin` secara permanen mempertahankan akses penuh (*root bypass*).
 - **Akses Rute Resmi:** Tersedia di URL `/sistem/menu-akses` dengan nama rute `sistem.menu-akses`.
 
+### 💾 13. Sistem Cadangan & Pemulihan Basis Data (Backup & Restore / Disaster Recovery)
+- **Otomasi Pembuatan Cadangan Satu Klik:** Mengekspor seluruh struktur skema basis data dan baris data ke berkas SQL dump (`.sql`) yang tersimpan di direktori privat server (`storage/app/backups/`).
+- **Mesin Mandiri Pure Native PHP/PDO:** Dirancang tanpa ketergantungan paket berat pihak ketiga, menjamin kompatibilitas tinggi lintas platform (Docker, server staging, dan hosting produksi) dengan proteksi penanganan foreign keys otomatis.
+- **Tata Kelola Arsip & Unduhan Lokal:** Memantau daftar berkas cadangan tersimpan, kapasitas penyimpanan yang terpakai, serta menyediakan tombol unduh aman ke komputer lokal maupun penghapusan berkas dengan sanitasi *anti-directory traversal*.
+- **Pemulihan Data Fleksibel (*Flexible Restore*):** Mendukung pemulihan langsung dari berkas cadangan yang ada di server maupun dari berkas `.sql` eksternal melalui formulir unggah berkas (hingga 50 MB).
+- **Protokol Keamanan Ketat (*Danger Confirmation Modal*):** Mengingat proses pemulihan bersifat destruktif terhadap data aktif, sistem memproteksi aksi restore dengan dialog modal interaktif yang mewajibkan pengetikan kata kunci verifikasi `"PULIHKAN"` sebelum tombol eksekusi terbuka.
+- **Akses Rute Mandiri:** Berada pada URL `/backup-restore` dengan nama rute `backup-restore` (sesuai nama rute pada menu mandiri sistem).
+
 ---
 
 ## 💻 Tech Stack & Arsitektur
