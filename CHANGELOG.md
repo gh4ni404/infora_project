@@ -9,15 +9,16 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 ## [Unreleased]
 
 ### Added
-- **Mesin Indikator Kemajuan Multi-Tahap Real-Time (*Real-Time Multi-Stage Progressive Bar Overlay*):**
-  - Mengimplementasikan sistem pelaporan progres riil langsung dari backend ke frontend melalui koneksi *stream* Server-Sent Events (SSE / `text/event-stream`) dan `ReadableStream` reader pada seluruh proses pencadangan dan pemulihan sistem (`/backup-restore`).
-  - Progress bar benar-benar mencerminkan tahapan proses aktual di server (bukan estimasi timer palsu / *fake timer animation*), melaporkan nama tabel database yang sedang diekspor, jumlah baris tabel, berkas aset yang sedang diarsipkan, status ekstraksi ZIP, penonaktifan foreign keys, serta verifikasi symlink secara interaktif.
-  - Tampilan visual modern berupa dialog modal progres dengan komponen native HTML5 `<progress class="infora-progress" value="0" max="100">`, indikator persentase numerik (0% - 100%), *badge* status berdenyut (*pulsing status badge*), dan *stepper* 4 tahap (Inisialisasi, Basis Data, Berkas Storage, Selesai).
-  - **Kepatuhan Desain Arsitektur 100% Bebas Inline Styles:** Seluruh styling antarmuka dan animasi gradien Royal Blue (`#2563EB`) ke Cyan (`#06B6D4`) dikembangkan menggunakan class CSS terstruktur di `resources/css/app.css` tanpa satupun atribut `style="..."` maupun tag `<style>`.
-  - Penanganan galat tangguh (*graceful error handling*) yang menampilkan pesan galat spesifik dan tombol penutup dialog jika terjadi kegagalan sistem atau pembatalan koneksi.
-  - Penyesuaian batas unggahan berkas cadangan menjadi **250 MB** pada `RestoreBackupRequest` (256.000 KB), konfigurasi Nginx (`client_max_body_size 250M;`), dan PHP-FPM (`upload_max_filesize = 250M`, `post_max_size = 250M`).
-  - Sinkronisasi zona waktu server dan aplikasi ke **`Asia/Makassar`** (Waktu Indonesia Tengah / WITA, GMT+8) di `docker/php/php.ini`, `config/app.php`, `.env`, dan `.env.example`.
-  - Test suite diperluas dengan pengujian streaming backup & restore dan verifikasi elemen progres bebas inline styles (total 86 tests aplikasi lulus 100%, 398 assertions).
+- **Universal Smooth Real-Time Progressive Loading Screen (*Global System Indicator Engine*):**
+  - Mentransformasikan indikator proses menjadi mesin *Universal Progressive Loading Screen* yang dapat dipanggil dan digunakan kembali oleh seluruh modul dan fitur aplikasi INFORA (bukan hanya Backup & Restore).
+  - Menyediakan antarmuka visual minimalis, elegan, dan tenang tanpa elemen kaku: menggantikan *stepper* bertingkat dan kotak log teknis dengan kartu melayang modern berbalut *backdrop blur*, *ambient status orb* berdenyut lembut, judul & teks aktivitas ringkas dinamis, serta bar progres ramping (*sleek pill bar*) 9px.
+  - **Animasi Sangat Halus (*Buttery Smooth Motion & Gradient Shimmer*)**: Bar progres dilengkapi sapuan gradien bercahaya Royal Blue (`#2563EB`) ke Cyan (`#06B6D4`) yang mengalir kontinu (`@keyframes progressGradientShimmer`), transisi pergerakan kurva `cubic-bezier(0.25, 1, 0.5, 1)`, serta interpolasi numerik persentase yang mengalir halus berbasis `requestAnimationFrame`.
+  - **Komponen Blade Global (`<x-progress-modal />`)**: Ditanamkan terpusat pada layout master [app.blade.php](file:///home/gania/infora_project/resources/views/layouts/app.blade.php) sehingga siap digunakan di halaman mana pun tanpa duplikasi markup.
+  - **Universal JavaScript API (`window.InforaProgress`)**: Modul mandiri [infora-progress.js](file:///home/gania/infora_project/resources/js/infora-progress.js) dengan metode `show()`, `set()`, `finish()`, `error()`, `hide()`, dan `stream(url, formData, options)` untuk otomasi konsumsi *Server-Sent Events* (SSE).
+  - **100% Kepatuhan Arsitektur Bebas Inline Styles**: Seluruh styling visual terpusat di `resources/css/app.css` tanpa satupun atribut `style="..."` maupun tag `<style>`.
+  - Penyesuaian batas unggahan berkas cadangan menjadi **250 MB** pada `RestoreBackupRequest` (256.000 KB), Nginx (`client_max_body_size 250M;`), dan PHP-FPM (`upload_max_filesize = 250M`, `post_max_size = 250M`).
+  - Sinkronisasi zona waktu server dan aplikasi ke **`Asia/Makassar`** (WITA, GMT+8) di `docker/php/php.ini`, `config/app.php`, `.env`, dan `.env.example`.
+  - Seluruh pengujian fitur dan unit test Pest lulus 100% (86 passed, 398 assertions).
 - **Sistem Cadangan & Pemulihan Sistem Lengkap (*Full System Snapshot & Server Migration Ready*):**
   - Meningkatkan fitur Backup & Restore pada rute `/backup-restore` (`backup-restore`) di bawah modul PENGATURAN SISTEM dari sekadar dump database menjadi snapshot sistem terpadu berformat `.zip`.
   - Mengemas basis data (`database.sql`), seluruh berkas/gambar unggahan pengguna (`storage/app/public/`), dan berkas `manifest.json` metadata ke dalam satu arsip portabel mandiri via native PHP `ZipArchive`.

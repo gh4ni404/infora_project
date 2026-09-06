@@ -101,8 +101,8 @@
   - [x] Pemulihan sistem (*restore*) dari berkas server maupun dari unggahan berkas eksternal hingga 250 MB via `RestoreBackupRequest`.
   - [x] Pengecekan cerdas kesehatan symlink storage (`ensureStorageLink()`): jika sudah terhubung valid dilanjutkan, jika hilang/rusak dibuat ulang via `Artisan::call('storage:link')` (mencegah aset gambar 404).
   - [x] Dialog modal bahaya (*Danger Confirmation Modal*) dengan kata kunci `"PULIHKAN"` untuk mencegah eksekusi tidak sengaja.
-  - [x] Mesin Real-Time Multi-Stage Progressive Bar (*Server-Sent Events* & `ReadableStream` reader) yang merefleksikan proses riil ekspor tabel, pengarsipan berkas, dan symlink checking.
-  - [x] Tampilan antarmuka estetik menggunakan elemen native HTML5 `<progress>` dan 100% reusable class di `resources/css/app.css` (bebas inline styles dan tag style).
+  - [x] Mesin Universal Smooth Real-Time Progressive Loading Screen (`window.InforaProgress` & `<x-progress-modal />`) dengan animasi gradien shimmer mengalir halus, ambient status orb, dan arsitektur reusable lintas modul.
+  - [x] Tampilan antarmuka estetik minimalis menggunakan elemen native HTML5 `<progress>` dan 100% reusable class di `resources/css/app.css` (bebas elemen kaku/stepper, bebas inline styles, dan bebas tag style).
   - [x] Sinkronisasi zona waktu server & aplikasi ke `Asia/Makassar` (WITA, GMT+8) serta konfigurasi upload hingga 250 MB.
   - [x] Automated Pest test suite `BackupRestoreTest.php` (total 86 tests aplikasi lulus 100%, 398 assertions).
 

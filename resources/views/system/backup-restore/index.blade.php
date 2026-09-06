@@ -347,57 +347,6 @@
     </div>
 </div>
 
-<!-- Modal Real-Time Progressive Indicator (Zero Inline Styles) -->
-<div class="modal-backdrop hidden" id="modalSystemProgress" role="dialog" aria-modal="true" aria-labelledby="systemProgressTitle">
-    <div class="progress-dialog">
-        <div class="progress-header">
-            <div class="progress-status-badge" id="systemProgressStatusBadge">
-                <span class="pulse-dot"></span>
-                <span id="systemProgressStatusText">Memproses...</span>
-            </div>
-            <span class="progress-percent-label" id="systemProgressPercent">0%</span>
-        </div>
-
-        <div>
-            <h3 class="progress-title" id="systemProgressTitle">Memproses Operasi Sistem</h3>
-            <p class="progress-subtitle" id="systemProgressSubtitle">Mohon jangan menutup jendela atau mematikan peramban selama operasi berlangsung.</p>
-        </div>
-
-        <div class="progress-bar-container">
-            <progress id="systemProgressBar" class="infora-progress" value="0" max="100"></progress>
-        </div>
-
-        <div class="progress-details-box">
-            <div class="progress-stage-name" id="systemProgressStage">Inisialisasi</div>
-            <div class="progress-detail-text" id="systemProgressDetail">Menyiapkan parameter sistem...</div>
-        </div>
-
-        <!-- Multi-stage Stepper -->
-        <div class="progress-stepper" id="systemProgressStepper">
-            <div class="stepper-item is-active" id="progressStep1">
-                <span class="stepper-icon">1</span>
-                <span class="stepper-label">Inisialisasi</span>
-            </div>
-            <div class="stepper-item" id="progressStep2">
-                <span class="stepper-icon">2</span>
-                <span class="stepper-label">Basis Data</span>
-            </div>
-            <div class="stepper-item" id="progressStep3">
-                <span class="stepper-icon">3</span>
-                <span class="stepper-label">Berkas Storage</span>
-            </div>
-            <div class="stepper-item" id="progressStep4">
-                <span class="stepper-icon">4</span>
-                <span class="stepper-label">Selesai</span>
-            </div>
-        </div>
-
-        <div class="progress-error-actions hidden" id="systemProgressErrorActions">
-            <button type="button" class="btn-secondary" id="btnCloseProgressModal">Tutup & Periksa Status</button>
-        </div>
-    </div>
-</div>
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Confirmation modal elements
@@ -416,23 +365,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const backupFileInput = document.getElementById('backupFileInput');
     const formUploadRestore = document.getElementById('formUploadRestore');
     const formConfirm = document.getElementById('formConfirmRestore');
-
-    // Progressive modal elements
-    const modalProgress = document.getElementById('modalSystemProgress');
-    const progressBar = document.getElementById('systemProgressBar');
-    const progressPercent = document.getElementById('systemProgressPercent');
-    const progressStatusBadge = document.getElementById('systemProgressStatusBadge');
-    const progressStatusText = document.getElementById('systemProgressStatusText');
-    const progressTitle = document.getElementById('systemProgressTitle');
-    const progressSubtitle = document.getElementById('systemProgressSubtitle');
-    const progressStage = document.getElementById('systemProgressStage');
-    const progressDetail = document.getElementById('systemProgressDetail');
-    const step1 = document.getElementById('progressStep1');
-    const step2 = document.getElementById('progressStep2');
-    const step3 = document.getElementById('progressStep3');
-    const step4 = document.getElementById('progressStep4');
-    const errorActions = document.getElementById('systemProgressErrorActions');
-    const btnCloseProgressModal = document.getElementById('btnCloseProgressModal');
 
     let activeRestoreMode = 'server'; // 'server' or 'upload'
 
@@ -496,156 +428,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // =========================================================================
-    // Real-Time Progress Stream Engine
-    // =========================================================================
-
-    function handleStreamEvent(data) {
-        if (typeof data.percent === 'number') {
-            progressBar.value = data.percent;
-            progressPercent.textContent = data.percent + '%';
-        }
-
-        if (data.stage) {
-            progressStage.textContent = data.stage;
-        }
-
-        if (data.detail) {
-            progressDetail.textContent = data.detail;
-        }
-
-        const stage = (data.stage || '').toLowerCase();
-        if (stage.includes('inisialisasi')) {
-            step1.className = 'stepper-item is-active';
-            step2.className = 'stepper-item';
-            step3.className = 'stepper-item';
-            step4.className = 'stepper-item';
-        } else if (stage.includes('basis data')) {
-            step1.className = 'stepper-item is-completed';
-            step2.className = 'stepper-item is-active';
-            step3.className = 'stepper-item';
-            step4.className = 'stepper-item';
-        } else if (stage.includes('berkas') || stage.includes('media') || stage.includes('storage') || stage.includes('arsip')) {
-            step1.className = 'stepper-item is-completed';
-            step2.className = 'stepper-item is-completed';
-            step3.className = 'stepper-item is-active';
-            step4.className = 'stepper-item';
-        } else if (stage.includes('finalisasi') || stage.includes('symlink') || stage.includes('pembersihan')) {
-            step1.className = 'stepper-item is-completed';
-            step2.className = 'stepper-item is-completed';
-            step3.className = 'stepper-item is-completed';
-            step4.className = 'stepper-item is-active';
-        }
-
-        if (data.status === 'completed') {
-            progressBar.value = 100;
-            progressPercent.textContent = '100%';
-            step1.className = 'stepper-item is-completed';
-            step2.className = 'stepper-item is-completed';
-            step3.className = 'stepper-item is-completed';
-            step4.className = 'stepper-item is-completed';
-
-            progressStatusBadge.className = 'progress-status-badge is-success';
-            progressStatusText.textContent = 'Selesai';
-            progressTitle.textContent = 'Operasi Selesai Berhasil';
-            progressSubtitle.textContent = data.message || data.detail;
-
-            setTimeout(function() {
-                window.location.reload();
-            }, 1200);
-        } else if (data.status === 'error') {
-            handleStreamError(data.message || data.detail || 'Terjadi galat saat memproses operasi sistem.');
-        }
-    }
-
-    function handleStreamError(errorMessage) {
-        progressStatusBadge.className = 'progress-status-badge is-error';
-        progressStatusText.textContent = 'Terjadi Galat';
-        progressTitle.textContent = 'Operasi Tidak Berhasil Dilanjutkan';
-        progressSubtitle.textContent = 'Terjadi kesalahan teknis pada sistem:';
-        progressDetail.textContent = errorMessage;
-        errorActions.classList.remove('hidden');
-    }
-
-    async function startSystemProgressStream(url, formData, operationTitle) {
-        if (!modalProgress) return;
-
-        // Reset state
-        progressBar.value = 0;
-        progressPercent.textContent = '0%';
-        progressStatusBadge.className = 'progress-status-badge';
-        progressStatusText.textContent = 'Memproses...';
-        progressTitle.textContent = operationTitle;
-        progressSubtitle.textContent = 'Mohon jangan menutup jendela atau mematikan peramban selama operasi berlangsung.';
-        progressStage.textContent = 'Inisialisasi';
-        progressDetail.textContent = 'Menyiapkan koneksi dan parameter sistem...';
-
-        step1.className = 'stepper-item is-active';
-        step2.className = 'stepper-item';
-        step3.className = 'stepper-item';
-        step4.className = 'stepper-item';
-
-        errorActions.classList.add('hidden');
-        modalProgress.classList.remove('hidden');
-        document.body.classList.add('modal-open');
-
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Accept': 'text/event-stream, application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                }
-            });
-
-            if (!response.ok) {
-                let errorText = 'Terjadi galat pada server (Status ' + response.status + ')';
-                try {
-                    const errData = await response.json();
-                    if (errData.message) errorText = errData.message;
-                    if (errData.errors) {
-                        const firstKey = Object.keys(errData.errors)[0];
-                        if (firstKey && errData.errors[firstKey][0]) {
-                            errorText = errData.errors[firstKey][0];
-                        }
-                    }
-                } catch (_) {}
-                throw new Error(errorText);
-            }
-
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder('utf-8');
-            let buffer = '';
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                buffer += decoder.decode(value, { stream: true });
-                const lines = buffer.split('\n');
-                buffer = lines.pop();
-
-                for (const line of lines) {
-                    const trimmed = line.trim();
-                    if (!trimmed.startsWith('data:')) continue;
-                    const jsonStr = trimmed.substring(5).trim();
-                    if (!jsonStr) continue;
-
-                    try {
-                        const eventData = JSON.parse(jsonStr);
-                        handleStreamEvent(eventData);
-                    } catch (e) {
-                        console.error('Gagal membaca event JSON:', line, e);
-                    }
-                }
-            }
-        } catch (err) {
-            handleStreamError(err.message || 'Koneksi ke server terputus.');
-        }
-    }
-
-    // Attach stream handler to backup generation forms
+    // Attach stream handler to backup generation forms via Universal InforaProgress API
     const backupForms = document.querySelectorAll('.form-backup-trigger');
     backupForms.forEach(function(form) {
         form.addEventListener('submit', function(e) {
@@ -656,11 +439,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 : 'Membuat Cadangan Basis Data (SQL)';
             const formData = new FormData(form);
             formData.append('stream', '1');
-            startSystemProgressStream(form.action, formData, title);
+
+            if (window.InforaProgress) {
+                window.InforaProgress.stream(form.action, formData, {
+                    title: title,
+                    statusText: 'Menginisialisasi pencadangan...',
+                });
+            } else {
+                form.submit();
+            }
         });
     });
 
-    // Attach stream handler to confirmed restore action
+    // Attach stream handler to confirmed restore action via Universal InforaProgress API
     if (formConfirm) {
         formConfirm.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -669,28 +460,30 @@ document.addEventListener('DOMContentLoaded', function() {
             if (activeRestoreMode === 'upload') {
                 const formData = new FormData(formUploadRestore);
                 formData.append('stream', '1');
-                startSystemProgressStream(
-                    formUploadRestore.action,
-                    formData,
-                    'Memulihkan Sistem dari Berkas Unggahan'
-                );
+
+                if (window.InforaProgress) {
+                    window.InforaProgress.stream(formUploadRestore.action, formData, {
+                        title: 'Memulihkan Sistem dari Berkas Unggahan',
+                        statusText: 'Mempersiapkan berkas unggahan...',
+                    });
+                } else {
+                    formUploadRestore.submit();
+                }
             } else {
                 const formData = new FormData(formConfirm);
                 formData.append('stream', '1');
-                startSystemProgressStream(
-                    formConfirm.action,
-                    formData,
-                    'Memulihkan Sistem dari Arsip Server'
-                );
+
+                if (window.InforaProgress) {
+                    window.InforaProgress.stream(formConfirm.action, formData, {
+                        title: 'Memulihkan Sistem dari Arsip Server',
+                        statusText: 'Mempersiapkan pemulihan arsip...',
+                    });
+                } else {
+                    formConfirm.submit();
+                }
             }
         });
     }
-
-    btnCloseProgressModal && btnCloseProgressModal.addEventListener('click', function() {
-        modalProgress.classList.add('hidden');
-        document.body.classList.remove('modal-open');
-        window.location.reload();
-    });
 
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && modalConfirm && !modalConfirm.classList.contains('hidden')) {

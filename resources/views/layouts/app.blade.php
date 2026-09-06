@@ -215,5 +215,8 @@
             </main>
         </div>
     </div>
+
+    <!-- Universal Progress Modal -->
+    <x-progress-modal />
 </body>
 </html>

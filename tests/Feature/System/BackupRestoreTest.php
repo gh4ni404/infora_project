@@ -297,20 +297,20 @@ test('super admin can stream database restoration with real-time SSE progress ev
         ->toContain('"percent":100');
 });
 
-test('backup-restore page contains real-time progress bar, stepper, and zero inline styles', function () {
+test('backup-restore page contains universal smooth progress modal and zero inline styles', function () {
     $response = $this->actingAs($this->superAdmin)->get('/backup-restore');
 
     $response->assertOk();
     $content = $response->getContent();
 
-    // Verify progress elements
-    $response->assertSee('id="modalSystemProgress"', false);
-    $response->assertSee('id="systemProgressBar"', false);
+    // Verify universal progress elements
+    $response->assertSee('id="globalProgressModal"', false);
+    $response->assertSee('id="globalProgressBar"', false);
     $response->assertSee('class="infora-progress"', false);
-    $response->assertSee('id="systemProgressPercent"', false);
-    $response->assertSee('id="systemProgressStepper"', false);
-    $response->assertSee('id="systemProgressStage"', false);
-    $response->assertSee('id="systemProgressDetail"', false);
+    $response->assertSee('id="globalProgressPercent"', false);
+    $response->assertSee('id="globalProgressTitle"', false);
+    $response->assertSee('id="globalProgressText"', false);
+    $response->assertSee('id="globalProgressDetail"', false);
 
     // Verify ZERO inline style="..." attributes in HTML elements
     expect(preg_match('/<[a-z0-9\-]+[^>]*\sstyle=["\'][^"\']*["\']/i', $content))->toBe(0);

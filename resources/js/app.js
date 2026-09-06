@@ -2,6 +2,8 @@
  * INFORA - Main Application Client Scripts
  */
 
+import './infora-progress';
+
 document.addEventListener('DOMContentLoaded', () => {
     // Password visibility toggle
     const togglePasswordBtn = document.getElementById('togglePassword');
