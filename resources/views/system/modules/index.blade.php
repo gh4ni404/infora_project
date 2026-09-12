@@ -177,13 +177,13 @@
                         id="order"
                         name="order"
                         class="form-input @error('order') border-danger @enderror"
-                        value="{{ old('order', 0) }}"
-                        min="0"
+                        value="{{ old('order', $nextOrder) }}"
+                        min="1"
                     >
                     @error('order')
                         <div class="form-error">{{ $message }}</div>
                     @enderror
-                    <div class="form-hint">Urutan numerik dari yang terkecil (0, 1, 2, ...) untuk posisi di sidebar.</div>
+                    <div class="form-hint">Urutan numerik dari yang terkecil (1, 2, 3, ...) untuk posisi di sidebar.</div>
                 </div>
 
                 <div class="form-group">
@@ -285,7 +285,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             formEdit.action = action;
             document.getElementById('edit_module_name').value = module.name || '';
-            document.getElementById('edit_module_order').value = module.order ?? 0;
+            document.getElementById('edit_module_order').value = module.order ?? 1;
             document.getElementById('edit_module_is_active').checked = Boolean(module.is_active);
 
             openEditModal();

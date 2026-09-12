@@ -189,7 +189,12 @@
                     >
                         <option value="">-- Pilih Induk Menu --</option>
                         @foreach ($menus as $menu)
-                            <option value="{{ $menu->id }}" {{ old('menu_id', request('menu_id')) == $menu->id ? 'selected' : '' }}>
+                            <option
+                                value="{{ $menu->id }}"
+                                data-next-order="{{ \App\Models\SubMenu::nextOrder($menu->id) }}"
+                                data-route-prefix="{{ $menu->route_prefix }}"
+                                {{ old('menu_id', request('menu_id')) == $menu->id ? 'selected' : '' }}
+                            >
                                 {{ $menu->module?->name ? $menu->module->name . ' → ' : '' }}{{ $menu->name }}
                             </option>
                         @endforeach
@@ -219,40 +224,54 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="modal_sub_route_name" class="form-label">Nama Rute (Route Name)</label>
-                    <input
-                        type="text"
-                        id="modal_sub_route_name"
-                        name="route_name"
-                        list="modal_subroutes_list"
-                        class="form-input @error('route_name') border-danger @enderror"
-                        placeholder="Contoh: system.modules, master.data.sekolah, atau dashboard"
-                        value="{{ old('route_name') }}"
-                    >
-                    <datalist id="modal_subroutes_list">
-                        <option value="system.modules">Tata Kelola Modul</option>
-                        <option value="system.menus">Tata Kelola Menu</option>
-                        <option value="system.sub-menus">Tata Kelola Sub-Menu</option>
-                        <option value="dashboard">Dashboard Utama</option>
-                    </datalist>
+                    <label class="form-label">Nama Rute (Route Name)</label>
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1">
+                            <input
+                                type="text"
+                                id="modal_sub_route_prefix"
+                                name="route_prefix"
+                                class="form-input font-mono text-sm @error('route_name') border-danger @enderror"
+                                placeholder="Prefix (contoh: master)"
+                                value="{{ old('route_prefix') }}"
+                                autocomplete="off"
+                            >
+                        </div>
+                        <span class="text-xl font-bold text-slate-400 select-none">.</span>
+                        <div class="flex-1">
+                            <input
+                                type="text"
+                                id="modal_sub_route_suffix"
+                                name="route_suffix"
+                                class="form-input font-mono text-sm @error('route_name') border-danger @enderror"
+                                placeholder="Sub-rute (contoh: data-sekolah)"
+                                value="{{ old('route_suffix') }}"
+                                autocomplete="off"
+                            >
+                        </div>
+                    </div>
                     @error('route_name')
                         <div class="form-error">{{ $message }}</div>
                     @enderror
+                    <div class="form-hint flex items-center gap-2 mt-1.5">
+                        <span>Pratinjau Rute:</span>
+                        <code class="text-brand font-mono font-semibold" id="modal_sub_route_preview">-</code>
+                    </div>
                     <div class="route-guide-box">
                         <div class="route-guide-title">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
                             <span>Panduan Format Rute Sub-Menu</span>
                         </div>
                         <ul class="route-guide-list">
-                            <li>Cukup gunakan format hierarki praktis <code>modul.menu.submenu</code> (contoh: <code>system.modules</code> atau <code>master.data.sekolah</code>).</li>
-                            <li>Sistem otomatis mencocokkan tanpa Anda perlu menentukan akhiran teknis <code>.index</code>.</li>
+                            <li>Kotak pertama (Prefix) otomatis terisi sesuai nama induk menu dan <strong>tetap dapat diedit</strong> sesuai kebutuhan.</li>
+                            <li>Kotak kedua diisi nama rute spesifik fitur (contoh: <code>data-sekolah</code>). Jika rute tunggal tanpa prefix (misal <code>dashboard</code>), cukup isi kotak kedua atau kotak pertama saja.</li>
                         </ul>
                         <div class="route-suggest-pills">
-                            <span class="route-suggest-label">Pilihan Cepat Sistem:</span>
-                            <button type="button" class="route-suggest-pill" onclick="document.getElementById('modal_sub_route_name').value='system.modules'">system.modules</button>
-                            <button type="button" class="route-suggest-pill" onclick="document.getElementById('modal_sub_route_name').value='system.menus'">system.menus</button>
-                            <button type="button" class="route-suggest-pill" onclick="document.getElementById('modal_sub_route_name').value='system.sub-menus'">system.sub-menus</button>
-                            <button type="button" class="route-suggest-pill" onclick="document.getElementById('modal_sub_route_name').value='dashboard'">dashboard</button>
+                            <span class="route-suggest-label">Pilihan Cepat:</span>
+                            <button type="button" class="route-suggest-pill" onclick="setCreateRoute('system', 'modules')">system.modules</button>
+                            <button type="button" class="route-suggest-pill" onclick="setCreateRoute('system', 'menus')">system.menus</button>
+                            <button type="button" class="route-suggest-pill" onclick="setCreateRoute('system', 'sub-menus')">system.sub-menus</button>
+                            <button type="button" class="route-suggest-pill" onclick="setCreateRoute('', 'dashboard')">dashboard</button>
                         </div>
                     </div>
                 </div>
@@ -264,13 +283,13 @@
                         id="modal_sub_order"
                         name="order"
                         class="form-input @error('order') border-danger @enderror"
-                        value="{{ old('order', 0) }}"
-                        min="0"
+                        value="{{ old('order', $nextOrder) }}"
+                        min="1"
                     >
                     @error('order')
                         <div class="form-error">{{ $message }}</div>
                     @enderror
-                    <div class="form-hint">Urutan numerik dalam sub-menu (0, 1, 2, ...).</div>
+                    <div class="form-hint">Urutan numerik dalam sub-menu (1, 2, 3, ...).</div>
                 </div>
 
                 <div class="form-group">
@@ -330,6 +349,58 @@ document.addEventListener('DOMContentLoaded', function() {
     btnCloseCreate && btnCloseCreate.addEventListener('click', closeCreateModal);
     btnCancelCreate && btnCancelCreate.addEventListener('click', closeCreateModal);
 
+    const modalSubMenuSelect = document.getElementById('modal_sub_menu_id');
+    const modalSubOrder = document.getElementById('modal_sub_order');
+    const modalSubRoutePrefix = document.getElementById('modal_sub_route_prefix');
+    const modalSubRouteSuffix = document.getElementById('modal_sub_route_suffix');
+    const modalSubRoutePreview = document.getElementById('modal_sub_route_preview');
+
+    function updateCreateRoutePreview() {
+        if (!modalSubRoutePreview) return;
+        const p = (modalSubRoutePrefix ? modalSubRoutePrefix.value : '').trim();
+        const s = (modalSubRouteSuffix ? modalSubRouteSuffix.value : '').trim();
+        let full = '';
+        if (p && s) {
+            full = p + '.' + s;
+        } else if (p) {
+            full = p;
+        } else if (s) {
+            full = s;
+        }
+        modalSubRoutePreview.textContent = full || '-';
+    }
+
+    window.setCreateRoute = function(prefix, suffix) {
+        if (modalSubRoutePrefix) modalSubRoutePrefix.value = prefix;
+        if (modalSubRouteSuffix) modalSubRouteSuffix.value = suffix;
+        updateCreateRoutePreview();
+    };
+
+    if (modalSubRoutePrefix) modalSubRoutePrefix.addEventListener('input', updateCreateRoutePreview);
+    if (modalSubRouteSuffix) modalSubRouteSuffix.addEventListener('input', updateCreateRoutePreview);
+
+    if (modalSubMenuSelect) {
+        modalSubMenuSelect.addEventListener('change', function() {
+            const opt = this.options[this.selectedIndex];
+            if (opt && opt.dataset.nextOrder && modalSubOrder) {
+                modalSubOrder.value = opt.dataset.nextOrder;
+            }
+            if (opt && opt.dataset.routePrefix && modalSubRoutePrefix) {
+                modalSubRoutePrefix.value = opt.dataset.routePrefix;
+                updateCreateRoutePreview();
+            }
+        });
+
+        // Set prefix awal jika sudah ada opsi terpilih saat buka create
+        if (modalSubMenuSelect.value && modalSubRoutePrefix && !modalSubRoutePrefix.value) {
+            const currentOpt = modalSubMenuSelect.options[modalSubMenuSelect.selectedIndex];
+            if (currentOpt && currentOpt.dataset.routePrefix) {
+                modalSubRoutePrefix.value = currentOpt.dataset.routePrefix;
+            }
+        }
+    }
+    updateCreateRoutePreview();
+
     createModal && createModal.addEventListener('click', function(e) {
         if (e.target === createModal) {
             closeCreateModal();
@@ -365,16 +436,91 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    let currentEditingSubMenu = null;
+
+    const editSubMenuSelect = document.getElementById('edit_submenu_menu_id');
+    const editSubOrder = document.getElementById('edit_submenu_order');
+    const editSubRoutePrefix = document.getElementById('edit_submenu_route_prefix');
+    const editSubRouteSuffix = document.getElementById('edit_submenu_route_suffix');
+    const editSubRoutePreview = document.getElementById('edit_submenu_route_preview');
+
+    function updateEditRoutePreview() {
+        if (!editSubRoutePreview) return;
+        const p = (editSubRoutePrefix ? editSubRoutePrefix.value : '').trim();
+        const s = (editSubRouteSuffix ? editSubRouteSuffix.value : '').trim();
+        let full = '';
+        if (p && s) {
+            full = p + '.' + s;
+        } else if (p) {
+            full = p;
+        } else if (s) {
+            full = s;
+        }
+        editSubRoutePreview.textContent = full || '-';
+    }
+
+    window.setEditRoute = function(prefix, suffix) {
+        if (editSubRoutePrefix) editSubRoutePrefix.value = prefix;
+        if (editSubRouteSuffix) editSubRouteSuffix.value = suffix;
+        updateEditRoutePreview();
+    };
+
+    if (editSubRoutePrefix) editSubRoutePrefix.addEventListener('input', updateEditRoutePreview);
+    if (editSubRouteSuffix) editSubRouteSuffix.addEventListener('input', updateEditRoutePreview);
+
+    if (editSubMenuSelect && editSubOrder) {
+        editSubMenuSelect.addEventListener('change', function() {
+            const selectedMenuId = this.value;
+            if (currentEditingSubMenu && String(selectedMenuId) === String(currentEditingSubMenu.menu_id)) {
+                editSubOrder.value = currentEditingSubMenu.order ?? 1;
+                // Pulihkan prefix asli sub-menu
+                if (editSubRoutePrefix) {
+                    const originalDot = (currentEditingSubMenu.route_name || '').indexOf('.');
+                    editSubRoutePrefix.value = originalDot !== -1 
+                        ? currentEditingSubMenu.route_name.substring(0, originalDot) 
+                        : '';
+                }
+            } else {
+                const opt = this.options[this.selectedIndex];
+                if (opt && opt.dataset.nextOrder) {
+                    editSubOrder.value = opt.dataset.nextOrder;
+                }
+                if (opt && opt.dataset.routePrefix && editSubRoutePrefix) {
+                    editSubRoutePrefix.value = opt.dataset.routePrefix;
+                }
+            }
+            updateEditRoutePreview();
+        });
+    }
+
     document.querySelectorAll('.btn-open-edit-sub-menu').forEach(function(btn) {
         btn.addEventListener('click', function() {
             const subMenu = JSON.parse(this.dataset.subMenu || '{}');
             const action = this.dataset.action;
+            currentEditingSubMenu = subMenu;
 
             formEdit.action = action;
             document.getElementById('edit_submenu_menu_id').value = subMenu.menu_id || '';
             document.getElementById('edit_submenu_name').value = subMenu.name || '';
-            document.getElementById('edit_submenu_route_name').value = subMenu.route_name || '';
-            document.getElementById('edit_submenu_order').value = subMenu.order ?? 0;
+
+            // Split route_name menjadi prefix & suffix
+            let prefix = '';
+            let suffix = '';
+            if (subMenu.route_name) {
+                const dotIndex = subMenu.route_name.indexOf('.');
+                if (dotIndex !== -1) {
+                    prefix = subMenu.route_name.substring(0, dotIndex);
+                    suffix = subMenu.route_name.substring(dotIndex + 1);
+                } else {
+                    prefix = '';
+                    suffix = subMenu.route_name;
+                }
+            }
+            if (editSubRoutePrefix) editSubRoutePrefix.value = prefix;
+            if (editSubRouteSuffix) editSubRouteSuffix.value = suffix;
+            updateEditRoutePreview();
+
+            document.getElementById('edit_submenu_order').value = subMenu.order ?? 1;
             document.getElementById('edit_submenu_is_active').checked = Boolean(subMenu.is_active);
 
             openEditModal();

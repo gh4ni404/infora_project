@@ -51,13 +51,13 @@
                     id="order"
                     name="order"
                     class="form-input @error('order') border-danger @enderror"
-                    value="{{ old('order', 0) }}"
-                    min="0"
+                    value="{{ old('order', $nextOrder) }}"
+                    min="1"
                 >
                 @error('order')
                     <div class="form-error">{{ $message }}</div>
                 @enderror
-                <div class="form-hint">Urutan numerik dari yang terkecil (0, 1, 2, ...) untuk penataan posisi di sidebar.</div>
+                <div class="form-hint">Urutan numerik dari yang terkecil (1, 2, 3, ...) untuk penataan posisi di sidebar.</div>
             </div>
 
             <div class="form-group">

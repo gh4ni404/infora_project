@@ -192,7 +192,11 @@
                     >
                         <option value="">-- Pilih Induk Modul --</option>
                         @foreach ($modules as $module)
-                            <option value="{{ $module->id }}" {{ old('module_id', request('module_id')) == $module->id ? 'selected' : '' }}>
+                            <option
+                                value="{{ $module->id }}"
+                                data-next-order="{{ \App\Models\Menu::nextOrder($module->id) }}"
+                                {{ old('module_id', request('module_id')) == $module->id ? 'selected' : '' }}
+                            >
                                 {{ $module->name }}
                             </option>
                         @endforeach
@@ -276,13 +280,13 @@
                         id="modal_menu_order"
                         name="order"
                         class="form-input @error('order') border-danger @enderror"
-                        value="{{ old('order', 0) }}"
-                        min="0"
+                        value="{{ old('order', $nextOrder) }}"
+                        min="1"
                     >
                     @error('order')
                         <div class="form-error">{{ $message }}</div>
                     @enderror
-                    <div class="form-hint">Urutan numerik dalam modul (0, 1, 2, ...).</div>
+                    <div class="form-hint">Urutan numerik dalam modul (1, 2, 3, ...).</div>
                 </div>
 
                 <div class="form-group">
@@ -342,6 +346,17 @@ document.addEventListener('DOMContentLoaded', function() {
     btnCloseCreate && btnCloseCreate.addEventListener('click', closeCreateModal);
     btnCancelCreate && btnCancelCreate.addEventListener('click', closeCreateModal);
 
+    const modalModuleSelect = document.getElementById('modal_module_id');
+    const modalMenuOrder = document.getElementById('modal_menu_order');
+    if (modalModuleSelect && modalMenuOrder) {
+        modalModuleSelect.addEventListener('change', function() {
+            const opt = this.options[this.selectedIndex];
+            if (opt && opt.dataset.nextOrder) {
+                modalMenuOrder.value = opt.dataset.nextOrder;
+            }
+        });
+    }
+
     createModal && createModal.addEventListener('click', function(e) {
         if (e.target === createModal) {
             closeCreateModal();
@@ -377,16 +392,35 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    let currentEditingMenu = null;
+
+    const editModuleSelect = document.getElementById('edit_menu_module_id');
+    const editMenuOrder = document.getElementById('edit_menu_order');
+    if (editModuleSelect && editMenuOrder) {
+        editModuleSelect.addEventListener('change', function() {
+            const selectedModuleId = this.value;
+            if (currentEditingMenu && String(selectedModuleId) === String(currentEditingMenu.module_id)) {
+                editMenuOrder.value = currentEditingMenu.order ?? 1;
+            } else {
+                const opt = this.options[this.selectedIndex];
+                if (opt && opt.dataset.nextOrder) {
+                    editMenuOrder.value = opt.dataset.nextOrder;
+                }
+            }
+        });
+    }
+
     document.querySelectorAll('.btn-open-edit-menu').forEach(function(btn) {
         btn.addEventListener('click', function() {
             const menu = JSON.parse(this.dataset.menu || '{}');
             const action = this.dataset.action;
+            currentEditingMenu = menu;
 
             formEdit.action = action;
             document.getElementById('edit_menu_module_id').value = menu.module_id || '';
             document.getElementById('edit_menu_name').value = menu.name || '';
             document.getElementById('edit_menu_route_name').value = menu.route_name || '';
-            document.getElementById('edit_menu_order').value = menu.order ?? 0;
+            document.getElementById('edit_menu_order').value = menu.order ?? 1;
             document.getElementById('edit_menu_is_active').checked = Boolean(menu.is_active);
 
             if (typeof window['setIconValue_edit_menu_icon'] === 'function') {

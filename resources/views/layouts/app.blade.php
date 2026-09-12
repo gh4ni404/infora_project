@@ -80,7 +80,7 @@
                                         <button type="button" class="nav-group-trigger {{ $isMenuActive ? 'active' : '' }}" aria-expanded="{{ $isMenuActive ? 'true' : 'false' }}" title="{{ $menu->name }}">
                                             <x-icon :name="$menu->icon" class="nav-item-icon" />
                                             <span class="nav-item-title">{{ $menu->name }}</span>
-                                            <span class="nav-count-badge">{{ $menu->subMenus->count() }}</span>
+                                            <!-- <span class="nav-count-badge">{{ $menu->subMenus->count() }}</span> -->
                                             <svg class="nav-arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                                 <polyline points="6 9 12 15 18 9"></polyline>
                                             </svg>

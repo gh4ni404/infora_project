@@ -27,7 +27,10 @@
                     >
                         <option value="">-- Pilih Induk Modul --</option>
                         @foreach ($modules as $module)
-                            <option value="{{ $module->id }}">
+                            <option
+                                value="{{ $module->id }}"
+                                data-next-order="{{ \App\Models\Menu::nextOrder($module->id) }}"
+                            >
                                 {{ $module->name }}
                             </option>
                         @endforeach
@@ -111,13 +114,13 @@
                         id="edit_menu_order"
                         name="order"
                         class="form-input @error('order') border-danger @enderror"
-                        value="{{ old('order', 0) }}"
-                        min="0"
+                        value="{{ old('order', 1) }}"
+                        min="1"
                     >
                     @error('order')
                         <div class="form-error">{{ $message }}</div>
                     @enderror
-                    <div class="form-hint">Urutan numerik dalam modul (0, 1, 2, ...).</div>
+                    <div class="form-hint">Urutan numerik dalam modul (1, 2, 3, ...).</div>
                 </div>
 
                 <div class="form-group">

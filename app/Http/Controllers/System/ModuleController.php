@@ -29,8 +29,9 @@ class ModuleController extends Controller
         }
 
         $modules = $query->paginate(15)->withQueryString();
+        $nextOrder = Module::nextOrder();
 
-        return view('system.modules.index', compact('modules'));
+        return view('system.modules.index', compact('modules', 'nextOrder'));
     }
 
     /**
@@ -38,7 +39,9 @@ class ModuleController extends Controller
      */
     public function create(): View
     {
-        return view('system.modules.create');
+        $nextOrder = Module::nextOrder();
+
+        return view('system.modules.create', compact('nextOrder'));
     }
 
     /**

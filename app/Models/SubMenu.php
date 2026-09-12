@@ -120,4 +120,20 @@ class SubMenu extends Model
 
         return request()->routeIs($patterns);
     }
+
+    /**
+     * Dapatkan nomor urutan tampil berikutnya untuk sub-menu baru dalam suatu menu (mulai dari 1).
+     */
+    public static function nextOrder(?int $menuId = null): int
+    {
+        $query = static::query();
+
+        if ($menuId) {
+            $query->where('menu_id', $menuId);
+        }
+
+        $max = $query->max('order');
+
+        return is_null($max) ? 1 : ((int) $max + 1);
+    }
 }

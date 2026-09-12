@@ -36,7 +36,11 @@
                 >
                     <option value="">-- Pilih Induk Modul --</option>
                     @foreach ($modules as $module)
-                        <option value="{{ $module->id }}" {{ old('module_id', $selectedModuleId) == $module->id ? 'selected' : '' }}>
+                        <option
+                            value="{{ $module->id }}"
+                            data-next-order="{{ \App\Models\Menu::nextOrder($module->id) }}"
+                            {{ old('module_id', $selectedModuleId) == $module->id ? 'selected' : '' }}
+                        >
                             {{ $module->name }}
                         </option>
                     @endforeach
@@ -120,13 +124,13 @@
                     id="order"
                     name="order"
                     class="form-input @error('order') border-danger @enderror"
-                    value="{{ old('order', 0) }}"
-                    min="0"
+                    value="{{ old('order', $nextOrder) }}"
+                    min="1"
                 >
                 @error('order')
                     <div class="form-error">{{ $message }}</div>
                 @enderror
-                <div class="form-hint">Urutan numerik dalam modul (0, 1, 2, ...).</div>
+                <div class="form-hint">Urutan numerik dalam modul (1, 2, 3, ...).</div>
             </div>
 
             <div class="form-group">
@@ -158,4 +162,19 @@
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const moduleSelect = document.getElementById('module_id');
+    const orderInput = document.getElementById('order');
+    if (moduleSelect && orderInput) {
+        moduleSelect.addEventListener('change', function() {
+            const opt = this.options[this.selectedIndex];
+            if (opt && opt.dataset.nextOrder) {
+                orderInput.value = opt.dataset.nextOrder;
+            }
+        });
+    }
+});
+</script>
 @endsection

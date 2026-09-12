@@ -39,8 +39,10 @@ class SubMenuController extends Controller
 
         $subMenus = $query->paginate(15)->withQueryString();
         $menus = Menu::with('module')->orderBy('module_id')->orderBy('order')->get();
+        $initialMenuId = $request->query('menu_id') ?: ($menus->first()->id ?? null);
+        $nextOrder = SubMenu::nextOrder($initialMenuId ? (int) $initialMenuId : null);
 
-        return view('system.sub-menus.index', compact('subMenus', 'menus'));
+        return view('system.sub-menus.index', compact('subMenus', 'menus', 'nextOrder'));
     }
 
     /**
@@ -50,8 +52,10 @@ class SubMenuController extends Controller
     {
         $menus = Menu::with('module')->orderBy('module_id')->orderBy('order')->get();
         $selectedMenuId = $request->query('menu_id');
+        $initialMenuId = $selectedMenuId ?: ($menus->first()->id ?? null);
+        $nextOrder = SubMenu::nextOrder($initialMenuId ? (int) $initialMenuId : null);
 
-        return view('system.sub-menus.create', compact('menus', 'selectedMenuId'));
+        return view('system.sub-menus.create', compact('menus', 'selectedMenuId', 'nextOrder'));
     }
 
     /**

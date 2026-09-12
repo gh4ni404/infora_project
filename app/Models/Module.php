@@ -68,4 +68,14 @@ class Module extends Model
     {
         return $this->hasMany(Menu::class)->orderBy('order');
     }
+
+    /**
+     * Dapatkan nomor urutan tampil berikutnya untuk modul baru (mulai dari 1).
+     */
+    public static function nextOrder(): int
+    {
+        $max = static::max('order');
+
+        return is_null($max) ? 1 : ((int) $max + 1);
+    }
 }

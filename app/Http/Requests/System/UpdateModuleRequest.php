@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\System;
 
+use App\Models\Module;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -20,9 +21,12 @@ class UpdateModuleRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
+        $module = $this->route('module');
+        $currentOrder = $module instanceof Module ? $module->order : 1;
+
         $this->merge([
             'is_active' => $this->boolean('is_active'),
-            'order' => $this->filled('order') ? (int) $this->input('order') : 0,
+            'order' => $this->filled('order') ? (int) $this->input('order') : $currentOrder,
         ]);
     }
 
@@ -35,7 +39,7 @@ class UpdateModuleRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'order' => ['nullable', 'integer', 'min:0'],
+            'order' => ['nullable', 'integer', 'min:1'],
             'is_active' => ['nullable', 'boolean'],
         ];
     }
@@ -64,7 +68,7 @@ class UpdateModuleRequest extends FormRequest
         return [
             'name.required' => 'Nama modul wajib diisi.',
             'name.max' => 'Nama modul tidak boleh melebihi 255 karakter.',
-            'order.min' => 'Urutan modul minimal bernilai 0.',
+            'order.min' => 'Urutan modul minimal bernilai 1.',
         ];
     }
 }

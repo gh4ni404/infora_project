@@ -27,7 +27,11 @@
                     >
                         <option value="">-- Pilih Induk Menu --</option>
                         @foreach ($menus as $menu)
-                            <option value="{{ $menu->id }}">
+                            <option
+                                value="{{ $menu->id }}"
+                                data-next-order="{{ \App\Models\SubMenu::nextOrder($menu->id) }}"
+                                data-route-prefix="{{ $menu->route_prefix }}"
+                            >
                                 {{ $menu->module?->name ? $menu->module->name . ' → ' : '' }}{{ $menu->name }}
                             </option>
                         @endforeach
@@ -57,40 +61,54 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="edit_submenu_route_name" class="form-label">Nama Rute (Route Name)</label>
-                    <input
-                        type="text"
-                        id="edit_submenu_route_name"
-                        name="route_name"
-                        list="edit_subroutes_list"
-                        class="form-input @error('route_name') border-danger @enderror"
-                        placeholder="Contoh: system.modules, master.data.sekolah, atau dashboard"
-                        value="{{ old('route_name') }}"
-                    >
-                    <datalist id="edit_subroutes_list">
-                        <option value="system.modules">Tata Kelola Modul</option>
-                        <option value="system.menus">Tata Kelola Menu</option>
-                        <option value="system.sub-menus">Tata Kelola Sub-Menu</option>
-                        <option value="dashboard">Dashboard Utama</option>
-                    </datalist>
+                    <label class="form-label">Nama Rute (Route Name)</label>
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1">
+                            <input
+                                type="text"
+                                id="edit_submenu_route_prefix"
+                                name="route_prefix"
+                                class="form-input font-mono text-sm @error('route_name') border-danger @enderror"
+                                placeholder="Prefix (contoh: master)"
+                                value="{{ old('route_prefix') }}"
+                                autocomplete="off"
+                            >
+                        </div>
+                        <span class="text-xl font-bold text-slate-400 select-none">.</span>
+                        <div class="flex-1">
+                            <input
+                                type="text"
+                                id="edit_submenu_route_suffix"
+                                name="route_suffix"
+                                class="form-input font-mono text-sm @error('route_name') border-danger @enderror"
+                                placeholder="Sub-rute (contoh: data-sekolah)"
+                                value="{{ old('route_suffix') }}"
+                                autocomplete="off"
+                            >
+                        </div>
+                    </div>
                     @error('route_name')
                         <div class="form-error">{{ $message }}</div>
                     @enderror
+                    <div class="form-hint flex items-center gap-2 mt-1.5">
+                        <span>Pratinjau Rute:</span>
+                        <code class="text-brand font-mono font-semibold" id="edit_submenu_route_preview">-</code>
+                    </div>
                     <div class="route-guide-box">
                         <div class="route-guide-title">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
                             <span>Panduan Format Rute Sub-Menu</span>
                         </div>
                         <ul class="route-guide-list">
-                            <li>Cukup gunakan format hierarki praktis <code>modul.menu.submenu</code> (contoh: <code>system.modules</code> atau <code>master.data.sekolah</code>).</li>
-                            <li>Sistem otomatis mencocokkan ke rute index atau halaman yang sesuai tanpa Anda perlu repot menentukan akhiran teknis seperti <code>.index</code> atau <code>.create</code>.</li>
+                            <li>Kotak pertama (Prefix) otomatis terisi sesuai nama induk menu dan <strong>tetap dapat diedit</strong> sesuai kebutuhan.</li>
+                            <li>Kotak kedua diisi nama rute spesifik fitur (contoh: <code>data-sekolah</code>). Jika rute tunggal tanpa prefix (misal <code>dashboard</code>), cukup isi kotak kedua atau kotak pertama saja.</li>
                         </ul>
                         <div class="route-suggest-pills">
-                            <span class="route-suggest-label">Pilihan Cepat Sistem:</span>
-                            <button type="button" class="route-suggest-pill" onclick="document.getElementById('edit_submenu_route_name').value='system.modules'">system.modules</button>
-                            <button type="button" class="route-suggest-pill" onclick="document.getElementById('edit_submenu_route_name').value='system.menus'">system.menus</button>
-                            <button type="button" class="route-suggest-pill" onclick="document.getElementById('edit_submenu_route_name').value='system.sub-menus'">system.sub-menus</button>
-                            <button type="button" class="route-suggest-pill" onclick="document.getElementById('edit_submenu_route_name').value='dashboard'">dashboard</button>
+                            <span class="route-suggest-label">Pilihan Cepat:</span>
+                            <button type="button" class="route-suggest-pill" onclick="setEditRoute('system', 'modules')">system.modules</button>
+                            <button type="button" class="route-suggest-pill" onclick="setEditRoute('system', 'menus')">system.menus</button>
+                            <button type="button" class="route-suggest-pill" onclick="setEditRoute('system', 'sub-menus')">system.sub-menus</button>
+                            <button type="button" class="route-suggest-pill" onclick="setEditRoute('', 'dashboard')">dashboard</button>
                         </div>
                     </div>
                 </div>
@@ -102,13 +120,13 @@
                         id="edit_submenu_order"
                         name="order"
                         class="form-input @error('order') border-danger @enderror"
-                        value="{{ old('order', 0) }}"
-                        min="0"
+                        value="{{ old('order', 1) }}"
+                        min="1"
                     >
                     @error('order')
                         <div class="form-error">{{ $message }}</div>
                     @enderror
-                    <div class="form-hint">Urutan numerik dari yang terkecil (0, 1, 2, ...) dalam menu induk.</div>
+                    <div class="form-hint">Urutan numerik dari yang terkecil (1, 2, 3, ...) dalam menu induk.</div>
                 </div>
 
                 <div class="form-group">

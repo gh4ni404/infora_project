@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('modules', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->integer('order')->default(0);
+            $table->integer('order')->default(1);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

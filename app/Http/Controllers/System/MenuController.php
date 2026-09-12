@@ -40,8 +40,10 @@ class MenuController extends Controller
 
         $menus = $query->paginate(15)->withQueryString();
         $modules = Module::orderBy('order')->get();
+        $initialModuleId = $request->query('module_id') ?: ($modules->first()->id ?? null);
+        $nextOrder = Menu::nextOrder($initialModuleId ? (int) $initialModuleId : null);
 
-        return view('system.menus.index', compact('menus', 'modules'));
+        return view('system.menus.index', compact('menus', 'modules', 'nextOrder'));
     }
 
     /**
@@ -51,8 +53,10 @@ class MenuController extends Controller
     {
         $modules = Module::orderBy('order')->get();
         $selectedModuleId = $request->query('module_id');
+        $initialModuleId = $selectedModuleId ?: ($modules->first()->id ?? null);
+        $nextOrder = Menu::nextOrder($initialModuleId ? (int) $initialModuleId : null);
 
-        return view('system.menus.create', compact('modules', 'selectedModuleId'));
+        return view('system.menus.create', compact('modules', 'selectedModuleId', 'nextOrder'));
     }
 
     /**

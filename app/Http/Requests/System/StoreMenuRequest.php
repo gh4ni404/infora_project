@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\System;
 
+use App\Models\Menu;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -20,9 +21,29 @@ class StoreMenuRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
+        $moduleId = $this->filled('module_id') ? (int) $this->input('module_id') : null;
+
+        $prefix = trim((string) $this->input('route_prefix', ''));
+        $suffix = trim((string) $this->input('route_suffix', ''));
+
+        if ($this->has('route_prefix') || $this->has('route_suffix')) {
+            if ($prefix !== '' && $suffix !== '') {
+                $routeName = "{$prefix}.{$suffix}";
+            } elseif ($prefix !== '') {
+                $routeName = $prefix;
+            } elseif ($suffix !== '') {
+                $routeName = $suffix;
+            } else {
+                $routeName = null;
+            }
+        } else {
+            $routeName = $this->input('route_name');
+        }
+
         $this->merge([
             'is_active' => $this->boolean('is_active'),
-            'order' => $this->filled('order') ? (int) $this->input('order') : 0,
+            'order' => $this->filled('order') ? (int) $this->input('order') : Menu::nextOrder($moduleId),
+            'route_name' => $routeName ? trim($routeName) : null,
         ]);
     }
 
@@ -38,7 +59,7 @@ class StoreMenuRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'route_name' => ['nullable', 'string', 'max:255'],
             'icon' => ['nullable', 'string', 'max:50'],
-            'order' => ['nullable', 'integer', 'min:0'],
+            'order' => ['nullable', 'integer', 'min:1'],
             'is_active' => ['nullable', 'boolean'],
         ];
     }
@@ -72,7 +93,7 @@ class StoreMenuRequest extends FormRequest
             'module_id.exists' => 'Modul yang dipilih tidak ditemukan dalam sistem.',
             'name.required' => 'Nama menu wajib diisi.',
             'name.max' => 'Nama menu tidak boleh melebihi 255 karakter.',
-            'order.min' => 'Urutan menu minimal bernilai 0.',
+            'order.min' => 'Urutan menu minimal bernilai 1.',
         ];
     }
 }

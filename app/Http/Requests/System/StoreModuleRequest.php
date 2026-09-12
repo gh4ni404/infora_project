@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\System;
 
+use App\Models\Module;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -22,7 +23,7 @@ class StoreModuleRequest extends FormRequest
     {
         $this->merge([
             'is_active' => $this->boolean('is_active'),
-            'order' => $this->filled('order') ? (int) $this->input('order') : 0,
+            'order' => $this->filled('order') ? (int) $this->input('order') : Module::nextOrder(),
         ]);
     }
 
@@ -35,7 +36,7 @@ class StoreModuleRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'order' => ['nullable', 'integer', 'min:0'],
+            'order' => ['nullable', 'integer', 'min:1'],
             'is_active' => ['nullable', 'boolean'],
         ];
     }
@@ -64,7 +65,7 @@ class StoreModuleRequest extends FormRequest
         return [
             'name.required' => 'Nama modul wajib diisi.',
             'name.max' => 'Nama modul tidak boleh melebihi 255 karakter.',
-            'order.min' => 'Urutan modul minimal bernilai 0.',
+            'order.min' => 'Urutan modul minimal bernilai 1.',
         ];
     }
 }

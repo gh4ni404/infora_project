@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('menu_id')->constrained('menus')->cascadeOnDelete();
             $table->string('name');
             $table->string('route_name')->nullable();
-            $table->integer('order')->default(0);
+            $table->integer('order')->default(1);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

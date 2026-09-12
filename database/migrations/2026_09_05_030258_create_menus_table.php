@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('route_name')->nullable();
             $table->string('icon')->nullable();
-            $table->integer('order')->default(0);
+            $table->integer('order')->default(1);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

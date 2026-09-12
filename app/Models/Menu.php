@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 
 class Menu extends Model
 {
@@ -139,5 +140,37 @@ class Menu extends Model
     public function hasActiveSubMenu(): bool
     {
         return $this->subMenus->contains(fn (SubMenu $sub) => $sub->isRouteActive());
+    }
+
+    /**
+     * Dapatkan nomor urutan tampil berikutnya untuk menu baru dalam suatu modul (mulai dari 1).
+     */
+    public static function nextOrder(?int $moduleId = null): int
+    {
+        $query = static::query();
+
+        if ($moduleId) {
+            $query->where('module_id', $moduleId);
+        }
+
+        $max = $query->max('order');
+
+        return is_null($max) ? 1 : ((int) $max + 1);
+    }
+
+    /**
+     * Dapatkan rekomendasi prefix rute turunan dari menu ini.
+     */
+    public function getRoutePrefixAttribute(): string
+    {
+        if (strcasecmp($this->name, 'Sistem') === 0) {
+            return 'system';
+        }
+
+        // Ambil kata pertama sebelum tanda '&' atau '/', lalu ubah ke slug
+        $base = explode('&', $this->name)[0];
+        $base = explode('/', $base)[0];
+
+        return Str::slug(trim($base));
     }
 }

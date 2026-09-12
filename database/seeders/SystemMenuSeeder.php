@@ -18,7 +18,7 @@ class SystemMenuSeeder extends Seeder
         $mainModule = Module::firstOrCreate(
             ['name' => 'NAVIGASI UTAMA'],
             [
-                'order' => 0,
+                'order' => 1,
                 'is_active' => true,
             ]
         );
@@ -31,7 +31,7 @@ class SystemMenuSeeder extends Seeder
             [
                 'route_name' => 'dashboard',
                 'icon' => 'layout-dashboard',
-                'order' => 0,
+                'order' => 1,
                 'is_active' => true,
             ]
         );

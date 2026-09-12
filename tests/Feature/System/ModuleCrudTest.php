@@ -177,3 +177,29 @@ test('super admin can delete module and cascades to menus and sub-menus', functi
     $this->assertDatabaseMissing('menus', ['id' => $menu->id]);
     $this->assertDatabaseMissing('sub_menus', ['id' => $subMenu->id]);
 });
+
+test('module store automatically assigns next order starting from 1 when order is omitted', function () {
+    $currentMax = Module::max('order') ?? 0;
+    $expectedOrder = $currentMax + 1;
+
+    $response = $this->actingAs($this->superAdmin)->post(route('system.modules.store'), [
+        'name' => 'Modul Otomatis Next Order',
+        'is_active' => true,
+    ]);
+
+    $response->assertRedirect(route('system.modules.index'));
+    $this->assertDatabaseHas('modules', [
+        'name' => 'MODUL OTOMATIS NEXT ORDER',
+        'order' => $expectedOrder,
+    ]);
+});
+
+test('module store validation fails when order is less than 1', function () {
+    $response = $this->actingAs($this->superAdmin)->post(route('system.modules.store'), [
+        'name' => 'Modul Order Nol',
+        'order' => 0,
+        'is_active' => true,
+    ]);
+
+    $response->assertSessionHasErrors('order');
+});

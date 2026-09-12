@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\System;
 
+use App\Models\SubMenu;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -20,9 +21,29 @@ class StoreSubMenuRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
+        $menuId = $this->filled('menu_id') ? (int) $this->input('menu_id') : null;
+
+        $prefix = trim((string) $this->input('route_prefix', ''));
+        $suffix = trim((string) $this->input('route_suffix', ''));
+
+        if ($this->has('route_prefix') || $this->has('route_suffix')) {
+            if ($prefix !== '' && $suffix !== '') {
+                $routeName = "{$prefix}.{$suffix}";
+            } elseif ($prefix !== '') {
+                $routeName = $prefix;
+            } elseif ($suffix !== '') {
+                $routeName = $suffix;
+            } else {
+                $routeName = null;
+            }
+        } else {
+            $routeName = $this->input('route_name');
+        }
+
         $this->merge([
             'is_active' => $this->boolean('is_active'),
-            'order' => $this->filled('order') ? (int) $this->input('order') : 0,
+            'order' => $this->filled('order') ? (int) $this->input('order') : SubMenu::nextOrder($menuId),
+            'route_name' => $routeName ? trim($routeName) : null,
         ]);
     }
 
@@ -37,7 +58,9 @@ class StoreSubMenuRequest extends FormRequest
             'menu_id' => ['required', 'integer', 'exists:menus,id'],
             'name' => ['required', 'string', 'max:255'],
             'route_name' => ['nullable', 'string', 'max:255'],
-            'order' => ['nullable', 'integer', 'min:0'],
+            'route_prefix' => ['nullable', 'string', 'max:100'],
+            'route_suffix' => ['nullable', 'string', 'max:150'],
+            'order' => ['nullable', 'integer', 'min:1'],
             'is_active' => ['nullable', 'boolean'],
         ];
     }
@@ -70,7 +93,7 @@ class StoreSubMenuRequest extends FormRequest
             'menu_id.exists' => 'Menu yang dipilih tidak ditemukan dalam sistem.',
             'name.required' => 'Nama sub-menu wajib diisi.',
             'name.max' => 'Nama sub-menu tidak boleh melebihi 255 karakter.',
-            'order.min' => 'Urutan sub-menu minimal bernilai 0.',
+            'order.min' => 'Urutan sub-menu minimal bernilai 1.',
         ];
     }
 }

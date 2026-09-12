@@ -183,3 +183,72 @@ test('super admin can delete menu and cascades to sub-menus', function () {
     $this->assertDatabaseMissing('menus', ['id' => $menu->id]);
     $this->assertDatabaseMissing('sub_menus', ['id' => $subMenu->id]);
 });
+
+test('menu store automatically assigns next order for module when order is omitted', function () {
+    $currentMax = Menu::where('module_id', $this->module->id)->max('order') ?? 0;
+    $expectedOrder = $currentMax + 1;
+
+    $response = $this->actingAs($this->superAdmin)->post(route('system.menus.store'), [
+        'module_id' => $this->module->id,
+        'name' => 'Menu Otomatis Next Order',
+        'is_active' => true,
+    ]);
+
+    $response->assertRedirect(route('system.menus.index'));
+    $this->assertDatabaseHas('menus', [
+        'module_id' => $this->module->id,
+        'name' => 'Menu Otomatis Next Order',
+        'order' => $expectedOrder,
+    ]);
+});
+
+test('menu store validation fails when order is less than 1', function () {
+    $response = $this->actingAs($this->superAdmin)->post(route('system.menus.store'), [
+        'module_id' => $this->module->id,
+        'name' => 'Menu Order Nol',
+        'order' => 0,
+        'is_active' => true,
+    ]);
+
+    $response->assertSessionHasErrors('order');
+});
+
+test('updating menu to a new parent module automatically assigns next order of the new module when order is omitted', function () {
+    $targetModule = Module::create([
+        'name' => 'MODUL TARGET LAIN',
+        'order' => 10,
+        'is_active' => true,
+    ]);
+
+    Menu::create([
+        'module_id' => $targetModule->id,
+        'name' => 'Menu Target 1',
+        'order' => 1,
+        'is_active' => true,
+    ]);
+    Menu::create([
+        'module_id' => $targetModule->id,
+        'name' => 'Menu Target 2',
+        'order' => 2,
+        'is_active' => true,
+    ]);
+
+    $menuToMove = Menu::create([
+        'module_id' => $this->module->id,
+        'name' => 'Menu Yang Dipindahkan',
+        'order' => 1,
+        'is_active' => true,
+    ]);
+
+    // Update parent module to targetModule without specifying order
+    $response = $this->actingAs($this->superAdmin)->put(route('system.menus.update', $menuToMove), [
+        'module_id' => $targetModule->id,
+        'name' => 'Menu Yang Dipindahkan',
+        'is_active' => true,
+    ]);
+
+    $response->assertRedirect(route('system.menus.index'));
+    $menuToMove->refresh();
+    expect($menuToMove->module_id)->toBe($targetModule->id)
+        ->and($menuToMove->order)->toBe(3); // targetModule max order 2 + 1 = 3
+});
