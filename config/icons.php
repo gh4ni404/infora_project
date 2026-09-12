@@ -15,6 +15,7 @@ return [
     'categories' => [
         'all' => 'Semua Ikon',
         'navigasi' => 'Navigasi & Tampilan',
+        'wilayah' => 'Wilayah & Lokasi',
         'akademik' => 'Sekolah & Akademik',
         'data' => 'Data & Arsip',
         'pengguna' => 'Pengguna & SDM',
@@ -28,7 +29,7 @@ return [
             'name' => 'compass',
             'label' => 'Kompas / Penjelajah',
             'category' => 'navigasi',
-            'keywords' => 'kompas penjelajah arah navigasi modul peta',
+            'keywords' => 'kompas penjelajah arah navigasi modul peta wilayah daerah',
         ],
         [
             'name' => 'layers',
@@ -59,6 +60,56 @@ return [
             'label' => 'Grid Aplikasi',
             'category' => 'navigasi',
             'keywords' => 'grid kotak menu kumpulan aplikasi modul',
+        ],
+        [
+            'name' => 'external-link',
+            'label' => 'Tautan Luar / Eksternal',
+            'category' => 'navigasi',
+            'keywords' => 'tautan luar link eksternal portal buka tab baru website redirect url',
+        ],
+
+        // Wilayah & Lokasi
+        [
+            'name' => 'map-pin',
+            'label' => 'Pin Lokasi / Wilayah',
+            'category' => 'wilayah',
+            'keywords' => 'wilayah lokasi peta map pin daerah tempat titik koordinat alamat domisili zonasi provinsi kota kabupaten kecamatan kelurahan',
+        ],
+        [
+            'name' => 'map',
+            'label' => 'Peta Wilayah / Geografis',
+            'category' => 'wilayah',
+            'keywords' => 'peta map wilayah daerah geografis zonasi area batas pulau provinsi kabupaten kota kecamatan desa batas-wilayah',
+        ],
+        [
+            'name' => 'navigation',
+            'label' => 'Navigasi / Arah Wilayah',
+            'category' => 'wilayah',
+            'keywords' => 'navigasi arah panah rute rute-wilayah kompas wilayah lokasi gps koordinat tujuan penunjuk',
+        ],
+        [
+            'name' => 'locate',
+            'label' => 'Titik Koordinat / GPS',
+            'category' => 'wilayah',
+            'keywords' => 'lokasi gps koordinat posisi titik temu radar pantau wilayah deteksi presisi titik-lokasi',
+        ],
+        [
+            'name' => 'flag',
+            'label' => 'Batas Wilayah / Zona',
+            'category' => 'wilayah',
+            'keywords' => 'bendera batas patok teritorial wilayah distrik zona penanda area kewilayahan',
+        ],
+        [
+            'name' => 'milestone',
+            'label' => 'Patok / Batas Daerah',
+            'category' => 'wilayah',
+            'keywords' => 'rambu patok penunjuk arah plang jalan batas wilayah kilometer jarak tonggak daerah',
+        ],
+        [
+            'name' => 'signpost',
+            'label' => 'Papan Arah / Rute Daerah',
+            'category' => 'wilayah',
+            'keywords' => 'papan arah rute simpang persimpangan daerah wilayah penunjuk jalan plang marka',
         ],
 
         // Sekolah & Akademik
@@ -141,6 +192,24 @@ return [
             'label' => 'Fasilitas & Sarpras',
             'category' => 'data',
             'keywords' => 'sarana prasarana gedung ruangan fasilitas kelas laboratorium',
+        ],
+        [
+            'name' => 'tag',
+            'label' => 'Tag / Label Kategori',
+            'category' => 'data',
+            'keywords' => 'tag label kategori penanda jenis kelompok klasifikasi',
+        ],
+        [
+            'name' => 'archive',
+            'label' => 'Arsip Berkas / Riwayat',
+            'category' => 'data',
+            'keywords' => 'arsip berkas kotak riwayat dokumen lampau simpan data',
+        ],
+        [
+            'name' => 'printer',
+            'label' => 'Cetak Dokumen / Laporan',
+            'category' => 'data',
+            'keywords' => 'cetak print printer cetakan dokumen laporan kertas cetak-data',
         ],
 
         // Pengguna & SDM
@@ -248,7 +317,7 @@ return [
             'name' => 'globe',
             'label' => 'Portal Publik / Web',
             'category' => 'umum',
-            'keywords' => 'portal website situs publik internet online domain',
+            'keywords' => 'portal website situs publik internet online domain wilayah global regional bumi',
         ],
         [
             'name' => 'help-circle',

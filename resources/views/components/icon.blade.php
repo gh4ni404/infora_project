@@ -55,6 +55,71 @@
         </svg>
         @break
 
+    @case('external-link')
+        <svg {{ $attributes->merge(['class' => $class]) }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" x2="21" y1="14" y2="3"></line>
+        </svg>
+        @break
+
+    @case('map-pin')
+    @case('pin')
+    @case('location')
+        <svg {{ $attributes->merge(['class' => $class]) }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        @break
+
+    @case('map')
+        <svg {{ $attributes->merge(['class' => $class]) }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon>
+            <line x1="9" x2="9" y1="3" y2="18"></line>
+            <line x1="15" x2="15" y1="6" y2="21"></line>
+        </svg>
+        @break
+
+    @case('navigation')
+        <svg {{ $attributes->merge(['class' => $class]) }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+        </svg>
+        @break
+
+    @case('locate')
+    @case('gps')
+        <svg {{ $attributes->merge(['class' => $class]) }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="2" x2="5" y1="12" y2="12"></line>
+            <line x1="19" x2="22" y1="12" y2="12"></line>
+            <line x1="12" x2="12" y1="2" y2="5"></line>
+            <line x1="12" x2="12" y1="19" y2="22"></line>
+            <circle cx="12" cy="12" r="7"></circle>
+        </svg>
+        @break
+
+    @case('flag')
+        <svg {{ $attributes->merge(['class' => $class]) }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+            <line x1="4" x2="4" y1="22" y2="15"></line>
+        </svg>
+        @break
+
+    @case('milestone')
+        <svg {{ $attributes->merge(['class' => $class]) }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6H5a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h13l4-3.5L18 6Z"></path>
+            <path d="M12 13v8"></path>
+            <path d="M12 3v3"></path>
+        </svg>
+        @break
+
+    @case('signpost')
+        <svg {{ $attributes->merge(['class' => $class]) }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3v3"></path>
+            <path d="M18.5 13H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h14.5l3.5 3-3.5 3z"></path>
+            <path d="M12 13v8"></path>
+        </svg>
+        @break
+
     @case('school')
         <svg {{ $attributes->merge(['class' => $class]) }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="m4 6 8-4 8 4"></path>
@@ -175,6 +240,29 @@
             <path d="M16 14h.01"></path>
             <path d="M8 10h.01"></path>
             <path d="M8 14h.01"></path>
+        </svg>
+        @break
+
+    @case('tag')
+        <svg {{ $attributes->merge(['class' => $class]) }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"></path>
+            <path d="M7 7h.01"></path>
+        </svg>
+        @break
+
+    @case('archive')
+        <svg {{ $attributes->merge(['class' => $class]) }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect width="20" height="5" x="2" y="3" rx="1"></rect>
+            <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path>
+            <path d="M10 12h4"></path>
+        </svg>
+        @break
+
+    @case('printer')
+        <svg {{ $attributes->merge(['class' => $class]) }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect width="12" height="8" x="6" y="14"></rect>
         </svg>
         @break
 

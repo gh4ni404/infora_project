@@ -185,6 +185,8 @@ test('menu create views render visual icon picker with free Lucide catalog', fun
     $responseMenu = $this->actingAs($this->user)->get(route('system.menus.create'));
     $responseMenu->assertOk();
     $responseMenu->assertSee('icon-picker-component', false);
+    $responseMenu->assertSee('data-icon-name="map-pin"', false);
+    $responseMenu->assertSee('Wilayah &amp; Lokasi', false);
     $responseMenu->assertSee('Panduan Nama Rute');
     $responseMenu->assertSee('registered_routes_list', false);
 });
