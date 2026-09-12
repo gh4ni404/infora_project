@@ -3,17 +3,16 @@
 namespace App\Models;
 
 use App\Support\TextFormatter;
-use Database\Factories\KabupatenFactory;
+use Database\Factories\KecamatanFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Kabupaten extends Model
+class Kecamatan extends Model
 {
-    /** @use HasFactory<KabupatenFactory> */
+    /** @use HasFactory<KecamatanFactory> */
     use HasFactory;
 
     /**
@@ -21,7 +20,7 @@ class Kabupaten extends Model
      *
      * @var string
      */
-    protected $table = 'kabupaten';
+    protected $table = 'kecamatan';
 
     /**
      * Atribut yang dapat diisi secara massal (mass assignable).
@@ -29,9 +28,8 @@ class Kabupaten extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'provinsi_id',
+        'kabupaten_id',
         'kode',
-        'tipe',
         'nama',
         'status',
     ];
@@ -44,33 +42,23 @@ class Kabupaten extends Model
     protected function casts(): array
     {
         return [
-            'provinsi_id' => 'integer',
+            'kabupaten_id' => 'integer',
             'status' => 'boolean',
         ];
     }
 
     /**
-     * Relasi ke entitas induk Provinsi.
+     * Relasi ke entitas induk Kabupaten/Kota.
      *
-     * @return BelongsTo<Provinsi, $this>
+     * @return BelongsTo<Kabupaten, $this>
      */
-    public function provinsi(): BelongsTo
+    public function kabupaten(): BelongsTo
     {
-        return $this->belongsTo(Provinsi::class, 'provinsi_id');
+        return $this->belongsTo(Kabupaten::class, 'kabupaten_id');
     }
 
     /**
-     * Relasi ke entitas anak Kecamatan.
-     *
-     * @return HasMany<Kecamatan, $this>
-     */
-    public function kecamatan(): HasMany
-    {
-        return $this->hasMany(Kecamatan::class, 'kabupaten_id');
-    }
-
-    /**
-     * Mutator & accessor untuk nama kabupaten/kota.
+     * Mutator & accessor untuk nama kecamatan.
      * Format otomatis Title Case dengan preservasi akronim resmi.
      */
     protected function nama(): Attribute
@@ -81,19 +69,19 @@ class Kabupaten extends Model
     }
 
     /**
-     * Accessor untuk nama lengkap kabupaten/kota (misal: "Kota Makassar" atau "Kabupaten Maros").
+     * Accessor untuk nama lengkap kecamatan (misal: "Kecamatan Tanete Riattang").
      */
     protected function namaLengkap(): Attribute
     {
         return Attribute::make(
-            get: fn () => trim("{$this->tipe} {$this->nama}"),
+            get: fn () => 'Kecamatan '.$this->nama,
         );
     }
 
     /**
      * Scope query untuk menyaring hanya data yang aktif.
      *
-     * @param  Builder<Kabupaten>  $query
+     * @param  Builder<Kecamatan>  $query
      */
     public function scopeAktif(Builder $query): void
     {
@@ -101,33 +89,35 @@ class Kabupaten extends Model
     }
 
     /**
-     * Scope query untuk menyaring berdasarkan ID provinsi.
+     * Scope query untuk menyaring berdasarkan ID kabupaten/kota.
      *
-     * @param  Builder<Kabupaten>  $query
+     * @param  Builder<Kecamatan>  $query
+     */
+    public function scopeFilterByKabupaten(Builder $query, ?int $kabupatenId): void
+    {
+        if ($kabupatenId) {
+            $query->where('kabupaten_id', $kabupatenId);
+        }
+    }
+
+    /**
+     * Scope query untuk menyaring berdasarkan ID provinsi induk.
+     *
+     * @param  Builder<Kecamatan>  $query
      */
     public function scopeFilterByProvinsi(Builder $query, ?int $provinsiId): void
     {
         if ($provinsiId) {
-            $query->where('provinsi_id', $provinsiId);
+            $query->whereHas('kabupaten', function (Builder $q) use ($provinsiId) {
+                $q->where('provinsi_id', $provinsiId);
+            });
         }
     }
 
     /**
-     * Scope query untuk menyaring berdasarkan tipe (Kabupaten / Kota).
+     * Scope query untuk pencarian berdasarkan kode wilayah, nama kecamatan, nama kabupaten, atau nama provinsi.
      *
-     * @param  Builder<Kabupaten>  $query
-     */
-    public function scopeFilterByTipe(Builder $query, ?string $tipe): void
-    {
-        if (filled($tipe) && in_array($tipe, ['Kabupaten', 'Kota'], true)) {
-            $query->where('tipe', $tipe);
-        }
-    }
-
-    /**
-     * Scope query untuk pencarian berdasarkan kode wilayah, nama kabupaten, atau nama provinsi.
-     *
-     * @param  Builder<Kabupaten>  $query
+     * @param  Builder<Kecamatan>  $query
      */
     public function scopeSearch(Builder $query, ?string $term): void
     {
@@ -139,8 +129,11 @@ class Kabupaten extends Model
         $query->where(function (Builder $q) use ($trimmed) {
             $q->where('kode', 'like', "%{$trimmed}%")
                 ->orWhere('nama', 'like', "%{$trimmed}%")
-                ->orWhereHas('provinsi', function (Builder $provQuery) use ($trimmed) {
-                    $provQuery->where('nama', 'like', "%{$trimmed}%");
+                ->orWhereHas('kabupaten', function (Builder $kabQuery) use ($trimmed) {
+                    $kabQuery->where('nama', 'like', "%{$trimmed}%")
+                        ->orWhereHas('provinsi', function (Builder $provQuery) use ($trimmed) {
+                            $provQuery->where('nama', 'like', "%{$trimmed}%");
+                        });
                 });
         });
     }
