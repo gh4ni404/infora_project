@@ -70,11 +70,9 @@ class SubMenuController extends Controller
     /**
      * Show the form for editing the specified sub-menu.
      */
-    public function edit(SubMenu $subMenu): View
+    public function edit(SubMenu $subMenu): RedirectResponse
     {
-        $menus = Menu::with('module')->orderBy('module_id')->orderBy('order')->get();
-
-        return view('system.sub-menus.edit', compact('subMenu', 'menus'));
+        return redirect()->route('system.sub-menus.index');
     }
 
     /**

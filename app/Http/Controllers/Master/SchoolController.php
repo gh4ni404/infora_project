@@ -63,9 +63,9 @@ class SchoolController extends Controller
     /**
      * Show the form for editing the specified school.
      */
-    public function edit(School $dataSekolah): View
+    public function edit(School $dataSekolah): RedirectResponse
     {
-        return view('master.data-sekolah.edit', ['school' => $dataSekolah]);
+        return redirect()->route('master.data-sekolah.index');
     }
 
     /**

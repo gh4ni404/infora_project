@@ -71,11 +71,9 @@ class MenuController extends Controller
     /**
      * Show the form for editing the specified menu.
      */
-    public function edit(Menu $menu): View
+    public function edit(Menu $menu): RedirectResponse
     {
-        $modules = Module::orderBy('order')->get();
-
-        return view('system.menus.edit', compact('menu', 'modules'));
+        return redirect()->route('system.menus.index');
     }
 
     /**

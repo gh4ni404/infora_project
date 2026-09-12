@@ -111,12 +111,18 @@
                         </td>
                         <td>
                             <div class="table-actions table-actions-right">
-                                <a href="{{ route('system.sub-menus.edit', $subMenu) }}" class="btn-edit" title="Edit Sub-Menu">
+                                <button
+                                    type="button"
+                                    class="btn-edit btn-open-edit-sub-menu"
+                                    title="Edit Sub-Menu"
+                                    data-sub-menu="{{ json_encode($subMenu) }}"
+                                    data-action="{{ route('system.sub-menus.update', $subMenu) }}"
+                                >
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
                                     </svg>
                                     <!-- <span>Edit</span> -->
-                                </a>
+                                </button>
                                 <form method="POST" action="{{ route('system.sub-menus.destroy', $subMenu) }}" onsubmit="return confirm('Hapus sub-menu ini?');" class="form-inline-action">
                                     @csrf
                                     @method('DELETE')
@@ -295,45 +301,103 @@
     </div>
 </div>
 
+<!-- Modal Edit Sub-Menu Component -->
+@include('system.sub-menus.edit')
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById('modalCreateSubMenu');
-    const btnOpen = document.getElementById('btnOpenCreateSubMenu');
-    const btnClose = document.getElementById('btnCloseCreateSubMenu');
-    const btnCancel = document.getElementById('btnCancelCreateSubMenu');
+    // Create Modal
+    const createModal = document.getElementById('modalCreateSubMenu');
+    const btnOpenCreate = document.getElementById('btnOpenCreateSubMenu');
+    const btnCloseCreate = document.getElementById('btnCloseCreateSubMenu');
+    const btnCancelCreate = document.getElementById('btnCancelCreateSubMenu');
 
-    function openModal() {
-        if (!modal) return;
-        modal.classList.remove('hidden');
+    function openCreateModal() {
+        if (!createModal) return;
+        createModal.classList.remove('hidden');
         document.body.classList.add('modal-open');
-        const firstInput = modal.querySelector('input[name="name"]');
+        const firstInput = createModal.querySelector('input[name="name"]');
         if (firstInput) setTimeout(() => firstInput.focus(), 50);
     }
 
-    function closeModal() {
-        if (!modal) return;
-        modal.classList.add('hidden');
+    function closeCreateModal() {
+        if (!createModal) return;
+        createModal.classList.add('hidden');
         document.body.classList.remove('modal-open');
     }
 
-    btnOpen && btnOpen.addEventListener('click', openModal);
-    btnClose && btnClose.addEventListener('click', closeModal);
-    btnCancel && btnCancel.addEventListener('click', closeModal);
+    btnOpenCreate && btnOpenCreate.addEventListener('click', openCreateModal);
+    btnCloseCreate && btnCloseCreate.addEventListener('click', closeCreateModal);
+    btnCancelCreate && btnCancelCreate.addEventListener('click', closeCreateModal);
 
-    modal && modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            closeModal();
+    createModal && createModal.addEventListener('click', function(e) {
+        if (e.target === createModal) {
+            closeCreateModal();
         }
     });
 
+    // Edit Modal
+    const editModal = document.getElementById('modalEditSubMenu');
+    const formEdit = document.getElementById('formEditSubMenu');
+    const btnCloseEdit = document.getElementById('btnCloseEditSubMenu');
+    const btnCancelEdit = document.getElementById('btnCancelEditSubMenu');
+
+    function openEditModal() {
+        if (!editModal) return;
+        editModal.classList.remove('hidden');
+        document.body.classList.add('modal-open');
+        const firstInput = editModal.querySelector('input[name="name"]');
+        if (firstInput) setTimeout(() => firstInput.focus(), 50);
+    }
+
+    function closeEditModal() {
+        if (!editModal) return;
+        editModal.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+    }
+
+    btnCloseEdit && btnCloseEdit.addEventListener('click', closeEditModal);
+    btnCancelEdit && btnCancelEdit.addEventListener('click', closeEditModal);
+
+    editModal && editModal.addEventListener('click', function(e) {
+        if (e.target === editModal) {
+            closeEditModal();
+        }
+    });
+
+    document.querySelectorAll('.btn-open-edit-sub-menu').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const subMenu = JSON.parse(this.dataset.subMenu || '{}');
+            const action = this.dataset.action;
+
+            formEdit.action = action;
+            document.getElementById('edit_submenu_menu_id').value = subMenu.menu_id || '';
+            document.getElementById('edit_submenu_name').value = subMenu.name || '';
+            document.getElementById('edit_submenu_route_name').value = subMenu.route_name || '';
+            document.getElementById('edit_submenu_order').value = subMenu.order ?? 0;
+            document.getElementById('edit_submenu_is_active').checked = Boolean(subMenu.is_active);
+
+            openEditModal();
+        });
+    });
+
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
-            closeModal();
+        if (e.key === 'Escape') {
+            if (createModal && !createModal.classList.contains('hidden')) {
+                closeCreateModal();
+            }
+            if (editModal && !editModal.classList.contains('hidden')) {
+                closeEditModal();
+            }
         }
     });
 
     @if ($errors->any())
-        openModal();
+        @if (old('_method') === 'PUT')
+            openEditModal();
+        @else
+            openCreateModal();
+        @endif
     @endif
 });
 </script>

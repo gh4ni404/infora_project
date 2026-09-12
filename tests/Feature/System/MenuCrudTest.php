@@ -125,7 +125,7 @@ test('menu store allows duplicate names without unique constraint errors', funct
     expect(Menu::where('name', 'Menu Duplikat')->count())->toBe(2);
 });
 
-test('super admin can view edit menu page', function () {
+test('super admin can view edit menu modal component on index and edit route redirects to index', function () {
     $menu = Menu::create([
         'module_id' => $this->module->id,
         'name' => 'Menu Edit Test',
@@ -133,11 +133,15 @@ test('super admin can view edit menu page', function () {
         'is_active' => true,
     ]);
 
-    $response = $this->actingAs($this->superAdmin)->get(route('system.menus.edit', $menu));
+    $redirectResponse = $this->actingAs($this->superAdmin)->get(route('system.menus.edit', $menu));
+    $redirectResponse->assertRedirect(route('system.menus.index'));
 
+    $response = $this->actingAs($this->superAdmin)->get(route('system.menus.index'));
     $response->assertOk();
-    $response->assertSee('Edit Menu: Menu Edit Test');
-    $response->assertSee('value="Menu Edit Test"', false);
+    $response->assertSee('Menu Edit Test');
+    $response->assertSee('modalEditMenu', false);
+    $response->assertSee('Formulir Perubahan Menu');
+    $response->assertSee('btn-open-edit-menu', false);
 });
 
 test('super admin can update existing menu', function () {

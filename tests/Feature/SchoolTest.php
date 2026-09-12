@@ -172,18 +172,22 @@ test('super admin can create school with base64 logo', function () {
     Storage::disk('public')->assertExists($school->logo_path);
 });
 
-test('super admin can view school edit page', function () {
+test('super admin can view school edit modal component on index and edit route redirects to index', function () {
     $school = School::factory()->create([
         'name' => 'SMA Unggulan',
         'npsn' => '40399999',
     ]);
 
-    $response = $this->actingAs($this->superAdmin)->get(route('master.data-sekolah.edit', $school));
+    $redirectResponse = $this->actingAs($this->superAdmin)->get(route('master.data-sekolah.edit', $school));
+    $redirectResponse->assertRedirect(route('master.data-sekolah.index'));
 
+    $response = $this->actingAs($this->superAdmin)->get(route('master.data-sekolah.index'));
     $response->assertOk();
     $response->assertSee('SMA Unggulan');
     $response->assertSee('40399999');
+    $response->assertSee('modalEditSchool', false);
     $response->assertSee('Formulir Perubahan Data Sekolah');
+    $response->assertSee('btn-open-edit-school', false);
 });
 
 test('super admin can update school information', function () {
@@ -264,9 +268,4 @@ test('school views adhere to zero inline styles convention', function () {
     $indexResponse->assertOk();
     expect($indexResponse->getContent())->not->toContain('style="');
     expect($indexResponse->getContent())->not->toContain('<style');
-
-    $editResponse = $this->actingAs($this->superAdmin)->get(route('master.data-sekolah.edit', $school));
-    $editResponse->assertOk();
-    expect($editResponse->getContent())->not->toContain('style="');
-    expect($editResponse->getContent())->not->toContain('<style');
 });

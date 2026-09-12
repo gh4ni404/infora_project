@@ -57,9 +57,9 @@ class ModuleController extends Controller
     /**
      * Show the form for editing the specified module.
      */
-    public function edit(Module $module): View
+    public function edit(Module $module): RedirectResponse
     {
-        return view('system.modules.edit', compact('module'));
+        return redirect()->route('system.modules.index');
     }
 
     /**

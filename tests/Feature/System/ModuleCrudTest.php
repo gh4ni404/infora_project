@@ -123,18 +123,22 @@ test('module store allows duplicate names without unique constraint errors', fun
     expect(Module::where('name', 'MODUL SAMA')->count())->toBe(2);
 });
 
-test('super admin can view edit module page', function () {
+test('super admin can view edit module modal component on index and edit route redirects to index', function () {
     $module = Module::create([
         'name' => 'Modul Edit Test',
         'order' => 2,
         'is_active' => true,
     ]);
 
-    $response = $this->actingAs($this->superAdmin)->get(route('system.modules.edit', $module));
+    $redirectResponse = $this->actingAs($this->superAdmin)->get(route('system.modules.edit', $module));
+    $redirectResponse->assertRedirect(route('system.modules.index'));
 
+    $response = $this->actingAs($this->superAdmin)->get(route('system.modules.index'));
     $response->assertOk();
-    $response->assertSee('Edit Modul: MODUL EDIT TEST');
-    $response->assertSee('value="MODUL EDIT TEST"', false);
+    $response->assertSee('MODUL EDIT TEST');
+    $response->assertSee('modalEditModule', false);
+    $response->assertSee('Formulir Perubahan Modul');
+    $response->assertSee('btn-open-edit-module', false);
 });
 
 test('super admin can update existing module', function () {

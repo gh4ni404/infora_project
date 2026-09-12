@@ -84,12 +84,18 @@
                         </td>
                         <td>
                             <div class="table-actions table-actions-right">
-                                <a href="{{ route('system.modules.edit', $module) }}" class="btn-edit" title="Edit Modul">
+                                <button
+                                    type="button"
+                                    class="btn-edit btn-open-edit-module"
+                                    title="Edit Modul"
+                                    data-module="{{ json_encode($module) }}"
+                                    data-action="{{ route('system.modules.update', $module) }}"
+                                >
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
                                     </svg>
                                     <!-- <span>Edit</span> -->
-                                </a>
+                                </button>
                                 <form method="POST" action="{{ route('system.modules.destroy', $module) }}" onsubmit="return confirm('Hapus modul ini beserta seluruh menu di dalamnya?');" class="form-inline-action">
                                     @csrf
                                     @method('DELETE')
@@ -208,48 +214,104 @@
     </div>
 </div>
 
+<!-- Modal Edit Modul Component -->
+@include('system.modules.edit')
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById('modalCreateModule');
-    const btnOpen = document.getElementById('btnOpenCreateModule');
-    const btnClose = document.getElementById('btnCloseCreateModule');
-    const btnCancel = document.getElementById('btnCancelCreateModule');
+    // Create Modal
+    const createModal = document.getElementById('modalCreateModule');
+    const btnOpenCreate = document.getElementById('btnOpenCreateModule');
+    const btnCloseCreate = document.getElementById('btnCloseCreateModule');
+    const btnCancelCreate = document.getElementById('btnCancelCreateModule');
 
-    function openModal() {
-        if (!modal) return;
-        modal.classList.remove('hidden');
+    function openCreateModal() {
+        if (!createModal) return;
+        createModal.classList.remove('hidden');
         document.body.classList.add('modal-open');
-        const firstInput = modal.querySelector('input[name="name"]');
+        const firstInput = createModal.querySelector('input[name="name"]');
         if (firstInput) setTimeout(() => firstInput.focus(), 50);
     }
 
-    function closeModal() {
-        if (!modal) return;
-        modal.classList.add('hidden');
+    function closeCreateModal() {
+        if (!createModal) return;
+        createModal.classList.add('hidden');
         document.body.classList.remove('modal-open');
     }
 
-    btnOpen && btnOpen.addEventListener('click', openModal);
-    btnClose && btnClose.addEventListener('click', closeModal);
-    btnCancel && btnCancel.addEventListener('click', closeModal);
+    btnOpenCreate && btnOpenCreate.addEventListener('click', openCreateModal);
+    btnCloseCreate && btnCloseCreate.addEventListener('click', closeCreateModal);
+    btnCancelCreate && btnCancelCreate.addEventListener('click', closeCreateModal);
 
-    modal && modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            closeModal();
+    createModal && createModal.addEventListener('click', function(e) {
+        if (e.target === createModal) {
+            closeCreateModal();
         }
     });
 
+    // Edit Modal
+    const editModal = document.getElementById('modalEditModule');
+    const formEdit = document.getElementById('formEditModule');
+    const btnCloseEdit = document.getElementById('btnCloseEditModule');
+    const btnCancelEdit = document.getElementById('btnCancelEditModule');
+
+    function openEditModal() {
+        if (!editModal) return;
+        editModal.classList.remove('hidden');
+        document.body.classList.add('modal-open');
+        const firstInput = editModal.querySelector('input[name="name"]');
+        if (firstInput) setTimeout(() => firstInput.focus(), 50);
+    }
+
+    function closeEditModal() {
+        if (!editModal) return;
+        editModal.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+    }
+
+    btnCloseEdit && btnCloseEdit.addEventListener('click', closeEditModal);
+    btnCancelEdit && btnCancelEdit.addEventListener('click', closeEditModal);
+
+    editModal && editModal.addEventListener('click', function(e) {
+        if (e.target === editModal) {
+            closeEditModal();
+        }
+    });
+
+    document.querySelectorAll('.btn-open-edit-module').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const module = JSON.parse(this.dataset.module || '{}');
+            const action = this.dataset.action;
+
+            formEdit.action = action;
+            document.getElementById('edit_module_name').value = module.name || '';
+            document.getElementById('edit_module_order').value = module.order ?? 0;
+            document.getElementById('edit_module_is_active').checked = Boolean(module.is_active);
+
+            openEditModal();
+        });
+    });
+
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+        if (e.key === 'Escape') {
             const iconModal = document.querySelector('.icon-picker-modal-backdrop:not(.hidden)');
             if (!iconModal) {
-                closeModal();
+                if (createModal && !createModal.classList.contains('hidden')) {
+                    closeCreateModal();
+                }
+                if (editModal && !editModal.classList.contains('hidden')) {
+                    closeEditModal();
+                }
             }
         }
     });
 
     @if ($errors->any())
-        openModal();
+        @if (old('_method') === 'PUT')
+            openEditModal();
+        @else
+            openCreateModal();
+        @endif
     @endif
 });
 </script>

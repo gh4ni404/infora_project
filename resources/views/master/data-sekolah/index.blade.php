@@ -152,12 +152,21 @@
                         </td>
                         <td>
                             <div class="table-actions table-actions-right">
-                                <a href="{{ route('master.data-sekolah.edit', $school) }}" class="btn-edit" title="Edit Data Sekolah">
+                                <button
+                                    type="button"
+                                    class="btn-edit btn-open-edit-school"
+                                    title="Edit Data Sekolah"
+                                    data-school="{{ json_encode($school) }}"
+                                    data-action="{{ route('master.data-sekolah.update', $school) }}"
+                                    @if ($school->logo_path)
+                                        data-logo-url="{{ asset('storage/' . $school->logo_path) }}"
+                                    @endif
+                                >
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
                                     </svg>
                                     <!-- <span>Edit</span> -->
-                                </a>
+                                </button>
                                 <form method="POST" action="{{ route('master.data-sekolah.destroy', $school) }}" onsubmit="return confirm('Hapus data sekolah {{ $school->name }} dari registri?');" class="form-inline-action">
                                     @csrf
                                     @method('DELETE')
@@ -449,52 +458,146 @@
     </div>
 </div>
 
+<!-- Modal Edit Sekolah Component -->
+@include('master.data-sekolah.edit')
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById('modalCreateSchool');
-    const btnOpen = document.getElementById('btnOpenCreateSchool');
-    const btnClose = document.getElementById('btnCloseCreateSchool');
-    const btnCancel = document.getElementById('btnCancelCreateSchool');
+    // Create Modal Elements
+    const createModal = document.getElementById('modalCreateSchool');
+    const btnOpenCreate = document.getElementById('btnOpenCreateSchool');
+    const btnCloseCreate = document.getElementById('btnCloseCreateSchool');
+    const btnCancelCreate = document.getElementById('btnCancelCreateSchool');
 
-    function openModal() {
-        if (!modal) return;
-        modal.classList.remove('hidden');
+    function openCreateModal() {
+        if (!createModal) return;
+        createModal.classList.remove('hidden');
         document.body.classList.add('modal-open');
-        const firstInput = modal.querySelector('input[name="name"]');
+        const firstInput = createModal.querySelector('input[name="name"]');
         if (firstInput) setTimeout(() => firstInput.focus(), 50);
     }
 
-    function closeModal() {
-        if (!modal) return;
-        modal.classList.add('hidden');
+    function closeCreateModal() {
+        if (!createModal) return;
+        createModal.classList.add('hidden');
         document.body.classList.remove('modal-open');
     }
 
-    btnOpen && btnOpen.addEventListener('click', openModal);
-    btnClose && btnClose.addEventListener('click', closeModal);
-    btnCancel && btnCancel.addEventListener('click', closeModal);
+    btnOpenCreate && btnOpenCreate.addEventListener('click', openCreateModal);
+    btnCloseCreate && btnCloseCreate.addEventListener('click', closeCreateModal);
+    btnCancelCreate && btnCancelCreate.addEventListener('click', closeCreateModal);
 
-    modal && modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            closeModal();
+    createModal && createModal.addEventListener('click', function(e) {
+        if (e.target === createModal) {
+            closeCreateModal();
         }
+    });
+
+    // Edit Modal Elements
+    const editModal = document.getElementById('modalEditSchool');
+    const formEdit = document.getElementById('formEditSchool');
+    const btnCloseEdit = document.getElementById('btnCloseEditSchool');
+    const btnCancelEdit = document.getElementById('btnCancelEditSchool');
+
+    function openEditModal() {
+        if (!editModal) return;
+        editModal.classList.remove('hidden');
+        document.body.classList.add('modal-open');
+        const firstInput = editModal.querySelector('input[name="name"]');
+        if (firstInput) setTimeout(() => firstInput.focus(), 50);
+    }
+
+    function closeEditModal() {
+        if (!editModal) return;
+        editModal.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+    }
+
+    btnCloseEdit && btnCloseEdit.addEventListener('click', closeEditModal);
+    btnCancelEdit && btnCancelEdit.addEventListener('click', closeEditModal);
+
+    editModal && editModal.addEventListener('click', function(e) {
+        if (e.target === editModal) {
+            closeEditModal();
+        }
+    });
+
+    // Edit Button Triggers on Table Rows
+    document.querySelectorAll('.btn-open-edit-school').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const school = JSON.parse(this.dataset.school || '{}');
+            const action = this.dataset.action;
+            const logoUrl = this.dataset.logoUrl;
+
+            formEdit.action = action;
+            document.getElementById('edit_name').value = school.name || '';
+            document.getElementById('edit_npsn').value = school.npsn || '';
+            document.getElementById('edit_school_type').value = school.school_type || '';
+            document.getElementById('edit_status').value = school.status || '';
+            document.getElementById('edit_accreditation').value = school.accreditation || '';
+            document.getElementById('edit_nss').value = school.nss || '';
+            document.getElementById('edit_address').value = school.address || '';
+            document.getElementById('edit_village').value = school.village || '';
+            document.getElementById('edit_district').value = school.district || '';
+            document.getElementById('edit_city').value = school.city || '';
+            document.getElementById('edit_province').value = school.province || '';
+            document.getElementById('edit_postal_code').value = school.postal_code || '';
+            document.getElementById('edit_phone').value = school.phone || '';
+            document.getElementById('edit_fax').value = school.fax || '';
+            document.getElementById('edit_email').value = school.email || '';
+            document.getElementById('edit_website').value = school.website || '';
+            document.getElementById('edit_principal_name').value = school.principal_name || '';
+            document.getElementById('edit_principal_nip').value = school.principal_nip || '';
+            document.getElementById('edit_foundation_name').value = school.foundation_name || '';
+            document.getElementById('edit_is_active').checked = Boolean(school.is_active);
+
+            // Reset logo states in edit modal
+            document.getElementById('edit_logo_base64').value = '';
+            document.getElementById('edit_remove_logo').value = '0';
+            document.getElementById('edit_logo_file').value = '';
+            const previewImg = document.getElementById('editLogoPreviewImg');
+            const preview = document.getElementById('editLogoPreview');
+            const placeholder = document.getElementById('editLogoPlaceholder');
+
+            if (logoUrl) {
+                previewImg.src = logoUrl;
+                placeholder.classList.add('hidden');
+                preview.classList.remove('hidden');
+            } else {
+                previewImg.src = '';
+                preview.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+            }
+
+            openEditModal();
+        });
     });
 
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
-            closeModal();
+        if (e.key === 'Escape') {
+            if (createModal && !createModal.classList.contains('hidden')) {
+                closeCreateModal();
+            }
+            if (editModal && !editModal.classList.contains('hidden')) {
+                closeEditModal();
+            }
         }
     });
 
-    // Base64 Logo Upload Handler (Create Form)
-    setupLogoUpload('create_logo_file', 'create_logo_base64', 'createLogoPlaceholder', 'createLogoPreview', 'createLogoPreviewImg', 'createLogoRemoveBtn', 'createLogoUploadArea');
+    // Base64 Logo Upload Handlers
+    setupLogoUpload('create_logo_file', 'create_logo_base64', 'createLogoPlaceholder', 'createLogoPreview', 'createLogoPreviewImg', 'createLogoRemoveBtn', 'createLogoUploadArea', null);
+    setupLogoUpload('edit_logo_file', 'edit_logo_base64', 'editLogoPlaceholder', 'editLogoPreview', 'editLogoPreviewImg', 'editLogoRemoveBtn', 'editLogoUploadArea', 'edit_remove_logo');
 
     @if ($errors->any())
-        openModal();
+        @if (old('_method') === 'PUT')
+            openEditModal();
+        @else
+            openCreateModal();
+        @endif
     @endif
 });
 
-function setupLogoUpload(fileInputId, base64InputId, placeholderId, previewId, previewImgId, removeBtnId, uploadAreaId) {
+function setupLogoUpload(fileInputId, base64InputId, placeholderId, previewId, previewImgId, removeBtnId, uploadAreaId, removeLogoInputId) {
     const fileInput = document.getElementById(fileInputId);
     const base64Input = document.getElementById(base64InputId);
     const placeholder = document.getElementById(placeholderId);
@@ -502,6 +605,7 @@ function setupLogoUpload(fileInputId, base64InputId, placeholderId, previewId, p
     const previewImg = document.getElementById(previewImgId);
     const removeBtn = document.getElementById(removeBtnId);
     const uploadArea = document.getElementById(uploadAreaId);
+    const removeLogoInput = removeLogoInputId ? document.getElementById(removeLogoInputId) : null;
 
     if (!fileInput || !uploadArea) return;
 
@@ -523,6 +627,7 @@ function setupLogoUpload(fileInputId, base64InputId, placeholderId, previewId, p
         const reader = new FileReader();
         reader.onload = function(e) {
             base64Input.value = e.target.result;
+            if (removeLogoInput) removeLogoInput.value = '0';
             previewImg.src = e.target.result;
             placeholder.classList.add('hidden');
             preview.classList.remove('hidden');
@@ -534,6 +639,7 @@ function setupLogoUpload(fileInputId, base64InputId, placeholderId, previewId, p
         e.stopPropagation();
         base64Input.value = '';
         fileInput.value = '';
+        if (removeLogoInput) removeLogoInput.value = '1';
         previewImg.src = '';
         preview.classList.add('hidden');
         placeholder.classList.remove('hidden');

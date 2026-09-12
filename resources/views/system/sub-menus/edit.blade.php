@@ -1,140 +1,132 @@
-@extends('layouts.app')
-
-@section('content')
-<div class="page-header">
-    <div>
-        <h2 class="page-title">Edit Sub-Menu: {{ $subMenu->name }}</h2>
-        <div class="page-subtitle">Perbarui data navigasi sub-menu dan relasi induk menu</div>
-    </div>
-    <div class="page-actions">
-        <a href="{{ route('system.sub-menus.index') }}" class="btn-secondary">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-            <span>Kembali ke Daftar</span>
-        </a>
-    </div>
-</div>
-
-<div class="card-surface">
-    <div class="card-header">
-        <span class="user-name-text">Formulir Perubahan Sub-Menu</span>
-        <span class="badge badge-cyan">ID #{{ $subMenu->id }}</span>
-    </div>
-
-    <div class="card-body">
-        <form method="POST" action="{{ route('system.sub-menus.update', $subMenu) }}">
+<!-- Modal Edit Sub-Menu Component -->
+<div class="modal-backdrop hidden" id="modalEditSubMenu" role="dialog" aria-modal="true" aria-labelledby="modalEditSubMenuTitle">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <div>
+                <h3 class="modal-title" id="modalEditSubMenuTitle">Formulir Perubahan Sub-Menu</h3>
+                <p class="modal-subtitle">Perbarui data navigasi sub-menu dan relasi induk menu dalam platform INFORA</p>
+            </div>
+            <button type="button" class="modal-close-btn" id="btnCloseEditSubMenu" aria-label="Tutup Formulir">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <form method="POST" action="" id="formEditSubMenu">
             @csrf
             @method('PUT')
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="edit_submenu_menu_id" class="form-label">Induk Menu <span class="text-danger">*</span></label>
+                    <select
+                        id="edit_submenu_menu_id"
+                        name="menu_id"
+                        class="form-select @error('menu_id') border-danger @enderror"
+                        required
+                    >
+                        <option value="">-- Pilih Induk Menu --</option>
+                        @foreach ($menus as $menu)
+                            <option value="{{ $menu->id }}">
+                                {{ $menu->module?->name ? $menu->module->name . ' → ' : '' }}{{ $menu->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('menu_id')
+                        <div class="form-error">{{ $message }}</div>
+                    @enderror
+                    <div class="form-hint">Sub-menu akan ditampilkan di dalam dropdown accordion menu induk ini.</div>
+                </div>
 
-            <div class="form-group">
-                <label for="menu_id" class="form-label">Induk Menu <span class="text-danger">*</span></label>
-                <select
-                    id="menu_id"
-                    name="menu_id"
-                    class="form-select @error('menu_id') border-danger @enderror"
-                    required
-                >
-                    <option value="">-- Pilih Induk Menu --</option>
-                    @foreach ($menus as $menu)
-                        <option value="{{ $menu->id }}" {{ old('menu_id', $subMenu->menu_id) == $menu->id ? 'selected' : '' }}>
-                            {{ $menu->module?->name ? $menu->module->name . ' → ' : '' }}{{ $menu->name }}
-                        </option>
-                    @endforeach
-                </select>
-                @error('menu_id')
-                    <div class="form-error">{{ $message }}</div>
-                @enderror
-                <div class="form-hint">Sub-menu akan ditampilkan di dalam dropdown accordion menu induk ini.</div>
-            </div>
+                <div class="form-group">
+                    <label for="edit_submenu_name" class="form-label">Nama Sub-Menu <span class="text-danger">*</span></label>
+                    <input
+                        type="text"
+                        id="edit_submenu_name"
+                        name="name"
+                        class="form-input @error('name') border-danger @enderror"
+                        data-transform="title-case"
+                        placeholder="Contoh: Modul, Menu, Sub-Menu, Rekapitulasi"
+                        value="{{ old('name') }}"
+                        required
+                    >
+                    @error('name')
+                        <div class="form-error">{{ $message }}</div>
+                    @enderror
+                    <div class="form-hint">Nama item sub-menu otomatis diformat Capitalize Each Word (Title Case).</div>
+                </div>
 
-            <div class="form-group">
-                <label for="name" class="form-label">Nama Sub-Menu <span class="text-danger">*</span></label>
-                <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    class="form-input @error('name') border-danger @enderror"
-                    data-transform="title-case"
-                    placeholder="Contoh: Modul, Menu, Sub-Menu, Rekapitulasi"
-                    value="{{ old('name', $subMenu->name) }}"
-                    required
-                >
-                @error('name')
-                    <div class="form-error">{{ $message }}</div>
-                @enderror
-                <div class="form-hint">Nama item sub-menu otomatis diformat Capitalize Each Word (Title Case).</div>
-            </div>
-
-            <div class="form-group">
-                <label for="route_name" class="form-label">Nama Rute (Route Name)</label>
-                <input
-                    type="text"
-                    id="route_name"
-                    name="route_name"
-                    list="registered_subroutes_list"
-                    class="form-input @error('route_name') border-danger @enderror"
-                    placeholder="Contoh: system.modules, master.data.sekolah, atau dashboard"
-                    value="{{ old('route_name', $subMenu->route_name) }}"
-                >
-                <datalist id="registered_subroutes_list">
-                    <option value="system.modules">Tata Kelola Modul</option>
-                    <option value="system.menus">Tata Kelola Menu</option>
-                    <option value="system.sub-menus">Tata Kelola Sub-Menu</option>
-                    <option value="dashboard">Dashboard Utama</option>
-                </datalist>
-                @error('route_name')
-                    <div class="form-error">{{ $message }}</div>
-                @enderror
-                <div class="route-guide-box">
-                    <div class="route-guide-title">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
-                        <span>Panduan Format Rute Sub-Menu</span>
-                    </div>
-                    <ul class="route-guide-list">
-                        <li>Cukup gunakan format hierarki praktis <code>modul.menu.submenu</code> (contoh: <code>system.modules</code> atau <code>master.data.sekolah</code>).</li>
-                        <li>Sistem otomatis mencocokkan ke rute index atau halaman yang sesuai tanpa Anda perlu repot menentukan akhiran teknis seperti <code>.index</code> atau <code>.create</code>.</li>
-                    </ul>
-                    <div class="route-suggest-pills">
-                        <span class="route-suggest-label">Pilihan Cepat Sistem:</span>
-                        <button type="button" class="route-suggest-pill" onclick="document.getElementById('route_name').value='system.modules'">system.modules</button>
-                        <button type="button" class="route-suggest-pill" onclick="document.getElementById('route_name').value='system.menus'">system.menus</button>
-                        <button type="button" class="route-suggest-pill" onclick="document.getElementById('route_name').value='system.sub-menus'">system.sub-menus</button>
-                        <button type="button" class="route-suggest-pill" onclick="document.getElementById('route_name').value='dashboard'">dashboard</button>
+                <div class="form-group">
+                    <label for="edit_submenu_route_name" class="form-label">Nama Rute (Route Name)</label>
+                    <input
+                        type="text"
+                        id="edit_submenu_route_name"
+                        name="route_name"
+                        list="edit_subroutes_list"
+                        class="form-input @error('route_name') border-danger @enderror"
+                        placeholder="Contoh: system.modules, master.data.sekolah, atau dashboard"
+                        value="{{ old('route_name') }}"
+                    >
+                    <datalist id="edit_subroutes_list">
+                        <option value="system.modules">Tata Kelola Modul</option>
+                        <option value="system.menus">Tata Kelola Menu</option>
+                        <option value="system.sub-menus">Tata Kelola Sub-Menu</option>
+                        <option value="dashboard">Dashboard Utama</option>
+                    </datalist>
+                    @error('route_name')
+                        <div class="form-error">{{ $message }}</div>
+                    @enderror
+                    <div class="route-guide-box">
+                        <div class="route-guide-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
+                            <span>Panduan Format Rute Sub-Menu</span>
+                        </div>
+                        <ul class="route-guide-list">
+                            <li>Cukup gunakan format hierarki praktis <code>modul.menu.submenu</code> (contoh: <code>system.modules</code> atau <code>master.data.sekolah</code>).</li>
+                            <li>Sistem otomatis mencocokkan ke rute index atau halaman yang sesuai tanpa Anda perlu repot menentukan akhiran teknis seperti <code>.index</code> atau <code>.create</code>.</li>
+                        </ul>
+                        <div class="route-suggest-pills">
+                            <span class="route-suggest-label">Pilihan Cepat Sistem:</span>
+                            <button type="button" class="route-suggest-pill" onclick="document.getElementById('edit_submenu_route_name').value='system.modules'">system.modules</button>
+                            <button type="button" class="route-suggest-pill" onclick="document.getElementById('edit_submenu_route_name').value='system.menus'">system.menus</button>
+                            <button type="button" class="route-suggest-pill" onclick="document.getElementById('edit_submenu_route_name').value='system.sub-menus'">system.sub-menus</button>
+                            <button type="button" class="route-suggest-pill" onclick="document.getElementById('edit_submenu_route_name').value='dashboard'">dashboard</button>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label for="order" class="form-label">Urutan Tampil (Order)</label>
-                <input
-                    type="number"
-                    id="order"
-                    name="order"
-                    class="form-input @error('order') border-danger @enderror"
-                    value="{{ old('order', $subMenu->order) }}"
-                    min="0"
-                >
-                @error('order')
-                    <div class="form-error">{{ $message }}</div>
-                @enderror
-                <div class="form-hint">Urutan numerik dalam sub-menu (0, 1, 2, ...).</div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-check">
+                <div class="form-group">
+                    <label for="edit_submenu_order" class="form-label">Urutan Tampil (Order)</label>
                     <input
-                        type="checkbox"
-                        name="is_active"
-                        value="1"
-                        class="form-check-input"
-                        {{ old('is_active', $subMenu->is_active ? '1' : '0') == '1' ? 'checked' : '' }}
+                        type="number"
+                        id="edit_submenu_order"
+                        name="order"
+                        class="form-input @error('order') border-danger @enderror"
+                        value="{{ old('order', 0) }}"
+                        min="0"
                     >
-                    <span class="form-check-label">Aktifkan sub-menu ini pada navigasi sistem</span>
-                </label>
-            </div>
+                    @error('order')
+                        <div class="form-error">{{ $message }}</div>
+                    @enderror
+                    <div class="form-hint">Urutan numerik dari yang terkecil (0, 1, 2, ...) dalam menu induk.</div>
+                </div>
 
-            <div class="form-actions">
+                <div class="form-group">
+                    <label class="form-check">
+                        <input
+                            type="checkbox"
+                            id="edit_submenu_is_active"
+                            name="is_active"
+                            value="1"
+                            class="form-check-input"
+                            {{ old('is_active', '1') == '1' ? 'checked' : '' }}
+                        >
+                        <span class="form-check-label">Aktifkan sub-menu ini pada navigasi sistem</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="btnCancelEditSubMenu">Batal</button>
                 <button type="submit" class="btn-primary">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
@@ -143,11 +135,7 @@
                     </svg>
                     <span>Simpan Perubahan</span>
                 </button>
-                <a href="{{ route('system.sub-menus.index') }}" class="btn-secondary">
-                    <span>Batal</span>
-                </a>
             </div>
         </form>
     </div>
 </div>
-@endsection

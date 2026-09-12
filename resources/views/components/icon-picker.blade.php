@@ -230,6 +230,13 @@
         closeModal();
     }
 
+    window['setIconValue_' + pickerId] = function(iconName) {
+        const card = modal.querySelector(`.icon-picker-card[data-icon-name="${iconName}"]`);
+        if (card) {
+            selectIcon(card);
+        }
+    };
+
     btnOpen && btnOpen.addEventListener('click', openModal);
     btnClose && btnClose.addEventListener('click', closeModal);
     btnCancel && btnCancel.addEventListener('click', closeModal);
