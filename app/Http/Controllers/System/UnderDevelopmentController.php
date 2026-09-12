@@ -44,7 +44,7 @@ class UnderDevelopmentController extends Controller
         $controllerBaseName = Str::studly(Str::replace(['.', '-', '_'], ' ', $cleanRoute)).'Controller';
         $suggestedRouteCode = sprintf(
             "Route::get('/%s', [%s::class, 'index'])->name('%s');",
-            Str::slug(Str::replace('.', '/', $cleanRoute)),
+            str_replace('.', '/', $cleanRoute),
             $controllerBaseName,
             $cleanRoute
         );

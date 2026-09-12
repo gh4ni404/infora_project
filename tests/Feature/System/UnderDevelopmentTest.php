@@ -48,6 +48,7 @@ test('super admin can access under-development page for a submenu without regist
     $response->assertSee('Sistem');
     $response->assertSee('Status Fitur: Dalam Tahap Pengembangan');
     $response->assertSee('unregistered.dummy.submenu');
+    $response->assertSee('/unregistered/dummy/submenu');
     $response->assertSee('php artisan make:controller');
 });
 
