@@ -44,7 +44,26 @@
 
 <div class="table-card">
     <div class="table-toolbar">
-        <form method="GET" action="{{ route('master.data-sekolah.index') }}" class="page-actions">
+        <form method="GET" action="{{ route('master.data-sekolah.index') }}" class="table-toolbar-form">
+            <div class="page-actions">
+                <div class="per-page-selector">
+                    <label for="table_per_page" class="table-cell-muted">Tampilkan:</label>
+                    <select id="table_per_page" name="per_page" class="form-select-sm" onchange="this.form.submit()">
+                        <option value="15" {{ request('per_page', '15') === '15' ? 'selected' : '' }}>15</option>
+                        <option value="30" {{ request('per_page') === '30' ? 'selected' : '' }}>30</option>
+                        <option value="90" {{ request('per_page') === '90' ? 'selected' : '' }}>90</option>
+                        <option value="semua" {{ in_array(request('per_page'), ['semua', 'all'], true) ? 'selected' : '' }}>Semua</option>
+                    </select>
+                    <span class="table-cell-muted">data</span>
+                </div>
+
+                <select name="school_type" class="form-select-sm" onchange="this.form.submit()">
+                    <option value="">Semua Jenis</option>
+                    <option value="SMA" {{ request('school_type') === 'SMA' ? 'selected' : '' }}>SMA</option>
+                    <option value="SMK" {{ request('school_type') === 'SMK' ? 'selected' : '' }}>SMK</option>
+                </select>
+            </div>
+
             <div class="search-box toolbar-search-box">
                 <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="11" cy="11" r="8"></circle>
@@ -58,17 +77,7 @@
                     value="{{ request('search') }}"
                 >
             </div>
-
-            <select name="school_type" class="form-select" onchange="this.form.submit()">
-                <option value="">Semua Jenis</option>
-                <option value="SMA" {{ request('school_type') === 'SMA' ? 'selected' : '' }}>SMA</option>
-                <option value="SMK" {{ request('school_type') === 'SMK' ? 'selected' : '' }}>SMK</option>
-            </select>
         </form>
-
-        <div class="table-cell-muted">
-            Total: <strong>{{ $schools->total() }}</strong> Sekolah
-        </div>
     </div>
 
     <div class="table-responsive">
@@ -198,265 +207,68 @@
         </table>
     </div>
 
-    @if ($schools->hasPages())
-        <div class="table-footer">
-            {{ $schools->links() }}
+    <div class="table-footer">
+        <div class="pagination-summary">
+            @if ($schools->total() > 0)
+                Menampilkan <strong>{{ $schools->firstItem() ?? 1 }}</strong> &ndash; <strong>{{ $schools->lastItem() ?? $schools->total() }}</strong> dari <strong>{{ $schools->total() }}</strong> Sekolah
+            @else
+                Menampilkan <strong>0</strong> Sekolah
+            @endif
         </div>
-    @endif
-</div>
 
-<!-- Modal Tambah Sekolah -->
-<div class="modal-backdrop hidden" id="modalCreateSchool" role="dialog" aria-modal="true" aria-labelledby="modalCreateSchoolTitle">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-header">
-            <div>
-                <h3 class="modal-title" id="modalCreateSchoolTitle">Tambah Sekolah Baru</h3>
-                <p class="modal-subtitle">Daftarkan data sekolah SMA atau SMK ke dalam registri platform INFORA</p>
-            </div>
-            <button type="button" class="modal-close-btn" id="btnCloseCreateSchool" aria-label="Tutup Formulir">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
-        </div>
-        <form method="POST" action="{{ route('master.data-sekolah.store') }}" id="formCreateSchool">
-            @csrf
-            <div class="modal-body">
-                <div class="form-section-label">Identitas Resmi</div>
-                <div class="form-grid-2col">
-                    <div class="form-group">
-                        <label for="create_name" class="form-label">Nama Sekolah <span class="text-danger">*</span></label>
-                        <input
-                            type="text"
-                            id="create_name"
-                            name="name"
-                            class="form-input @error('name') border-danger @enderror"
-                            data-transform="title-case"
-                            placeholder="Contoh: SMA Negeri 1 Makassar"
-                            value="{{ old('name') }}"
-                            required
-                        >
-                        @error('name')
-                            <div class="form-error">{{ $message }}</div>
-                        @enderror
-                    </div>
+        @if ($schools->hasPages())
+            <nav class="pagination-nav" role="navigation" aria-label="Navigasi Halaman">
+                {{-- Tombol Sebelumnya --}}
+                @if ($schools->onFirstPage())
+                    <span class="pagination-btn disabled" aria-disabled="true">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                        <span>Sebelumnya</span>
+                    </span>
+                @else
+                    <a href="{{ $schools->previousPageUrl() }}" class="pagination-btn" rel="prev">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                        <span>Sebelumnya</span>
+                    </a>
+                @endif
 
-                    <div class="form-group">
-                        <label for="create_npsn" class="form-label">NPSN <span class="text-danger">*</span></label>
-                        <input
-                            type="text"
-                            id="create_npsn"
-                            name="npsn"
-                            class="form-input @error('npsn') border-danger @enderror"
-                            placeholder="8 digit angka, contoh: 40312345"
-                            value="{{ old('npsn') }}"
-                            maxlength="8"
-                            required
-                        >
-                        @error('npsn')
-                            <div class="form-error">{{ $message }}</div>
-                        @enderror
-                        <div class="form-hint">Nomor Pokok Sekolah Nasional (8 digit).</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="create_school_type" class="form-label">Jenis Sekolah <span class="text-danger">*</span></label>
-                        <select id="create_school_type" name="school_type" class="form-select @error('school_type') border-danger @enderror" required>
-                            <option value="">-- Pilih Jenis --</option>
-                            <option value="SMA" {{ old('school_type') === 'SMA' ? 'selected' : '' }}>SMA</option>
-                            <option value="SMK" {{ old('school_type') === 'SMK' ? 'selected' : '' }}>SMK</option>
-                        </select>
-                        @error('school_type')
-                            <div class="form-error">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="form-group">
-                        <label for="create_status" class="form-label">Status <span class="text-danger">*</span></label>
-                        <select id="create_status" name="status" class="form-select @error('status') border-danger @enderror" required>
-                            <option value="">-- Pilih Status --</option>
-                            <option value="Negeri" {{ old('status') === 'Negeri' ? 'selected' : '' }}>Negeri</option>
-                            <option value="Swasta" {{ old('status') === 'Swasta' ? 'selected' : '' }}>Swasta</option>
-                        </select>
-                        @error('status')
-                            <div class="form-error">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="form-group">
-                        <label for="create_accreditation" class="form-label">Akreditasi</label>
-                        <select id="create_accreditation" name="accreditation" class="form-select @error('accreditation') border-danger @enderror">
-                            <option value="">-- Belum Ditentukan --</option>
-                            <option value="A" {{ old('accreditation') === 'A' ? 'selected' : '' }}>A (Unggul)</option>
-                            <option value="B" {{ old('accreditation') === 'B' ? 'selected' : '' }}>B (Baik)</option>
-                            <option value="C" {{ old('accreditation') === 'C' ? 'selected' : '' }}>C (Cukup)</option>
-                            <option value="Belum" {{ old('accreditation') === 'Belum' ? 'selected' : '' }}>Belum Terakreditasi</option>
-                        </select>
-                        @error('accreditation')
-                            <div class="form-error">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="form-group">
-                        <label for="create_nss" class="form-label">NSS</label>
-                        <input
-                            type="text"
-                            id="create_nss"
-                            name="nss"
-                            class="form-input @error('nss') border-danger @enderror"
-                            placeholder="Nomor Statistik Sekolah (opsional)"
-                            value="{{ old('nss') }}"
-                            maxlength="20"
-                        >
-                        @error('nss')
-                            <div class="form-error">{{ $message }}</div>
-                        @enderror
-                    </div>
+                {{-- Nomor Halaman --}}
+                <div class="pagination-pages">
+                    @foreach ($schools->getUrlRange(1, $schools->lastPage()) as $page => $url)
+                        @if ($page == $schools->currentPage())
+                            <span class="pagination-page active" aria-current="page">{{ $page }}</span>
+                        @else
+                            <a href="{{ $url }}" class="pagination-page">{{ $page }}</a>
+                        @endif
+                    @endforeach
                 </div>
 
-                <div class="form-section-divider"></div>
-                <div class="form-section-label">Alamat</div>
-
-                <div class="form-group">
-                    <label for="create_address" class="form-label">Alamat Jalan</label>
-                    <textarea
-                        id="create_address"
-                        name="address"
-                        class="form-input form-textarea @error('address') border-danger @enderror"
-                        placeholder="Jalan, RT/RW, dan detail alamat lengkap"
-                        rows="2"
-                    >{{ old('address') }}</textarea>
-                    @error('address')
-                        <div class="form-error">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <div class="form-grid-2col">
-                    <div class="form-group">
-                        <label for="create_village" class="form-label">Kelurahan / Desa</label>
-                        <input type="text" id="create_village" name="village" class="form-input" value="{{ old('village') }}" placeholder="Kelurahan/Desa">
-                    </div>
-                    <div class="form-group">
-                        <label for="create_district" class="form-label">Kecamatan</label>
-                        <input type="text" id="create_district" name="district" class="form-input" value="{{ old('district') }}" placeholder="Kecamatan">
-                    </div>
-                    <div class="form-group">
-                        <label for="create_city" class="form-label">Kabupaten / Kota</label>
-                        <input type="text" id="create_city" name="city" class="form-input" value="{{ old('city') }}" placeholder="Kabupaten/Kota">
-                    </div>
-                    <div class="form-group">
-                        <label for="create_province" class="form-label">Provinsi</label>
-                        <input type="text" id="create_province" name="province" class="form-input" value="{{ old('province') }}" placeholder="Provinsi">
-                    </div>
-                    <div class="form-group">
-                        <label for="create_postal_code" class="form-label">Kode Pos</label>
-                        <input type="text" id="create_postal_code" name="postal_code" class="form-input" value="{{ old('postal_code') }}" maxlength="10" placeholder="Kode Pos">
-                    </div>
-                </div>
-
-                <div class="form-section-divider"></div>
-                <div class="form-section-label">Kontak</div>
-
-                <div class="form-grid-2col">
-                    <div class="form-group">
-                        <label for="create_phone" class="form-label">Telepon</label>
-                        <input type="text" id="create_phone" name="phone" class="form-input" value="{{ old('phone') }}" maxlength="20" placeholder="Nomor Telepon">
-                    </div>
-                    <div class="form-group">
-                        <label for="create_fax" class="form-label">Fax</label>
-                        <input type="text" id="create_fax" name="fax" class="form-input" value="{{ old('fax') }}" maxlength="20" placeholder="Nomor Fax">
-                    </div>
-                    <div class="form-group">
-                        <label for="create_email" class="form-label">Email</label>
-                        <input type="email" id="create_email" name="email" class="form-input @error('email') border-danger @enderror" value="{{ old('email') }}" placeholder="email@sekolah.sch.id">
-                        @error('email')
-                            <div class="form-error">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="form-group">
-                        <label for="create_website" class="form-label">Website</label>
-                        <input type="url" id="create_website" name="website" class="form-input @error('website') border-danger @enderror" value="{{ old('website') }}" placeholder="https://sekolah.sch.id">
-                        @error('website')
-                            <div class="form-error">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
-
-                <div class="form-section-divider"></div>
-                <div class="form-section-label">Pimpinan & Yayasan</div>
-
-                <div class="form-grid-2col">
-                    <div class="form-group">
-                        <label for="create_principal_name" class="form-label">Nama Kepala Sekolah</label>
-                        <input type="text" id="create_principal_name" name="principal_name" class="form-input" value="{{ old('principal_name') }}" placeholder="Nama lengkap beserta gelar">
-                    </div>
-                    <div class="form-group">
-                        <label for="create_principal_nip" class="form-label">NIP Kepala Sekolah</label>
-                        <input type="text" id="create_principal_nip" name="principal_nip" class="form-input" value="{{ old('principal_nip') }}" maxlength="30" placeholder="Nomor Induk Pegawai">
-                    </div>
-                    <div class="form-group">
-                        <label for="create_foundation_name" class="form-label">Nama Yayasan</label>
-                        <input type="text" id="create_foundation_name" name="foundation_name" class="form-input" value="{{ old('foundation_name') }}" placeholder="Relevan untuk sekolah Swasta">
-                        <div class="form-hint">Isi jika sekolah berstatus Swasta dan bernaung di bawah yayasan.</div>
-                    </div>
-                </div>
-
-                <div class="form-section-divider"></div>
-                <div class="form-section-label">Logo Sekolah</div>
-
-                <div class="form-group">
-                    <div class="dropzone-upload" id="createLogoUploadArea">
-                        <input type="hidden" name="logo" id="create_logo_base64">
-                        <input type="file" id="create_logo_file" accept="image/png,image/jpeg,image/webp,image/gif" class="hidden">
-                        <div class="dropzone-upload-content" id="createLogoPlaceholder">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect>
-                                <circle cx="9" cy="9" r="2"></circle>
-                                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>
-                            </svg>
-                            <span>Klik untuk unggah logo sekolah</span>
-                            <span class="form-hint">Format: PNG, JPG, WebP, GIF. Maks 1MB.</span>
-                        </div>
-                        <div class="dropzone-upload-preview hidden" id="createLogoPreview">
-                            <img id="createLogoPreviewImg" alt="Preview Logo">
-                            <button type="button" class="dropzone-remove-btn" id="createLogoRemoveBtn" title="Hapus Logo">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-check">
-                        <input
-                            type="checkbox"
-                            name="is_active"
-                            value="1"
-                            class="form-check-input"
-                            {{ old('is_active', '1') == '1' ? 'checked' : '' }}
-                        >
-                        <span class="form-check-label">Sekolah aktif dan tampil dalam sistem</span>
-                    </label>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-secondary" id="btnCancelCreateSchool">Batal</button>
-                <button type="submit" class="btn-primary">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                        <polyline points="7 3 7 8 15 8"></polyline>
-                    </svg>
-                    <span>Simpan Sekolah</span>
-                </button>
-            </div>
-        </form>
+                {{-- Tombol Selanjutnya --}}
+                @if ($schools->hasMorePages())
+                    <a href="{{ $schools->nextPageUrl() }}" class="pagination-btn" rel="next">
+                        <span>Selanjutnya</span>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </a>
+                @else
+                    <span class="pagination-btn disabled" aria-disabled="true">
+                        <span>Selanjutnya</span>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </span>
+                @endif
+            </nav>
+        @endif
     </div>
 </div>
+
+<!-- Modal Tambah Sekolah Component -->
+@include('master.data-sekolah.create')
 
 <!-- Modal Edit Sekolah Component -->
 @include('master.data-sekolah.edit')

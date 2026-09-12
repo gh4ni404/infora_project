@@ -36,9 +36,20 @@ class SchoolController extends Controller
             $query->where('school_type', $request->query('school_type'));
         }
 
-        $schools = $query->paginate(15)->withQueryString();
+        // Opsi batas data per halaman (15, 30, 90, semua)
+        $perPageInput = $request->query('per_page', '15');
+        if ($perPageInput === 'semua' || $perPageInput === 'all') {
+            $perPage = 1000;
+        } elseif (in_array($perPageInput, ['15', '30', '90'], true)) {
+            $perPage = (int) $perPageInput;
+        } else {
+            $perPage = 15;
+            $perPageInput = '15';
+        }
 
-        return view('master.data-sekolah.index', compact('schools'));
+        $schools = $query->paginate($perPage)->withQueryString();
+
+        return view('master.data-sekolah.index', compact('schools', 'perPageInput'));
     }
 
     /**

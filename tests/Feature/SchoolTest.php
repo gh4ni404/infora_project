@@ -269,3 +269,28 @@ test('school views adhere to zero inline styles convention', function () {
     expect($indexResponse->getContent())->not->toContain('style="');
     expect($indexResponse->getContent())->not->toContain('<style');
 });
+
+test('super admin can change school per_page limit and display all data when selecting semua', function () {
+    School::factory()->count(25)->create();
+
+    $responseDefault = $this->actingAs($this->superAdmin)->get(route('master.data-sekolah.index'));
+    $responseDefault->assertOk();
+    $responseDefault->assertSee('Selanjutnya');
+
+    $responseSemua = $this->actingAs($this->superAdmin)->get(route('master.data-sekolah.index', ['per_page' => 'semua']));
+    $responseSemua->assertOk();
+    $responseSemua->assertSee('Menampilkan');
+    $responseSemua->assertDontSee('Selanjutnya');
+});
+
+test('super admin can navigate to next page and see subsequent schools', function () {
+    School::factory()->count(20)->create();
+
+    $responsePage1 = $this->actingAs($this->superAdmin)->get(route('master.data-sekolah.index', ['page' => '1']));
+    $responsePage1->assertOk();
+    $responsePage1->assertSee('Selanjutnya');
+
+    $responsePage2 = $this->actingAs($this->superAdmin)->get(route('master.data-sekolah.index', ['page' => '2']));
+    $responsePage2->assertOk();
+    $responsePage2->assertSee('Sebelumnya');
+});
