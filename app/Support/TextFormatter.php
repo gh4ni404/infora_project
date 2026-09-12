@@ -13,7 +13,7 @@ class TextFormatter
         'SMK', 'SMA', 'SMP', 'SD', 'SIM', 'PKL', 'KBM', 'GTK',
         'BAN-SM', 'RPP', 'IT', 'TU', 'UKS', 'OSIS', 'BK', 'BKK',
         'ID', 'API', 'CRUD', 'UI', 'UX', 'IPK', 'SK', 'KD', 'CP', 'TP', 'ATP', 'P5',
-        'NIP', 'NISN', 'NIS', 'NUPTK',
+        'NIP', 'NISN', 'NIS', 'NUPTK', 'DKI', 'DI',
     ];
 
     /**

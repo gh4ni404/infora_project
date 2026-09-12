@@ -9,6 +9,7 @@ use App\Http\Controllers\System\MenuController;
 use App\Http\Controllers\System\ModuleController;
 use App\Http\Controllers\System\SubMenuController;
 use App\Http\Controllers\System\UnderDevelopmentController;
+use App\Http\Controllers\Wilayah\ProvinsiController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -45,6 +46,14 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
     // Master Data Administrasi
     Route::prefix('master')->name('master.')->group(function () {
         Route::resource('data-sekolah', SchoolController::class)->except(['show', 'create']);
+    });
+
+    // Master Wilayah Administratif
+    Route::prefix('wilayah')->name('wilayah.')->group(function () {
+        Route::resource('provinsi', ProvinsiController::class)->names([
+            'index' => 'provinsi',
+        ])->except(['show', 'create']);
+        Route::get('/provinsi/semua', [ProvinsiController::class, 'index'])->name('provinsi.index');
     });
 
     // Cadangan & Pemulihan Basis Data (Backup & Restore)
