@@ -200,12 +200,12 @@
                 <div class="form-section-label">Logo Sekolah</div>
 
                 <div class="form-group">
-                    <div class="school-logo-upload" id="editLogoUploadArea">
+                    <div class="dropzone-upload" id="editLogoUploadArea">
                         <input type="hidden" name="logo" id="edit_logo_base64">
                         <input type="hidden" name="remove_logo" id="edit_remove_logo" value="0">
                         <input type="file" id="edit_logo_file" accept="image/png,image/jpeg,image/webp,image/gif" class="hidden">
 
-                        <div class="school-logo-upload-content" id="editLogoPlaceholder">
+                        <div class="dropzone-upload-content" id="editLogoPlaceholder">
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                                 <rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect>
                                 <circle cx="9" cy="9" r="2"></circle>
@@ -215,9 +215,9 @@
                             <span class="form-hint">Format: PNG, JPG, WebP, GIF. Maks 1MB.</span>
                         </div>
 
-                        <div class="school-logo-upload-preview hidden" id="editLogoPreview">
+                        <div class="dropzone-upload-preview hidden" id="editLogoPreview">
                             <img id="editLogoPreviewImg" src="" alt="Preview Logo">
-                            <button type="button" class="school-logo-remove-btn" id="editLogoRemoveBtn" title="Hapus Logo">
+                            <button type="button" class="dropzone-remove-btn" id="editLogoRemoveBtn" title="Hapus Logo">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <line x1="18" y1="6" x2="6" y2="18"></line>
                                     <line x1="6" y1="6" x2="18" y2="18"></line>

@@ -91,9 +91,9 @@
                         <td>
                             <div class="alert-content">
                                 @if ($school->logo_path)
-                                    <img src="{{ asset('storage/' . $school->logo_path) }}" alt="Logo" class="school-logo-thumb">
+                                    <img src="{{ asset('storage/' . $school->logo_path) }}" alt="Logo" class="entity-logo-thumb">
                                 @else
-                                    <span class="school-logo-placeholder">
+                                    <span class="entity-logo-placeholder">
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                                             <polyline points="9 22 9 12 15 12 15 22"></polyline>
@@ -110,7 +110,7 @@
                         </td>
                         <td>
                             @if ($school->school_type === 'SMA')
-                                <span class="badge badge-purple">SMA</span>
+                                <span class="badge badge-primary">SMA</span>
                             @else
                                 <span class="badge badge-cyan">SMK</span>
                             @endif
@@ -406,10 +406,10 @@
                 <div class="form-section-label">Logo Sekolah</div>
 
                 <div class="form-group">
-                    <div class="school-logo-upload" id="createLogoUploadArea">
+                    <div class="dropzone-upload" id="createLogoUploadArea">
                         <input type="hidden" name="logo" id="create_logo_base64">
                         <input type="file" id="create_logo_file" accept="image/png,image/jpeg,image/webp,image/gif" class="hidden">
-                        <div class="school-logo-upload-content" id="createLogoPlaceholder">
+                        <div class="dropzone-upload-content" id="createLogoPlaceholder">
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                                 <rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect>
                                 <circle cx="9" cy="9" r="2"></circle>
@@ -418,9 +418,9 @@
                             <span>Klik untuk unggah logo sekolah</span>
                             <span class="form-hint">Format: PNG, JPG, WebP, GIF. Maks 1MB.</span>
                         </div>
-                        <div class="school-logo-upload-preview hidden" id="createLogoPreview">
+                        <div class="dropzone-upload-preview hidden" id="createLogoPreview">
                             <img id="createLogoPreviewImg" alt="Preview Logo">
-                            <button type="button" class="school-logo-remove-btn" id="createLogoRemoveBtn" title="Hapus Logo">
+                            <button type="button" class="dropzone-remove-btn" id="createLogoRemoveBtn" title="Hapus Logo">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <line x1="18" y1="6" x2="6" y2="18"></line>
                                     <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -610,7 +610,7 @@ function setupLogoUpload(fileInputId, base64InputId, placeholderId, previewId, p
     if (!fileInput || !uploadArea) return;
 
     uploadArea.addEventListener('click', function(e) {
-        if (e.target.closest('.school-logo-remove-btn')) return;
+        if (e.target.closest('.dropzone-remove-btn')) return;
         fileInput.click();
     });
 

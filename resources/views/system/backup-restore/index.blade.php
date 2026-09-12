@@ -175,9 +175,9 @@
                             </td>
                             <td>
                                 @if ($backup['type'] === 'full')
-                                    <span class="badge badge-purple" title="Snapshot Lengkap: Basis Data + Seluruh Berkas Aset">Full Snapshot (ZIP)</span>
+                                    <span class="badge badge-primary" title="Snapshot Lengkap: Basis Data + Seluruh Berkas Aset">ZIP</span>
                                 @else
-                                    <span class="badge badge-cyan" title="Hanya Skema & Data Basis Data">Database Saja (SQL)</span>
+                                    <span class="badge badge-cyan" title="Hanya Skema & Data Basis Data">SQL</span>
                                 @endif
                             </td>
                             <td>
@@ -194,7 +194,7 @@
                                             <polyline points="7 10 12 15 17 10"></polyline>
                                             <line x1="12" y1="15" x2="12" y2="3"></line>
                                         </svg>
-                                        <span>Unduh</span>
+                                        <!-- <span>Unduh</span> -->
                                     </a>
 
                                     <button
@@ -210,7 +210,7 @@
                                             <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
                                             <path d="M3 3v5h5"></path>
                                         </svg>
-                                        <span>Pulihkan</span>
+                                        <!-- <span>Pulihkan</span> -->
                                     </button>
 
                                     <form method="POST" action="{{ route('backup-restore.destroy', $backup['filename']) }}" onsubmit="return confirm('Hapus permanen berkas cadangan {{ $backup['filename'] }} dari server?');" class="form-inline-action">
@@ -221,7 +221,7 @@
                                                 <polyline points="3 6 5 6 21 6"></polyline>
                                                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                                             </svg>
-                                            <span>Hapus</span>
+                                            <!-- <span>Hapus</span> -->
                                         </button>
                                     </form>
                                 </div>
