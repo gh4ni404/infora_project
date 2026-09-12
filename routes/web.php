@@ -34,12 +34,12 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
 
     // Tata Kelola Menu Akses & Template Peran
     Route::prefix('sistem')->name('sistem.')->group(function () {
-        Route::get('/menu-akses', [MenuAccessController::class, 'index'])->name('menu-akses');
-        Route::get('/menu-akses/user/{user}', [MenuAccessController::class, 'editUser'])->name('menu-akses.user');
-        Route::put('/menu-akses/user/{user}', [MenuAccessController::class, 'updateUser'])->name('menu-akses.user.update');
-        Route::post('/menu-akses/user/{user}/apply-template', [MenuAccessController::class, 'applyTemplateToUser'])->name('menu-akses.user.apply-template');
-        Route::get('/menu-akses/template/{roleKey}', [MenuAccessController::class, 'editTemplate'])->name('menu-akses.template');
-        Route::put('/menu-akses/template/{roleKey}', [MenuAccessController::class, 'updateTemplate'])->name('menu-akses.template.update');
+        Route::get('/user', [MenuAccessController::class, 'index'])->name('user');
+        Route::get('/user/user/{user}', [MenuAccessController::class, 'editUser'])->name('user.user');
+        Route::put('/user/user/{user}', [MenuAccessController::class, 'updateUser'])->name('user.user.update');
+        Route::post('/user/user/{user}/apply-template', [MenuAccessController::class, 'applyTemplateToUser'])->name('user.user.apply-template');
+        Route::get('/user/template/{roleKey}', [MenuAccessController::class, 'editTemplate'])->name('user.template');
+        Route::put('/user/template/{roleKey}', [MenuAccessController::class, 'updateTemplate'])->name('user.template.update');
     });
 
     // Master Data Administrasi

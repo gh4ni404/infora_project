@@ -7,7 +7,7 @@
         <div class="page-subtitle">Atur visibilitas menu dan wewenang aksi (Lihat, Tambah, Ubah, Hapus) untuk {{ $user->name }}</div>
     </div>
     <div class="page-actions">
-        <a href="{{ route('sistem.menu-akses', ['role' => $user->user_type]) }}" class="btn-secondary">
+        <a href="{{ route('sistem.user', ['role' => $user->user_type]) }}" class="btn-secondary">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
@@ -57,7 +57,7 @@
         <!-- Toolbar Pintas & Terapkan Template -->
         <div class="matrix-action-bar">
             <!-- Form Salin Template -->
-            <form method="POST" action="{{ route('sistem.menu-akses.user.apply-template', $user) }}" class="page-actions">
+            <form method="POST" action="{{ route('sistem.user.user.apply-template', $user) }}" class="page-actions">
                 @csrf
                 <select name="role_key" class="form-select" required>
                     <option value="">-- Pilih Template Peran --</option>
@@ -90,7 +90,7 @@
         </div>
 
         <!-- Form Matriks Perizinan Granular -->
-        <form method="POST" action="{{ route('sistem.menu-akses.user.update', $user) }}" id="permissionForm">
+        <form method="POST" action="{{ route('sistem.user.user.update', $user) }}" id="permissionForm">
             @csrf
             @method('PUT')
 
@@ -268,7 +268,7 @@
                     </svg>
                     <span>Simpan Hak Akses</span>
                 </button>
-                <a href="{{ route('sistem.menu-akses', ['role' => $user->user_type]) }}" class="btn-secondary">
+                <a href="{{ route('sistem.user', ['role' => $user->user_type]) }}" class="btn-secondary">
                     <span>Batal</span>
                 </a>
             </div>

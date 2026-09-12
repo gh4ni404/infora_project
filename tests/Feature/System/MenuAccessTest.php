@@ -35,26 +35,26 @@ beforeEach(function () {
 });
 
 test('guest cannot access menu access routes', function () {
-    $response = $this->get('/sistem/menu-akses');
+    $response = $this->get('/sistem/user');
     $response->assertRedirect('/login');
 });
 
 test('non-super admin cannot access menu access management', function () {
-    $response = $this->actingAs($this->guruUser)->get('/sistem/menu-akses');
+    $response = $this->actingAs($this->guruUser)->get('/sistem/user');
     $response->assertForbidden();
 });
 
 test('super admin can view menu access index with user list and template tab', function () {
     $this->seed(MenuAccessTemplateSeeder::class);
 
-    $response = $this->actingAs($this->superAdmin)->get('/sistem/menu-akses');
+    $response = $this->actingAs($this->superAdmin)->get('/sistem/user');
     $response->assertOk();
     $response->assertSee('Tata Kelola Menu Akses');
     $response->assertSee('Budi Sudarsono');
     $response->assertSee('Ani Lestari');
 
     // Cek tab templates
-    $responseTemplates = $this->actingAs($this->superAdmin)->get('/sistem/menu-akses?tab=templates');
+    $responseTemplates = $this->actingAs($this->superAdmin)->get('/sistem/user?tab=templates');
     $responseTemplates->assertOk();
     $responseTemplates->assertSee('Guru Pengajar');
     $responseTemplates->assertSee('Wali Kelas');
@@ -62,12 +62,12 @@ test('super admin can view menu access index with user list and template tab', f
 });
 
 test('super admin can filter users by role and search query', function () {
-    $responseFilterGuru = $this->actingAs($this->superAdmin)->get('/sistem/menu-akses?role=guru');
+    $responseFilterGuru = $this->actingAs($this->superAdmin)->get('/sistem/user?role=guru');
     $responseFilterGuru->assertOk();
     $responseFilterGuru->assertSee('Budi Sudarsono');
     $responseFilterGuru->assertDontSee('Ani Lestari');
 
-    $responseSearch = $this->actingAs($this->superAdmin)->get('/sistem/menu-akses?search=Ani');
+    $responseSearch = $this->actingAs($this->superAdmin)->get('/sistem/user?search=Ani');
     $responseSearch->assertOk();
     $responseSearch->assertSee('Ani Lestari');
     $responseSearch->assertDontSee('Budi Sudarsono');
@@ -78,13 +78,13 @@ test('super admin can view and update granular permissions for a user', function
     $menu = Menu::create(['module_id' => $module->id, 'name' => 'Kesiswaan', 'order' => 1, 'is_active' => true]);
     $subMenu = SubMenu::create(['menu_id' => $menu->id, 'name' => 'Data Siswa', 'order' => 1, 'is_active' => true]);
 
-    $responseEdit = $this->actingAs($this->superAdmin)->get(route('sistem.menu-akses.user', $this->guruUser));
+    $responseEdit = $this->actingAs($this->superAdmin)->get(route('sistem.user.user', $this->guruUser));
     $responseEdit->assertOk();
     $responseEdit->assertSee('Budi Sudarsono');
     $responseEdit->assertSee('Data Siswa');
 
     // Simpan izin granular
-    $responseUpdate = $this->actingAs($this->superAdmin)->put(route('sistem.menu-akses.user.update', $this->guruUser), [
+    $responseUpdate = $this->actingAs($this->superAdmin)->put(route('sistem.user.user.update', $this->guruUser), [
         'permissions' => [
             [
                 'menu_id' => $menu->id,
@@ -105,7 +105,7 @@ test('super admin can view and update granular permissions for a user', function
         ],
     ]);
 
-    $responseUpdate->assertRedirect(route('sistem.menu-akses', ['role' => 'guru']));
+    $responseUpdate->assertRedirect(route('sistem.user', ['role' => 'guru']));
 
     // Verifikasi di database
     $this->assertDatabaseHas('user_menu_permissions', [
@@ -148,7 +148,7 @@ test('super admin can apply role template directly to a user', function () {
         'can_delete' => false,
     ]);
 
-    $response = $this->actingAs($this->superAdmin)->post(route('sistem.menu-akses.user.apply-template', $this->guruUser), [
+    $response = $this->actingAs($this->superAdmin)->post(route('sistem.user.user.apply-template', $this->guruUser), [
         'role_key' => 'guru_pengajar',
     ]);
 
@@ -167,11 +167,11 @@ test('super admin can configure role access template', function () {
     $module = Module::create(['name' => 'INDUSTRI', 'order' => 1, 'is_active' => true]);
     $menu = Menu::create(['module_id' => $module->id, 'name' => 'Daftar PKL', 'order' => 1, 'is_active' => true]);
 
-    $responseView = $this->actingAs($this->superAdmin)->get(route('sistem.menu-akses.template', 'siswa_pkl'));
+    $responseView = $this->actingAs($this->superAdmin)->get(route('sistem.user.template', 'siswa_pkl'));
     $responseView->assertOk();
     $responseView->assertSee('Daftar PKL');
 
-    $responseUpdate = $this->actingAs($this->superAdmin)->put(route('sistem.menu-akses.template.update', 'siswa_pkl'), [
+    $responseUpdate = $this->actingAs($this->superAdmin)->put(route('sistem.user.template.update', 'siswa_pkl'), [
         'role_name' => 'Siswa PKL Berprestasi',
         'role_category' => 'siswa',
         'permissions' => [
@@ -186,7 +186,7 @@ test('super admin can configure role access template', function () {
         ],
     ]);
 
-    $responseUpdate->assertRedirect(route('sistem.menu-akses', ['tab' => 'templates']));
+    $responseUpdate->assertRedirect(route('sistem.user', ['tab' => 'templates']));
 
     $this->assertDatabaseHas('menu_access_templates', [
         'role_key' => 'siswa_pkl',

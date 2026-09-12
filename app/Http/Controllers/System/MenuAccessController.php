@@ -9,6 +9,7 @@ use App\Models\MenuAccessTemplate;
 use App\Models\Module;
 use App\Models\User;
 use App\Models\UserMenuPermission;
+use App\Support\SidebarCache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -138,8 +139,10 @@ class MenuAccessController extends Controller
             }
         });
 
+        SidebarCache::forgetUser($user->id);
+
         return redirect()
-            ->route('sistem.menu-akses', ['role' => $user->user_type])
+            ->route('sistem.user', ['role' => $user->user_type])
             ->with('success', "Hak akses navigasi untuk pengguna {$user->name} berhasil diperbarui.");
     }
 
@@ -183,6 +186,8 @@ class MenuAccessController extends Controller
         });
 
         $templateName = $templatePermissions->first()->role_name ?? $roleKey;
+
+        SidebarCache::forgetUser($user->id);
 
         return back()->with('success', "Template peran '{$templateName}' berhasil diterapkan ke akun {$user->name}.");
     }
@@ -288,8 +293,10 @@ class MenuAccessController extends Controller
             MenuAccessTemplate::insert($recordsToInsert);
         });
 
+        SidebarCache::flushGlobal();
+
         return redirect()
-            ->route('sistem.menu-akses', ['tab' => 'templates'])
+            ->route('sistem.user', ['tab' => 'templates'])
             ->with('success', "Konfigurasi menu bawaan untuk template peran '{$roleName}' berhasil disimpan.");
     }
 }

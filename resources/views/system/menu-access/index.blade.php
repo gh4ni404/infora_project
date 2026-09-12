@@ -24,7 +24,7 @@
 <div class="card-surface">
     <div class="card-header">
         <div class="tab-pills">
-            <a href="{{ route('sistem.menu-akses', ['tab' => 'users']) }}" class="tab-pill {{ $activeTab !== 'templates' ? 'active' : '' }}">
+            <a href="{{ route('sistem.user', ['tab' => 'users']) }}" class="tab-pill {{ $activeTab !== 'templates' ? 'active' : '' }}">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                     <circle cx="9" cy="7" r="4"></circle>
@@ -33,7 +33,7 @@
                 </svg>
                 <span>Hak Akses per Pengguna</span>
             </a>
-            <a href="{{ route('sistem.menu-akses', ['tab' => 'templates']) }}" class="tab-pill {{ $activeTab === 'templates' ? 'active' : '' }}">
+            <a href="{{ route('sistem.user', ['tab' => 'templates']) }}" class="tab-pill {{ $activeTab === 'templates' ? 'active' : '' }}">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect width="18" height="18" x="3" y="3" rx="2"></rect>
                     <path d="m9 12 2 2 4-4"></path>
@@ -73,7 +73,7 @@
                             </div>
                         </div>
                         <div class="template-card-footer">
-                            <a href="{{ route('sistem.menu-akses.template', $tmpl->role_key) }}" class="btn-secondary">
+                            <a href="{{ route('sistem.user.template', $tmpl->role_key) }}" class="btn-secondary">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M12 20h9"></path>
                                     <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
@@ -91,15 +91,15 @@
             <div class="table-toolbar">
                 <!-- Filter Role Tabs -->
                 <div class="tab-pills">
-                    <a href="{{ route('sistem.menu-akses', ['search' => $search]) }}" class="tab-pill {{ empty($currentRole) ? 'active' : '' }}">Semua</a>
-                    <a href="{{ route('sistem.menu-akses', ['role' => 'super_admin', 'search' => $search]) }}" class="tab-pill {{ $currentRole === 'super_admin' ? 'active' : '' }}">Super Admin</a>
-                    <a href="{{ route('sistem.menu-akses', ['role' => 'admin', 'search' => $search]) }}" class="tab-pill {{ $currentRole === 'admin' ? 'active' : '' }}">Admin TU</a>
-                    <a href="{{ route('sistem.menu-akses', ['role' => 'guru', 'search' => $search]) }}" class="tab-pill {{ $currentRole === 'guru' ? 'active' : '' }}">Guru</a>
-                    <a href="{{ route('sistem.menu-akses', ['role' => 'siswa', 'search' => $search]) }}" class="tab-pill {{ $currentRole === 'siswa' ? 'active' : '' }}">Siswa</a>
+                    <a href="{{ route('sistem.user', ['search' => $search]) }}" class="tab-pill {{ empty($currentRole) ? 'active' : '' }}">Semua</a>
+                    <a href="{{ route('sistem.user', ['role' => 'super_admin', 'search' => $search]) }}" class="tab-pill {{ $currentRole === 'super_admin' ? 'active' : '' }}">Super Admin</a>
+                    <a href="{{ route('sistem.user', ['role' => 'admin', 'search' => $search]) }}" class="tab-pill {{ $currentRole === 'admin' ? 'active' : '' }}">Admin TU</a>
+                    <a href="{{ route('sistem.user', ['role' => 'guru', 'search' => $search]) }}" class="tab-pill {{ $currentRole === 'guru' ? 'active' : '' }}">Guru</a>
+                    <a href="{{ route('sistem.user', ['role' => 'siswa', 'search' => $search]) }}" class="tab-pill {{ $currentRole === 'siswa' ? 'active' : '' }}">Siswa</a>
                 </div>
 
                 <!-- Search Input -->
-                <form method="GET" action="{{ route('sistem.menu-akses') }}">
+                <form method="GET" action="{{ route('sistem.user') }}">
                     @if ($currentRole)
                         <input type="hidden" name="role" value="{{ $currentRole }}">
                     @endif
@@ -156,7 +156,7 @@
                                     @endif
                                 </td>
                                 <td class="text-right">
-                                    <a href="{{ route('sistem.menu-akses.user', $user) }}" class="btn-secondary">
+                                    <a href="{{ route('sistem.user.user', $user) }}" class="btn-secondary">
                                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <rect width="18" height="18" x="3" y="3" rx="2"></rect>
                                             <path d="m9 12 2 2 4-4"></path>
