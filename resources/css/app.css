@@ -629,6 +629,10 @@ body {
     scrollbar-color: var(--infora-border) transparent;
 }
 
+.sidebar-menu > * {
+    flex-shrink: 0;
+}
+
 .sidebar-menu::-webkit-scrollbar {
     width: 4px;
 }
@@ -657,6 +661,8 @@ body {
     border-top: 1px solid var(--infora-border);
     white-space: nowrap;
     overflow: hidden;
+    flex-shrink: 0;
+    min-height: fit-content;
     transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1), margin 0.25s cubic-bezier(0.4, 0, 0.2, 1), padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     max-height: 40px;
     opacity: 1;
@@ -695,6 +701,8 @@ body {
     gap: 0.75rem;
     width: 100%;
     height: 40px;
+    min-height: 40px;
+    flex-shrink: 0;
     box-sizing: border-box;
     padding: 0.625rem 10px;
     border-radius: 0.5rem;
@@ -740,6 +748,7 @@ body {
 .nav-group-item {
     display: flex;
     flex-direction: column;
+    flex-shrink: 0;
 }
 
 .nav-group-trigger {
@@ -749,12 +758,15 @@ body {
     gap: 0.75rem;
     width: 100%;
     height: 40px;
+    min-height: 40px;
+    flex-shrink: 0;
     box-sizing: border-box;
     padding: 0.625rem 10px;
     border-radius: 0.5rem;
     color: var(--infora-text-muted);
     background: transparent;
     border: 1px solid transparent;
+    outline: none;
     font-size: 0.875rem;
     font-weight: 500;
     font-family: inherit;
@@ -763,6 +775,11 @@ body {
     transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
     white-space: nowrap;
     overflow: hidden;
+}
+
+.nav-group-trigger:focus,
+.nav-group-trigger:focus-visible {
+    outline: none;
 }
 
 .nav-group-trigger:hover {
@@ -810,7 +827,7 @@ body {
 .nav-arrow-icon {
     flex-shrink: 0;
     color: var(--infora-text-dim);
-    transition: transform 0.2s ease, color 0.15s ease, opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s ease;
     opacity: 1;
 }
 
@@ -834,11 +851,12 @@ body {
     max-height: 0;
     overflow: hidden;
     opacity: 0;
-    transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, padding 0.2s ease;
+    flex-shrink: 0;
+    transition: max-height 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease, padding 0.22s ease;
 }
 
 .nav-group-item.is-open > .nav-submenu-list {
-    max-height: 500px;
+    max-height: 280px;
     opacity: 1;
     padding-top: 0.375rem;
     padding-bottom: 0.375rem;
@@ -855,13 +873,17 @@ body {
     text-decoration: none;
     font-size: 0.8125rem;
     font-weight: 500;
-    transition: all 0.15s ease;
+    transition: color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
     white-space: nowrap;
+    flex-shrink: 0;
+    min-height: 32px;
+    box-sizing: border-box;
 }
 
 .nav-submenu-item:hover {
     color: var(--infora-text-main);
     background-color: var(--infora-surface-muted);
+    transform: translateX(2px);
     /* border-left-color: var(--infora-brand-secondary, #0284c7); */
 }
 

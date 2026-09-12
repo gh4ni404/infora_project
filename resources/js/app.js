@@ -114,8 +114,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const isOpen = group.classList.toggle('is-open');
                 trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+
+                // Smoothly adjust scroll position if the opened submenu overflows the visible sidebar bottom
+                if (isOpen) {
+                    setTimeout(() => {
+                        const groupRect = group.getBoundingClientRect();
+                        const containerRect = sidebarNavMenu.getBoundingClientRect();
+                        const overflowDiff = groupRect.bottom - containerRect.bottom;
+
+                        if (overflowDiff > 0) {
+                            sidebarNavMenu.scrollBy({
+                                top: overflowDiff + 12, // 12px breathing buffer above docked footer
+                                behavior: 'smooth',
+                            });
+                        }
+                    }, 140);
+                }
             });
         });
+
+        // Ensure active menu item is comfortably visible within viewport on initial load
+        const activeMenuItem = sidebarNavMenu.querySelector('.nav-link-item.active, .nav-submenu-item.active');
+        if (activeMenuItem) {
+            requestAnimationFrame(() => {
+                const itemRect = activeMenuItem.getBoundingClientRect();
+                const containerRect = sidebarNavMenu.getBoundingClientRect();
+                if (itemRect.bottom > containerRect.bottom || itemRect.top < containerRect.top) {
+                    activeMenuItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                }
+            });
+        }
 
         // Search filtering logic
         if (menuSearchInput) {
