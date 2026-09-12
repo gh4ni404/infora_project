@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\System\StoreModuleRequest;
 use App\Http\Requests\System\UpdateModuleRequest;
 use App\Models\Module;
+use App\Support\SidebarCache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -46,6 +47,7 @@ class ModuleController extends Controller
     public function store(StoreModuleRequest $request): RedirectResponse
     {
         Module::create($request->validated());
+        SidebarCache::flushGlobal();
 
         return redirect()
             ->route('system.modules.index')
@@ -66,6 +68,7 @@ class ModuleController extends Controller
     public function update(UpdateModuleRequest $request, Module $module): RedirectResponse
     {
         $module->update($request->validated());
+        SidebarCache::flushGlobal();
 
         return redirect()
             ->route('system.modules.index')
@@ -78,6 +81,7 @@ class ModuleController extends Controller
     public function destroy(Module $module): RedirectResponse
     {
         $module->delete();
+        SidebarCache::flushGlobal();
 
         return redirect()
             ->route('system.modules.index')

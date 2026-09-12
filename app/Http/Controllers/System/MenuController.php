@@ -7,6 +7,7 @@ use App\Http\Requests\System\StoreMenuRequest;
 use App\Http\Requests\System\UpdateMenuRequest;
 use App\Models\Menu;
 use App\Models\Module;
+use App\Support\SidebarCache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -60,6 +61,7 @@ class MenuController extends Controller
     public function store(StoreMenuRequest $request): RedirectResponse
     {
         Menu::create($request->validated());
+        SidebarCache::flushGlobal();
 
         return redirect()
             ->route('system.menus.index')
@@ -82,6 +84,7 @@ class MenuController extends Controller
     public function update(UpdateMenuRequest $request, Menu $menu): RedirectResponse
     {
         $menu->update($request->validated());
+        SidebarCache::flushGlobal();
 
         return redirect()
             ->route('system.menus.index')
@@ -94,6 +97,7 @@ class MenuController extends Controller
     public function destroy(Menu $menu): RedirectResponse
     {
         $menu->delete();
+        SidebarCache::flushGlobal();
 
         return redirect()
             ->route('system.menus.index')

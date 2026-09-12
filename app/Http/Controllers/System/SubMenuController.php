@@ -7,6 +7,7 @@ use App\Http\Requests\System\StoreSubMenuRequest;
 use App\Http\Requests\System\UpdateSubMenuRequest;
 use App\Models\Menu;
 use App\Models\SubMenu;
+use App\Support\SidebarCache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -59,6 +60,7 @@ class SubMenuController extends Controller
     public function store(StoreSubMenuRequest $request): RedirectResponse
     {
         SubMenu::create($request->validated());
+        SidebarCache::flushGlobal();
 
         return redirect()
             ->route('system.sub-menus.index')
@@ -81,6 +83,7 @@ class SubMenuController extends Controller
     public function update(UpdateSubMenuRequest $request, SubMenu $subMenu): RedirectResponse
     {
         $subMenu->update($request->validated());
+        SidebarCache::flushGlobal();
 
         return redirect()
             ->route('system.sub-menus.index')
@@ -93,6 +96,7 @@ class SubMenuController extends Controller
     public function destroy(SubMenu $subMenu): RedirectResponse
     {
         $subMenu->delete();
+        SidebarCache::flushGlobal();
 
         return redirect()
             ->route('system.sub-menus.index')

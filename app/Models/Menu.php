@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\SidebarCache;
 use App\Support\TextFormatter;
 use Database\Factories\MenuFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -15,6 +16,15 @@ class Menu extends Model
 {
     /** @use HasFactory<MenuFactory> */
     use HasFactory;
+
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::saved(fn () => SidebarCache::flushGlobal());
+        static::deleted(fn () => SidebarCache::flushGlobal());
+    }
 
     /**
      * Interact with the menu's name.

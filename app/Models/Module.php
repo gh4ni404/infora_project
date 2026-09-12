@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\SidebarCache;
 use App\Support\TextFormatter;
 use Database\Factories\ModuleFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -13,6 +14,15 @@ class Module extends Model
 {
     /** @use HasFactory<ModuleFactory> */
     use HasFactory;
+
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::saved(fn () => SidebarCache::flushGlobal());
+        static::deleted(fn () => SidebarCache::flushGlobal());
+    }
 
     /**
      * Interact with the module's name.
