@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Provinsi extends Model
 {
@@ -53,6 +54,16 @@ class Provinsi extends Model
         return Attribute::make(
             set: fn (?string $value) => TextFormatter::titleCase($value),
         );
+    }
+
+    /**
+     * Relasi ke entitas anak Kabupaten / Kota.
+     *
+     * @return HasMany<Kabupaten, $this>
+     */
+    public function kabupaten(): HasMany
+    {
+        return $this->hasMany(Kabupaten::class, 'provinsi_id');
     }
 
     /**

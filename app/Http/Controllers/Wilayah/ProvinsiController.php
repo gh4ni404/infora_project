@@ -95,6 +95,13 @@ class ProvinsiController extends Controller
      */
     public function destroy(Provinsi $provinsi): RedirectResponse
     {
+        // Proteksi integritas relasi: periksa apakah provinsi masih menaungi data kabupaten/kota
+        if ($provinsi->kabupaten()->exists()) {
+            return redirect()
+                ->route('wilayah.provinsi')
+                ->with('error', "Provinsi {$provinsi->nama} tidak dapat dihapus karena masih memiliki relasi data kabupaten/kota aktif.");
+        }
+
         // Proteksi integritas relasi: periksa apakah nama atau kode provinsi digunakan di data sekolah
         $isLinkedToSchool = School::where('province', $provinsi->nama)->exists();
 

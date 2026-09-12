@@ -9,6 +9,7 @@ use App\Http\Controllers\System\MenuController;
 use App\Http\Controllers\System\ModuleController;
 use App\Http\Controllers\System\SubMenuController;
 use App\Http\Controllers\System\UnderDevelopmentController;
+use App\Http\Controllers\Wilayah\KabupatenController;
 use App\Http\Controllers\Wilayah\ProvinsiController;
 use Illuminate\Support\Facades\Route;
 
@@ -54,6 +55,11 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
             'index' => 'provinsi',
         ])->except(['show', 'create']);
         Route::get('/provinsi/semua', [ProvinsiController::class, 'index'])->name('provinsi.index');
+
+        Route::resource('kabupaten', KabupatenController::class)->names([
+            'index' => 'kabupaten',
+        ])->except(['show', 'create']);
+        Route::get('/kabupaten/semua', [KabupatenController::class, 'index'])->name('kabupaten.index');
     });
 
     // Cadangan & Pemulihan Basis Data (Backup & Restore)
