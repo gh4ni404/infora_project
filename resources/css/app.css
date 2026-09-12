@@ -2528,16 +2528,16 @@ input[data-transform="title-case"] {
 }
 
 /* ==========================================================================
-   Backup & Restore Styles
+   Universal Stats & Metric Grid Components
    ========================================================================== */
-.backup-stats-grid {
+.stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 1.25rem;
     margin-bottom: 1.5rem;
 }
 
-.backup-stat-card {
+.stat-card {
     background-color: #FFFFFF;
     border: 1px solid var(--infora-border);
     border-radius: 0.75rem;
@@ -2546,9 +2546,14 @@ input[data-transform="title-case"] {
     align-items: center;
     gap: 1rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.backup-stat-icon {
+.stat-card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07);
+}
+
+.stat-icon {
     width: 2.75rem;
     height: 2.75rem;
     border-radius: 0.625rem;
@@ -2558,33 +2563,33 @@ input[data-transform="title-case"] {
     flex-shrink: 0;
 }
 
-.backup-stat-icon.is-primary {
+.stat-icon.is-primary {
     background-color: rgba(37, 99, 235, 0.1);
     color: var(--infora-brand-primary);
 }
 
-.backup-stat-icon.is-success {
+.stat-icon.is-success {
     background-color: rgba(16, 185, 129, 0.1);
     color: var(--infora-success);
 }
 
-.backup-stat-icon.is-cyan {
+.stat-icon.is-cyan {
     background-color: rgba(14, 165, 233, 0.1);
     color: var(--infora-brand-cyan);
 }
 
-.backup-stat-icon.is-amber {
+.stat-icon.is-amber {
     background-color: rgba(245, 158, 11, 0.1);
     color: #D97706;
 }
 
-.backup-stat-content {
+.stat-content {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
 }
 
-.backup-stat-label {
+.stat-label {
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -2592,14 +2597,17 @@ input[data-transform="title-case"] {
     color: var(--infora-text-muted);
 }
 
-.backup-stat-value {
+.stat-value {
     font-size: 1.25rem;
     font-weight: 700;
     color: var(--infora-text-main);
     line-height: 1.2;
 }
 
-.backup-danger-box {
+/* ==========================================================================
+   Universal Callout & Alert Box Components
+   ========================================================================== */
+.callout-danger {
     border-left: 4px solid var(--infora-danger);
     background-color: rgba(239, 68, 68, 0.05);
     border-radius: 0.5rem;
@@ -2610,25 +2618,28 @@ input[data-transform="title-case"] {
     align-items: flex-start;
 }
 
-.backup-danger-icon {
+.callout-icon {
     color: var(--infora-danger);
     flex-shrink: 0;
     margin-top: 0.125rem;
 }
 
-.backup-danger-text {
+.callout-text {
     font-size: 0.875rem;
     color: var(--infora-text-main);
     line-height: 1.5;
 }
 
-.backup-danger-title {
+.callout-title {
     font-weight: 600;
     color: var(--infora-danger);
     margin-bottom: 0.25rem;
 }
 
-.backup-actions-split {
+/* ==========================================================================
+   Universal Split Layout Grid (2:1 Asymmetric)
+   ========================================================================== */
+.grid-split-2-1 {
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 1.5rem;
@@ -2636,9 +2647,45 @@ input[data-transform="title-case"] {
 }
 
 @media (max-width: 1024px) {
-    .backup-actions-split {
+    .grid-split-2-1 {
         grid-template-columns: 1fr;
     }
+}
+
+/* ==========================================================================
+   Universal Scrollable Table Modifier & Sticky Header
+   ========================================================================== */
+.table-responsive-scroll {
+    max-height: 440px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--infora-border) transparent;
+}
+
+.table-responsive-scroll::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.table-responsive-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.table-responsive-scroll::-webkit-scrollbar-thumb {
+    background-color: var(--infora-border);
+    border-radius: 4px;
+}
+
+.table-responsive-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: var(--infora-text-dim);
+}
+
+.table-responsive-scroll .data-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: var(--infora-surface-muted);
+    box-shadow: inset 0 -1px 0 var(--infora-border);
 }
 
 .btn-restore {

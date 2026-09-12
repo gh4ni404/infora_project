@@ -76,79 +76,79 @@
 @endif
 
 <!-- Database & Storage Summary Statistics -->
-<div class="backup-stats-grid">
-    <div class="backup-stat-card">
-        <div class="backup-stat-icon is-primary">
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon is-primary">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
                 <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
                 <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
             </svg>
         </div>
-        <div class="backup-stat-content">
-            <span class="backup-stat-label">Basis Data Aktif</span>
-            <span class="backup-stat-value">{{ $stats['database_name'] }}</span>
+        <div class="stat-content">
+            <span class="stat-label">Basis Data Aktif</span>
+            <span class="stat-value">{{ $stats['database_name'] }}</span>
         </div>
     </div>
 
-    <div class="backup-stat-card">
-        <div class="backup-stat-icon is-cyan">
+    <div class="stat-card">
+        <div class="stat-icon is-cyan">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect>
                 <line x1="3" y1="9" x2="21" y2="9"></line>
                 <line x1="9" y1="21" x2="9" y2="9"></line>
             </svg>
         </div>
-        <div class="backup-stat-content">
-            <span class="backup-stat-label">Total Tabel Sistem</span>
-            <span class="backup-stat-value">{{ $stats['total_tables'] }} Tabel</span>
+        <div class="stat-content">
+            <span class="stat-label">Total Tabel Sistem</span>
+            <span class="stat-value">{{ $stats['total_tables'] }} Tabel</span>
         </div>
     </div>
 
-    <div class="backup-stat-card">
-        <div class="backup-stat-icon is-success">
+    <div class="stat-card">
+        <div class="stat-icon is-success">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
             </svg>
         </div>
-        <div class="backup-stat-content">
-            <span class="backup-stat-label">Aset Storage Pengguna</span>
-            <span class="backup-stat-value">{{ $stats['public_storage_file_count'] }} Berkas ({{ $stats['public_storage_human'] }})</span>
+        <div class="stat-content">
+            <span class="stat-label">Aset Storage Pengguna</span>
+            <span class="stat-value">{{ $stats['public_storage_file_count'] }} Berkas ({{ $stats['public_storage_human'] }})</span>
         </div>
     </div>
 
-    <div class="backup-stat-card">
-        <div class="backup-stat-icon is-amber">
+    <div class="stat-card">
+        <div class="stat-icon is-amber">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
                 <path d="M12 12v9"></path>
                 <path d="m8 17 4 4 4-4"></path>
             </svg>
         </div>
-        <div class="backup-stat-content">
-            <span class="backup-stat-label">Arsip Cadangan Tersimpan</span>
-            <span class="backup-stat-value">{{ $stats['backup_count'] }} Berkas ({{ $stats['total_storage_human'] }})</span>
+        <div class="stat-content">
+            <span class="stat-label">Arsip Cadangan Tersimpan</span>
+            <span class="stat-value">{{ $stats['backup_count'] }} Berkas ({{ $stats['total_storage_human'] }})</span>
         </div>
     </div>
 </div>
 
 <!-- Security Alert Notice -->
-<div class="backup-danger-box">
-    <div class="backup-danger-icon">
+<div class="callout-danger">
+    <div class="callout-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
             <line x1="12" y1="9" x2="12" y2="13"></line>
             <line x1="12" y1="17" x2="12.01" y2="17"></line>
         </svg>
     </div>
-    <div class="backup-danger-text">
-        <div class="backup-danger-title">Perhatian Khusus Pemulihan Data (*Full System Restore*)</div>
+    <div class="callout-text">
+        <div class="callout-title">Perhatian Khusus Pemulihan Data (*Full System Restore*)</div>
         Operasi pemulihan sistem bersifat <strong>destruktif menyeluruh</strong>. Data pada tabel dan berkas di dalam <code>storage/app/public/</code> akan digantikan oleh data dari berkas cadangan. Sistem secara otomatis memverifikasi dan menyambungkan kembali <em>symbolic link</em> storage agar seluruh aset gambar tetap terhubung dan bebas galat 404.
     </div>
 </div>
 
 <!-- Main Split: Archive List & Upload Form -->
-<div class="backup-actions-split">
+<div class="grid-split-2-1">
     <!-- Archive Table Card -->
     <div class="table-card">
         <div class="table-toolbar">
@@ -156,7 +156,7 @@
             <div class="table-cell-muted">Total: <strong>{{ $backups->count() }}</strong> Berkas</div>
         </div>
 
-        <div class="table-responsive">
+        <div class="table-responsive table-responsive-scroll">
             <table class="data-table">
                 <thead>
                     <tr>
@@ -305,15 +305,15 @@
             <input type="hidden" name="filename" id="restoreFilenameInput" value="">
 
             <div class="modal-body">
-                <div class="backup-danger-box">
-                    <div class="backup-danger-icon">
+                <div class="callout-danger">
+                    <div class="callout-icon">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
                             <line x1="12" y1="9" x2="12" y2="13"></line>
                             <line x1="12" y1="17" x2="12.01" y2="17"></line>
                         </svg>
                     </div>
-                    <div class="backup-danger-text">
+                    <div class="callout-text">
                         Anda akan memulihkan data sistem menggunakan berkas:
                         <div class="table-cell-bold" id="restoreTargetFilenameText">-</div>
                         <div class="form-hint" id="restoreTargetMetaText">-</div>
