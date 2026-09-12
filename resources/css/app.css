@@ -1456,6 +1456,15 @@ body {
     background-color: #FFFFFF;
 }
 
+.table-toolbar-form {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
 .table-responsive {
     width: 100%;
     overflow-x: auto;
@@ -1523,6 +1532,139 @@ body {
     gap: 1rem;
     border-top: 1px solid var(--infora-border);
     background-color: #FFFFFF;
+}
+
+/* Universal Pagination Component */
+.pagination-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.pagination-summary {
+    font-size: 0.8125rem;
+    color: var(--infora-text-dim);
+}
+
+.pagination-summary strong {
+    color: var(--infora-text-main);
+    font-weight: 600;
+}
+
+.pagination-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex-wrap: wrap;
+}
+
+.pagination-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.4375rem 0.8125rem;
+    border-radius: 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--infora-text-main);
+    background-color: #FFFFFF;
+    border: 1px solid var(--infora-border-light);
+    text-decoration: none;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    user-select: none;
+    line-height: 1.25;
+}
+
+.pagination-btn:hover:not(.disabled) {
+    background-color: var(--infora-surface-muted);
+    border-color: var(--infora-border);
+    color: var(--infora-brand-primary);
+}
+
+.pagination-btn.disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    background-color: var(--infora-surface-muted);
+    color: var(--infora-text-dim);
+    border-color: var(--infora-border-light);
+}
+
+.pagination-pages {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.pagination-page {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.125rem;
+    height: 2.125rem;
+    padding: 0 0.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--infora-text-main);
+    background-color: #FFFFFF;
+    border: 1px solid var(--infora-border-light);
+    text-decoration: none;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.pagination-page:hover:not(.active) {
+    background-color: var(--infora-surface-muted);
+    border-color: var(--infora-border);
+    color: var(--infora-brand-primary);
+}
+
+.pagination-page.active {
+    background-color: var(--infora-brand-primary);
+    border-color: var(--infora-brand-primary);
+    color: #FFFFFF;
+    box-shadow: 0 1px 3px rgba(2, 132, 199, 0.3);
+    cursor: default;
+}
+
+.pagination-ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.75rem;
+    height: 2.125rem;
+    color: var(--infora-text-dim);
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.per-page-selector {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--infora-text-dim);
+}
+
+.form-select-sm {
+    padding: 0.375rem 0.625rem;
+    font-size: 0.8125rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--infora-border-light);
+    background-color: #FFFFFF;
+    color: var(--infora-text-main);
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+
+.form-select-sm:focus {
+    border-color: var(--infora-brand-primary);
 }
 
 .btn-edit {
