@@ -25,11 +25,11 @@
         <!-- Sidebar Navigation -->
         <aside class="layout-sidebar" id="layoutSidebar">
             <div class="sidebar-header">
-                <a href="{{ route('dashboard') }}" class="sidebar-brand-link" title="INFORA - Platform Governance Core">
+                <a href="{{ route('dashboard') }}" class="sidebar-brand-link" title="INFORA - SIM Sekolah">
                     <img src="{{ asset('images/infora-emblem-badge.png') }}" alt="INFORA Logo" class="brand-badge-img">
                     <div class="sidebar-brand-text">
                         <h1 class="brand-title">INFORA</h1>
-                        <div class="brand-subtitle">Platform Governance Core</div>
+                        <div class="brand-subtitle">SIM Sekolah</div>
                     </div>
                 </a>
             </div>
@@ -211,8 +211,24 @@
 
             <!-- Main Body -->
             <main class="layout-main-body">
-                @yield('content')
+                <div class="layout-content-area">
+                    @yield('content')
+                </div>
             </main>
+            <!-- Content Footer -->
+            <footer class="content-footer">
+                <div class="content-footer-left">
+                    <span>&copy; {{ date('Y') }} <strong>INFORA</strong> &mdash; Era Baru Sistem Informasi Sekolah Menengah</span>
+                </div>
+                <div class="content-footer-right">
+                    <span class="content-footer-badge">
+                        <span class="status-dot"></span>
+                        v1.0.0
+                    </span>
+                    <span class="content-footer-sep">&bull;</span>
+                    <span class="content-footer-desc">SIM Sekolah</span>
+                </div>
+            </footer>
         </div>
     </div>
 
