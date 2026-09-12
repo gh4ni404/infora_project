@@ -10,8 +10,13 @@
 - [x] Spesifikasi Desain & Arsitektur Sistem ([DESIGN.md](detail/DESIGN.md))
 - [x] Inisialisasi Project Laravel & Docker Stack Multi-Platform ([README.md](README.md))
 - [x] Standarisasi Format Upload Base64 (Maks. 1MB) & Pola Penamaan Berkas Semantik
-- [ ] Arsitektur Akun Sivitas (4 Tipe Akun) & Sistem Menu Berbasis User (User-Centric & Anti-Duplicate)
-- [ ] Dedicated Layout Separation (Desktop & Mobile) & Reusable Global CSS System
+- [x] Arsitektur Navigasi Dinamis & Pengaturan Sistem (Modul, Menu, Sub-Menu)
+- [x] Arsitektur Modal Dialog CRUD Modular (Create & Edit as Components in Index)
+- [x] Tata Kelola Menu Akses & Dynamic Role Templates (User-Centric Granular Permissions)
+- [x] Sistem Cadangan & Pemulihan Sistem Lengkap (Full System Snapshot & Server Migration Ready)
+- [x] Master Data Sekolah (Multi-Record Registry SMA & SMK)
+- [ ] Arsitektur Akun Sivitas (4 Tipe Akun: Siswa, Guru, Staff, Admin dengan profil relasional 1-to-1)
+- [ ] Dedicated Layout Separation (Desktop & Mobile)
 - [ ] Implementasi Modul Akademik & Tata Kelola Utama
 
 ---
@@ -70,7 +75,7 @@
     - [x] Antarmuka manajemen lengkap (9 Blade views) dengan standardisasi komponen tabel data, form control, alerts, dan tombol aksi (100% bebas *inline styles*).
     - [x] Visual Icon Picker Component (`<x-icon-picker>`): dialog katalog visual dengan live preview, live search (Indonesia), filter kategori, dan 100% free Lucide Icons (~38 SVG icons).
     - [x] Panduan informatif nama rute dengan quick suggestion pills dan datalist rute terdaftar.
-    - [x] Modal Interaktif Tambah Data: Tombol Tambah Modul, Tambah Menu, dan Tambah Sub-Menu memunculkan modal dialog interaktif langsung di atas tabel data (tanpa redirect halaman) dengan auto-reopen pada validasi error.
+    - [x] Modal Interaktif Tambah & Edit Data: Tombol Tambah dan Edit pada Modul, Menu, dan Sub-Menu memunculkan modal dialog interaktif langsung di atas tabel data (tanpa redirect halaman) dengan auto-reopen pada validasi error serta komponen modular `edit.blade.php`.
     - [x] Classic Minimalist Sidebar Divider: Label modul berfungsi sebagai pemisah kategori yang rapi dan elegan (`.menu-category-label` dengan garis pembatas tipis atas dan tipografi uppercase) serta eliminasi kolom/opsi icon modul yang redundan.
     - [x] Relokasi Profil Pengguna & Logout ke Sidebar Footer: Topbar dibersihkan dan difokuskan, seksi akun pengguna dipindahkan ke bawah sidebar (`.sidebar-footer`).
     - [x] Dropup Popover Menu Interaktif: Kartu profil pengguna (`#userProfileTrigger`) memicu popover menu melayang ke atas (*dropup*) berisi Pengaturan Profile, Ubah Password, Bantuan, dan Keluar.
@@ -78,28 +83,56 @@
     - [x] Penjangkaran Simetris Animasi Sidebar (*Anchored Symmetrical Transition*): Posisi avatar 38px (17px margin) dan seluruh ikon menu (26px margin) terkunci presisi tanpa pergeseran horizontal (0px horizontal jump) baik saat expanded (260px) maupun collapsed (72px), menghilangkan glitch *auto-centering*.
     - [x] Tombol Pencarian Interaktif Mode Ciut & Shortcut `Ctrl+K`: Kotak pencarian otomatis berubah menjadi tombol ikon 40px di atas Dashboard saat sidebar diciutkan; mengkliknya otomatis membuka sidebar dan memfokuskan input pencarian.
     - [x] Otomatisasi Kapitalisasi Teks Input & Integritas Data: Frontend real-time auto-transform via `[data-transform]` + helper `TextFormatter` & Eloquent mutators (UPPERCASE untuk Modul, Title Case / Capitalize Each Word untuk Menu & Sub-Menu dengan preservasi akronim pendidikan & teknologi).
-    - [x] Automated Pest test suite (total 54 tests lulus 100%, 242 assertions).
-- [ ] **2.4. User-Centric Menu Access & Role Presets (Pengembangan Lanjutan)**
-  - [ ] Registrasi katalog menu terpusat (`config/menu.php`) dengan atribut `key`, `title`, `icon`, `route`, `group`, dan filter tipe sekolah `school_type: ['sma', 'smk']`.
-  - [ ] Alokasi menu berbasis pengguna (*User-Centric Access Control*): mengizinkan satu guru memegang berbagai penugasan tanpa batasan role kaku.
-  - [ ] Mekanisme *De-Duplication* otomatis (`unique('key')`) agar menu di sidebar/mobile drawer tidak pernah muncul ganda.
-  - [ ] Fitur *Role Presets* (Template menu awal untuk mempercepat admin TU saat membuat akun guru/staf baru).
+    - [x] Halaman Placeholder "Fitur Dalam Pengembangan" & Dynamic Navigation Fallback:
+      - [x] Eliminasi tautan mati (`href="#"`) di sidebar untuk menu/sub-menu tanpa rute terdaftar.
+      - [x] Fallback otomatis model `Menu` & `SubMenu` ke rute `system.under-development?type={menu|submenu}&id={id}` jika rute belum diimplementasikan di `routes/web.php`.
+      - [x] Controller `UnderDevelopmentController` & View `resources/views/system/under-development.blade.php` dengan breadcrumb hierarki, kartu status, dan developer scaffolding blueprint (`php artisan make:controller ...`).
+      - [x] Preservasi state aktif sidebar (accordion induk tetap terbuka dan item disorot aktif saat berada di halaman placeholder).
+    - [x] Automated Pest test suite (total 59 tests lulus 100%, 261 assertions).
+- [x] **2.4. Tata Kelola Menu Akses & Dynamic Role Templates (User-Centric Granular Permissions)**
+  - [x] Skema database: tabel `user_menu_permissions` & `menu_access_templates` tanpa constraint `unique` pada teks.
+  - [x] Model Eloquent `UserMenuPermission`, `MenuAccessTemplate`, serta relasi dan helper otorisasi di `User.php` (`hasMenuAccess()`, `hasSubMenuAccess()`).
+  - [x] Seeder awal `MenuAccessTemplateSeeder` untuk preset beragam peran guru (Pengajar, Wali Kelas, Wakasek) dan siswa (Reguler, PKL).
+  - [x] Form Requests & Controller: `MenuAccessController`, `UpdateUserPermissionsRequest`, `UpdateTemplatePermissionsRequest`.
+  - [x] Antarmuka manajemen lengkap di `resources/views/system/menu-access/` (Tab Hak Akses per Pengguna, Tab Template Peran Sistem, Form Matriks Izin User, Form Matriks Template Peran).
+  - [x] Fitur 1-Klik Salin Template Peran ke Akun Pengguna (*Apply Preset*).
+  - [x] Integrasi filtering dinamis pada `SidebarComposer` (non-super admin hanya melihat menu yang diizinkan, super admin root bypass).
+  - [x] Automated Pest test suite `MenuAccessTest.php` (total 67 tests lulus 100%, 299 assertions).
+- [x] **2.5. Cadangan & Pemulihan Sistem Lengkap (*Full System Snapshot & Server Migration Ready*)**
+  - [x] Arsitektur rute mandiri `/backup-restore` (`backup-restore`) di bawah middleware proteksi Super Admin.
+  - [x] Mesin backup mandiri (*pure native PHP/PDO & ZipArchive*) tanpa dependensi pihak ketiga (`DatabaseBackupService`) dengan dukungan multi-driver (MySQL/MariaDB & SQLite).
+  - [x] Pembuatan paket arsip `.zip` portabel berisi `database.sql`, berkas aset `storage/app/public/`, dan `manifest.json`.
+  - [x] Manajemen berkas arsip di `storage/app/backups/`: pembuatan dump ZIP/SQL satu-klik, pengunduhan aman, dan penghapusan aman dari path traversal.
+  - [x] Pemulihan sistem (*restore*) dari berkas server maupun dari unggahan berkas eksternal hingga 250 MB via `RestoreBackupRequest`.
+  - [x] Pengecekan cerdas kesehatan symlink storage (`ensureStorageLink()`): jika sudah terhubung valid dilanjutkan, jika hilang/rusak dibuat ulang via `Artisan::call('storage:link')` (mencegah aset gambar 404).
+  - [x] Dialog modal bahaya (*Danger Confirmation Modal*) dengan kata kunci `"PULIHKAN"` untuk mencegah eksekusi tidak sengaja.
+  - [x] Mesin Universal Smooth Real-Time Progressive Loading Screen (`window.InforaProgress` & `<x-progress-modal />`) dengan animasi gradien shimmer mengalir halus, ambient status orb, dan arsitektur reusable lintas modul.
+  - [x] Tampilan antarmuka estetik minimalis menggunakan elemen native HTML5 `<progress>` dan 100% reusable class di `resources/css/app.css` (bebas elemen kaku/stepper, bebas inline styles, dan bebas tag style).
+  - [x] Sinkronisasi zona waktu server & aplikasi ke `Asia/Makassar` (WITA, GMT+8) serta konfigurasi upload hingga 250 MB.
+  - [x] Automated Pest test suite `BackupRestoreTest.php` (total 86 tests aplikasi lulus 100%, 398 assertions).
 
 ---
 
 ## 🏫 Fase 3: Modul Master Data Sekolah & Manajemen Akademik (SMA & SMK)
-- [ ] **3.1. Master Data Sekolah & Sivitas**
+- [x] **3.1. Master Data Sekolah (Multi-Record Registry & Kesiapan Bridging)**
+  - [x] Skema database tabel `schools`: kolom identitas resmi (nama, NPSN non-unique terindeks, NSS, jenjang SMA/SMK, status Negeri/Swasta, akreditasi A/B/C/Belum), alamat lengkap, kontak telepon/email/web, pimpinan/NIP, yayasan, dan status aktif.
+  - [x] Model `School` dengan Title Case auto-mutator (`TextFormatter::titleCase()` preservasi akronim), boolean casting, dan helper query.
+  - [x] Form Requests & Controller CRUD lengkap (`Master\SchoolController`, `StoreSchoolRequest`, `UpdateSchoolRequest`) dengan validasi bahasa Indonesia dan dukungan Base64 logo upload (maks. 1MB).
+  - [x] Antarmuka manajemen terpadu: Data Table dengan pencarian (nama/NPSN/kota), filter jenis sekolah, paginasi, thumbnail logo, modal interaktif tambah sekolah, dan modal interaktif edit sekolah (komponen modular `edit.blade.php`).
+  - [x] Standarisasi sistem dialog modal: arsitektur flexbox (eliminasi footer clipping), normalisasi margin/padding, divider `var(--infora-border)` standar desain, dan badge seksi edukasi.
+  - [x] Automated Pest test suite `SchoolTest.php` (15 skenario pengujian feature test lulus 100%, total suite 101 tests lulus).
+- [ ] **3.2. Master Data Akademik & Sivitas**
   - [ ] CRUD Data Jurusan/Konsentrasi Keahlian (SMK) & Peminatan/Fase (SMA).
   - [ ] CRUD Data Rombel/Kelas & Ruangan Belajar.
   - [ ] Manajemen Data Siswa terhubung ke `student_profiles`.
   - [ ] Manajemen Data Guru & Pegawai terhubung ke `teacher_profiles` & `staff_profiles`.
-- [ ] **3.2. Kalender & Jadwal Pelajaran**
+- [ ] **3.3. Kalender & Jadwal Pelajaran**
   - [ ] Manajemen Tahun Ajaran, Semester, & Kalender Akademik.
   - [ ] Alokasi Jam Mengajar Guru & Penyusunan Jadwal Mingguan per Kelas.
-- [ ] **3.3. Jurnal KBM Digital Guru**
+- [ ] **3.4. Jurnal KBM Digital Guru**
   - [ ] Form input jurnal mengajar harian guru per jam tatap muka.
   - [ ] Pencatatan topik/materi, kendala siswa di kelas, dan upload foto dokumentasi KBM (format Base64, maksimal 1MB per berkas dengan kualitas visual terjaga, pola penamaan semantik: `{modul}_u{user_id}_{YYYYMMDD_His}_{random_8char}.{ekstensi}`).
-- [ ] **3.4. Kesiswaan & Bimbingan Konseling (BK)**
+- [ ] **3.5. Kesiswaan & Bimbingan Konseling (BK)**
   - [ ] Buku catatan pelanggaran tata tertib & kalkulasi poin disiplin.
   - [ ] Portofolio prestasi, sertifikat, dan kejuaraan siswa.
 
@@ -147,7 +180,8 @@
 ---
 
 ## 📚 Rujukan Dokumen Terkait
-- 📖 **[README.md](README.md):** Gambaran umum proyek, standar arsitektur, dan panduan Docker.
+- 📖 **[README.md](README.md):** Gambaran umum proyek, ringkasan fitur, dan panduan Docker.
+- 🚀 **[README.md Detail](detail/README.md):** Rincian lengkap seluruh fitur unggulan dan spesifikasi teknis mendalam.
 - 📝 **[CHANGELOG.md](CHANGELOG.md):** Catatan riwayat perubahan dan versi rilis platform.
 - 🎨 **[DESIGN.md](detail/DESIGN.md):** Spesifikasi arsitektur teknis, sistem peran (RBAC), skema basis data, dan UI/UX.
 - 🖼️ **[BRANDING.md](detail/docs/BRANDING.md):** Filosofi penamaan brand, aset logo lockup, dan app icon.

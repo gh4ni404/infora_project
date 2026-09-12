@@ -55,6 +55,12 @@
     - Seluruh dialog modal menggunakan struktur flex column `.modal-dialog form { display: flex; flex-direction: column; flex: 1; min-height: 0; }` dengan `.modal-header` dan `.modal-footer` terproteksi `flex-shrink: 0`, menjamin tombol aksi tidak pernah terpotong (*zero-clipping sticky footers*) pada ketinggian layar apa pun.
     - Area `.modal-body` memanfaatkan *dynamic vertical scroll* dengan *custom slim scrollbar* (6px) dan normalisasi margin input (`.modal-body .form-group { margin-bottom: 0; }`) untuk mencegah penumpukan jarak ganda.
     - Pembatas seksi form `.form-section-divider` menggunakan warna border standar sistem desain (`border-top: 1px solid var(--infora-border)`), dipadukan dengan label seksi edukasi `.form-section-label` berformat badge khas INFORA dengan indikator titik biru.
+13. **Arsitektur Modal Dialog CRUD Modular (Create & Edit as Components in Index, Zero Standalone Edit Pages):**
+    - Seluruh formulir Tambah (`create`) dan Ubah (`edit`) pada entitas administratif (Data Sekolah, Modul, Menu, Sub-Menu) terintegrasi langsung sebagai modal dialog interaktif di atas halaman `index`, menghilangkan keharusan berpindah atau redirect ke halaman baru (*zero-reload workflow*).
+    - Berkas `edit.blade.php` distandarisasi sebagai komponen Blade modular yang di-include (`@include('...edit')`) ke dalam `index.blade.php`, bukan lagi berupa view terpisah yang meng-`@extends('layouts.app')`.
+    - Integrasi data dinamis melalui tombol aksi edit dengan atribut `data-*` (seperti `data-school`, `data-module`, `data-menu`, `data-sub-menu`) yang dibaca oleh listener JavaScript untuk mengisi input form modal secara instan.
+    - Penanganan validasi server cerdas (*auto-reopen*) dengan deteksi `old('_method') === 'PUT'`, memastikan modal terbuka kembali secara otomatis saat terjadi kegagalan validasi backend dengan data input (`old(...)`) tetap terjaga.
+    - Kompatibilitas rute: metode `Controller::edit()` mengalihkan (*redirect*) pengguna kembali ke `index` guna menjaga kompatibilitas rute dan bookmark.
 
 ### 2.5. Sistem Ikonografi & Navigasi Hirarki (Iconography & Route Resolution)
 1. **100% Free & Open-Source Lucide Icons:** Menggunakan keluarga ikon Lucide Icons resmi (lisensi open source ISC) berbasis SVG murni yang di-render native via komponen `<x-icon>`. Bebas biaya lisensi dan tanpa ketergantungan font eksternal.
@@ -125,7 +131,7 @@ Untuk mengakomodasi realitas sivitas sekolah di mana guru dan siswa sering memil
 ### 5.0. Modul Master Data Administrasi (Registri Sekolah & Multi-Unit)
 - **Registri Sekolah Multi-Record (`schools`):** Manajemen daftar sekolah SMA & SMK (Negeri/Swasta) dengan data identitas resmi, akreditasi, alamat, kontak, pimpinan, dan yayasan.
 - **Kesiapan Bridging API Dapodik:** Kolom `npsn` di-index secara optimal sebagai *secondary natural key* untuk sinkronisasi data nasional tanpa mengorbankan fleksibilitas operasional (non-unique pada level DBMS).
-- **Pipeline Logo Sekolah Base64 (Maks. 1MB):** Pengunggahan logo format Base64 terintegrasi langsung di form modal create dan halaman edit, dengan penamaan berkas collision-proof di `storage/app/public/logos`.
+- **Pipeline Logo Sekolah Base64 (Maks. 1MB):** Pengunggahan logo format Base64 terintegrasi langsung di form modal create dan form modal edit (`edit.blade.php`), dengan penamaan berkas collision-proof di `storage/app/public/logos`.
 
 ### 5.1. Modul 1: Manajemen Akademik & Kesiswaan (SMA & SMK)
 - Manajemen Tahun Ajaran, Semester, Rombel/Kelas, dan Mata Pelajaran.
@@ -199,7 +205,8 @@ erDiagram
 ---
 
 ## 📚 8. Rujukan Dokumen Terkait
-- 📖 **[README.md](../README.md):** Gambaran umum proyek dan panduan quick start Docker.
+- 📖 **[README.md Utama](../README.md):** Gambaran umum proyek dan panduan quick start Docker.
+- 🚀 **[README.md Detail](README.md):** Rincian lengkap seluruh fitur unggulan dan spesifikasi teknis mendalam.
 - 📋 **[TODO.md](../TODO.md):** Roadmap tahapan implementasi dari Fase 1 hingga Fase 6.
 - 📝 **[CHANGELOG.md](../CHANGELOG.md):** Catatan riwayat perubahan dan versi rilis platform.
 - 🖼️ **[BRANDING.md](docs/BRANDING.md):** Filosofi penamaan brand, aset logo lockup, dan app icon.

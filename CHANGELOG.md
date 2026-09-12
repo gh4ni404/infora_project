@@ -9,6 +9,21 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 ## [Unreleased]
 
 ### Added
+- **Arsitektur Modal Interaktif Edit Data (`edit.blade.php` sebagai Komponen Modal Modular):**
+  - Mentransformasikan seluruh formulir pengubahan data (*edit*) yang sebelumnya berupa halaman terpisah menjadi modal dialog interaktif langsung di atas tabel data (`index.blade.php`) tanpa reload halaman (*zero-reload workflow*).
+  - Diterapkan secara seragam pada 4 entitas utama:
+    - **Master Data Sekolah (`master/data-sekolah`)**: Komponen modal `#modalEditSchool` dengan integrasi form preview/upload/hapus logo Base64, select status/akreditasi, dan auto-population via payload `data-school`.
+    - **Tata Kelola Modul (`system/modules`)**: Komponen modal `#modalEditModule` dengan auto-transform uppercase dan auto-population via payload `data-module`.
+    - **Tata Kelola Menu (`system/menus`)**: Komponen modal `#modalEditMenu` dengan integrasi dinamis `<x-icon-picker>` (melalui helper global `window['setIconValue_' + pickerId]`), auto-transform title case, dan auto-population via payload `data-menu`.
+    - **Tata Kelola Sub-Menu (`system/sub-menus`)**: Komponen modal `#modalEditSubMenu` dengan auto-transform title case dan auto-population via payload `data-sub-menu`.
+  - **Arsitektur Komponen Modular (`edit.blade.php` sebagai Modal Component)**: Berkas `edit.blade.php` distandarisasi sebagai berkas view modular yang di-include (`@include('...edit')`) ke dalam `index.blade.php`, bukan lagi berupa view yang meng-`@extends('layouts.app')`.
+  - **Penanganan Validasi Cerdas (*Smart Auto-Reopen*)**: Memeriksa `old('_method') === 'PUT'` untuk membuka kembali modal edit secara otomatis jika validasi backend gagal, menjaga persistensi data input pengguna (`old(...)`).
+  - **Backward Compatibility Rute**: Mengubah metode `edit()` pada `SchoolController`, `ModuleController`, `MenuController`, dan `SubMenuController` untuk mengalihkan (*redirect*) ke route `index` terkait alih-alih 404/menampilkan view lama, memastikan tautan lama atau bookmark tetap mendarat aman di halaman tabel.
+  - **100% Kepatuhan Arsitektur Bebas Inline Styles**: Mengandalkan sistem kelas modal universal di `resources/css/app.css` tanpa satupun atribut `style="..."` maupun tag `<style>`.
+  - **Automated Feature Testing**: Memperbarui dan menyelaraskan seluruh skenario pengujian di `SchoolTest.php`, `ModuleCrudTest.php`, `MenuCrudTest.php`, dan `SubMenuCrudTest.php` untuk memvalidasi alur modal edit baru dan status redirect `edit()`. Seluruh 101 tests aplikasi lulus 100% (474 assertions).
+- **Pemisahan & Penyempurnaan Dokumentasi Fitur Unggulan (`detail/README.md` & `README.md`):**
+  - Memisahkan dan merinci seluruh 15 spesifikasi fitur unggulan secara komprehensif ke berkas `detail/README.md`.
+  - Merestrukturisasi berkas `README.md` utama menjadi ringkasan yang ringkas, tajam, dan elegan, dilengkapi penunjuk tautan langsung ke `detail/README.md` untuk eksplorasi teknis mendalam.
 - **Fitur Master Data Sekolah (Multi-Record Registry & Kesiapan Bridging):**
   - Membangun fitur manajemen registri sekolah pada rute `/master/data-sekolah` (`master.data-sekolah.*`) di bawah modul Administrasi ➔ Master ➔ Data Sekolah.
   - Mendukung multi-record registri sekolah (SMA dan SMK, berstatus Negeri maupun Swasta) untuk kebutuhan pengelolaan multi-unit yayasan serta kesiapan bridging API Dapodik.
@@ -19,7 +34,7 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
   - **Antarmuka Pengguna Terpadu**:
     - Data Table dengan pencarian dinamis (nama sekolah, NPSN, kota), dropdown filter jenis sekolah (SMA/SMK), badge warna status/akreditasi/jenis (`badge-purple`, `badge-cyan`, `badge-success`, `badge-amber`), dan paginasi 15/halaman.
     - Modal interaktif tambah sekolah (`modalCreateSchool`) dengan auto-reopen saat validasi error.
-    - Halaman terpisah formulir edit data sekolah (`master.data-sekolah.edit`) berbalut `card-surface`.
+    - Modal interaktif edit data sekolah (`modalEditSchool` via komponen modular `master.data-sekolah.edit`).
   - **15 Automated Pest Feature Tests**: Test suite `SchoolTest.php` mencakup autentikasi & otorisasi super admin, listing & empty state, pencarian & filter jenis, validasi form, mutator title-case, Base64 logo upload & storage, update & hapus logo, penghapusan data & berkas fisik, serta verifikasi zero inline styles (15 passed, 63 assertions). Total pengujian aplikasi mencapai 101 tests lulus 100%.
 
 ### Changed & Refactored

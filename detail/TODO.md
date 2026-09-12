@@ -10,9 +10,13 @@
 - [x] Spesifikasi Desain & Arsitektur Sistem ([DESIGN.md](DESIGN.md))
 - [x] Inisialisasi Project Laravel & Docker Stack Multi-Platform ([README.md](../README.md))
 - [x] Standarisasi Format Upload Base64 (Maks. 1MB) & Pola Penamaan Berkas Semantik
+- [x] Arsitektur Navigasi Dinamis & Pengaturan Sistem (Modul, Menu, Sub-Menu)
+- [x] Arsitektur Modal Dialog CRUD Modular (Create & Edit as Components in Index)
+- [x] Tata Kelola Menu Akses & Dynamic Role Templates (User-Centric Granular Permissions)
+- [x] Sistem Cadangan & Pemulihan Sistem Lengkap (Full System Snapshot & Server Migration Ready)
 - [x] Master Data Sekolah (Multi-Record Registry SMA & SMK)
-- [ ] Arsitektur Akun Sivitas (4 Tipe Akun) & Sistem Menu Berbasis User (User-Centric & Anti-Duplicate)
-- [ ] Dedicated Layout Separation (Desktop & Mobile) & Reusable Global CSS System
+- [ ] Arsitektur Akun Sivitas (4 Tipe Akun: Siswa, Guru, Staff, Admin dengan profil relasional 1-to-1)
+- [ ] Dedicated Layout Separation (Desktop & Mobile)
 - [ ] Implementasi Modul Akademik & Tata Kelola Utama
 
 ---
@@ -71,7 +75,7 @@
     - [x] Antarmuka manajemen lengkap (9 Blade views) dengan standardisasi komponen tabel data, form control, alerts, dan tombol aksi (100% bebas *inline styles*).
     - [x] Visual Icon Picker Component (`<x-icon-picker>`): dialog katalog visual dengan live preview, live search (Indonesia), filter kategori, dan 100% free Lucide Icons (~38 SVG icons).
     - [x] Panduan informatif nama rute dengan quick suggestion pills dan datalist rute terdaftar.
-    - [x] Modal Interaktif Tambah Data: Tombol Tambah Modul, Tambah Menu, dan Tambah Sub-Menu memunculkan modal dialog interaktif langsung di atas tabel data (tanpa redirect halaman) dengan auto-reopen pada validasi error.
+    - [x] Modal Interaktif Tambah & Edit Data: Tombol Tambah dan Edit pada Modul, Menu, dan Sub-Menu memunculkan modal dialog interaktif langsung di atas tabel data (tanpa redirect halaman) dengan auto-reopen pada validasi error serta komponen modular `edit.blade.php`.
     - [x] Classic Minimalist Sidebar Divider: Label modul berfungsi sebagai pemisah kategori yang rapi dan elegan (`.menu-category-label` dengan garis pembatas tipis atas dan tipografi uppercase) serta eliminasi kolom/opsi icon modul yang redundan.
     - [x] Relokasi Profil Pengguna & Logout ke Sidebar Footer: Topbar dibersihkan dan difokuskan, seksi akun pengguna dipindahkan ke bawah sidebar (`.sidebar-footer`).
     - [x] Dropup Popover Menu Interaktif: Kartu profil pengguna (`#userProfileTrigger`) memicu popover menu melayang ke atas (*dropup*) berisi Pengaturan Profile, Ubah Password, Bantuan, dan Keluar.
@@ -114,7 +118,7 @@
   - [x] Skema database tabel `schools`: kolom identitas resmi (nama, NPSN non-unique terindeks, NSS, jenjang SMA/SMK, status Negeri/Swasta, akreditasi A/B/C/Belum), alamat lengkap, kontak telepon/email/web, pimpinan/NIP, yayasan, dan status aktif.
   - [x] Model `School` dengan Title Case auto-mutator (`TextFormatter::titleCase()` preservasi akronim), boolean casting, dan helper query.
   - [x] Form Requests & Controller CRUD lengkap (`Master\SchoolController`, `StoreSchoolRequest`, `UpdateSchoolRequest`) dengan validasi bahasa Indonesia dan dukungan Base64 logo upload (maks. 1MB).
-  - [x] Antarmuka manajemen terpadu: Data Table dengan pencarian (nama/NPSN/kota), filter jenis sekolah, paginasi, thumbnail logo, modal interaktif tambah sekolah, dan formulir edit terpisah.
+  - [x] Antarmuka manajemen terpadu: Data Table dengan pencarian (nama/NPSN/kota), filter jenis sekolah, paginasi, thumbnail logo, modal interaktif tambah sekolah, dan modal interaktif edit sekolah (komponen modular `edit.blade.php`).
   - [x] Standarisasi sistem dialog modal: arsitektur flexbox (eliminasi footer clipping), normalisasi margin/padding, divider `var(--infora-border)` standar desain, dan badge seksi edukasi.
   - [x] Automated Pest test suite `SchoolTest.php` (15 skenario pengujian feature test lulus 100%, total suite 101 tests lulus).
 - [ ] **3.2. Master Data Akademik & Sivitas**
@@ -176,7 +180,8 @@
 ---
 
 ## 📚 Rujukan Dokumen Terkait
-- 📖 **[README.md](../README.md):** Gambaran umum proyek, standar arsitektur, dan panduan Docker.
+- 📖 **[README.md Utama](../README.md):** Gambaran umum proyek, ringkasan fitur, dan panduan Docker.
+- 🚀 **[README.md Detail](README.md):** Rincian lengkap seluruh fitur unggulan dan spesifikasi teknis mendalam.
 - 📝 **[CHANGELOG.md](../CHANGELOG.md):** Catatan riwayat perubahan dan versi rilis platform.
 - 🎨 **[DESIGN.md](DESIGN.md):** Spesifikasi arsitektur teknis, sistem peran (RBAC), skema basis data, dan UI/UX.
 - 🖼️ **[BRANDING.md](docs/BRANDING.md):** Filosofi penamaan brand, aset logo lockup, dan app icon.
