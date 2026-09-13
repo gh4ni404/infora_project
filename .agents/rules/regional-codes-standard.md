@@ -30,3 +30,16 @@ Jika memerlukan pemetaan atau penambahan data wilayah baru:
 ## 4. Format Penyimpanan & Konsistensi Awalan
 - Simpan kode wilayah sebagai string numerik murni tanpa tanda titik (misal: Kemendagri `73.08` disimpan sebagai `7308`).
 - Pastikan 2 digit pertama kode kabupaten/kota selalu identik dengan kode provinsi induknya.
+
+## 5. Standar Kode & Verifikasi Kelurahan vs Desa (Tingkat 4)
+- Kode wilayah Kemendagri tingkat 4 terdiri dari 10 digit (misal `7308182003`):
+  - 2 digit: Provinsi (`73`)
+  - 2 digit: Kabupaten/Kota (`08`)
+  - 2 digit: Kecamatan (`18`)
+  - 4 digit: Entitas Desa/Kelurahan:
+    - **Kelurahan** diawali angka `1` (misal `1001` -> `7308181001` Pompanua).
+    - **Desa** diawali angka `2` (misal `2003` -> `7308182003` Welado).
+- Saat melakukan seeding atau validasi wilayah kecamatan, **WAJIB** mengecek kelengkapan seluruh desa/kelurahan dari endpoint bridging resmi:
+  `https://sig.bps.go.id/rest-bridging-dagri/getwilayah?level=desa&parent={kode_kecamatan_bertitik}`
+- Jangan pernah memotong atau melewatkan desa/kelurahan (seperti Welado, Pinceng Pute, Labissa) karena akan menggeser kode urutan wilayah lainnya.
+
