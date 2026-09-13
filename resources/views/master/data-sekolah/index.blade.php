@@ -128,7 +128,7 @@
                             @if ($school->status === 'Negeri')
                                 <span class="badge badge-success">Negeri</span>
                             @else
-                                <span class="badge badge-amber">Swasta</span>
+                                <span class="badge badge-warning">Swasta</span>
                             @endif
                         </td>
                         <td>
@@ -140,7 +140,7 @@
                                     <span class="badge badge-cyan">B</span>
                                     @break
                                 @case('C')
-                                    <span class="badge badge-amber">C</span>
+                                    <span class="badge badge-warning">C</span>
                                     @break
                                 @case('Belum')
                                     <span class="badge badge-neutral">Belum</span>
