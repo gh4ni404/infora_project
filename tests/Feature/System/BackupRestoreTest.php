@@ -178,6 +178,44 @@ test('super admin can delete an existing backup file', function () {
     expect(File::exists($dummyPath))->toBeFalse();
 });
 
+test('super admin can delete all backup files', function () {
+    $file1 = $this->backupDir.DIRECTORY_SEPARATOR.'test_backup_all_1.zip';
+    $file2 = $this->backupDir.DIRECTORY_SEPARATOR.'test_backup_all_2.sql';
+    File::put($file1, 'Dummy ZIP 1');
+    File::put($file2, '-- Dummy SQL 2');
+
+    expect(File::exists($file1))->toBeTrue()
+        ->and(File::exists($file2))->toBeTrue();
+
+    $response = $this->actingAs($this->superAdmin)->delete(route('backup-restore.destroy-all'));
+
+    $response->assertRedirect(route('backup-restore'));
+    $response->assertSessionHas('success');
+    expect(File::exists($file1))->toBeFalse()
+        ->and(File::exists($file2))->toBeFalse();
+});
+
+test('non super admin cannot delete all backup files', function () {
+    $response = $this->actingAs($this->teacherUser)->delete(route('backup-restore.destroy-all'));
+
+    $response->assertForbidden();
+});
+
+test('deleting all backups when directory is empty returns info notification', function () {
+    $files = array_merge(
+        File::glob($this->backupDir.DIRECTORY_SEPARATOR.'*.zip') ?: [],
+        File::glob($this->backupDir.DIRECTORY_SEPARATOR.'*.sql') ?: []
+    );
+    foreach ($files as $file) {
+        File::delete($file);
+    }
+
+    $response = $this->actingAs($this->superAdmin)->delete(route('backup-restore.destroy-all'));
+
+    $response->assertRedirect(route('backup-restore'));
+    $response->assertSessionHas('info');
+});
+
 test('super admin can restore full system from an existing zip archive and auto-links storage', function () {
     $zipFilename = 'test_full_restore.zip';
     $zipPath = $this->backupDir.DIRECTORY_SEPARATOR.$zipFilename;

@@ -274,4 +274,28 @@ class BackupRestoreController extends Controller
                 ->with('error', 'Terjadi kesalahan saat menghapus cadangan: '.$e->getMessage());
         }
     }
+
+    /**
+     * Delete all backup files from the server storage.
+     */
+    public function destroyAll(): RedirectResponse
+    {
+        try {
+            $count = $this->backupService->deleteAllBackups();
+
+            if ($count === 0) {
+                return redirect()
+                    ->route('backup-restore')
+                    ->with('info', 'Tidak ada berkas cadangan yang tersimpan di server.');
+            }
+
+            return redirect()
+                ->route('backup-restore')
+                ->with('success', "Semua berkas cadangan ({$count} berkas) berhasil dihapus dari server.");
+        } catch (Exception $e) {
+            return redirect()
+                ->route('backup-restore')
+                ->with('error', 'Terjadi kesalahan saat menghapus semua cadangan: '.$e->getMessage());
+        }
+    }
 }

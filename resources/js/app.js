@@ -562,8 +562,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!href || href === '#' || href.startsWith('#') || href.startsWith('javascript:') ||
             href.startsWith('mailto:') || href.startsWith('tel:')) return;
 
-        // Skip new tab / external links
-        if (link.target === '_blank' || link.hasAttribute('download')) return;
+        // Skip new tab / external links / downloads
+        if (link.target === '_blank' || link.hasAttribute('download') || link.classList.contains('btn-download') || href.includes('/download/')) return;
 
         // Skip external URLs
         try {

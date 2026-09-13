@@ -357,6 +357,29 @@ class DatabaseBackupService
     }
 
     /**
+     * Delete all backup files (.zip and .sql) from server storage.
+     *
+     * @return int Number of deleted backup files
+     */
+    public function deleteAllBackups(): int
+    {
+        $directory = $this->getBackupDirectory();
+        $files = array_merge(
+            File::glob($directory.DIRECTORY_SEPARATOR.'*.zip') ?: [],
+            File::glob($directory.DIRECTORY_SEPARATOR.'*.sql') ?: []
+        );
+
+        $deletedCount = 0;
+        foreach ($files as $file) {
+            if (File::delete($file)) {
+                $deletedCount++;
+            }
+        }
+
+        return $deletedCount;
+    }
+
+    /**
      * Restore system from an SQL script or full ZIP archive.
      *
      * @param  (callable(int, string, string): void)|null  $progressCallback

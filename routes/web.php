@@ -88,5 +88,6 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
     Route::post('/backup-restore', [BackupRestoreController::class, 'store'])->name('backup-restore.create');
     Route::get('/backup-restore/download/{filename}', [BackupRestoreController::class, 'download'])->name('backup-restore.download');
     Route::post('/backup-restore/restore', [BackupRestoreController::class, 'restore'])->name('backup-restore.restore');
+    Route::delete('/backup-restore/all', [BackupRestoreController::class, 'destroyAll'])->name('backup-restore.destroy-all');
     Route::delete('/backup-restore/{filename}', [BackupRestoreController::class, 'destroy'])->name('backup-restore.destroy');
 });

@@ -49,6 +49,19 @@
     </div>
 @endif
 
+@if (session('info'))
+    <div class="alert-info">
+        <div class="alert-content">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span>{{ session('info') }}</span>
+        </div>
+    </div>
+@endif
+
 @if (session('error'))
     <div class="alert-danger">
         <div class="alert-content">
@@ -152,8 +165,26 @@
     <!-- Archive Table Card -->
     <div class="table-card">
         <div class="table-toolbar">
-            <div class="table-cell-bold">Riwayat Berkas Cadangan Tersimpan</div>
-            <div class="table-cell-muted">Total: <strong>{{ $backups->count() }}</strong> Berkas</div>
+            <div class="flex items-center gap-2">
+                <span class="table-cell-bold">Riwayat Berkas Cadangan Tersimpan</span>
+                <span class="table-cell-muted">&bull; Total: <strong>{{ $backups->count() }}</strong> Berkas</span>
+            </div>
+
+            @if ($backups->isNotEmpty())
+                <form method="POST" action="{{ route('backup-restore.destroy-all') }}" onsubmit="return confirm('PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA ({{ $backups->count() }}) berkas cadangan dari server? Tindakan ini tidak dapat dibatalkan.');" class="form-inline-action">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn-delete" id="btnDeleteAllBackups" title="Hapus semua berkas cadangan dari server">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                        </svg>
+                        <span>Hapus Semua Cadangan</span>
+                    </button>
+                </form>
+            @endif
         </div>
 
         <div class="table-responsive table-responsive-scroll">
@@ -188,7 +219,7 @@
                             </td>
                             <td>
                                 <div class="table-actions table-actions-right">
-                                    <a href="{{ route('backup-restore.download', $backup['filename']) }}" class="btn-download" title="Unduh Berkas Cadangan">
+                                    <a href="{{ route('backup-restore.download', $backup['filename']) }}" class="btn-download" data-no-progress download title="Unduh Berkas Cadangan">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                             <polyline points="7 10 12 15 17 10"></polyline>
