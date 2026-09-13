@@ -110,43 +110,106 @@
                 </div>
 
                 <div class="form-section-divider"></div>
-                <div class="form-section-label">Alamat</div>
+                <div class="form-section-label">Wilayah & Alamat</div>
 
-                <div class="form-group">
-                    <label for="edit_address" class="form-label">Alamat Jalan</label>
+                <!-- Hidden inputs untuk sinkronisasi nama teks wilayah demi kompatibilitas cadangan -->
+                <input type="hidden" name="province" id="edit_province" value="{{ old('province') }}">
+                <input type="hidden" name="city" id="edit_city" value="{{ old('city') }}">
+                <input type="hidden" name="district" id="edit_district" value="{{ old('district') }}">
+                <input type="hidden" name="village" id="edit_village" value="{{ old('village') }}">
+
+                <div class="form-grid-2col">
+                    <div class="form-group">
+                        <label for="edit_provinsi_id" class="form-label">Provinsi</label>
+                        <x-searchable-select
+                            name="provinsi_id"
+                            id="edit_provinsi_id"
+                            placeholder="-- Pilih Provinsi --"
+                            search-placeholder="Cari provinsi..."
+                            :options="$provinsiList ?? []"
+                            :value="old('provinsi_id')"
+                        />
+                        @error('provinsi_id')
+                            <div class="form-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_kabupaten_id" class="form-label">Kabupaten / Kota</label>
+                        <x-searchable-select
+                            name="kabupaten_id"
+                            id="edit_kabupaten_id"
+                            placeholder="-- Pilih Kabupaten/Kota --"
+                            search-placeholder="Cari kabupaten/kota..."
+                            :disabled="!old('provinsi_id')"
+                            :value="old('kabupaten_id')"
+                        />
+                        @error('kabupaten_id')
+                            <div class="form-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_kecamatan_id" class="form-label">Kecamatan</label>
+                        <x-searchable-select
+                            name="kecamatan_id"
+                            id="edit_kecamatan_id"
+                            placeholder="-- Pilih Kecamatan --"
+                            search-placeholder="Cari kecamatan..."
+                            :disabled="!old('kabupaten_id')"
+                            :value="old('kecamatan_id')"
+                        />
+                        @error('kecamatan_id')
+                            <div class="form-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_kelurahan_id" class="form-label">Kelurahan / Desa</label>
+                        <x-searchable-select
+                            name="kelurahan_id"
+                            id="edit_kelurahan_id"
+                            placeholder="-- Pilih Kelurahan/Desa --"
+                            search-placeholder="Cari kelurahan/desa..."
+                            :disabled="!old('kecamatan_id')"
+                            :value="old('kelurahan_id')"
+                        />
+                        @error('kelurahan_id')
+                            <div class="form-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="form-grid-2col mt-4">
+                    <div class="form-group">
+                        <label for="edit_postal_code" class="form-label">Kode Pos</label>
+                        <input
+                            type="text"
+                            id="edit_postal_code"
+                            name="postal_code"
+                            class="form-input @error('postal_code') border-danger @enderror"
+                            value="{{ old('postal_code') }}"
+                            maxlength="10"
+                            placeholder="Kode Pos (otomatis terisi saat memilih kelurahan)"
+                        >
+                        @error('postal_code')
+                            <div class="form-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="form-group mt-4">
+                    <label for="edit_address" class="form-label">Alamat Jalan / Lengkap</label>
                     <textarea
                         id="edit_address"
                         name="address"
                         class="form-input form-textarea @error('address') border-danger @enderror"
-                        placeholder="Jalan, RT/RW, dan detail alamat lengkap"
+                        placeholder="Jalan, RT/RW, dan detail alamat lengkap sekolah"
                         rows="2"
                     >{{ old('address') }}</textarea>
                     @error('address')
                         <div class="form-error">{{ $message }}</div>
                     @enderror
-                </div>
-
-                <div class="form-grid-2col">
-                    <div class="form-group">
-                        <label for="edit_village" class="form-label">Kelurahan / Desa</label>
-                        <input type="text" id="edit_village" name="village" class="form-input" value="{{ old('village') }}" placeholder="Kelurahan/Desa">
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_district" class="form-label">Kecamatan</label>
-                        <input type="text" id="edit_district" name="district" class="form-input" value="{{ old('district') }}" placeholder="Kecamatan">
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_city" class="form-label">Kabupaten / Kota</label>
-                        <input type="text" id="edit_city" name="city" class="form-input" value="{{ old('city') }}" placeholder="Kabupaten/Kota">
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_province" class="form-label">Provinsi</label>
-                        <input type="text" id="edit_province" name="province" class="form-input" value="{{ old('province') }}" placeholder="Provinsi">
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_postal_code" class="form-label">Kode Pos</label>
-                        <input type="text" id="edit_postal_code" name="postal_code" class="form-input" value="{{ old('postal_code') }}" maxlength="10" placeholder="Kode Pos">
-                    </div>
                 </div>
 
                 <div class="form-section-divider"></div>

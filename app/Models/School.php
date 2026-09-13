@@ -7,6 +7,7 @@ use Database\Factories\SchoolFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class School extends Model
 {
@@ -36,6 +37,10 @@ class School extends Model
         'school_type',
         'status',
         'accreditation',
+        'provinsi_id',
+        'kabupaten_id',
+        'kecamatan_id',
+        'kelurahan_id',
         'address',
         'village',
         'district',
@@ -52,6 +57,38 @@ class School extends Model
         'logo_path',
         'is_active',
     ];
+
+    /**
+     * Relasi ke master provinsi.
+     */
+    public function provinsi(): BelongsTo
+    {
+        return $this->belongsTo(Provinsi::class, 'provinsi_id');
+    }
+
+    /**
+     * Relasi ke master kabupaten/kota.
+     */
+    public function kabupaten(): BelongsTo
+    {
+        return $this->belongsTo(Kabupaten::class, 'kabupaten_id');
+    }
+
+    /**
+     * Relasi ke master kecamatan.
+     */
+    public function kecamatan(): BelongsTo
+    {
+        return $this->belongsTo(Kecamatan::class, 'kecamatan_id');
+    }
+
+    /**
+     * Relasi ke master kelurahan/desa.
+     */
+    public function kelurahan(): BelongsTo
+    {
+        return $this->belongsTo(Kelurahan::class, 'kelurahan_id');
+    }
 
     /**
      * Get the attributes that should be cast.

@@ -22,7 +22,13 @@ return new class extends Migration
             $table->string('status', 10);
             $table->string('accreditation', 10)->nullable();
 
-            // Alamat Lengkap
+            // Relasi Wilayah Administratif
+            $table->foreignId('provinsi_id')->nullable()->constrained('provinsi')->nullOnDelete();
+            $table->foreignId('kabupaten_id')->nullable()->constrained('kabupaten')->nullOnDelete();
+            $table->foreignId('kecamatan_id')->nullable()->constrained('kecamatan')->nullOnDelete();
+            $table->foreignId('kelurahan_id')->nullable()->constrained('kelurahan')->nullOnDelete();
+
+            // Alamat Lengkap (Text columns dipertahankan untuk kompatibilitas cadangan ZIP)
             $table->text('address')->nullable();
             $table->string('village')->nullable();
             $table->string('district')->nullable();

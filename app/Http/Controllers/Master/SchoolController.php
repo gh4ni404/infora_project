@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Master;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Master\StoreSchoolRequest;
 use App\Http\Requests\Master\UpdateSchoolRequest;
+use App\Models\Provinsi;
 use App\Models\School;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,6 +21,7 @@ class SchoolController extends Controller
     public function index(Request $request): View
     {
         $query = School::query()
+            ->with(['provinsi', 'kabupaten', 'kecamatan', 'kelurahan'])
             ->orderBy('name')
             ->orderBy('id');
 
@@ -28,7 +30,8 @@ class SchoolController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('npsn', 'like', "%{$search}%")
-                    ->orWhere('city', 'like', "%{$search}%");
+                    ->orWhere('city', 'like', "%{$search}%")
+                    ->orWhereHas('kabupaten', fn ($k) => $k->where('nama', 'like', "%{$search}%"));
             });
         }
 
@@ -49,7 +52,13 @@ class SchoolController extends Controller
 
         $schools = $query->paginate($perPage)->withQueryString();
 
-        return view('master.data-sekolah.index', compact('schools', 'perPageInput'));
+        // Data referensi provinsi untuk inisialisasi dropdown wilayah
+        $provinsiList = Provinsi::query()
+            ->aktif()
+            ->orderBy('kode')
+            ->get(['id', 'kode', 'nama']);
+
+        return view('master.data-sekolah.index', compact('schools', 'perPageInput', 'provinsiList'));
     }
 
     /**

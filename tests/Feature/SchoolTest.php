@@ -1,5 +1,9 @@
 <?php
 
+use App\Models\Kabupaten;
+use App\Models\Kecamatan;
+use App\Models\Kelurahan;
+use App\Models\Provinsi;
 use App\Models\School;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
@@ -293,4 +297,66 @@ test('super admin can navigate to next page and see subsequent schools', functio
     $responsePage2 = $this->actingAs($this->superAdmin)->get(route('master.data-sekolah.index', ['page' => '2']));
     $responsePage2->assertOk();
     $responsePage2->assertSee('Sebelumnya');
+});
+
+test('super admin can store new school with wilayah foreign keys', function () {
+    $prov = Provinsi::factory()->create();
+    $kab = Kabupaten::factory()->create(['provinsi_id' => $prov->id]);
+    $kec = Kecamatan::factory()->create(['kabupaten_id' => $kab->id]);
+    $kel = Kelurahan::factory()->create(['kecamatan_id' => $kec->id]);
+
+    $response = $this->actingAs($this->superAdmin)->post(route('master.data-sekolah.store'), [
+        'name' => 'SMK Negeri 8 Bone',
+        'npsn' => '40319999',
+        'school_type' => 'SMK',
+        'status' => 'Negeri',
+        'provinsi_id' => $prov->id,
+        'kabupaten_id' => $kab->id,
+        'kecamatan_id' => $kec->id,
+        'kelurahan_id' => $kel->id,
+        'address' => 'Jl. Poros Bone-Sengkang',
+        'postal_code' => '92755',
+        'is_active' => '1',
+    ]);
+
+    $response->assertRedirect(route('master.data-sekolah.index'));
+    $response->assertSessionHas('success');
+
+    $this->assertDatabaseHas('schools', [
+        'npsn' => '40319999',
+        'provinsi_id' => $prov->id,
+        'kabupaten_id' => $kab->id,
+        'kecamatan_id' => $kec->id,
+        'kelurahan_id' => $kel->id,
+    ]);
+
+    $school = School::where('npsn', '40319999')->first();
+    expect($school->provinsi->id)->toBe($prov->id);
+    expect($school->kabupaten->id)->toBe($kab->id);
+    expect($school->kecamatan->id)->toBe($kec->id);
+    expect($school->kelurahan->id)->toBe($kel->id);
+});
+
+test('super admin can update school with new wilayah foreign keys', function () {
+    $prov1 = Provinsi::factory()->create();
+    $prov2 = Provinsi::factory()->create();
+    $kab2 = Kabupaten::factory()->create(['provinsi_id' => $prov2->id]);
+
+    $school = School::factory()->create([
+        'provinsi_id' => $prov1->id,
+    ]);
+
+    $response = $this->actingAs($this->superAdmin)->put(route('master.data-sekolah.update', $school), [
+        'name' => $school->name,
+        'npsn' => $school->npsn,
+        'school_type' => $school->school_type,
+        'status' => $school->status,
+        'provinsi_id' => $prov2->id,
+        'kabupaten_id' => $kab2->id,
+    ]);
+
+    $response->assertRedirect(route('master.data-sekolah.index'));
+    $school->refresh();
+    expect($school->provinsi_id)->toBe($prov2->id);
+    expect($school->kabupaten_id)->toBe($kab2->id);
 });

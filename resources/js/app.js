@@ -3,6 +3,7 @@
  */
 
 import './infora-progress';
+import './searchable-select';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Password visibility toggle

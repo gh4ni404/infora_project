@@ -150,7 +150,7 @@
                             @endswitch
                         </td>
                         <td>
-                            <span class="table-cell-muted">{{ $school->city ?? '-' }}</span>
+                            <span class="table-cell-muted">{{ $school->kabupaten?->nama ?? $school->city ?? '-' }}</span>
                         </td>
                         <td>
                             @if ($school->is_active)
@@ -363,6 +363,67 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('edit_foundation_name').value = school.foundation_name || '';
             document.getElementById('edit_is_active').checked = Boolean(school.is_active);
 
+            // Populasi nilai dropdown wilayah di modal edit
+            const editProvSelect = window.SearchableSelect ? window.SearchableSelect.getInstance('edit_provinsi_id') : null;
+            const editKabSelect = window.SearchableSelect ? window.SearchableSelect.getInstance('edit_kabupaten_id') : null;
+            const editKecSelect = window.SearchableSelect ? window.SearchableSelect.getInstance('edit_kecamatan_id') : null;
+            const editKelSelect = window.SearchableSelect ? window.SearchableSelect.getInstance('edit_kelurahan_id') : null;
+
+            if (editProvSelect) {
+                editProvSelect.setValue(
+                    school.provinsi_id || '',
+                    school.provinsi?.nama || school.province || '',
+                    school.provinsi?.kode || '',
+                    false
+                );
+            }
+
+            if (school.provinsi_id && editKabSelect) {
+                editKabSelect.setDisabled(false);
+                editKabSelect.setLoading(true);
+
+                fetch(`{{ route('wilayah.dropdown.kabupaten') }}?provinsi_id=${encodeURIComponent(school.provinsi_id)}`)
+                    .then(res => res.json())
+                    .then(kabData => {
+                        editKabSelect.setOptions(kabData, school.kabupaten_id);
+                        editKabSelect.setLoading(false);
+
+                        if (school.kabupaten_id && editKecSelect) {
+                            editKecSelect.setDisabled(false);
+                            editKecSelect.setLoading(true);
+                            return fetch(`{{ route('wilayah.dropdown.kecamatan') }}?kabupaten_id=${encodeURIComponent(school.kabupaten_id)}`);
+                        }
+                    })
+                    .then(res => res ? res.json() : null)
+                    .then(kecData => {
+                        if (!kecData || !editKecSelect) return;
+                        editKecSelect.setOptions(kecData, school.kecamatan_id);
+                        editKecSelect.setLoading(false);
+
+                        if (school.kecamatan_id && editKelSelect) {
+                            editKelSelect.setDisabled(false);
+                            editKelSelect.setLoading(true);
+                            return fetch(`{{ route('wilayah.dropdown.kelurahan') }}?kecamatan_id=${encodeURIComponent(school.kecamatan_id)}`);
+                        }
+                    })
+                    .then(res => res ? res.json() : null)
+                    .then(kelData => {
+                        if (!kelData || !editKelSelect) return;
+                        editKelSelect.setOptions(kelData, school.kelurahan_id);
+                        editKelSelect.setLoading(false);
+                    })
+                    .catch(err => {
+                        console.error('Gagal memuat rantai wilayah edit:', err);
+                        editKabSelect?.setLoading(false);
+                        editKecSelect?.setLoading(false);
+                        editKelSelect?.setLoading(false);
+                    });
+            } else {
+                if (editKabSelect) { editKabSelect.setOptions([], ''); editKabSelect.setDisabled(true); }
+                if (editKecSelect) { editKecSelect.setOptions([], ''); editKecSelect.setDisabled(true); }
+                if (editKelSelect) { editKelSelect.setOptions([], ''); editKelSelect.setDisabled(true); }
+            }
+
             // Reset logo states in edit modal
             document.getElementById('edit_logo_base64').value = '';
             document.getElementById('edit_remove_logo').value = '0';
@@ -406,8 +467,226 @@ document.addEventListener('DOMContentLoaded', function() {
         @else
             openCreateModal();
         @endif
+
+        // Pulihkan opsi bertingkat jika terjadi error validasi
+        @if (old('provinsi_id'))
+            (function() {
+                const targetPrefix = '{{ old('_method') === 'PUT' ? 'edit' : 'create' }}';
+                const oldProvId = '{{ old('provinsi_id') }}';
+                const oldKabId = '{{ old('kabupaten_id') }}';
+                const oldKecId = '{{ old('kecamatan_id') }}';
+                const oldKelId = '{{ old('kelurahan_id') }}';
+
+                const targetKab = window.SearchableSelect ? window.SearchableSelect.getInstance(targetPrefix + '_kabupaten_id') : null;
+                const targetKec = window.SearchableSelect ? window.SearchableSelect.getInstance(targetPrefix + '_kecamatan_id') : null;
+                const targetKel = window.SearchableSelect ? window.SearchableSelect.getInstance(targetPrefix + '_kelurahan_id') : null;
+
+                if (targetKab) {
+                    targetKab.setDisabled(false);
+                    targetKab.setLoading(true);
+                    fetch(`{{ route('wilayah.dropdown.kabupaten') }}?provinsi_id=${encodeURIComponent(oldProvId)}`)
+                        .then(res => res.json())
+                        .then(kabData => {
+                            targetKab.setOptions(kabData, oldKabId);
+                            targetKab.setLoading(false);
+
+                            if (oldKabId && targetKec) {
+                                targetKec.setDisabled(false);
+                                targetKec.setLoading(true);
+                                return fetch(`{{ route('wilayah.dropdown.kecamatan') }}?kabupaten_id=${encodeURIComponent(oldKabId)}`);
+                            }
+                        })
+                        .then(res => res ? res.json() : null)
+                        .then(kecData => {
+                            if (!kecData || !targetKec) return;
+                            targetKec.setOptions(kecData, oldKecId);
+                            targetKec.setLoading(false);
+
+                            if (oldKecId && targetKel) {
+                                targetKel.setDisabled(false);
+                                targetKel.setLoading(true);
+                                return fetch(`{{ route('wilayah.dropdown.kelurahan') }}?kecamatan_id=${encodeURIComponent(oldKecId)}`);
+                            }
+                        })
+                        .then(res => res ? res.json() : null)
+                        .then(kelData => {
+                            if (!kelData || !targetKel) return;
+                            targetKel.setOptions(kelData, oldKelId);
+                            targetKel.setLoading(false);
+                        })
+                        .catch(err => console.error('Gagal memulihkan opsi old wilayah:', err));
+                }
+            })();
+        @endif
     @endif
 });
+
+    // Delegasi Event Global untuk Cascading Wilayah (Modal Tambah & Modal Edit)
+    document.addEventListener('searchable-select:change', function(e) {
+        const inputId = e.target?.id || e.detail?.inputId || '';
+        if (!inputId) return;
+
+        let prefix = null;
+        if (inputId.startsWith('create_')) prefix = 'create';
+        else if (inputId.startsWith('edit_')) prefix = 'edit';
+        if (!prefix) return;
+
+        const val = e.detail?.value;
+        const text = e.detail?.text;
+        const item = e.detail?.item;
+
+        if (inputId === prefix + '_provinsi_id') {
+            const provInput = document.getElementById(prefix + '_province');
+            const kabInput = document.getElementById(prefix + '_city');
+            const kecInput = document.getElementById(prefix + '_district');
+            const kelInput = document.getElementById(prefix + '_village');
+
+            if (provInput) provInput.value = text || '';
+            if (kabInput) kabInput.value = '';
+            if (kecInput) kecInput.value = '';
+            if (kelInput) kelInput.value = '';
+
+            const kabSelect = window.SearchableSelect?.getInstance(prefix + '_kabupaten_id');
+            const kecSelect = window.SearchableSelect?.getInstance(prefix + '_kecamatan_id');
+            const kelSelect = window.SearchableSelect?.getInstance(prefix + '_kelurahan_id');
+
+            if (kabSelect) {
+                kabSelect.setOptions([]);
+                kabSelect.clear(false);
+            }
+            if (kecSelect) {
+                kecSelect.setOptions([]);
+                kecSelect.clear(false);
+                kecSelect.setDisabled(true);
+            }
+            if (kelSelect) {
+                kelSelect.setOptions([]);
+                kelSelect.clear(false);
+                kelSelect.setDisabled(true);
+            }
+
+            if (!val) {
+                if (kabSelect) kabSelect.setDisabled(true);
+                return;
+            }
+
+            if (kabSelect) {
+                kabSelect.setDisabled(false);
+                kabSelect.setLoading(true);
+            }
+
+            fetch(`{{ route('wilayah.dropdown.kabupaten') }}?provinsi_id=${encodeURIComponent(val)}`)
+                .then(res => res.json())
+                .then(data => {
+                    const kab = window.SearchableSelect?.getInstance(prefix + '_kabupaten_id');
+                    if (kab) {
+                        kab.setOptions(data);
+                        kab.setLoading(false);
+                        kab.setDisabled(false);
+                    }
+                })
+                .catch(err => {
+                    console.error('Gagal mengambil data kabupaten:', err);
+                    const kab = window.SearchableSelect?.getInstance(prefix + '_kabupaten_id');
+                    if (kab) kab.setLoading(false);
+                });
+        } else if (inputId === prefix + '_kabupaten_id') {
+            const kabInput = document.getElementById(prefix + '_city');
+            const kecInput = document.getElementById(prefix + '_district');
+            const kelInput = document.getElementById(prefix + '_village');
+
+            if (kabInput) kabInput.value = text || '';
+            if (kecInput) kecInput.value = '';
+            if (kelInput) kelInput.value = '';
+
+            const kecSelect = window.SearchableSelect?.getInstance(prefix + '_kecamatan_id');
+            const kelSelect = window.SearchableSelect?.getInstance(prefix + '_kelurahan_id');
+
+            if (kecSelect) {
+                kecSelect.setOptions([]);
+                kecSelect.clear(false);
+            }
+            if (kelSelect) {
+                kelSelect.setOptions([]);
+                kelSelect.clear(false);
+                kelSelect.setDisabled(true);
+            }
+
+            if (!val) {
+                if (kecSelect) kecSelect.setDisabled(true);
+                return;
+            }
+
+            if (kecSelect) {
+                kecSelect.setDisabled(false);
+                kecSelect.setLoading(true);
+            }
+
+            fetch(`{{ route('wilayah.dropdown.kecamatan') }}?kabupaten_id=${encodeURIComponent(val)}`)
+                .then(res => res.json())
+                .then(data => {
+                    const kec = window.SearchableSelect?.getInstance(prefix + '_kecamatan_id');
+                    if (kec) {
+                        kec.setOptions(data);
+                        kec.setLoading(false);
+                        kec.setDisabled(false);
+                    }
+                })
+                .catch(err => {
+                    console.error('Gagal mengambil data kecamatan:', err);
+                    const kec = window.SearchableSelect?.getInstance(prefix + '_kecamatan_id');
+                    if (kec) kec.setLoading(false);
+                });
+        } else if (inputId === prefix + '_kecamatan_id') {
+            const kecInput = document.getElementById(prefix + '_district');
+            const kelInput = document.getElementById(prefix + '_village');
+
+            if (kecInput) kecInput.value = text || '';
+            if (kelInput) kelInput.value = '';
+
+            const kelSelect = window.SearchableSelect?.getInstance(prefix + '_kelurahan_id');
+
+            if (kelSelect) {
+                kelSelect.setOptions([]);
+                kelSelect.clear(false);
+            }
+
+            if (!val) {
+                if (kelSelect) kelSelect.setDisabled(true);
+                return;
+            }
+
+            if (kelSelect) {
+                kelSelect.setDisabled(false);
+                kelSelect.setLoading(true);
+            }
+
+            fetch(`{{ route('wilayah.dropdown.kelurahan') }}?kecamatan_id=${encodeURIComponent(val)}`)
+                .then(res => res.json())
+                .then(data => {
+                    const kel = window.SearchableSelect?.getInstance(prefix + '_kelurahan_id');
+                    if (kel) {
+                        kel.setOptions(data);
+                        kel.setLoading(false);
+                        kel.setDisabled(false);
+                    }
+                })
+                .catch(err => {
+                    console.error('Gagal mengambil data kelurahan:', err);
+                    const kel = window.SearchableSelect?.getInstance(prefix + '_kelurahan_id');
+                    if (kel) kel.setLoading(false);
+                });
+        } else if (inputId === prefix + '_kelurahan_id') {
+            const kelInput = document.getElementById(prefix + '_village');
+            const postalInput = document.getElementById(prefix + '_postal_code');
+
+            if (kelInput) kelInput.value = text || '';
+
+            if (val && item && item.kode_pos) {
+                if (postalInput) postalInput.value = item.kode_pos;
+            }
+        }
+    });
 
 function setupLogoUpload(fileInputId, base64InputId, placeholderId, previewId, previewImgId, removeBtnId, uploadAreaId, removeLogoInputId) {
     const fileInput = document.getElementById(fileInputId);

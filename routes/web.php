@@ -13,6 +13,7 @@ use App\Http\Controllers\Wilayah\KabupatenController;
 use App\Http\Controllers\Wilayah\KecamatanController;
 use App\Http\Controllers\Wilayah\KelurahanController;
 use App\Http\Controllers\Wilayah\ProvinsiController;
+use App\Http\Controllers\Wilayah\WilayahDropdownController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -72,6 +73,14 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
             'index' => 'kelurahan',
         ])->except(['show', 'create']);
         Route::get('/kelurahan/semua', [KelurahanController::class, 'index'])->name('kelurahan.index');
+
+        // Endpoint Data Dropdown Wilayah (JSON)
+        Route::prefix('dropdown')->name('dropdown.')->group(function () {
+            Route::get('provinsi', [WilayahDropdownController::class, 'provinsi'])->name('provinsi');
+            Route::get('kabupaten', [WilayahDropdownController::class, 'kabupaten'])->name('kabupaten');
+            Route::get('kecamatan', [WilayahDropdownController::class, 'kecamatan'])->name('kecamatan');
+            Route::get('kelurahan', [WilayahDropdownController::class, 'kelurahan'])->name('kelurahan');
+        });
     });
 
     // Cadangan & Pemulihan Basis Data (Backup & Restore)
