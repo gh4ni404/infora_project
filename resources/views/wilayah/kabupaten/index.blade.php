@@ -329,8 +329,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!createModal) return;
         createModal.classList.remove('hidden');
         document.body.classList.add('modal-open');
-        const firstSelect = createModal.querySelector('select[name="provinsi_id"]');
-        if (firstSelect) setTimeout(() => firstSelect.focus(), 50);
+        const trigger = document.getElementById('trigger_create_provinsi_id');
+        if (trigger) setTimeout(() => trigger.focus(), 50);
     }
 
     function closeCreateModal() {
@@ -339,7 +339,9 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.classList.remove('modal-open');
     }
 
-    btnOpenCreate && btnOpenCreate.addEventListener('click', openCreateModal);
+    btnOpenCreate && btnOpenCreate.addEventListener('click', function() {
+        openCreateModal();
+    });
     btnCloseCreate && btnCloseCreate.addEventListener('click', closeCreateModal);
     btnCancelCreate && btnCancelCreate.addEventListener('click', closeCreateModal);
 
@@ -351,15 +353,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Auto-prefixing kode wilayah pada Create Modal
     if (createProvSelect && createKodeInput) {
-        createProvSelect.addEventListener('change', function() {
-            const selectedOpt = this.options[this.selectedIndex];
-            const provKode = selectedOpt ? selectedOpt.dataset.kode : '';
+        createProvSelect.addEventListener('searchable-select:change', function(e) {
+            const provKode = e.detail?.extra || '';
             if (provKode) {
                 const currentVal = createKodeInput.value.trim();
                 if (!currentVal || currentVal.length <= 2) {
                     createKodeInput.value = provKode;
                 } else if (!currentVal.startsWith(provKode)) {
                     createKodeInput.value = provKode + currentVal.slice(2, 4);
+                }
+            } else if (!e.detail?.value) {
+                if (createKodeInput.value.length <= 2) {
+                    createKodeInput.value = '';
                 }
             }
         });
@@ -377,8 +382,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!editModal) return;
         editModal.classList.remove('hidden');
         document.body.classList.add('modal-open');
-        const firstSelect = editModal.querySelector('select[name="provinsi_id"]');
-        if (firstSelect) setTimeout(() => firstSelect.focus(), 50);
+        const trigger = document.getElementById('trigger_edit_provinsi_id');
+        if (trigger) setTimeout(() => trigger.focus(), 50);
     }
 
     function closeEditModal() {
@@ -398,9 +403,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Auto-prefixing kode wilayah pada Edit Modal
     if (editProvSelect && editKodeInput) {
-        editProvSelect.addEventListener('change', function() {
-            const selectedOpt = this.options[this.selectedIndex];
-            const provKode = selectedOpt ? selectedOpt.dataset.kode : '';
+        editProvSelect.addEventListener('searchable-select:change', function(e) {
+            const provKode = e.detail?.extra || '';
             if (provKode) {
                 const currentVal = editKodeInput.value.trim();
                 if (!currentVal || currentVal.length <= 2) {
@@ -451,7 +455,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const action = this.dataset.action;
 
             formEdit.action = action;
-            document.getElementById('edit_provinsi_id').value = data.provinsi_id || '';
+            const editProvInst = window.SearchableSelect ? window.SearchableSelect.getInstance('edit_provinsi_id') : null;
+            if (editProvInst) {
+                editProvInst.setValue(data.provinsi_id || '', '', '', false);
+            } else {
+                document.getElementById('edit_provinsi_id').value = data.provinsi_id || '';
+            }
             document.getElementById('edit_tipe').value = data.tipe || 'Kabupaten';
             document.getElementById('edit_kode').value = data.kode || '';
             document.getElementById('edit_nama').value = data.nama || '';

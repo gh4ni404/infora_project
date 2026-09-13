@@ -19,23 +19,15 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label for="edit_provinsi_id" class="form-label">Provinsi Induk <span class="text-danger">*</span></label>
-                    <select
-                        id="edit_provinsi_id"
+                    <x-searchable-select
                         name="provinsi_id"
-                        class="form-input @error('provinsi_id') border-danger @enderror"
+                        id="edit_provinsi_id"
+                        placeholder="-- Pilih Provinsi Induk --"
+                        search-placeholder="Cari provinsi..."
+                        :options="$provinsiList"
+                        :value="old('provinsi_id')"
                         required
-                    >
-                        <option value="">-- Pilih Provinsi Induk --</option>
-                        @foreach ($provinsiList as $prov)
-                            <option
-                                value="{{ $prov->id }}"
-                                data-kode="{{ $prov->kode }}"
-                                {{ old('provinsi_id') == $prov->id ? 'selected' : '' }}
-                            >
-                                {{ $prov->kode }} - {{ $prov->nama }}
-                            </option>
-                        @endforeach
-                    </select>
+                    />
                     @error('provinsi_id')
                         <div class="form-error">{{ $message }}</div>
                     @enderror

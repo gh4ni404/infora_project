@@ -19,23 +19,15 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label for="edit_provinsi_id" class="form-label">Provinsi Induk <span class="text-danger">*</span></label>
-                    <select
-                        id="edit_provinsi_id"
+                    <x-searchable-select
                         name="provinsi_id"
-                        class="form-input @error('provinsi_id') border-danger @enderror"
+                        id="edit_provinsi_id"
+                        placeholder="-- Pilih Provinsi Induk --"
+                        search-placeholder="Cari provinsi..."
+                        :options="$provinsiList"
+                        :value="old('provinsi_id')"
                         required
-                    >
-                        <option value="">-- Pilih Provinsi Induk --</option>
-                        @foreach ($provinsiList as $prov)
-                            <option
-                                value="{{ $prov->id }}"
-                                data-kode="{{ $prov->kode }}"
-                                {{ old('provinsi_id') == $prov->id ? 'selected' : '' }}
-                            >
-                                {{ $prov->kode }} - {{ $prov->nama }}
-                            </option>
-                        @endforeach
-                    </select>
+                    />
                     @error('provinsi_id')
                         <div class="form-error">{{ $message }}</div>
                     @enderror
@@ -44,24 +36,14 @@
 
                 <div class="form-group">
                     <label for="edit_kabupaten_id" class="form-label">Kabupaten / Kota Induk <span class="text-danger">*</span></label>
-                    <select
-                        id="edit_kabupaten_id"
+                    <x-searchable-select
                         name="kabupaten_id"
-                        class="form-input @error('kabupaten_id') border-danger @enderror"
+                        id="edit_kabupaten_id"
+                        placeholder="-- Pilih Kabupaten / Kota --"
+                        search-placeholder="Cari kabupaten/kota..."
+                        :value="old('kabupaten_id')"
                         required
-                    >
-                        <option value="">-- Pilih Kabupaten / Kota --</option>
-                        @foreach ($kabupatenList as $kab)
-                            <option
-                                value="{{ $kab->id }}"
-                                data-provinsi="{{ $kab->provinsi_id }}"
-                                data-kode="{{ $kab->kode }}"
-                                {{ old('kabupaten_id') == $kab->id ? 'selected' : '' }}
-                            >
-                                {{ $kab->kode }} - {{ $kab->tipe }} {{ $kab->nama }}
-                            </option>
-                        @endforeach
-                    </select>
+                    />
                     @error('kabupaten_id')
                         <div class="form-error">{{ $message }}</div>
                     @enderror
@@ -70,24 +52,14 @@
 
                 <div class="form-group">
                     <label for="edit_kecamatan_id" class="form-label">Kecamatan Induk <span class="text-danger">*</span></label>
-                    <select
-                        id="edit_kecamatan_id"
+                    <x-searchable-select
                         name="kecamatan_id"
-                        class="form-input @error('kecamatan_id') border-danger @enderror"
+                        id="edit_kecamatan_id"
+                        placeholder="-- Pilih Kecamatan Induk --"
+                        search-placeholder="Cari kecamatan..."
+                        :value="old('kecamatan_id')"
                         required
-                    >
-                        <option value="">-- Pilih Kecamatan Induk --</option>
-                        @foreach ($kecamatanList as $kec)
-                            <option
-                                value="{{ $kec->id }}"
-                                data-kabupaten="{{ $kec->kabupaten_id }}"
-                                data-kode="{{ $kec->kode }}"
-                                {{ old('kecamatan_id') == $kec->id ? 'selected' : '' }}
-                            >
-                                {{ $kec->kode }} - {{ $kec->nama }}
-                            </option>
-                        @endforeach
-                    </select>
+                    />
                     @error('kecamatan_id')
                         <div class="form-error">{{ $message }}</div>
                     @enderror

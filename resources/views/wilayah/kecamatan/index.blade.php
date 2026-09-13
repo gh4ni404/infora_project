@@ -382,6 +382,30 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Helper pemuatan data kabupaten via AJAX untuk SearchableSelect
+    function loadKabupatenOptions(kabInstance, provId, selectedKabId = null) {
+        if (!kabInstance) return Promise.resolve();
+        if (!provId) {
+            kabInstance.setOptions([], '');
+            kabInstance.setDisabled(true);
+            return Promise.resolve();
+        }
+
+        kabInstance.setDisabled(false);
+        kabInstance.setLoading(true);
+
+        return fetch(`{{ route('wilayah.dropdown.kabupaten') }}?provinsi_id=${encodeURIComponent(provId)}`)
+            .then(res => res.json())
+            .then(data => {
+                kabInstance.setOptions(data, selectedKabId);
+                kabInstance.setLoading(false);
+            })
+            .catch(err => {
+                console.error('Gagal memuat daftar kabupaten:', err);
+                kabInstance.setLoading(false);
+            });
+    }
+
     // 2. Create Modal Elements & Handlers
     const createModal = document.getElementById('modalCreateKecamatan');
     const btnOpenCreate = document.getElementById('btnOpenCreateKecamatan');
@@ -395,10 +419,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!createModal) return;
         createModal.classList.remove('hidden');
         document.body.classList.add('modal-open');
-        if (createProvSelect) {
-            filterKabupatenOptions(createProvSelect, createKabSelect, '{{ old('kabupaten_id') }}');
-            setTimeout(() => createProvSelect.focus(), 50);
-        }
+        const trigger = document.getElementById('trigger_create_provinsi_id');
+        if (trigger) setTimeout(() => trigger.focus(), 50);
     }
 
     function closeCreateModal() {
@@ -407,7 +429,9 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.classList.remove('modal-open');
     }
 
-    btnOpenCreate && btnOpenCreate.addEventListener('click', openCreateModal);
+    btnOpenCreate && btnOpenCreate.addEventListener('click', function() {
+        openCreateModal();
+    });
     btnCloseCreate && btnCloseCreate.addEventListener('click', closeCreateModal);
     btnCancelCreate && btnCancelCreate.addEventListener('click', closeCreateModal);
 
@@ -415,25 +439,38 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target === createModal) closeCreateModal();
     });
 
-    if (createProvSelect && createKabSelect) {
-        createProvSelect.addEventListener('change', function() {
-            filterKabupatenOptions(createProvSelect, createKabSelect);
-            if (createKodeInput && this.value === '') {
-                createKodeInput.value = '';
+    if (createProvSelect) {
+        createProvSelect.addEventListener('searchable-select:change', function(e) {
+            const provId = e.detail?.value || '';
+            const createKabInst = window.SearchableSelect ? window.SearchableSelect.getInstance('create_kabupaten_id') : null;
+
+            if (provId) {
+                loadKabupatenOptions(createKabInst, provId, null);
+            } else {
+                if (createKabInst) {
+                    createKabInst.clear(true);
+                    createKabInst.setDisabled(true);
+                }
+                if (createKodeInput && createKodeInput.value.length <= 4) {
+                    createKodeInput.value = '';
+                }
             }
         });
     }
 
-    if (createKabSelect && createKodeInput) {
-        createKabSelect.addEventListener('change', function() {
-            const selectedOpt = this.options[this.selectedIndex];
-            const kabKode = selectedOpt ? selectedOpt.dataset.kode : '';
-            if (kabKode) {
+    if (createKabSelect) {
+        createKabSelect.addEventListener('searchable-select:change', function(e) {
+            const kabKode = e.detail?.extra || e.detail?.item?.kode || '';
+            if (kabKode && createKodeInput) {
                 const currentVal = createKodeInput.value.trim();
                 if (!currentVal || currentVal.length <= 4) {
                     createKodeInput.value = kabKode;
                 } else if (!currentVal.startsWith(kabKode)) {
                     createKodeInput.value = kabKode + currentVal.slice(4, 6);
+                }
+            } else if (!e.detail?.value && createKodeInput) {
+                if (createKodeInput.value.length <= 4) {
+                    createKodeInput.value = '';
                 }
             }
         });
@@ -452,7 +489,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!editModal) return;
         editModal.classList.remove('hidden');
         document.body.classList.add('modal-open');
-        if (editProvSelect) setTimeout(() => editProvSelect.focus(), 50);
+        const trigger = document.getElementById('trigger_edit_provinsi_id');
+        if (trigger) setTimeout(() => trigger.focus(), 50);
     }
 
     function closeEditModal() {
@@ -468,17 +506,29 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target === editModal) closeEditModal();
     });
 
-    if (editProvSelect && editKabSelect) {
-        editProvSelect.addEventListener('change', function() {
-            filterKabupatenOptions(editProvSelect, editKabSelect);
+    if (editProvSelect) {
+        editProvSelect.addEventListener('searchable-select:change', function(e) {
+            const provId = e.detail?.value || '';
+            const editKabInst = window.SearchableSelect ? window.SearchableSelect.getInstance('edit_kabupaten_id') : null;
+
+            if (provId) {
+                loadKabupatenOptions(editKabInst, provId, null);
+            } else {
+                if (editKabInst) {
+                    editKabInst.clear(true);
+                    editKabInst.setDisabled(true);
+                }
+                if (editKodeInput && editKodeInput.value.length <= 4) {
+                    editKodeInput.value = '';
+                }
+            }
         });
     }
 
-    if (editKabSelect && editKodeInput) {
-        editKabSelect.addEventListener('change', function() {
-            const selectedOpt = this.options[this.selectedIndex];
-            const kabKode = selectedOpt ? selectedOpt.dataset.kode : '';
-            if (kabKode) {
+    if (editKabSelect) {
+        editKabSelect.addEventListener('searchable-select:change', function(e) {
+            const kabKode = e.detail?.extra || e.detail?.item?.kode || '';
+            if (kabKode && editKodeInput) {
                 const currentVal = editKodeInput.value.trim();
                 if (!currentVal || currentVal.length <= 4) {
                     editKodeInput.value = kabKode;
@@ -526,13 +576,21 @@ document.addEventListener('DOMContentLoaded', function() {
             const action = this.dataset.action;
 
             formEdit.action = action;
-            if (editProvSelect) {
-                editProvSelect.value = data.provinsi_id || '';
-                filterKabupatenOptions(editProvSelect, editKabSelect, data.kabupaten_id);
+
+            const editProvInst = window.SearchableSelect ? window.SearchableSelect.getInstance('edit_provinsi_id') : null;
+            const editKabInst = window.SearchableSelect ? window.SearchableSelect.getInstance('edit_kabupaten_id') : null;
+
+            if (editProvInst) {
+                editProvInst.setValue(data.provinsi_id || '', '', '', false);
             }
-            if (editKabSelect) {
-                editKabSelect.value = data.kabupaten_id || '';
+
+            if (data.provinsi_id && editKabInst) {
+                loadKabupatenOptions(editKabInst, data.provinsi_id, data.kabupaten_id);
+            } else if (editKabInst) {
+                editKabInst.setOptions([], '');
+                editKabInst.setDisabled(true);
             }
+
             if (editKodeInput) editKodeInput.value = data.kode || '';
             document.getElementById('edit_nama').value = data.nama || '';
             document.getElementById('edit_status').checked = Boolean(data.status);
@@ -571,8 +629,20 @@ document.addEventListener('DOMContentLoaded', function() {
     @if ($errors->any())
         @if (old('_method') === 'PUT')
             openEditModal();
+            @if (old('provinsi_id'))
+                (function() {
+                    const editKabInst = window.SearchableSelect ? window.SearchableSelect.getInstance('edit_kabupaten_id') : null;
+                    loadKabupatenOptions(editKabInst, '{{ old('provinsi_id') }}', '{{ old('kabupaten_id') }}');
+                })();
+            @endif
         @else
             openCreateModal();
+            @if (old('provinsi_id'))
+                (function() {
+                    const createKabInst = window.SearchableSelect ? window.SearchableSelect.getInstance('create_kabupaten_id') : null;
+                    loadKabupatenOptions(createKabInst, '{{ old('provinsi_id') }}', '{{ old('kabupaten_id') }}');
+                })();
+            @endif
         @endif
     @endif
 });
