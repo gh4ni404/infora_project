@@ -24,6 +24,17 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 15. [Master Data Sekolah](#-15-master-data-sekolah-multi-record-registry--kesiapan-bridging)
 16. [Master Wilayah Administratif Kemendagri](#-16-master-wilayah-administratif-kemendagri-hierarki-4-tingkat)
 17. [Tata Letak 3-Tier Docked Footer & Komponen Paginasi Responsif](#-17-tata-letak-3-tier-docked-footer--komponen-paginasi-responsif-global)
+18. [Modul Kalender Akademik Sekolah](#-18-modul-kalender-akademik-sekolah-dual-view-interaktif)
+19. [Modul Konfigurasi Tahun Ajaran & Semester](#-19-modul-konfigurasi-tahun-ajaran--semester-master-detail-split-layout)
+20. [Master Data Jurusan / Konsentrasi Keahlian & Peminatan](#-20-master-data-jurusan--konsentrasi-keahlian--peminatan)
+21. [Searchable Select Universal & Cascading Wilayah Data Sekolah](#-21-searchable-select-universal--cascading-wilayah-data-sekolah)
+22. [Penyempurnaan Manajemen Cadangan](#-22-penyempurnaan-manajemen-cadangan-batch-purge--safe-download)
+23. [Pedoman Arsitektur Baru & Aturan Anti-Overengineering](#-23-pedoman-arsitektur-baru--aturan-anti-overengineering-lean-architecture-guidelines)
+
+---
+
+> 🛑 **STATUS PROYEK: DIARSIPKAN SEBAGAI REFERENSI TEKNIS (ARCHIVED REFERENCE BLUEPRINT)**  
+> Repositori ini resmi ditutup untuk pengembangan aktif dan dialihkan fungsinya sebagai **Arsip & Basis Referensi** untuk pembangunan **INFORA Generasi Baru (Next-Gen INFORA)**. Rincian fitur 1 sampai 22 di bawah ini mendokumentasikan spesifikasi domain bisnis sekolah, sedangkan poin 23 merangkum pelajaran arsitektural (*post-mortem*) dan aturan teknis baru untuk menjaga kode tetap ramping (*Lean MVC*), hemat memori, dan efisien untuk context AI.
 
 ---
 
@@ -199,6 +210,87 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 - **Toolbar Tabel Responsif & Sticky Header Scroll:**
   - Penataan toolbar tabel (`.table-toolbar-responsive`) yang fleksibel membungkus search box, filter dropdown, dan tombol tambah data di berbagai ukuran layar.
   - Wadah tabel data dengan modifier `.table-responsive-scroll` dengan batas ketinggian maksimal 440px dan sticky header `th`, menjaga label kolom tetap terlihat saat pengguna menelusuri data tabel panjang.
+
+---
+
+### 📆 18. Modul Kalender Akademik Sekolah (Dual View Interaktif)
+- **Manajemen Agenda Akademik Terpadu:** Pengelolaan seluruh agenda kegiatan sekolah, jadwal ujian/asesmen (PTS, PAS, PAT, ANBK, UKK), rentang semester, hari libur nasional, dan cuti bersama.
+- **Tampilan Ganda Interaktif (Dual View Switcher):**
+  - **Tampilan Kalender Bulanan:** Grid kalender visual dengan navigasi bulan/tahun, jump selector cepat, penanda halus hari ini (`is-today`), penanda akhir pekan merah lembut (`is-weekend`), serta popover rincian agenda per tanggal dengan status libur KBM.
+  - **Tampilan Tabel Agenda:** Tabel data terstruktur dengan pencarian teks, filter kategori kegiatan, filter semester, filter tahun ajaran, dan paginasi adaptif.
+- **Preset Kategori Semantik & Kode Warna Universal:** Mendukung kategori standar pendidikan (*KBM Efektif*, *Ujian/Asesmen*, *Libur Nasional*, *Libur Semester*, *Kegiatan Sekolah*, dan *Khusus SMK*) yang dipetakan ke warna semantik Infora (`blue`, `indigo`, `rose`, `amber`, `emerald`, `purple`).
+- **Endpoint API Events Murni JSON:** Rute `/kalender-akademik/events` siap konsumsi untuk visualisasi kalender dinamis di sisi klien ataupun aplikasi mobile.
+- **Akses Rute Resmi:** `/konfigurasi-sekolah/kalender-akademik` (`konfigurasi-sekolah.kalender-akademik.*`).
+
+---
+
+### 📅 19. Modul Konfigurasi Tahun Ajaran & Semester (Master-Detail Split Layout)
+- **Tata Letak Master-Detail Universal (Split 1:1):** Menggunakan pembagian kolom seimbang (`.grid-split-1-1`) di mana tabel master Tahun Ajaran berada di kolom kiri, dan tabel detail Semester di kolom kanan secara reaktif menyelaraskan item terpilih tanpa memicu kebingungan visual.
+- **Banner Status Semester Aktif Global:** Menampilkan informasi semester yang sedang aktif operasional di sekolah terpilih beserta rentang tanggal KBM efektif.
+- **Helper Aktivasi Atomik Transaksional:** Menggunakan transaksi basis data (`DB::transaction`) untuk memastikan hanya ada 1 semester yang berstatus aktif per unit sekolah. Mengaktifkan satu semester otomatis menonaktifkan semester lain secara konsisten dan aman.
+- **Akses Rute Resmi:** `/konfigurasi-sekolah/tahun-ajaran` (`konfigurasi-sekolah.tahun-ajaran.*`).
+
+---
+
+### 🎓 20. Master Data Jurusan / Konsentrasi Keahlian & Peminatan
+- **Registri Kejuruan Terpadu SMA & SMK:** Mendukung pendataan Konsentrasi Keahlian (SMK) dan Peminatan/Fase (SMA) per unit sekolah.
+- **Kartu Metrik Statistik Ringkasan (KPI):** Panel ringkasan atas tabel yang menampilkan metrik Total Jurusan, Jurusan Aktif, Jurusan Non-Aktif, dan Keragaman Bidang Keahlian.
+- **Fitur Quick Toggle Status:** Mengubah status keaktifan jurusan secara instan langsung dari tabel data tanpa harus membuka modal formulir pengubahan data.
+- **Akses Rute Resmi:** `/master/data-jurusan` (`master.data-jurusan.*`).
+
+---
+
+### 🔍 21. Searchable Select Universal & Cascading Wilayah Data Sekolah
+- **Komponen `<x-searchable-select>` Universal:** Komponen pemilih dropdown berbasis Blade dan JavaScript ringan yang mendukung pencarian teks langsung, navigasi keyboard (Up/Down/Enter/Escape), penyesuaian posisi otomatis, dan integrasi form submit asli tanpa memerlukan pustaka pihak ketiga berukuran besar (seperti Select2 atau Choices.js).
+- **Integrasi Cascading Wilayah pada Form Sekolah:** Modal Tambah dan Ubah data sekolah terintegrasi dinamis dengan API wilayah Kemendagri 4 tingkat (Provinsi ➔ Kabupaten/Kota ➔ Kecamatan ➔ Kelurahan/Desa) via AJAX endpoint, lengkap dengan pengisian otomatis kode pos.
+
+---
+
+### 💾 22. Penyempurnaan Manajemen Cadangan (Batch Purge & Safe Download)
+- **Aksi Pembersihan Masal (Batch Purge All):** Fitur pembersihan seluruh berkas cadangan snapshot lama dalam satu tindakan aman, dilindungi oleh dialog konfirmasi bahaya interaktif guna menghemat kapasitas penyimpanan server secara efisien.
+- **Streaming Pengunduhan Berkas Aman:** Mekanisme pengunduhan arsip `.zip` dan skrip `.sql` dengan sanitasi ketat nama berkas (`basename()`) untuk mencegah celah keamanan *path traversal*.
+
+---
+
+### ⚖️ 23. Pedoman Arsitektur Baru & Aturan Anti-Overengineering (Lean Architecture Guidelines)
+> ⚠️ **ATURAN WAJIB BAGI DEVELOPER & AI AGENT UNTUK PENGEMBANGAN INFORA GENERASI BARU**  
+> Pelajaran berharga dari proyek ini: overengineering, fragmentasi file berlebihan (*pseudo-Separation of Concerns*), dan analisis berlarut-larut untuk fitur sederhana menyebabkan pemborosan token context, kelelahan kognitif, dan inefisiensi runtime. Aturan-aturan berikut mengikat seluruh siklus pengembangan selanjutnya:
+
+#### 1. Prinsip Lean MVC (Maksimal 3–4 Berkas per Modul CRUD)
+Dalam arsitektur MVC sehat, satu entitas CRUD sederhana **TIDAK BOLEH** menghasilkan belasan file. Batasan berkas per CRUD:
+1. `Migration` (1 berkas)
+2. `Model` (1 berkas)
+3. `Controller` (1 berkas)
+4. `FormRequest` tunggal atau validasi inline `$request->validate()` (0–1 berkas)
+5. `View` Blade: Cukup `index.blade.php` (dengan modal terintegrasi) ATAU maksimal 2 berkas jika form menggunakan halaman terpisah (1–2 berkas)
+6. `Feature Test` (1 berkas)  
+👉 **Total berkas maksimal 4–5 berkas per modul CRUD.** Dilarang keras memecah 1 fitur menjadi 10–14 file!
+
+#### 2. Aturan Form Request: Larangan Duplikasi Store & Update
+- **Dilarang Keras** membuat dua berkas terpisah `StoreXRequest.php` dan `UpdateXRequest.php` jika 90%+ aturan validasinya identik!
+- Gunakan **satu berkas FormRequest tunggal** (misal: `JurusanRequest.php`). Jika terdapat perbedaan rule unik (seperti `Rule::unique()->ignore(...)`), lakukan pengecekan ID route di dalam method `rules()`:
+  ```php
+  $id = $this->route('jurusan')?->id;
+  return [
+      'kode' => ['required', 'string', 'max:20', Rule::unique('jurusan', 'kode')->ignore($id)],
+      // ...
+  ];
+  ```
+- Untuk form yang hanya memiliki 2–4 field sederhana, utamakan inline validation `$request->validate([...])` langsung di controller tanpa membuat berkas FormRequest baru.
+
+#### 3. Aturan Blade Views: Satukan Formulir Modal Tambah & Ubah
+- **Dilarang Keras** membuat berkas terpisah `modal-create.blade.php`, `modal-edit.blade.php`, dan `modal-delete.blade.php` yang menduplikasi 400 baris markup HTML yang sama.
+- Satukan ke dalam **satu komponen modal form terpadu** (atau tempatkan langsung di bagian bawah `index.blade.php`). Pemicu edit cukup mengubah atribut `action` form, judul modal, dan mengisi nilai input via JavaScript.
+- **Hapus Modal Delete Per Entitas:** Gunakan **1 modal konfirmasi hapus universal** yang ditempatkan di master layout (`layouts/app.blade.php`). Tombol hapus di tabel mana pun cukup memanggil fungsi pembantu global `openDeleteConfirm(actionUrl, itemName)`.
+
+#### 4. Aturan Styling: Tailwind-First & Larangan Monolithic Custom CSS
+- Manfaatkan utility classes Tailwind CSS langsung di dalam elemen Blade HTML.
+- **Dilarang Keras** menulis kembali kelas utilitas Tailwind menjadi 4.000 baris CSS kustom monolitik manual di `resources/css/app.css`. File CSS kustom hanya untuk konfigurasi `:root` variabel desain dan komponen layout yang benar-benar esensial.
+
+#### 5. Aturan Kerja AI Agent (Context Window & Request Efficiency)
+- **Zero Convoluted Over-Analysis:** Jika tugas pengguna adalah *"buat CRUD data X"*, agent dilarang melakukan riset dan perencanaan berbelit-belit yang menghabiskan 10+ turn percakapan. Langsung buat migrasi, model, controller, view, dan test secara ramping (*straight to the point*).
+- **Hemat Konteks & Request:** Hindari membaca dan menyunting belasan file sekaligus jika tidak diperlukan. Pertahankan context window tetap bersih dan ringkas.
+- **Zero Dead Code:** Dilarang membuat file view atau method controller cadangan yang tidak pernah dipanggil/dirender oleh sistem (seperti `create.blade.php` statis saat sistem memakai modal).
 
 ---
 

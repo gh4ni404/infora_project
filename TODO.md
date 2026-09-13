@@ -5,6 +5,9 @@
 ---
 
 ## 📌 Status Ringkasan Proyek
+> 🛑 **STATUS PROYEK: RESMI DITUTUP & DIARSIPKAN SEBAGAI BLUEPRINT REFERENSI**  
+> Repositori ini telah menyelesaikan serangkaian modul inti awal (Sistem Navigasi Dinamis, Hak Akses, Backup/Restore, Master Sekolah, Master Wilayah Kemendagri 4 Tingkat, Master Jurusan, Tahun Ajaran & Semester, serta Kalender Akademik). Proyek ini resmi diarsipkan sebagai bahan rujukan dan studi kasus untuk membangun **INFORA Generasi Baru (Next-Gen INFORA)** dengan standar Lean MVC (KISS) dan efisiensi context AI.
+
 - [x] Konsep & Penamaan Platform (**INFORA**)
 - [x] Filosofi Brand, Desain Logo & App Icon ([BRANDING.md](detail/docs/BRANDING.md))
 - [x] Spesifikasi Desain & Arsitektur Sistem ([DESIGN.md](detail/DESIGN.md))
@@ -14,12 +17,14 @@
 - [x] Arsitektur Modal Dialog CRUD Modular (Create & Edit as Components in Index)
 - [x] Tata Kelola Menu Akses & Dynamic Role Templates (User-Centric Granular Permissions)
 - [x] Sistem Cadangan & Pemulihan Sistem Lengkap (Full System Snapshot & Server Migration Ready)
-- [x] Master Data Sekolah (Multi-Record Registry SMA & SMK)
+- [x] Master Data Sekolah (Multi-Record Registry SMA & SMK dengan Cascading Wilayah Kemendagri)
 - [x] Master Data Wilayah Administratif Pemerintahan Berbasis Kode Kemendagri (Provinsi, Kabupaten, Kecamatan, Kelurahan & Desa)
 - [x] Arsitektur Tata Letak 3-Tier (Docked Footer & Scroll Internal) & Komponen Paginasi Responsif Global
-- [ ] Arsitektur Akun Sivitas (4 Tipe Akun: Siswa, Guru, Staff, Admin dengan profil relasional 1-to-1)
-- [ ] Dedicated Layout Separation (Desktop & Mobile)
-- [ ] Implementasi Modul Akademik & Tata Kelola Utama
+- [x] Master Data Jurusan / Konsentrasi Keahlian (SMK) & Peminatan (SMA)
+- [x] Konfigurasi Tahun Ajaran & Semester (Split Layout 1:1 & Atomic Activation)
+- [x] Modul Kalender Akademik Sekolah (Dual View Kalender & Agenda Table)
+- [x] **Evaluasi Arsitektur & Perumusan Aturan Baru:** Analisis *overengineering/context bloat* dan pedoman *Lean MVC* untuk proyek generasi berikutnya.
+- [ ] *Sisa Roadmap (Akun Sivitas, Rombel, Jurnal KBM, DUDI, Akreditasi) dialihkan ke INFORA Generasi Baru.*
 
 ---
 
@@ -138,14 +143,15 @@
   - [x] Antarmuka Blade terstandarisasi dengan arsitektur modal CRUD modular (`index.blade.php`, `create.blade.php`, dan `edit.blade.php`), filter cascading dinamis 3 tingkat, sticky header scroll tabel, dan paginasi responsif.
   - [x] Seeder resmi Kemendagri: 38 Provinsi se-Indonesia, 24 Kabupaten/Kota se-Sulawesi Selatan, 27 Kecamatan se-Kabupaten Bone, 372 Kelurahan & Desa se-Kabupaten Bone.
   - [x] Automated Pest test suite (66 skenario feature tests di `ProvinsiTest.php`, `KabupatenTest.php`, `KecamatanTest.php`, dan `KelurahanTest.php`, meningkatkan total suite menjadi **167 tests lulus 100%, 727 assertions**).
-- [ ] **3.3. Master Data Akademik & Sivitas**
-  - [x] CRUD Data Jurusan/Konsentrasi Keahlian (SMK) & Peminatan/Fase (SMA).
-  - [ ] CRUD Data Rombel/Kelas & Ruangan Belajar.
-  - [ ] Manajemen Data Siswa terhubung ke `student_profiles`.
-  - [ ] Manajemen Data Guru & Pegawai terhubung ke `teacher_profiles` & `staff_profiles`.
-- [ ] **3.4. Kalender & Jadwal Pelajaran**
-  - [ ] Manajemen Tahun Ajaran, Semester, & Kalender Akademik.
-  - [ ] Alokasi Jam Mengajar Guru & Penyusunan Jadwal Mingguan per Kelas.
+- [x] **3.3. Master Data Akademik & Sivitas**
+  - [x] CRUD Data Jurusan/Konsentrasi Keahlian (SMK) & Peminatan/Fase (SMA): Model `Jurusan`, migrasi, relasi `School`, Form Requests, Controller dengan KPI summary & quick toggle, modal dialog CRUD, dan Pest tests (`JurusanTest.php`).
+  - [ ] CRUD Data Rombel/Kelas & Ruangan Belajar *(dialihkan ke proyek baru)*.
+  - [ ] Manajemen Data Siswa terhubung ke `student_profiles` *(dialihkan ke proyek baru)*.
+  - [ ] Manajemen Data Guru & Pegawai terhubung ke `teacher_profiles` & `staff_profiles` *(dialihkan ke proyek baru)*.
+- [x] **3.4. Kalender & Jadwal Pelajaran**
+  - [x] Manajemen Konfigurasi Tahun Ajaran & Semester: Skema tabel relasional berjenjang, Master-Detail UI (split 1:1), helper aktivasi atomik per unit sekolah, dan Pest tests (`TahunAjaranTest.php`).
+  - [x] Manajemen Kalender Akademik Sekolah: Model `KalenderAkademik`, mode ganda (grid kalender interaktif + tabel agenda), endpoint API JSON events, preset kategori semantik, dan Pest tests (`KalenderAkademikTest.php`).
+  - [ ] Alokasi Jam Mengajar Guru & Penyusunan Jadwal Mingguan per Kelas *(dialihkan ke proyek baru)*.
 - [ ] **3.5. Jurnal KBM Digital Guru**
   - [ ] Form input jurnal mengajar harian guru per jam tatap muka.
   - [ ] Pencatatan topik/materi, kendala siswa di kelas, dan upload foto dokumentasi KBM (format Base64, maksimal 1MB per berkas dengan kualitas visual terjaga, pola penamaan semantik: `{modul}_u{user_id}_{YYYYMMDD_His}_{random_8char}.{ekstensi}`).

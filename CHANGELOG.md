@@ -6,9 +6,60 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 
 ---
 
-## [Unreleased]
+## [Project Archived as Reference Blueprint] - 2026-09-14
 
-### Added
+### 🛑 Status Penutupan Proyek & Arsip Referensi
+- **Penutupan Resmi Pengembangan INFORA v1:** Repositori ini resmi ditutup dan dialihkan statusnya menjadi **Arsip Referensi Teknis (Reference & Blueprint Codebase)**. Seluruh modul dan fungsionalitas yang telah dibangun akan menjadi rujukan utama untuk pengembangan ulang proyek **INFORA Generasi Baru (Next-Gen INFORA)** yang mengadopsi arsitektur ramping (*lean & clean*).
+- **Hasil Evaluasi Arsitektur (Architectural Retrospective & Post-Mortem):**
+  - Mengidentifikasi isu *severe overengineering* dan *pseudo-Separation of Concerns* di mana 1 modul CRUD sederhana menghasilkan 11–15 berkas baru (~1.800–2.300 baris kode).
+  - Mengidentifikasi duplikasi masif pada Form Requests (27 berkas `Store*Request` dan `Update*Request` yang 100% identik).
+  - Mengidentifikasi pemborosan memori runtime pada manipulasi DOM kalender dan query wilayah tak terbatas (*unbounded in-memory loading*).
+  - Mengidentifikasi pemborosan konteks AI (*context window bloat*) akibat banyaknya berkas yang harus diinspeksi untuk perubahan kecil.
+  - Merumuskan **Aturan Arsitektur Ramping Generasi Baru** (Maksimal 3–4 berkas per CRUD, konsolidasi FormRequest & modal Blade, Tailwind-first styling, dan batasan analisis ringkas untuk AI agent).
+
+### Added (Fitur Sejak d1fca01)
+- **Master Data Jurusan / Konsentrasi Keahlian SMK & Peminatan SMA (`/master/data-jurusan`):**
+  - Skema database tabel `jurusan` berelasi ke unit sekolah (`schools`), Model Eloquent `Jurusan` dengan relasi `school()`, scope filter `aktif()` dan `untukSekolah()`, serta mutator `TextFormatter`.
+  - Kartu metrik KPI ringkasan di bagian atas tabel: Total Jurusan, Jurusan Aktif, Jurusan Non-Aktif, dan Total Bidang Keahlian.
+  - Filter unit sekolah, filter status aktif/non-aktif, pencarian multi-kolom (kode, nama, singkatan, bidang, program, kepala jurusan), dan paginasi fleksibel.
+  - Alur kerja modal dialog CRUD modular: Modal Tambah (`modal-create.blade.php`), Modal Edit (`modal-edit.blade.php`), dan Modal Hapus Bahaya (`modal-delete.blade.php`).
+  - Fitur *Quick Toggle Status*: Pengubahan status aktif/nonaktif jurusan secara instan via tombol status di tabel data.
+  - Form Requests validasi: `StoreJurusanRequest` dan `UpdateJurusanRequest`.
+  - Automated feature test suite `JurusanTest.php` (11 skenario pengujian fitur Pest lulus 100%).
+- **Konfigurasi Tahun Ajaran & Semester (`/konfigurasi-sekolah/tahun-ajaran`):**
+  - Modul master-detail konfigurasi tahun ajaran dan semester aktif per unit sekolah.
+  - Skema database tabel `tahun_ajaran` dan `semester` dengan cascade delete, Model `TahunAjaran` dan `Semester`.
+  - Antarmuka split layout 1:1 (`.grid-split-1-1`): Kolom kiri menampilkan tabel master Tahun Ajaran, kolom kanan menampilkan daftar Semester di bawah tahun ajaran terpilih.
+  - Banner status global penanda semester aktif beserta rentang tanggal KBM efektif.
+  - Helper aktivasi atomik global (`activateSemester` & `Semester::activeFor`): Memastikan hanya ada 1 semester aktif dalam satu unit sekolah pada satu waktu, otomatis menonaktifkan semester lain secara transaksional aman (`DB::transaction`).
+  - Form Requests: `StoreTahunAjaranRequest`, `UpdateTahunAjaranRequest`, `StoreSemesterRequest`, dan `UpdateSemesterRequest`.
+  - Dialog modal CRUD interaktif untuk Tahun Ajaran (`modal-tahun-ajaran.blade.php`) dan Semester (`modal-semester.blade.php`).
+  - Automated feature test suite `TahunAjaranTest.php` mencakup seluruh alur master-detail dan aktivasi atomik (lulus 100%).
+- **Modul Kalender Akademik Sekolah (`/konfigurasi-sekolah/kalender-akademik`):**
+  - Manajemen terpadu agenda kegiatan sekolah, jadwal ujian/asesmen, rentang semester, dan hari libur nasional/sekolah.
+  - Tampilan ganda (*Dual View Switcher*):
+    1. **Grid Kalender Bulanan Interaktif:** Kalender visual bulanan dengan navigasi bulan/tahun, jump selector, indikator hari ini (`is-today`), penanda akhir pekan lembut (`is-weekend`), serta popover rincian agenda per tanggal.
+    2. **Tabel Agenda Lengkap:** Tabel agenda tabular dengan pencarian teks, filter kategori kegiatan, filter semester, filter tahun ajaran, dan paginasi dinamis.
+  - Model `KalenderAkademik` dengan casting tanggal Carbon, scope filter rentang bulan, dan relasi ke data unit sekolah.
+  - Endpoint API murni JSON `/kalender-akademik/events` untuk kebutuhan pertukaran data kegiatan akademik via AJAX/mobile.
+  - Preset kategori akademik terstandarisasi: *KBM Efektif*, *Ujian/Asesmen*, *Libur Nasional*, *Libur Semester*, *Kegiatan Sekolah*, dan *Khusus SMK* dengan asosiasi warna semantik.
+  - Form Requests: `StoreKalenderAkademikRequest` dan `UpdateKalenderAkademikRequest`.
+  - Automated feature test suite `KalenderAkademikTest.php` (12 skenario pengujian Pest lulus 100%).
+- **Integrasi Dropdown Cascading Wilayah Kemendagri pada Master Data Sekolah:**
+  - Menghubungkan formulir tambah dan edit data sekolah dengan hierarki wilayah Kemendagri 4 tingkat via AJAX endpoint `WilayahDropdownController` (Provinsi ➔ Kabupaten/Kota ➔ Kecamatan ➔ Kelurahan/Desa).
+  - Otomatisasi pengisian kode pos sekolah berdasarkan kelurahan/desa yang dipilih pengguna.
+- **Komponen Searchable Select Universal (`<x-searchable-select>`):**
+  - Komponen Blade kustom untuk dropdown pilihan data besar dengan fitur pencarian teks instan, navigasi keyboard (panah atas/bawah & Enter), dan integrasi event change kustom.
+- **Penyempurnaan Modul Cadangan & Pemulihan (Backup & Restore):**
+  - Tombol aksi "Hapus Semua Cadangan" (*batch purge*) dengan konfirmasi bahaya untuk membersihkan seluruh snapshot lama dalam satu klik.
+  - Perbaikan mekanisme pengunduhan berkas cadangan langsung dari direktori penyimpanan privat server.
+- **Penyempurnaan Data Wilayah Resmi Kemendagri:**
+  - Melengkapi daftar 14 desa/kelurahan resmi Kemendagri di Kecamatan Ajangale, Kabupaten Bone (Desa Welado, Pinceng Pute, Labissa, dll) pada `KelurahanSeeder.php`.
+- **Konsolidasi Design System & Styling Standards:**
+  - Standarisasi dokumentasi arsitektur token warna semantik (`var(--infora-*)`) dan aturan larangan mutlak class CSS ad-hoc pada `.agents/rules/ui-styling-tokens-reusability.md`.
+  - Standarisasi varian badge: Menggantikan seluruh pemakaian `.badge-amber` dengan `.badge-warning` terpusat untuk konsistensi bahasa desain.
+
+### Added (Fitur Awal Hingga d1fca01)
 - **Master Data Wilayah Administratif Pemerintahan Berbasis Kode Kemendagri (Hierarki 4 Tingkat):**
   - Mengimplementasikan CRUD lengkap untuk 4 tingkat hierarki wilayah: **Provinsi** (`/wilayah/provinsi`), **Kabupaten/Kota** (`/wilayah/kabupaten`), **Kecamatan** (`/wilayah/kecamatan`), dan **Kelurahan/Desa** (`/wilayah/kelurahan`) di bawah modul Master Wilayah Administratif.
   - **Standardisasi Kode Wilayah Resmi Kemendagri (Bukan BPS)**:

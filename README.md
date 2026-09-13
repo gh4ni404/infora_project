@@ -18,6 +18,11 @@
 
 ---
 
+> 🛑 **STATUS PROYEK: DIARSIPKAN SEBAGAI REFERENSI TEKNIS (ARCHIVED REFERENCE BLUEPRINT)**  
+> Repositori ini resmi ditutup dan dialihkan fungsinya sebagai **Arsip & Basis Referensi** untuk pengembangan ulang **INFORA Generasi Baru (Next-Gen INFORA)** yang mengusung arsitektur ramping (*Lean MVC*), hemat memori, dan ramah konteks AI. Seluruh kode, modul, dan dokumentasi di repositori ini menjadi rujukan spesifikasi fitur dan analisis evaluasi (*post-mortem*).
+
+---
+
 ## 📖 Tentang INFORA
 
 **INFORA** adalah platform Sistem Informasi Manajemen (SIM) sekolah menengah generasi baru yang dirancang untuk menjawab kebutuhan operasional **SMA** dan **SMK**. 
@@ -31,19 +36,22 @@ Dibangun dengan arsitektur **API-First & System Bridging**, **Pengembangan Berba
 INFORA menghadirkan ekosistem terpadu yang dirancang khusus untuk memenuhi standar tata kelola dan akreditasi sekolah menengah:
 
 - 🏫 **Manajemen Terpadu SMA & SMK:** Struktur akademik fleksibel (Peminatan/Fase SMA & Konsentrasi Keahlian SMK), Jurnal Digital KBM Guru harian, dan modul Kesiswaan & Bimbingan Konseling (BK).
+- 🎓 **Master Data Jurusan:** Manajemen konsentrasi keahlian (SMK) dan peminatan (SMA) terhubung ke unit sekolah, ringkasan KPI, filter sekolah, dan quick status toggle.
+- 📅 **Tahun Ajaran & Semester:** Konfigurasi master-detail kanan-kiri (1:1 split), banner status semester aktif, dan helper aktivasi atomik transaksional.
+- 📆 **Kalender Akademik Sekolah:** Manajemen agenda sekolah mode ganda (*Interactive Month Grid & Agenda Table*), filter kategori event, badge warna semantik, dan endpoint API events JSON.
 - 🏭 **Kemitraan Industri & Magang PKL (Khusus SMK):** Database mitra DUDI, monitoring penempatan magang, plotting guru pembimbing, dan rekap Tracer Study alumni.
 - 🏆 **Automasi Instrumen Akreditasi (BAN-SM / IASP):** Dashboard kesiapan 4 komponen mutu, penyimpanan terstruktur bank dokumen digital, serta portal audit khusus asesor.
 - 🔌 **API-First Architecture & System Bridging:** RESTful API terstandarisasi, jembatan integrasi (*bridging*) dengan ekosistem Dapodik/LMS/WhatsApp, otorisasi Sanctum, dan kontrak respons *Pure JSON*.
 - 📱 **Mobile-First & Dedicated Layout System:** Pemisahan struktur layout native antara Desktop Power-Dashboard dan Mobile App-Like (bukan sekadar responsive CSS hiding).
 - 🗂️ **Navigasi Dinamis & Tata Kelola Menu Akses:** Hierarki navigasi sistem (Modul ➔ Menu ➔ Sub-Menu) berbasis data, otorisasi granular *user-centric*, template peran dinamis, dan fallback aman *Zero Dead Links*.
-- 💾 **Cadangan & Pemulihan Sistem Lengkap:** Snapshot portabel satu-klik (.zip), mesin backup mandiri native PHP/PDO tanpa dependensi luar, dan auto-repair symlink storage.
-- 🏫 **Master Data Sekolah:** Registri multi-sekolah SMA & SMK, alur kerja interaktif berbasis dialog modal (Create & Edit) tanpa reload halaman, dan upload logo Base64.
-- 🗺️ **Master Wilayah Administratif Kemendagri:** Hierarki 4 tingkat (Provinsi, Kabupaten/Kota, Kecamatan, Kelurahan & Desa) berbasis standar resmi Kemendagri RI, cascading filter 3 tingkat dinamis, proteksi relasi sekolah, dan seeder resmi lengkap.
+- 💾 **Cadangan & Pemulihan Sistem Lengkap:** Snapshot portabel satu-klik (.zip), mesin backup mandiri native PHP/PDO tanpa dependensi luar, auto-repair symlink storage, dan aksi *batch purge* cadangan.
+- 🏫 **Master Data Sekolah:** Registri multi-sekolah SMA & SMK, dropdown berjenjang Kemendagri 4 tingkat via AJAX, alur kerja interaktif modal (Create & Edit) tanpa reload halaman, dan upload logo Base64.
+- 🗺️ **Master Wilayah Administratif Kemendagri:** Hierarki 4 tingkat (Provinsi, Kabupaten/Kota, Kecamatan, Kelurahan & Desa) berbasis standar resmi Kemendagri RI, komponen `<x-searchable-select>`, cascading filter 3 tingkat dinamis, proteksi relasi sekolah, dan seeder resmi lengkap.
 - 📐 **Tata Letak 3-Tier & Paginasi Responsif:** Arsitektur antarmuka 3-tier (fixed topbar, docked footer, dan scroll internal independen) berpadu dengan komponen paginasi universal `<x-pagination>` dan toolbar tabel adaptif.
 - ⚡ **Universal Smooth Progressive Loading Screen:** Mesin indikator progres global (`window.InforaProgress`) beranimasi gradien halus (*buttery smooth motion*) untuk seluruh operasi sistem.
 
 > 💡 **Dokumentasi Lengkap & Spesifikasi Arsitektur:**  
-> Untuk penjelasan mendalam mengenai rasionalisasi desain sistem, standar upload Base64, reduksi batasan unik, dan rincian teknis lengkap dari setiap fitur di atas, silakan baca **[detail/README.md](detail/README.md)**.
+> Untuk rincian teknis mendalam dari seluruh 23 fitur, evaluasi arsitektur (*post-mortem*), dan pedoman arsitektur baru, silakan baca **[detail/README.md](detail/README.md)** dan **[detail/DESIGN.md](detail/DESIGN.md)**.
 
 ---
 

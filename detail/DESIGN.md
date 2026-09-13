@@ -2,6 +2,9 @@
 > **Information Network for Organization, Records, & Accreditation**  
 > *"Era Baru Sistem Informasi Sekolah Menengah (SMA & SMK)"*
 
+> 🛑 **STATUS REPOSITORI: DIARSIPKAN SEBAGAI BLUEPRINT REFERENSI TEKNIS**  
+> Repositori ini resmi ditutup dan dialihkan statusnya sebagai **Arsip Referensi Teknis** untuk perancangan ulang proyek **INFORA Generasi Baru (Next-Gen INFORA)**. Dokumen ini mendokumentasikan spesifikasi arsitektur yang telah dibangun beserta evaluasi kritis (*architectural retrospective*) dan aturan arsitektur baru (Seksi 9).
+
 ---
 
 ## 1. 🌟 Ringkasan Eksekutif (Executive Summary)
@@ -179,6 +182,10 @@ erDiagram
     KABUPATEN ||--o{ KECAMATAN : contains
     KECAMATAN ||--o{ KELURAHAN : contains
     KELURAHAN ||--o{ SCHOOLS : locates
+    SCHOOLS ||--o{ JURUSAN : offers
+    SCHOOLS ||--o{ TAHUN_AJARAN : configures
+    TAHUN_AJARAN ||--o{ SEMESTER : divides
+    SCHOOLS ||--o{ KALENDER_AKADEMIK : schedules
     SCHOOLS ||--o{ CLASSES : hosts
     USERS ||--o{ STUDENT_PROFILES : has
     USERS ||--o{ TEACHER_PROFILES : has
@@ -202,11 +209,15 @@ erDiagram
 8. `kecamatan`: Master data kecamatan (`kode` CHAR(7) PK, `kabupaten_kode` CHAR(4) FK, `nama` VARCHAR(100), `status_aktif` BOOLEAN).
 9. `kelurahan`: Master data kelurahan/desa (`kode` CHAR(10) PK, `kecamatan_kode` CHAR(7) FK, `tipe` ENUM ['Kelurahan', 'Desa'], `nama` VARCHAR(100), `kode_pos` VARCHAR(5), `status_aktif` BOOLEAN).
    > *Standar Kode Wilayah Kemendagri:* Seluruh kode wilayah disimpan dalam format string numerik murni tanpa tanda titik (contoh: Kemendagri `73.08` disimpan `7308`). Dilarang keras menggunakan kode statistik BPS untuk mencegah desinkronisasi data nasional.
-10. `students` & `teachers`: Profil lengkap, NISN/NIP, biodata, foto profil.
-11. `classes` & `majors`: Struktur rombel dan jurusan/peminatan (TKJ, RPL, IPA, IPS, dll.).
-12. `schedules` & `journals`: Jadwal mata pelajaran dan catatan jurnal KBM harian guru.
-13. `internships` (PKL): Data penempatan industri, guru pembimbing, nilai instruktur industri.
-14. `accreditation_evidences`: Dokumen bukti fisik terhubung ke butir standar akreditasi.
+10. `jurusan`: Master data konsentrasi keahlian (SMK) dan peminatan (SMA) per sekolah (`id`, `school_id` FK, `kode` VARCHAR(20), `nama` VARCHAR(150), `singkatan` VARCHAR(20), `jenjang` ENUM ['SMK', 'SMA'], `bidang_keahlian`, `program_keahlian`, `kepala_jurusan`, `is_active` BOOLEAN, `deskripsi` TEXT).
+11. `tahun_ajaran`: Registri tahun ajaran per sekolah (`id`, `school_id` FK, `tahun` VARCHAR(9) [misal: `2026/2027`], `is_active` BOOLEAN, `keterangan` TEXT).
+12. `semester`: Data semester berelasi ke tahun ajaran (`id`, `tahun_ajaran_id` FK, `semester` ENUM ['ganjil', 'genap'], `tanggal_mulai` DATE, `tanggal_selesai` DATE, `is_active` BOOLEAN, `keterangan` TEXT). Menggunakan mekanisme aktivasi atomik per unit sekolah.
+13. `kalender_akademik`: Agenda akademik dan penanda hari libur (`id`, `school_id` FK, `tahun_ajaran` VARCHAR(9), `semester` ENUM ['ganjil', 'genap'], `judul_kegiatan` VARCHAR(200), `tanggal_mulai` DATE, `tanggal_selesai` DATE, `kategori` VARCHAR(50), `warna` VARCHAR(20), `libur_kbm` BOOLEAN, `keterangan` TEXT).
+14. `students` & `teachers`: Profil lengkap, NISN/NIP, biodata, foto profil.
+15. `classes`: Struktur rombel dan penempatan kelas.
+16. `schedules` & `journals`: Jadwal mata pelajaran dan catatan jurnal KBM harian guru.
+17. `internships` (PKL): Data penempatan industri, guru pembimbing, nilai instruktur industri.
+18. `accreditation_evidences`: Dokumen bukti fisik terhubung ke butir standar akreditasi.
 
 ---
 
@@ -228,9 +239,37 @@ erDiagram
 
 ---
 
-## 📚 8. Rujukan Dokumen Terkait
+## 8. 🛑 Evaluasi Arsitektur & Pedoman Desain Generasi Baru (Post-Mortem & Next-Gen Guidelines)
+
+### 8.1. Mengapa Proyek v1 Ditutup? (Latar Belakang Evaluasi)
+Pengembangan INFORA v1 berhasil memvalidasi kebutuhan bisnis sekolah dan membuktikan fungsionalitas fitur-fitur kompleks (Sistem Navigasi Dinamis, Hak Akses, Backup Snapshot, Master Wilayah Kemendagri, Tahun Ajaran, dan Kalender Akademik). Namun, dari sisi arsitektur rekayasa perangkat lunak, proyek mengalami **overengineering kritis**:
+1. **Ledakan Berkas (*File Explosion* / *Pseudo-SoC*):** Satu fitur CRUD sederhana (`Jurusan`) memakan **14 file dan 1.805 baris kode**. Setiap CRUD memecah form menjadi `modal-create`, `modal-edit`, `modal-delete`, `StoreRequest`, dan `UpdateRequest`.
+2. **Duplikasi Form Request 100%:** Ditemukan 27 FormRequest di mana pasangan `Store*Request` dan `Update*Request` secara harfiah 100% identik tanpa perbedaan aturan.
+3. **Monolitik CSS 3.943 Baris:** Meskipun Tailwind CSS v4 sudah aktif, developer menulis ulang kelas utilitas menjadi 522 CSS rules kustom manual di `resources/css/app.css`, membuang keunggulan optimasi engine Tailwind.
+4. **Inefisiensi Memori:** Query kalender akademik men-dump seluruh tabel database langsung ke JavaScript HTML DOM (`@json($calendarEvents)`), dan `KelurahanController` me-load seluruh data Kabupaten dan Kecamatan se-Indonesia ke dalam tag `<option>` Blade.
+5. **Pemborosan Konteks AI (*Context Bloat*):** Karena 1 fitur tersebar di belasan file, proses maintenance oleh AI agent membakar puluhan ribu token hanya untuk membaca dan menyelaraskan file-file boilerplate, memperlambat turnaround dan meningkatkan risiko desinkronisasi.
+
+### 8.2. Aturan Baku Arsitektur untuk INFORA Generasi Baru (KISS & Lean MVC)
+Aturan ini **wajib dipatuhi** oleh setiap pengembang dan AI Coding Agent yang bekerja pada proyek INFORA Generasi Baru:
+1. **Prinsip Lean MVC (Maksimal 3–4 Berkas per CRUD):**
+   - 1 Controller, 1 Model, 1 Migrasi, 1 FormRequest (jika diperlukan), 1 View Blade (`index.blade.php` dengan modal terpadu), 1 Feature Test. Total $\le$ 5 file.
+2. **Larangan Duplikasi Form Request:**
+   - Cukup 1 berkas `[Entity]Request.php` untuk Store dan Update. Gunakan `$this->route('entity')?->id` untuk aturan unik. Jika field sedikit, gunakan inline validation `$request->validate()` di controller.
+3. **Penyatuan Modal Form Blade:**
+   - Dilarang membuat file `modal-create`, `modal-edit`, dan `modal-delete` terpisah. Gunakan satu modal form reusable yang diatur action URL-nya via JavaScript.
+   - Gunakan **satu modal konfirmasi hapus universal** di `layouts/app.blade.php` untuk seluruh tabel di aplikasi.
+4. **Tailwind-First Utility:**
+   - Gunakan utility classes Tailwind langsung di Blade. Hindari membuat ratusan class CSS kustom di stylesheet.
+5. **Zero Multi-Turn Over-Analysis untuk AI Agent:**
+   - Agent AI dilarang melakukan perdebatan, perencanaan berbelit-belit, atau riset berlebihan untuk fitur CRUD sederhana. Terapkan solusi langsung, ramping, dan bersih (*Lean, direct, and fast*).
+6. **Zero Dead Code:**
+   - Hapus semua view atau file yang tidak lagi di-render oleh controller.
+
+---
+
+## 📚 9. Rujukan Dokumen Terkait
 - 📖 **[README.md Utama](../README.md):** Gambaran umum proyek dan panduan quick start Docker.
-- 🚀 **[README.md Detail](README.md):** Rincian lengkap seluruh fitur unggulan dan spesifikasi teknis mendalam.
+- 🚀 **[README.md Detail](README.md):** Rincian lengkap seluruh 23 fitur unggulan dan spesifikasi teknis mendalam.
 - 📋 **[TODO.md](../TODO.md):** Roadmap tahapan implementasi dari Fase 1 hingga Fase 6.
 - 📝 **[CHANGELOG.md](../CHANGELOG.md):** Catatan riwayat perubahan dan versi rilis platform.
 - 🖼️ **[BRANDING.md](docs/BRANDING.md):** Filosofi penamaan brand, aset logo lockup, dan app icon.
