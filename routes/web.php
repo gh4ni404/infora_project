@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KonfigurasiSekolah\KalenderAkademikController;
+use App\Http\Controllers\KonfigurasiSekolah\TahunAjaranController;
 use App\Http\Controllers\Master\SchoolController;
 use App\Http\Controllers\System\BackupRestoreController;
 use App\Http\Controllers\System\MenuAccessController;
@@ -55,6 +56,18 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
 
     // Konfigurasi Sekolah
     Route::prefix('konfigurasi-sekolah')->name('konfigurasi-sekolah.')->group(function () {
+        // Tahun Ajaran & Semester
+        Route::get('/tahun-ajaran', [TahunAjaranController::class, 'index'])->name('tahun-ajaran');
+        Route::post('/tahun-ajaran', [TahunAjaranController::class, 'store'])->name('tahun-ajaran.store');
+        Route::put('/tahun-ajaran/{tahunAjaran}', [TahunAjaranController::class, 'update'])->name('tahun-ajaran.update');
+        Route::delete('/tahun-ajaran/{tahunAjaran}', [TahunAjaranController::class, 'destroy'])->name('tahun-ajaran.destroy');
+
+        Route::post('/tahun-ajaran/{tahunAjaran}/semester', [TahunAjaranController::class, 'storeSemester'])->name('tahun-ajaran.semester.store');
+        Route::put('/tahun-ajaran/{tahunAjaran}/semester/{semester}', [TahunAjaranController::class, 'updateSemester'])->name('tahun-ajaran.semester.update');
+        Route::delete('/tahun-ajaran/{tahunAjaran}/semester/{semester}', [TahunAjaranController::class, 'destroySemester'])->name('tahun-ajaran.semester.destroy');
+        Route::post('/tahun-ajaran/{tahunAjaran}/semester/{semester}/activate', [TahunAjaranController::class, 'activateSemester'])->name('tahun-ajaran.semester.activate');
+
+        // Kalender Akademik
         Route::get('/kalender-akademik/events', [KalenderAkademikController::class, 'events'])->name('kalender-akademik.events');
         Route::resource('kalender-akademik', KalenderAkademikController::class)->names([
             'index' => 'kalender-akademik',

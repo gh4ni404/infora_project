@@ -100,6 +100,32 @@ class School extends Model
     }
 
     /**
+     * Relasi ke data tahun ajaran sekolah.
+     *
+     * @return HasMany<TahunAjaran, $this>
+     */
+    public function tahunAjaran(): HasMany
+    {
+        return $this->hasMany(TahunAjaran::class, 'school_id')->orderBy('tahun', 'desc');
+    }
+
+    /**
+     * Mendapatkan Tahun Ajaran yang sedang aktif di sekolah ini.
+     */
+    public function activeTahunAjaran(): ?TahunAjaran
+    {
+        return $this->tahunAjaran()->where('is_active', true)->first();
+    }
+
+    /**
+     * Mendapatkan Semester yang sedang aktif di sekolah ini.
+     */
+    public function activeSemester(): ?Semester
+    {
+        return Semester::activeFor($this->id);
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
