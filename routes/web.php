@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\KonfigurasiSekolah\KalenderAkademikController;
 use App\Http\Controllers\Master\SchoolController;
 use App\Http\Controllers\System\BackupRestoreController;
 use App\Http\Controllers\System\MenuAccessController;
@@ -50,6 +51,15 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
     // Master Data Administrasi
     Route::prefix('master')->name('master.')->group(function () {
         Route::resource('data-sekolah', SchoolController::class)->except(['show', 'create']);
+    });
+
+    // Konfigurasi Sekolah
+    Route::prefix('konfigurasi-sekolah')->name('konfigurasi-sekolah.')->group(function () {
+        Route::get('/kalender-akademik/events', [KalenderAkademikController::class, 'events'])->name('kalender-akademik.events');
+        Route::resource('kalender-akademik', KalenderAkademikController::class)->names([
+            'index' => 'kalender-akademik',
+        ])->except(['show', 'create']);
+        Route::get('/kalender-akademik/semua', [KalenderAkademikController::class, 'index'])->name('kalender-akademik.index');
     });
 
     // Master Wilayah Administratif
