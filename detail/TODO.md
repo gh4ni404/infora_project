@@ -15,6 +15,8 @@
 - [x] Tata Kelola Menu Akses & Dynamic Role Templates (User-Centric Granular Permissions)
 - [x] Sistem Cadangan & Pemulihan Sistem Lengkap (Full System Snapshot & Server Migration Ready)
 - [x] Master Data Sekolah (Multi-Record Registry SMA & SMK)
+- [x] Master Data Wilayah Administratif Pemerintahan Berbasis Kode Kemendagri (Provinsi, Kabupaten, Kecamatan, Kelurahan & Desa)
+- [x] Arsitektur Tata Letak 3-Tier (Docked Footer & Scroll Internal) & Komponen Paginasi Responsif Global
 - [ ] Arsitektur Akun Sivitas (4 Tipe Akun: Siswa, Guru, Staff, Admin dengan profil relasional 1-to-1)
 - [ ] Dedicated Layout Separation (Desktop & Mobile)
 - [ ] Implementasi Modul Akademik & Tata Kelola Utama
@@ -39,6 +41,8 @@
   - [x] Setup palet warna INFORA Terang & Ramah Sivitas (Canvas `#F8FAFC`, Surface `#FFFFFF`, Sky/Royal Blue `#0284C7`/`#2563EB`, Teks Kontras Tinggi `#0F172A`) & tipografi `Plus Jakarta Sans`.
   - [x] Standarisasi class CSS global terpusat di `resources/css/app.css` (reusable global utility & component classes, zero inline styles, zero `<style>` tags).
   - [x] Master layout shell minimalis awal: `layouts/auth.blade.php` dan `layouts/app.blade.php`.
+  - [x] Implementasi Tata Letak 3-Tier dengan Docked Footer dan scroll internal independen (`.app-content` & `.sidebar-content`) untuk mengeliminasi double window scroll.
+  - [x] Komponen Paginasi Responsif Global (`<x-pagination>`) terdaftar universal via `AppServiceProvider` & Toolbar Tabel Responsif.
   - [ ] Implementasi layout lanjutan khusus: Mobile App-like (`layouts/mobile.blade.php`) & Desktop Power-Dashboard (`layouts/desktop.blade.php`).
 - [ ] **2.2. Manajemen Akun Sivitas & Autentikasi Fleksibel (4 Tipe Akun)**
   - [x] Migrasi kolom sistem tabel `users` (`username`, `user_type`, `is_active`, `avatar_path`).
@@ -74,7 +78,12 @@
     - [x] Controllers: `ModuleController`, `MenuController`, `SubMenuController`.
     - [x] Antarmuka manajemen lengkap (9 Blade views) dengan standardisasi komponen tabel data, form control, alerts, dan tombol aksi (100% bebas *inline styles*).
     - [x] Visual Icon Picker Component (`<x-icon-picker>`): dialog katalog visual dengan live preview, live search (Indonesia), filter kategori, dan 100% free Lucide Icons (~38 SVG icons).
+    - [x] Perluasan Katalog Ikon Lucide Kategori Wilayah (`map`, `map-pin`, `landmark`, `building`, `building-2`, `globe`) & Data (`table`).
     - [x] Panduan informatif nama rute dengan quick suggestion pills dan datalist rute terdaftar.
+    - [x] Otomatisasi urutan tampil mulai 1 (`nextOrder()`) pada model Modul, Menu, dan Sub-Menu serta validasi order `min:1`.
+    - [x] Dual field input nama rute pada formulir sub-menu (prefix rute menu induk terkunci + input sub-rute mandiri).
+    - [x] Standarisasi komponen metrik universal (`.stats-grid`, `.stat-card`, `.callout-danger`, `.grid-split-2-1`) dan utilitas dropzone.
+    - [x] Penyempurnaan interaksi sidebar: `flex-shrink: 0` pada nav items, kurva animasi accordion cubic-bezier, dan auto-scroll saat submenu dibuka di bagian bawah.
     - [x] Modal Interaktif Tambah & Edit Data: Tombol Tambah dan Edit pada Modul, Menu, dan Sub-Menu memunculkan modal dialog interaktif langsung di atas tabel data (tanpa redirect halaman) dengan auto-reopen pada validasi error serta komponen modular `edit.blade.php`.
     - [x] Classic Minimalist Sidebar Divider: Label modul berfungsi sebagai pemisah kategori yang rapi dan elegan (`.menu-category-label` dengan garis pembatas tipis atas dan tipografi uppercase) serta eliminasi kolom/opsi icon modul yang redundan.
     - [x] Relokasi Profil Pengguna & Logout ke Sidebar Footer: Topbar dibersihkan dan difokuskan, seksi akun pengguna dipindahkan ke bawah sidebar (`.sidebar-footer`).
@@ -118,21 +127,29 @@
   - [x] Skema database tabel `schools`: kolom identitas resmi (nama, NPSN non-unique terindeks, NSS, jenjang SMA/SMK, status Negeri/Swasta, akreditasi A/B/C/Belum), alamat lengkap, kontak telepon/email/web, pimpinan/NIP, yayasan, dan status aktif.
   - [x] Model `School` dengan Title Case auto-mutator (`TextFormatter::titleCase()` preservasi akronim), boolean casting, dan helper query.
   - [x] Form Requests & Controller CRUD lengkap (`Master\SchoolController`, `StoreSchoolRequest`, `UpdateSchoolRequest`) dengan validasi bahasa Indonesia dan dukungan Base64 logo upload (maks. 1MB).
-  - [x] Antarmuka manajemen terpadu: Data Table dengan pencarian (nama/NPSN/kota), filter jenis sekolah, paginasi, thumbnail logo, modal interaktif tambah sekolah, dan modal interaktif edit sekolah (komponen modular `edit.blade.php`).
+  - [x] Antarmuka manajemen terpadu: Data Table dengan pencarian (nama/NPSN/kota), filter jenis sekolah, paginasi, thumbnail logo, modal interaktif tambah sekolah (`create.blade.php`), dan modal interaktif edit sekolah (komponen modular `edit.blade.php`).
   - [x] Standarisasi sistem dialog modal: arsitektur flexbox (eliminasi footer clipping), normalisasi margin/padding, divider `var(--infora-border)` standar desain, dan badge seksi edukasi.
-  - [x] Automated Pest test suite `SchoolTest.php` (15 skenario pengujian feature test lulus 100%, total suite 101 tests lulus).
-- [ ] **3.2. Master Data Akademik & Sivitas**
+  - [x] Automated Pest test suite `SchoolTest.php` (15 skenario pengujian feature test lulus 100%).
+- [x] **3.2. Master Data Wilayah Administratif Indonesia (Standar Resmi Kemendagri)**
+  - [x] Penetapan kewajiban standar kode wilayah resmi Kementerian Dalam Negeri RI (Kemendagri) numerik murni tanpa titik (2 digit provinsi, 4 digit kabupaten/kota, 6/7 digit kecamatan, 10 digit kelurahan/desa) dan penolakan kode statistik BPS/Wilkerstat (`.agents/rules/regional-codes-standard.md`).
+  - [x] Skema database relasional berjenjang 4 tingkat (`provinsi`, `kabupaten`, `kecamatan`, `kelurahan`) dengan indeks kode, cascade delete, dan proteksi integritas relasi sekolah.
+  - [x] Model Eloquent `Provinsi`, `Kabupaten`, `Kecamatan`, dan `Kelurahan` lengkap dengan relasi hierarkis, relasi `sekolah()`, scope `aktif()`, dan mutator Title Case (`TextFormatter::titleCase()`).
+  - [x] Form Requests & Controllers CRUD lengkap: `ProvinsiController`, `KabupatenController`, `KecamatanController`, `KelurahanController` dengan validasi hierarki bertingkat.
+  - [x] Antarmuka Blade terstandarisasi dengan arsitektur modal CRUD modular (`index.blade.php`, `create.blade.php`, dan `edit.blade.php`), filter cascading dinamis 3 tingkat, sticky header scroll tabel, dan paginasi responsif.
+  - [x] Seeder resmi Kemendagri: 38 Provinsi se-Indonesia, 24 Kabupaten/Kota se-Sulawesi Selatan, 27 Kecamatan se-Kabupaten Bone, 372 Kelurahan & Desa se-Kabupaten Bone.
+  - [x] Automated Pest test suite (66 skenario feature tests di `ProvinsiTest.php`, `KabupatenTest.php`, `KecamatanTest.php`, dan `KelurahanTest.php`, meningkatkan total suite menjadi **167 tests lulus 100%, 727 assertions**).
+- [ ] **3.3. Master Data Akademik & Sivitas**
   - [ ] CRUD Data Jurusan/Konsentrasi Keahlian (SMK) & Peminatan/Fase (SMA).
   - [ ] CRUD Data Rombel/Kelas & Ruangan Belajar.
   - [ ] Manajemen Data Siswa terhubung ke `student_profiles`.
   - [ ] Manajemen Data Guru & Pegawai terhubung ke `teacher_profiles` & `staff_profiles`.
-- [ ] **3.3. Kalender & Jadwal Pelajaran**
+- [ ] **3.4. Kalender & Jadwal Pelajaran**
   - [ ] Manajemen Tahun Ajaran, Semester, & Kalender Akademik.
   - [ ] Alokasi Jam Mengajar Guru & Penyusunan Jadwal Mingguan per Kelas.
-- [ ] **3.3. Jurnal KBM Digital Guru**
+- [ ] **3.5. Jurnal KBM Digital Guru**
   - [ ] Form input jurnal mengajar harian guru per jam tatap muka.
   - [ ] Pencatatan topik/materi, kendala siswa di kelas, dan upload foto dokumentasi KBM (format Base64, maksimal 1MB per berkas dengan kualitas visual terjaga, pola penamaan semantik: `{modul}_u{user_id}_{YYYYMMDD_His}_{random_8char}.{ekstensi}`).
-- [ ] **3.4. Kesiswaan & Bimbingan Konseling (BK)**
+- [ ] **3.6. Kesiswaan & Bimbingan Konseling (BK)**
   - [ ] Buku catatan pelanggaran tata tertib & kalkulasi poin disiplin.
   - [ ] Portofolio prestasi, sertifikat, dan kejuaraan siswa.
 

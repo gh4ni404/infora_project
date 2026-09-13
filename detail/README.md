@@ -22,6 +22,8 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 13. [Sistem Cadangan & Pemulihan Sistem Lengkap](#-13-sistem-cadangan--pemulihan-sistem-lengkap-full-system-snapshot--server-migration-ready)
 14. [Universal Smooth Real-Time Progressive Loading Screen](#-14-universal-smooth-real-time-progressive-loading-screen-windowinforaprogress)
 15. [Master Data Sekolah](#-15-master-data-sekolah-multi-record-registry--kesiapan-bridging)
+16. [Master Wilayah Administratif Kemendagri](#-16-master-wilayah-administratif-kemendagri-hierarki-4-tingkat)
+17. [Tata Letak 3-Tier Docked Footer & Komponen Paginasi Responsif](#-17-tata-letak-3-tier-docked-footer--komponen-paginasi-responsif-global)
 
 ---
 
@@ -94,10 +96,16 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 - **Seksi Pengguna & Dropup Popover di Sidebar Footer:** Profil akun pengguna dan aksi logout ditempatkan di bagian bawah sidebar (`.sidebar-footer`) menggunakan kartu interaktif (`.user-card-button`) yang memunculkan popover menu melayang ke atas (*dropup*) berisi Pengaturan Profile, Ubah Password, Bantuan, dan Keluar.
 - **Interaktivitas Sidebar Modern & Anchored Transition:**
   - View Composer `SidebarComposer` dengan *eager loading*, *caching versioning*, dan *safeguard* tabel.
-  - Dropdown accordion sub-menu dengan rotasi ikon panah 180° dan penutupan mulus saat ciut.
+  - Dropdown accordion sub-menu dengan rotasi ikon panah 180°, penutupan mulus saat ciut, dan `flex-shrink: 0` pada nav items untuk mencegah pemerasan teks.
   - Penataan penjangkaran simetris (*Anchored Symmetrical Transition*): Posisi avatar (17px margin) dan seluruh ikon menu (26px margin) terkunci presisi tanpa pergeseran horizontal (0px horizontal jump) baik saat terbuka (260px) maupun ciut (72px), menghilangkan efek *auto-centering* atau lompatan visual saat animasi berjalan.
   - Tombol Pencarian pada Mode Ciut: Kotak pencarian otomatis bertransformasi menjadi tombol ikon 40px yang elegan di atas Dashboard saat sidebar diciutkan; mengkliknya akan langsung membuka sidebar dan memfokuskan input pencarian.
   - Pencarian menu real-time multi-level (modul, menu, sub-menu) dengan auto-expand parent group dan shortcut global `Ctrl+K`.
+- **Otomatisasi Urutan Tampil Mulai 1 & Dual Field Nama Rute Sub-Menu:**
+  - Nilai default urutan (`order`) pada migrasi modul, menu, dan sub-menu dimulai dari 1 (menggantikan default 0).
+  - Helper method `nextOrder()` pada model `Module`, `Menu`, dan `SubMenu` menghitung nomor urut selanjutnya secara otomatis untuk formulir tambah data.
+  - Input dual-field nama rute pada formulir sub-menu (tampilan visual prefix rute menu induk terkunci + input sub-rute mandiri) guna menjamin konsistensi penamaan rute hierarkis.
+- **Katalog Ikon Terkurasi & Penambahan Kategori Wilayah & Data:**
+  - Visual Icon Picker (`<x-icon-picker>`) dan komponen SVG `<x-icon>` diperluas dengan ikon kategori Wilayah (`map`, `map-pin`, `landmark`, `building`, `building-2`, `globe`) dan kategori Data (`table`, dll.) berbasis Lucide Icons 100% free open-source.
 - **Otomatisasi Kapitalisasi Teks Dua Lapis (Dual-Layer Text Transformation):**
   - **Nama Modul:** Selalu diformat **HURUF KAPITAL SEMUA (UPPERCASE)** secara otomatis saat diketik (`data-transform="uppercase"`) dan dijamin oleh Eloquent Attribute Mutator saat disimpan ke basis data (contoh: `NAVIGASI UTAMA`, `PENGATURAN SISTEM`).
   - **Nama Menu & Sub-Menu:** Selalu diformat **Capitalize Each Word (Title Case)** dengan pemeliharaan cerdas akronim standar pendidikan & teknologi (`SMK`, `SMA`, `SIM`, `PKL`, `KBM`, `GTK`, `BAN-SM`, `RPP`, `IT`, `TU`, `ID`, dll.) baik di sisi frontend maupun Model backend (contoh: `Dashboard`, `Sistem`, `Jurnal KBM`, `Rekam Jejak PKL SMK`, `Sub-Menu`). Pengguna cukup mengetik huruf kecil biasa, sistem otomatis memformatnya dengan rapi dan konsisten.
@@ -151,11 +159,46 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 
 ### 🏫 15. Master Data Sekolah (Multi-Record Registry & Kesiapan Bridging)
 - **Registri Sekolah Fleksibel (SMA & SMK):** Mendukung pengelolaan daftar banyak sekolah (multi-unit yayasan) dengan atribut lengkap: identitas resmi (Nama Sekolah, NPSN, NSS, Jenis Sekolah SMA/SMK, Status Negeri/Swasta, Akreditasi A/B/C/Belum), alamat komprehensif, kontak, pimpinan sekolah & NIP, serta yayasan naungan.
-- **Modal Interaktif Tambah & Edit Data (Zero-Reload CRUD):** Baik formulir tambah (*create*) maupun ubah (*edit*) beroperasi secara interaktif via dialog modal (`#modalCreateSchool` dan `#modalEditSchool`) langsung di atas tabel data tanpa reload halaman. Berkas `edit.blade.php` dijadikan sebagai komponen modular yang disertakan ke dalam halaman indeks.
+- **Arsitektur Modal Dialog Tambah & Edit Modular (`create.blade.php` & `edit.blade.php`):** Baik formulir tambah (*create*) maupun ubah (*edit*) beroperasi secara interaktif via dialog modal (`#modalCreateSchool` dan `#modalEditSchool`) langsung di atas tabel data tanpa reload halaman. Berkas `create.blade.php` dan `edit.blade.php` distandarisasi sebagai komponen modular yang di-include ke dalam halaman indeks (`index.blade.php`).
 - **Kesiapan Bridging Ekosistem Dapodik:** Kolom `npsn` di-index secara optimal sebagai kunci unik alternatif (*secondary natural key*) untuk integrasi API bridging ekosistem nasional pada fase lanjutan, tanpa mengunci constraint unik kaku pada level DBMS sesuai prinsip reduksi batasan teks unik.
 - **Manajemen Visual & Upload Logo Base64 (Maks. 1MB):** Dilengkapi sistem unggah logo format Base64 terintegrasi langsung di form modal create dan edit, live preview instan, validasi ukuran 1MB, dan penyimpanan otomatis ke disk publik dengan tata nama collision-proof: `sekolah_u{user_id}_{timestamp}_{random8}.{ext}`.
-- **Pencarian Dinamis & Filter Jenis:** Pencarian instan berdasarkan nama sekolah, NPSN, maupun kota/kabupaten dengan filter dropdown jenis sekolah (Semua, SMA, SMK) dan paginasi 15 data per halaman.
+- **Pencarian Dinamis, Filter Jenis & Paginasi Responsif:** Pencarian instan berdasarkan nama sekolah, NPSN, maupun kota/kabupaten dengan filter dropdown jenis sekolah (Semua, SMA, SMK), toolbar tabel adaptif, dan integrasi komponen paginasi global `<x-pagination>`.
 - **Akses Rute Resmi:** Dikelola pada rute `/master/data-sekolah` (`master.data-sekolah.*`) di bawah modul Administrasi ➔ Master ➔ Data Sekolah.
+
+---
+
+### 🗺️ 16. Master Wilayah Administratif Kemendagri (Hierarki 4 Tingkat)
+- **Kewajiban Standar Resmi Kemendagri (Bukan BPS):** Seluruh kode wilayah administratif dalam platform INFORA wajib menggunakan standar resmi Kementerian Dalam Negeri RI dalam format string numerik murni tanpa tanda titik (Provinsi 2 digit misal `73`, Kabupaten/Kota 4 digit misal `7308`, Kecamatan 6/7 digit misal `730801`, Kelurahan/Desa 10 digit misal `7308011001`). Secara ketat menolak kode wilayah statistik BPS (Wilkerstat) yang memiliki ketidakcocokan signifikan pada level kabupaten/kota (misal: Kab. Bone Kemendagri = `7308`, BPS = `7311`). Pedoman resmi dicatat dalam `.agents/rules/regional-codes-standard.md`.
+- **Relasi Berjenjang 4 Tingkat & Integritas Relasional:**
+  - Struktur hierarki berjenjang (`Provinsi` ➔ `Kabupaten` ➔ `Kecamatan` ➔ `Kelurahan/Desa`) dengan relasi *has-many-through* dan relasi langsung ke entitas sekolah (`sekolah()`).
+  - Mutator Title Case otomatis (`TextFormatter::titleCase()`) pada nama wilayah, mutator UPPERCASE pada singkatan provinsi, dan scope query `aktif()`.
+  - Proteksi integritas relasi: data kelurahan/desa yang masih terhubung dengan registri data sekolah diproteksi dari penghapusan (*restricted deletion guard*).
+- **Filter Cascading Dinamis 3 Tingkat:** Antarmuka pencarian dan formulir modal dilengkapi filter dropdown cascading reaktif (pilih Provinsi ➔ memuat Kabupaten terkait ➔ memuat Kecamatan terkait) tanpa reload halaman.
+- **Arsitektur Modal Dialog CRUD Modular:** Formulir tambah (`create.blade.php`) dan ubah (`edit.blade.php`) terstandarisasi sebagai komponen modal modular yang di-include pada `index.blade.php`, dilengkapi sticky header scroll tabel (`.table-responsive-scroll`) dan paginasi responsif.
+- **Dataset Baseline Resmi Kemendagri (Seeder):**
+  - 38 Provinsi se-Indonesia (`ProvinsiSeeder`).
+  - 24 Kabupaten/Kota se-Sulawesi Selatan dan kota-kota percontohan nasional (`KabupatenSeeder`).
+  - 27 Kecamatan se-Kabupaten Bone (`KecamatanSeeder`).
+  - 372 Kelurahan & Desa se-Kabupaten Bone (`KelurahanSeeder`).
+- **Akses Rute Resmi:**
+  - Provinsi: `/wilayah/provinsi` (`wilayah.provinsi.*`)
+  - Kabupaten: `/wilayah/kabupaten` (`wilayah.kabupaten.*`)
+  - Kecamatan: `/wilayah/kecamatan` (`wilayah.kecamatan.*`)
+  - Kelurahan: `/wilayah/kelurahan` (`wilayah.kelurahan.*`)
+
+---
+
+### 📐 17. Tata Letak 3-Tier Docked Footer & Komponen Paginasi Responsif Global
+- **Arsitektur Antarmuka 3-Tier (Docked Footer & Internal Scroll):**
+  - Membagi tata letak aplikasi menjadi 3 zona fungsional: Topbar (*header*) tetap di bagian atas, footer docked (*docked bottom dock*) permanen di bawah viewport layar, serta scrolling vertikal independen pada area konten utama (`.app-content`) dan navigasi sidebar (`.sidebar-content`).
+  - Menghilangkan *double scrollbar* pada jendela browser dan memastikan seluruh tombol aksi serta footer sistem selalu berada dalam jangkauan pandang pengguna.
+  - Penguncian `flex-shrink: 0` pada elemen navigasi sidebar dan penghalusan kurva transisi accordion menu dengan *cubic-bezier* serta auto-scroll cerdas.
+- **Komponen Paginasi Responsif Global (`<x-pagination>`):**
+  - Komponen universal di `resources/views/components/pagination.blade.php` yang didaftarkan secara global pada `AppServiceProvider` via `Paginator::defaultView('components.pagination')`.
+  - Menyajikan badge informasi rentang data, tautan nomor halaman yang rapi, dan tombol navigasi mobile-friendly yang tidak rusak pada resolusi sempit.
+- **Toolbar Tabel Responsif & Sticky Header Scroll:**
+  - Penataan toolbar tabel (`.table-toolbar-responsive`) yang fleksibel membungkus search box, filter dropdown, dan tombol tambah data di berbagai ukuran layar.
+  - Wadah tabel data dengan modifier `.table-responsive-scroll` dengan batas ketinggian maksimal 440px dan sticky header `th`, menjaga label kolom tetap terlihat saat pengguna menelusuri data tabel panjang.
 
 ---
 

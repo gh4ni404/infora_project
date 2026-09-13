@@ -56,18 +56,27 @@
     - Area `.modal-body` memanfaatkan *dynamic vertical scroll* dengan *custom slim scrollbar* (6px) dan normalisasi margin input (`.modal-body .form-group { margin-bottom: 0; }`) untuk mencegah penumpukan jarak ganda.
     - Pembatas seksi form `.form-section-divider` menggunakan warna border standar sistem desain (`border-top: 1px solid var(--infora-border)`), dipadukan dengan label seksi edukasi `.form-section-label` berformat badge khas INFORA dengan indikator titik biru.
 13. **Arsitektur Modal Dialog CRUD Modular (Create & Edit as Components in Index, Zero Standalone Edit Pages):**
-    - Seluruh formulir Tambah (`create`) dan Ubah (`edit`) pada entitas administratif (Data Sekolah, Modul, Menu, Sub-Menu) terintegrasi langsung sebagai modal dialog interaktif di atas halaman `index`, menghilangkan keharusan berpindah atau redirect ke halaman baru (*zero-reload workflow*).
-    - Berkas `edit.blade.php` distandarisasi sebagai komponen Blade modular yang di-include (`@include('...edit')`) ke dalam `index.blade.php`, bukan lagi berupa view terpisah yang meng-`@extends('layouts.app')`.
-    - Integrasi data dinamis melalui tombol aksi edit dengan atribut `data-*` (seperti `data-school`, `data-module`, `data-menu`, `data-sub-menu`) yang dibaca oleh listener JavaScript untuk mengisi input form modal secara instan.
-    - Penanganan validasi server cerdas (*auto-reopen*) dengan deteksi `old('_method') === 'PUT'`, memastikan modal terbuka kembali secara otomatis saat terjadi kegagalan validasi backend dengan data input (`old(...)`) tetap terjaga.
+    - Seluruh formulir Tambah (`create`) dan Ubah (`edit`) pada entitas administratif (Data Sekolah, Modul, Menu, Sub-Menu, serta Wilayah Administratif) terintegrasi langsung sebagai modal dialog interaktif di atas halaman `index`, menghilangkan keharusan berpindah atau redirect ke halaman baru (*zero-reload workflow*).
+    - Berkas `create.blade.php` dan `edit.blade.php` distandarisasi sebagai komponen Blade modular yang di-include (`@include('...create')`, `@include('...edit')`) ke dalam `index.blade.php`, bukan lagi berupa view terpisah yang meng-`@extends('layouts.app')`.
+    - Integrasi data dinamis melalui tombol aksi edit dengan atribut `data-*` (seperti `data-school`, `data-module`, `data-menu`, `data-sub-menu`, `data-provinsi`, dll.) yang dibaca oleh listener JavaScript untuk mengisi input form modal secara instan.
+    - Penanganan validasi server cerdas (*auto-reopen*) dengan deteksi `old('_method') === 'PUT'` (untuk modal edit) atau `$errors->any()` (untuk modal create), memastikan modal terbuka kembali secara otomatis saat terjadi kegagalan validasi backend dengan data input (`old(...)`) tetap terjaga.
     - Kompatibilitas rute: metode `Controller::edit()` mengalihkan (*redirect*) pengguna kembali ke `index` guna menjaga kompatibilitas rute dan bookmark.
+14. **Arsitektur Antarmuka 3-Tier (Docked Footer & Scroll Internal Independen):**
+    - Membagi struktur tampilan aplikasi menjadi 3 zona layout: Topbar (*header*) tetap di bagian atas, footer *docked* permanen di bawah viewport layar (`.app-footer`), dan scrolling vertikal independen pada area konten utama (`.app-content`) dan navigasi sidebar (`.sidebar-content`).
+    - Mengeliminasi *double scrollbar* pada window browser, menjaga footer sistem selalu terlihat rapi tanpa terdorong ke luar layar, dan mengunci `flex-shrink: 0` pada item navigasi sidebar agar teks menu tidak tertekan saat accordion dibuka.
+15. **Komponen Paginasi Responsif Universal (`<x-pagination>`):**
+    - Komponen paginasi global terstandarisasi di `resources/views/components/pagination.blade.php` dengan badge informasi rentang data adaptif, tombol navigasi sebelumnya/selanjutnya yang mobile-friendly, dan link nomor halaman ringkas.
+    - Terdaftar secara global pada `AppServiceProvider` via `Paginator::defaultView('components.pagination')`.
+    - Dipadukan dengan `.table-toolbar-responsive` untuk wrapping kontrol pencarian dan filter yang rapi, serta modifier `.table-responsive-scroll` dengan sticky header dan batas tinggi 440px.
 
 ### 2.5. Sistem Ikonografi & Navigasi Hirarki (Iconography & Route Resolution)
 1. **100% Free & Open-Source Lucide Icons:** Menggunakan keluarga ikon Lucide Icons resmi (lisensi open source ISC) berbasis SVG murni yang di-render native via komponen `<x-icon>`. Bebas biaya lisensi dan tanpa ketergantungan font eksternal.
-2. **Visual Icon Picker Interaktif (`<x-icon-picker>`):** Formulir manajemen modul dan menu dilengkapi dialog katalog visual dengan live preview, pencarian kata kunci instan, dan tab filter kategori (Navigasi, Akademik, Data, Pengguna, Sistem, Umum) untuk meminimalisir kesalahan pengetikan manual.
-3. **Sub-Menu Hirarki Rapi (Tanpa Bullet Dot):** Sub-menu sidebar menggunakan tata letak berjenjang bersih dengan *left accent indicator bar* pada hover dan status aktif, menggantikan titik peluru (*bullet dot*) konvensional agar tampilan lebih modern dan nyaman dipandang.
-4. **Resolusi Rute Otomatis (Hierarchical Route Pattern):** Pengguna cukup mendefinisikan rute dengan pola hierarki sederhana `modul.menu` atau `modul.menu.submenu`. Model secara cerdas mencocokkan ketersediaan rute terdaftar baik dengan akhiran `.index` maupun rute langsung, serta mendeteksi status aktif pada seluruh sub-halaman terkait tanpa membebani pengguna.
-5. **Halaman Placeholder 'Fitur Dalam Pengembangan' (Zero Dead Links & Developer Blueprint):** Jika suatu menu atau sub-menu memiliki `route_name` yang belum terdaftar di `routes/web.php` (atau masih kosong), sistem secara otomatis mengarahkan tautan ke rute terpusat `/system/under-development?type={menu|submenu}&id={id}` alih-alih merender link mati (`href="#"`). Halaman ini menyajikan status pengembangan, hierarki navigasi, kartu status operasional, serta cetak biru teknis bagi developer (snippet rute Laravel dan perintah `php artisan make:controller`). Navigasi sidebar secara cerdas mempertahankan status aktif dan membuka accordion induk ketika halaman placeholder ini dikunjungi.
+2. **Visual Icon Picker Interaktif (`<x-icon-picker>`):** Formulir manajemen modul dan menu dilengkapi dialog katalog visual dengan live preview, pencarian kata kunci instan, dan tab filter kategori (Navigasi, Akademik, Data, Pengguna, Sistem, Wilayah, Umum) untuk meminimalisir kesalahan pengetikan manual.
+3. **Perluasan Katalog Ikon Wilayah & Data:** Koleksi ikon SVG resmi diperluas mencakup kategori Wilayah (`map`, `map-pin`, `landmark`, `building`, `building-2`, `globe`) dan kategori Data (`table`), mendukung modularitas modul wilayah dan tabel data.
+4. **Sub-Menu Hirarki Rapi (Tanpa Bullet Dot):** Sub-menu sidebar menggunakan tata letak berjenjang bersih dengan *left accent indicator bar* pada hover dan status aktif, menggantikan titik peluru (*bullet dot*) konvensional agar tampilan lebih modern dan nyaman dipandang.
+5. **Otomatisasi Urutan Tampil Mulai 1 & Dual-Field Rute Sub-Menu:** Nilai urutan bawaan (`order`) pada tabel modul, menu, dan sub-menu dimulai dari 1 (menggantikan default 0). Model `Module`, `Menu`, dan `SubMenu` dilengkapi metode pembantu `nextOrder()` untuk mengisi nomor urut berikutnya secara otomatis. Formulir sub-menu mengadopsi input dual-field nama rute (prefix rute menu induk terkunci + input slug sub-rute mandiri) guna mencegah salah ketik.
+6. **Resolusi Rute Otomatis (Hierarchical Route Pattern):** Pengguna cukup mendefinisikan rute dengan pola hierarki sederhana `modul.menu` atau `modul.menu.submenu`. Model secara cerdas mencocokkan ketersediaan rute terdaftar baik dengan akhiran `.index` maupun rute langsung, serta mendeteksi status aktif pada seluruh sub-halaman terkait tanpa membebani pengguna.
+7. **Halaman Placeholder 'Fitur Dalam Pengembangan' (Zero Dead Links & Developer Blueprint):** Jika suatu menu atau sub-menu memiliki `route_name` yang belum terdaftar di `routes/web.php` (atau masih kosong), sistem secara otomatis mengarahkan tautan ke rute terpusat `/system/under-development?type={menu|submenu}&id={id}` alih-alih merender link mati (`href="#"`). Halaman ini menyajikan status pengembangan, hierarki navigasi, kartu status operasional, serta cetak biru teknis bagi developer (snippet rute Laravel dan perintah `php artisan make:controller`). Navigasi sidebar secara cerdas mempertahankan status aktif dan membuka accordion induk ketika halaman placeholder ini dikunjungi.
 
 ---
 
@@ -133,6 +142,12 @@ Untuk mengakomodasi realitas sivitas sekolah di mana guru dan siswa sering memil
 - **Kesiapan Bridging API Dapodik:** Kolom `npsn` di-index secara optimal sebagai *secondary natural key* untuk sinkronisasi data nasional tanpa mengorbankan fleksibilitas operasional (non-unique pada level DBMS).
 - **Pipeline Logo Sekolah Base64 (Maks. 1MB):** Pengunggahan logo format Base64 terintegrasi langsung di form modal create dan form modal edit (`edit.blade.php`), dengan penamaan berkas collision-proof di `storage/app/public/logos`.
 
+### 5.0.1. Modul Master Wilayah Administratif Pemerintahan (Standar Kemendagri 4 Tingkat)
+- **Hierarki 4 Tingkat Komprehensif:** Mengelola data wilayah administratif Republik Indonesia secara berjenjang dari Provinsi (`/wilayah/provinsi`), Kabupaten/Kota (`/wilayah/kabupaten`), Kecamatan (`/wilayah/kecamatan`), hingga Kelurahan & Desa (`/wilayah/kelurahan`).
+- **Standardisasi Kode Resmi Kemendagri:** Menggunakan format numerik murni tanpa tanda titik sesuai keputusan Kemendagri terbaru (2 digit provinsi, 4 digit kabupaten/kota, 6/7 digit kecamatan, 10 digit kelurahan/desa). Secara ketat menolak kode BPS guna menjamin konsistensi integrasi Dapodik dan kependudukan.
+- **Cascading Filter & Relasi Berjenjang:** Dropdown dinamis 3 tingkat yang saling berantai secara instan pada tabel indeks dan form dialog modal, didukung relasi *has-many-through* dan proteksi penghapusan data wilayah yang telah dirujuk oleh sekolah.
+- **Arsitektur Modal CRUD Modular:** Standarisasi berkas `index.blade.php`, `create.blade.php`, dan `edit.blade.php` pada setiap tingkat wilayah tanpa reload halaman.
+
 ### 5.1. Modul 1: Manajemen Akademik & Kesiswaan (SMA & SMK)
 - Manajemen Tahun Ajaran, Semester, Rombel/Kelas, dan Mata Pelajaran.
 - Pembagian Konsentrasi Keahlian (SMK) dan Peminatan/Fase (SMA).
@@ -160,6 +175,10 @@ Untuk mengakomodasi realitas sivitas sekolah di mana guru dan siswa sering memil
 erDiagram
     MODULES ||--o{ MENUS : contains
     MENUS ||--o{ SUB_MENUS : contains
+    PROVINSI ||--o{ KABUPATEN : contains
+    KABUPATEN ||--o{ KECAMATAN : contains
+    KECAMATAN ||--o{ KELURAHAN : contains
+    KELURAHAN ||--o{ SCHOOLS : locates
     SCHOOLS ||--o{ CLASSES : hosts
     USERS ||--o{ STUDENT_PROFILES : has
     USERS ||--o{ TEACHER_PROFILES : has
@@ -178,11 +197,16 @@ erDiagram
    > *Catatan Prinsip Skema Navigasi:* Tidak menggunakan constraint `unique` pada kolom teks (`name`, `route_name`) untuk menjamin fleksibilitas operasional input/edit data tanpa bentrok validasi, sepenuhnya mengandalkan integritas relasional Primary Key ID & Foreign Key dengan *cascade delete*.
    > *Standar Kapitalisasi Teks Entitas Navigasi:* Nama modul wajib disimpan dalam format **HURUF KAPITAL SEMUA (UPPERCASE)** untuk visualisasi pemisah kategori yang tegas. Nama menu dan sub-menu wajib disimpan dalam format **Capitalize Each Word (Title Case)** dengan preservasi akronim standar (SMK, SMA, SIM, PKL, KBM, GTK, BAN-SM, RPP, IT, TU). Seluruh pemformatan ini berjalan otomatis dua lapis melalui atribut `data-transform` di antarmuka pengguna serta Eloquent Mutator di backend.
 5. `schools`: Registri profil sekolah SMA & SMK (`id`, `name`, `npsn`, `nss`, `school_type`, `status`, `accreditation`, `address`, `village`, `district`, `city`, `province`, `postal_code`, `phone`, `fax`, `email`, `website`, `principal_name`, `principal_nip`, `foundation_name`, `logo_path`, `is_active`). Kolom `npsn` di-index tanpa constraint unique kaku untuk mendukung prinsip reduksi batasan teks unik.
-6. `students` & `teachers`: Profil lengkap, NISN/NIP, biodata, foto profil.
-7. `classes` & `majors`: Struktur rombel dan jurusan/peminatan (TKJ, RPL, IPA, IPS, dll.).
-8. `schedules` & `journals`: Jadwal mata pelajaran dan catatan jurnal KBM harian guru.
-9. `internships` (PKL): Data penempatan industri, guru pembimbing, nilai instruktur industri.
-10. `accreditation_evidences`: Dokumen bukti fisik terhubung ke butir standar akreditasi.
+6. `provinsi`: Master data provinsi se-Indonesia (`kode` CHAR(2) PK, `nama` VARCHAR(100), `singkatan` VARCHAR(10), `status_aktif` BOOLEAN).
+7. `kabupaten`: Master data kabupaten/kota (`kode` CHAR(4) PK, `provinsi_kode` CHAR(2) FK, `tipe` ENUM ['Kabupaten', 'Kota'], `nama` VARCHAR(100), `status_aktif` BOOLEAN).
+8. `kecamatan`: Master data kecamatan (`kode` CHAR(7) PK, `kabupaten_kode` CHAR(4) FK, `nama` VARCHAR(100), `status_aktif` BOOLEAN).
+9. `kelurahan`: Master data kelurahan/desa (`kode` CHAR(10) PK, `kecamatan_kode` CHAR(7) FK, `tipe` ENUM ['Kelurahan', 'Desa'], `nama` VARCHAR(100), `kode_pos` VARCHAR(5), `status_aktif` BOOLEAN).
+   > *Standar Kode Wilayah Kemendagri:* Seluruh kode wilayah disimpan dalam format string numerik murni tanpa tanda titik (contoh: Kemendagri `73.08` disimpan `7308`). Dilarang keras menggunakan kode statistik BPS untuk mencegah desinkronisasi data nasional.
+10. `students` & `teachers`: Profil lengkap, NISN/NIP, biodata, foto profil.
+11. `classes` & `majors`: Struktur rombel dan jurusan/peminatan (TKJ, RPL, IPA, IPS, dll.).
+12. `schedules` & `journals`: Jadwal mata pelajaran dan catatan jurnal KBM harian guru.
+13. `internships` (PKL): Data penempatan industri, guru pembimbing, nilai instruktur industri.
+14. `accreditation_evidences`: Dokumen bukti fisik terhubung ke butir standar akreditasi.
 
 ---
 

@@ -9,6 +9,37 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 ## [Unreleased]
 
 ### Added
+- **Master Data Wilayah Administratif Pemerintahan Berbasis Kode Kemendagri (Hierarki 4 Tingkat):**
+  - Mengimplementasikan CRUD lengkap untuk 4 tingkat hierarki wilayah: **Provinsi** (`/wilayah/provinsi`), **Kabupaten/Kota** (`/wilayah/kabupaten`), **Kecamatan** (`/wilayah/kecamatan`), dan **Kelurahan/Desa** (`/wilayah/kelurahan`) di bawah modul Master Wilayah Administratif.
+  - **Standardisasi Kode Wilayah Resmi Kemendagri (Bukan BPS)**:
+    - Kewajiban penggunaan standar resmi Kementerian Dalam Negeri RI dalam format numerik murni tanpa tanda titik: 2 digit Provinsi (`73`), 4 digit Kabupaten/Kota (`7308`), 6/7 digit Kecamatan (`730801`), dan 10 digit Kelurahan/Desa (`7308011001`).
+    - Penegakan aturan konsistensi: menolak kode wilayah statistik BPS (Wilkerstat) yang kerap berbeda signifikan (misal: Kab. Bone Kemendagri = `7308`, bukan BPS `7311`). Aturan terdokumentasi permanen di `.agents/rules/regional-codes-standard.md`.
+  - **Model, Relasi Berjenjang & Mutator**:
+    - Model `Provinsi`, `Kabupaten`, `Kecamatan`, dan `Kelurahan` dilengkapi relasi hierarki langsung dan *has-many-through* (`provinsi` ➔ `kabupaten` ➔ `kecamatan` ➔ `kelurahan/desa`), serta relasi `sekolah()` pada masing-masing entitas.
+    - Mutator otomatis `TextFormatter::titleCase()` untuk preservasi huruf kapital dan akronim pada nama wilayah, mutator UPPERCASE pada singkatan provinsi, serta scope query `aktif()`.
+    - Proteksi integritas relasional: Kelurahan yang masih dirujuk oleh data sekolah tidak dapat dihapus (*restricted deletion guard*).
+  - **Filter Cascading Dinamis 3 Tingkat**:
+    - Antarmuka tabel dan modal dilengkapi filter bertingkat dinamis (Provinsi ➔ Kabupaten ➔ Kecamatan) yang saling terhubung secara reaktif tanpa reload halaman.
+  - **Seeder Resmi Kemendagri**:
+    - `ProvinsiSeeder`: 38 Provinsi resmi Republik Indonesia.
+    - `KabupatenSeeder`: 24 Kabupaten/Kota se-Sulawesi Selatan dan kota-kota percontohan nasional.
+    - `KecamatanSeeder`: Seluruh 27 Kecamatan se-Kabupaten Bone.
+    - `KelurahanSeeder`: Seluruh 372 Kelurahan & Desa resmi se-Kabupaten Bone.
+  - **66 Automated Feature Tests**: Test suite `ProvinsiTest.php`, `KabupatenTest.php`, `KecamatanTest.php`, dan `KelurahanTest.php` mencakup otentikasi super admin, listing & pencarian, filter cascading, validasi format kode & hierarki wilayah, mutator title case, operasi CRUD, dan proteksi integritas relasi. Total suite pengujian aplikasi melonjak menjadi **167 tests lulus 100% (727 assertions)**.
+- **Arsitektur Tata Letak 3-Tier dengan Docked Footer & Scroll Internal Independen (`layouts/app.blade.php` & `resources/css/app.css`):**
+  - Menerapkan arsitektur layout 3-tier: Topbar (*header*) tetap di atas, footer docked (*docked bottom dock*) permanen di bawah viewport, dan scrolling internal independen pada area konten utama (`.app-content`) dan sidebar navigasi (`.sidebar-content`).
+  - Mengeliminasi isu *double scrollbar* pada window browser dan memastikan footer sistem selalu terlihat rapi tanpa terdorong ke luar layar.
+- **Komponen Paginasi Responsif Global & Toolbar Tabel (`<x-pagination>`):**
+  - Komponen Blade reusable `<x-pagination>` di `resources/views/components/pagination.blade.php` dengan badge informasi jumlah data yang adaptif, tombol navigasi sebelumnya/selanjutnya yang mobile-friendly, dan link nomor halaman yang ringkas.
+  - Terdaftar secara terpusat sebagai default pagination view pada `AppServiceProvider` via `Paginator::defaultView('components.pagination')`.
+  - Komponen `.table-toolbar-responsive` untuk tata letak toolbar pencarian, filter dropdown, dan tombol aksi yang membungkus (*wrap*) secara proporsional di layar ponsel dan tablet.
+  - Modifier `.table-responsive-scroll` dengan batas ketinggian 440px dan sticky header untuk kenyamanan navigasi tabel bervolume besar.
+- **Otomatisasi Urutan Tampil Mulai 1 & Dual Field Nama Rute Sub-Menu:**
+  - Mengubah nilai default order migrasi tabel `modules`, `menus`, dan `sub_menus` menjadi 1 (menggantikan default 0).
+  - Menambahkan method pembantu `nextOrder()` pada model `Module`, `Menu`, dan `SubMenu` untuk mengisi nomor urut otomatis berikutnya pada formulir tambah data.
+  - Tampilan input dual-field nama rute pada formulir sub-menu (tampilan visual prefix rute menu induk yang terkunci + input nama sub-rute mandiri) guna mencegah salah ketik nama rute.
+- **Perluasan Katalog Ikon Lucide Kategori Wilayah & Data:**
+  - Menambahkan koleksi ikon baru pada konfigurasi katalog `config/icons.php` dan komponen SVG `<x-icon>`: kategori Wilayah (`map`, `map-pin`, `landmark`, `building`, `building-2`, `globe`) dan kategori Data (`table`, dll.) yang dapat dipilih langsung via `<x-icon-picker>`.
 - **Arsitektur Modal Interaktif Edit Data (`edit.blade.php` sebagai Komponen Modal Modular):**
   - Mentransformasikan seluruh formulir pengubahan data (*edit*) yang sebelumnya berupa halaman terpisah menjadi modal dialog interaktif langsung di atas tabel data (`index.blade.php`) tanpa reload halaman (*zero-reload workflow*).
   - Diterapkan secara seragam pada 4 entitas utama:
@@ -38,6 +69,16 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
   - **15 Automated Pest Feature Tests**: Test suite `SchoolTest.php` mencakup autentikasi & otorisasi super admin, listing & empty state, pencarian & filter jenis, validasi form, mutator title-case, Base64 logo upload & storage, update & hapus logo, penghapusan data & berkas fisik, serta verifikasi zero inline styles (15 passed, 63 assertions). Total pengujian aplikasi mencapai 101 tests lulus 100%.
 
 ### Changed & Refactored
+- **Modularisasi Komponen Modal Tambah Data (`create.blade.php` sebagai Komponen Modal Modular):**
+  - Memisahkan formulir dialog modal tambah sekolah ke dalam berkas modular terpisah `resources/views/master/data-sekolah/create.blade.php` yang di-include ke `index.blade.php`.
+  - Menerapkan pola yang sama secara seragam pada seluruh modul wilayah (`provinsi/create.blade.php`, `kabupaten/create.blade.php`, `kecamatan/create.blade.php`, `kelurahan/create.blade.php`), menjadikan arsitektur modal CRUD sepenuhnya modular (`index.blade.php`, `create.blade.php`, dan `edit.blade.php`).
+- **Penyempurnaan Interaktivitas Navigasi Sidebar & Animasi Accordion:**
+  - Menambahkan `flex-shrink: 0` pada item navigasi sidebar untuk mencegah pemerasan/pemotongan teks menu saat accordion dibuka.
+  - Menghapus outline fokus kaku pada pemicu accordion menu dan memperhalus kurva transisi buka-tutup dengan fungsi *cubic-bezier*.
+  - Menambahkan logika penyesuaian scroll otomatis saat accordion submenu di bagian bawah sidebar dibuka pengguna.
+- **Standarisasi Komponen Metrik Universal & Utilitas Dropzone:**
+  - Menggantikan class CSS ad-hoc `.backup-*` dengan komponen metrik universal di `resources/css/app.css`: `.stats-grid`, `.stat-card`, `.callout-danger`, dan `.grid-split-2-1`.
+  - Standarisasi class `.dropzone`, `.dropzone-icon`, `.dropzone-text`, dan area pratinjau unggahan berkas tanpa class alias.
 - **Penyempurnaan Sistem Dialog Modal & Normalisasi Margin/Padding UI (`resources/css/app.css`):**
   - **Arsitektur Flexbox Terpadu**: Menambahkan aturan `.modal-dialog form { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; margin: 0; }` serta `.modal-header` & `.modal-footer { flex-shrink: 0; }`. Memastikan footer modal (tombol Batal & Simpan) selalu utuh, tidak pernah terpotong di bagian bawah dialog pada resolusi/tinggi layar berapa pun.
   - **Eliminasi Margin Ganda (Double Spacing)**: Menormalkan `.modal-body .form-group { margin-bottom: 0; gap: 0.375rem; }` dan `.form-grid-2col .form-group { margin-bottom: 0; }`, menghilangkan jarak vertikal berlebih antar-input yang sebelumnya mencapai 40px akibat tumpukan `gap` dan `margin-bottom`.

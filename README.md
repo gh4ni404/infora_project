@@ -38,6 +38,8 @@ INFORA menghadirkan ekosistem terpadu yang dirancang khusus untuk memenuhi stand
 - 🗂️ **Navigasi Dinamis & Tata Kelola Menu Akses:** Hierarki navigasi sistem (Modul ➔ Menu ➔ Sub-Menu) berbasis data, otorisasi granular *user-centric*, template peran dinamis, dan fallback aman *Zero Dead Links*.
 - 💾 **Cadangan & Pemulihan Sistem Lengkap:** Snapshot portabel satu-klik (.zip), mesin backup mandiri native PHP/PDO tanpa dependensi luar, dan auto-repair symlink storage.
 - 🏫 **Master Data Sekolah:** Registri multi-sekolah SMA & SMK, alur kerja interaktif berbasis dialog modal (Create & Edit) tanpa reload halaman, dan upload logo Base64.
+- 🗺️ **Master Wilayah Administratif Kemendagri:** Hierarki 4 tingkat (Provinsi, Kabupaten/Kota, Kecamatan, Kelurahan & Desa) berbasis standar resmi Kemendagri RI, cascading filter 3 tingkat dinamis, proteksi relasi sekolah, dan seeder resmi lengkap.
+- 📐 **Tata Letak 3-Tier & Paginasi Responsif:** Arsitektur antarmuka 3-tier (fixed topbar, docked footer, dan scroll internal independen) berpadu dengan komponen paginasi universal `<x-pagination>` dan toolbar tabel adaptif.
 - ⚡ **Universal Smooth Progressive Loading Screen:** Mesin indikator progres global (`window.InforaProgress`) beranimasi gradien halus (*buttery smooth motion*) untuk seluruh operasi sistem.
 
 > 💡 **Dokumentasi Lengkap & Spesifikasi Arsitektur:**  
@@ -48,10 +50,12 @@ INFORA menghadirkan ekosistem terpadu yang dirancang khusus untuk memenuhi stand
 ## 💻 Tech Stack & Arsitektur
 
 - **Backend:** Laravel (Versi Terbaru) — *Modular Monolith, RESTful API & Bridging Core*
-- **Navigation & Hierarchy:** System-Driven Dynamic Navigation (Modul ➔ Menu ➔ Sub-Menu), 3 Baseline Bootstrap Menus, User-Centric Menu Access Control, Configurable Role Templates, Dynamic Under-Development Fallback (Zero Dead Links), Non-Unique Entity Convention
+- **Navigation & Hierarchy:** System-Driven Dynamic Navigation (Modul ➔ Menu ➔ Sub-Menu), 3 Baseline Bootstrap Menus, User-Centric Menu Access Control, Configurable Role Templates, Dynamic Under-Development Fallback (Zero Dead Links), Non-Unique Entity Convention, Automatic Order & Dual-Field Routing
 - **School Master Registry:** Multi-Record School Management (SMA & SMK, Public & Private), Dynamic Filtering, Base64 Logo Pipeline, Title-Case Auto Formatting, Bridging-Ready Architecture
+- **Regional Administrative Master:** Kemendagri 4-Tier Standard (Provinsi, Kabupaten/Kota, Kecamatan, Kelurahan/Desa), Pure Numeric Codes (Non-BPS), 3-Tier Cascading Filter, School Relation Integrity Guard
+- **Layout & Pagination Architecture:** 3-Tier Docked Layout (Fixed Topbar, Docked Bottom Footer, Independent Internal Scrolling), Universal Responsive Pagination Component (`<x-pagination>`, Registered Global via `Paginator::defaultView`)
 - **Global Indicator Engine:** Universal Smooth Real-Time Progressive Indicator (`window.InforaProgress`, `<x-progress-modal />`, SSE Stream Reader, Zero Inline Styles)
-- **Universal Modal & Form UI:** Flexbox-Driven Modal Architecture (Zero-Clipping Sticky Footers, Dynamic Scrolling Body), Interactive Modal CRUD (Create & Edit as Modular Components in Index), Margin Normalization, Standard Design Border Dividers, Accessible Slim Scrollbar
+- **Universal Modal & Form UI:** Flexbox-Driven Modal Architecture (Zero-Clipping Sticky Footers, Dynamic Scrolling Body), Interactive Modular Modal CRUD (`create.blade.php` & `edit.blade.php` as Components in `index`), Margin Normalization, Standard Design Border Dividers, Accessible Slim Scrollbar
 - **Data & Response Contract:** Pure JSON Responses (`application/json`), Eloquent API Resources, Zero HTML in Data Payloads
 - **Media & File Handling:** Base64 Uploads (Maks. 1MB/file, Preservasi Kualitas, Pola Nama: `{modul}_u{user_id}_{timestamp}_{random8}.{ext}`)
 - **Styling & UI Convention:** Reusable Global CSS Classes (Light, Smooth & Clean Theme, Strict No Ad-Hoc/Specific Classes), Zero Inline Styles (`style=""`), Zero `<style>` Tags in Views
