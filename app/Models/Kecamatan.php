@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Kecamatan extends Model
 {
@@ -55,6 +56,16 @@ class Kecamatan extends Model
     public function kabupaten(): BelongsTo
     {
         return $this->belongsTo(Kabupaten::class, 'kabupaten_id');
+    }
+
+    /**
+     * Relasi ke entitas anak Kelurahan / Desa.
+     *
+     * @return HasMany<Kelurahan, $this>
+     */
+    public function kelurahan(): HasMany
+    {
+        return $this->hasMany(Kelurahan::class, 'kecamatan_id');
     }
 
     /**

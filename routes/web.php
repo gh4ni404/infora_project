@@ -11,6 +11,7 @@ use App\Http\Controllers\System\SubMenuController;
 use App\Http\Controllers\System\UnderDevelopmentController;
 use App\Http\Controllers\Wilayah\KabupatenController;
 use App\Http\Controllers\Wilayah\KecamatanController;
+use App\Http\Controllers\Wilayah\KelurahanController;
 use App\Http\Controllers\Wilayah\ProvinsiController;
 use Illuminate\Support\Facades\Route;
 
@@ -66,6 +67,11 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
             'index' => 'kecamatan',
         ])->except(['show', 'create']);
         Route::get('/kecamatan/semua', [KecamatanController::class, 'index'])->name('kecamatan.index');
+
+        Route::resource('kelurahan', KelurahanController::class)->names([
+            'index' => 'kelurahan',
+        ])->except(['show', 'create']);
+        Route::get('/kelurahan/semua', [KelurahanController::class, 'index'])->name('kelurahan.index');
     });
 
     // Cadangan & Pemulihan Basis Data (Backup & Restore)
