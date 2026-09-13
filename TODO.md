@@ -139,7 +139,7 @@
   - [x] Seeder resmi Kemendagri: 38 Provinsi se-Indonesia, 24 Kabupaten/Kota se-Sulawesi Selatan, 27 Kecamatan se-Kabupaten Bone, 372 Kelurahan & Desa se-Kabupaten Bone.
   - [x] Automated Pest test suite (66 skenario feature tests di `ProvinsiTest.php`, `KabupatenTest.php`, `KecamatanTest.php`, dan `KelurahanTest.php`, meningkatkan total suite menjadi **167 tests lulus 100%, 727 assertions**).
 - [ ] **3.3. Master Data Akademik & Sivitas**
-  - [ ] CRUD Data Jurusan/Konsentrasi Keahlian (SMK) & Peminatan/Fase (SMA).
+  - [x] CRUD Data Jurusan/Konsentrasi Keahlian (SMK) & Peminatan/Fase (SMA).
   - [ ] CRUD Data Rombel/Kelas & Ruangan Belajar.
   - [ ] Manajemen Data Siswa terhubung ke `student_profiles`.
   - [ ] Manajemen Data Guru & Pegawai terhubung ke `teacher_profiles` & `staff_profiles`.

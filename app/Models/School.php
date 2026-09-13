@@ -126,6 +126,16 @@ class School extends Model
     }
 
     /**
+     * Relasi ke data jurusan sekolah.
+     *
+     * @return HasMany<Jurusan, $this>
+     */
+    public function jurusans(): HasMany
+    {
+        return $this->hasMany(Jurusan::class, 'school_id')->orderBy('kode');
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

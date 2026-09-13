@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KonfigurasiSekolah\KalenderAkademikController;
 use App\Http\Controllers\KonfigurasiSekolah\TahunAjaranController;
+use App\Http\Controllers\Master\JurusanController;
 use App\Http\Controllers\Master\SchoolController;
 use App\Http\Controllers\System\BackupRestoreController;
 use App\Http\Controllers\System\MenuAccessController;
@@ -52,6 +53,12 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
     // Master Data Administrasi
     Route::prefix('master')->name('master.')->group(function () {
         Route::resource('data-sekolah', SchoolController::class)->except(['show', 'create']);
+        Route::resource('data-jurusan', JurusanController::class)->parameters([
+            'data-jurusan' => 'jurusan',
+        ])->names([
+            'index' => 'data-jurusan',
+        ])->except(['show', 'create']);
+        Route::post('data-jurusan/{jurusan}/toggle-status', [JurusanController::class, 'toggleStatus'])->name('data-jurusan.toggle-status');
     });
 
     // Konfigurasi Sekolah
