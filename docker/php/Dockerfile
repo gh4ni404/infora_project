@@ -39,11 +39,6 @@ RUN install-php-extensions \
     opcache \
     redis
 
-# Install Node.js 22 LTS & npm for asset compilation
-RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
-    && apt-get install -y --no-install-recommends nodejs \
-    && rm -rf /var/lib/apt/lists/*
-
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
@@ -54,6 +49,10 @@ RUN if [ ${UID} -ne 33 ]; then \
     if [ ${GID} -ne 33 ]; then \
         groupmod -g ${GID} www-data 2>/dev/null || true; \
     fi
+
+# Ensure home directory and composer cache directory are owned by www-data
+RUN mkdir -p /var/www/.composer && chown -R www-data:www-data /var/www
+ENV COMPOSER_HOME=/var/www/.composer
 
 # Set working directory
 WORKDIR /var/www/html

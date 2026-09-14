@@ -101,7 +101,7 @@ Gunakan helper script bawaan untuk kemudahan lintas OS:
 # Windows (PowerShell)
 .\dev.ps1 artisan migrate
 ```
-*(Wajib dijalankan saat instalasi awal: `./dev artisan storage:link --relative` untuk membuat symbolic link storage publik yang portabel dan kompatibel antara host dan container Docker)*
+*(Catatan: Symbolic link storage publik relatif sudah dibuat otomatis saat `./dev start`. Anda juga dapat menjalankannya manual jika diperlukan via `./dev artisan storage:link --relative`)*
 
 ### 5. Akses Aplikasi
 - **Aplikasi Web INFORA:** [http://localhost:8000](http://localhost:8000)
