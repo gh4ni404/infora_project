@@ -63,6 +63,8 @@ test('super admin can view master data jurusan page', function () {
     $response->assertSee('modalCreateJurusan');
     $response->assertSee('modalEditJurusan');
     $response->assertSee('modalDeleteJurusan');
+    $response->assertSee('id="school_id"', false);
+    $response->assertSee('name="school_id"', false);
 });
 
 test('school selector filters jurusan list correctly', function () {
