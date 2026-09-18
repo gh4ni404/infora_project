@@ -83,6 +83,20 @@ test('modal renders delete form with csrf method override and html body and foot
     $view->assertDontSee('&lt;button', false);
 });
 
+test('modal renders delete variant with preset danger, size sm, alert, and footer buttons', function () {
+    $view = $this->blade(
+        '<x-modal name="delete" id="modalDeleteTest" item-name="jurusan" />'
+    );
+
+    $view->assertSee('modal-backdrop', false);
+    $view->assertSee('modal-sm', false);
+    $view->assertSee('text-danger', false);
+    $view->assertSee('name="_method" value="DELETE"', false);
+    $view->assertSee('Apakah Anda yakin ingin menghapus jurusan');
+    $view->assertSee('Tindakan ini tidak dapat dibatalkan.');
+    $view->assertSee('btn-delete', false);
+});
+
 test('modal renders a plain dialog when no form method is given', function () {
     $view = $this->blade(
         '<x-modal id="modalInfo" title="Informasi"><p>Konten dialog biasa.</p></x-modal>'
