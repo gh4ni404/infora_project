@@ -18,8 +18,7 @@
                     name="school_id"
                     id="school_id"
                     :selected="$selectedSchoolId"
-                    group-class="form-inline-action"
-                    onchange="this.form.submit()"
+                    onchange="this.form.requestSubmit ? this.form.requestSubmit() : this.form.submit()"
                     title="Pilih Unit Sekolah"
                 >
                     @foreach ($schools as $school)
@@ -55,7 +54,7 @@
 <x-data-table route="{{ route('master.data-jurusan') }}" search-placeholder="Cari kode, nama jurusan, bidang, atau kaprog..." :per-page="$perPageInput">
     <x-slot:filters>
         <input type="hidden" name="school_id" value="{{ $selectedSchoolId }}">
-        <select name="status" class="form-select-sm" onchange="this.form.submit()" title="Filter Status">
+        <select name="status" class="form-select-sm" onchange="this.form.requestSubmit ? this.form.requestSubmit() : this.form.submit()" title="Filter Status">
             <option value="">Semua Status</option>
             <option value="aktif" {{ request('status') === 'aktif' ? 'selected' : '' }}>Status Aktif</option>
             <option value="nonaktif" {{ request('status') === 'nonaktif' ? 'selected' : '' }}>Status Nonaktif</option>

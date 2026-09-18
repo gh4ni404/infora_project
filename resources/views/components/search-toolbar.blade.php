@@ -16,7 +16,7 @@
         @if ($perPage !== null)
             <div class="per-page-selector">
                 <label for="table_per_page" class="table-cell-muted">Tampilkan:</label>
-                <select id="table_per_page" name="per_page" class="form-select-sm" onchange="this.form.submit()">
+                <select id="table_per_page" name="per_page" class="form-select-sm" onchange="this.form.requestSubmit ? this.form.requestSubmit() : this.form.submit()">
                     @foreach ($perPageOptions as $option)
                         <option value="{{ $option }}" {{ request('per_page', (string) $perPage) === (string) $option ? 'selected' : '' }}>
                             {{ $option }}

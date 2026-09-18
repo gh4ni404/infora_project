@@ -497,6 +497,18 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         }
 
+        // School Selector / Filter (Khusus ganti unit sekolah)
+        const isSchoolFilter = form.id === 'schoolFilterForm' ||
+            (form.querySelector('select[name="school_id"]') && !form.querySelector('input[name="_method"]'));
+        if (isSchoolFilter) {
+            const isJurusan = action.includes('data-jurusan') || window.location.pathname.includes('data-jurusan');
+            return {
+                title: isJurusan ? 'Memuat Data Jurusan' : 'Memuat Data Sekolah',
+                statusText: 'Beralih ke unit sekolah yang dipilih...',
+                detail: isJurusan ? 'Mengambil data konsentrasi keahlian & peminatan...' : 'Mengambil data dan konfigurasi sekolah...',
+            };
+        }
+
         // GET forms (filter, search, pagination)
         if ((form.getAttribute('method') || '').toUpperCase() === 'GET') {
             return {
@@ -515,16 +527,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     /**
-     * Global form submit interceptor.
-     * Skip: forms with [data-no-progress], or that already use InforaProgress.stream()
-     * (those stop the default submit themselves).
+     * Helper to show loading progress for form submissions.
      */
-    document.addEventListener('submit', (e) => {
-        const form = e.target;
-        if (!(form instanceof HTMLFormElement)) return;
-        if (form.hasAttribute('data-no-progress')) return;
-        if (form.hasAttribute('data-progress-stream')) return; // managed by InforaProgress.stream()
+    let isProgressActive = false;
+
+    const triggerFormProgress = (form) => {
         if (!window.InforaProgress) return;
+        if (isProgressActive) return;
+
+        isProgressActive = true;
+        setTimeout(() => { isProgressActive = false; }, 1500);
 
         const ctx = resolveFormLoadingContext(form);
         window.InforaProgress.show({
@@ -541,7 +553,34 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             if (window.InforaProgress) window.InforaProgress.set(75, ctx.statusText, 'Menunggu respons server...');
         }, 800);
+    };
+
+    /**
+     * Global form submit interceptor.
+     * Skip: forms with [data-no-progress], or that already use InforaProgress.stream()
+     * (those stop the default submit themselves).
+     */
+    document.addEventListener('submit', (e) => {
+        const form = e.target;
+        if (!(form instanceof HTMLFormElement)) return;
+        if (form.hasAttribute('data-no-progress')) return;
+        if (form.hasAttribute('data-progress-stream')) return; // managed by InforaProgress.stream()
+
+        triggerFormProgress(form);
     }, true); // capture phase so it fires before other handlers
+
+    /**
+     * Intercept programmatic form.submit() calls (e.g. from onchange="this.form.submit()").
+     * Native form.submit() does NOT dispatch a 'submit' DOM event, so we explicitly
+     * trigger InforaProgress here.
+     */
+    const originalFormSubmit = HTMLFormElement.prototype.submit;
+    HTMLFormElement.prototype.submit = function () {
+        if (!this.hasAttribute('data-no-progress') && !this.hasAttribute('data-progress-stream')) {
+            triggerFormProgress(this);
+        }
+        return originalFormSubmit.apply(this, arguments);
+    };
 
     /**
      * Global navigation link interceptor.
@@ -613,6 +652,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Hide loading screen if user navigates back via bfcache (browser back/forward cache)
     window.addEventListener('pageshow', (e) => {
+        isProgressActive = false;
         if (e.persisted && window.InforaProgress) {
             window.InforaProgress.hide();
         }
