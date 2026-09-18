@@ -165,7 +165,22 @@
 {{-- Komponen Dialog Modals --}}
 @include('master.data-jurusan.create')
 @include('master.data-jurusan.edit')
-@include('master.data-jurusan.delete')
+
+{{-- Modal Konfirmasi Hapus Data Jurusan --}}
+<x-modal
+    name="delete"
+    id="modalDeleteJurusan"
+    title="Konfirmasi Hapus Jurusan"
+    subtitle="Tindakan ini akan menghapus data jurusan secara permanen dari sistem"
+    form-id="formDeleteJurusan"
+    cancel-btn-id="btnCancelDeleteJurusan"
+    confirm-btn-id="btnConfirmDeleteJurusan"
+    confirm-text="Ya, Hapus Jurusan"
+>
+    <x-alert type="error" title="Peringatan Penghapusan Permanen!">
+        Anda akan menghapus data jurusan <strong id="deleteJurusanNama">-</strong> (<span id="deleteJurusanKode" class="text-primary">-</span>). Tindakan ini tidak dapat dibatalkan.
+    </x-alert>
+</x-modal>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
