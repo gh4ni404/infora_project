@@ -484,7 +484,7 @@ Komponen dialog interaktif yang fleksibel untuk modal informasi maupun modal for
 
     <x-slot:footer>
         <button type="button" class="btn-secondary" id="btnCancelDelete">Batal</button>
-        <button type="submit" class="btn-danger">Ya, Hapus Data</button>
+        <button type="submit" class="btn-delete">Ya, Hapus Data</button>
     </x-slot:footer>
 </x-modal>
 ```
