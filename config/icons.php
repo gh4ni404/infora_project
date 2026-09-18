@@ -132,7 +132,7 @@ return [
             'keywords' => 'buku terbuka kurikulum pelajaran materi baca silabus',
         ],
         [
-            'name' => 'book',
+            'name' => 'book-closed',
             'label' => 'Buku / Modul Belajar',
             'category' => 'akademik',
             'keywords' => 'buku modul perpustakaan literatur referensi',
