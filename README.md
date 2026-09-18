@@ -43,7 +43,8 @@ INFORA menghadirkan ekosistem terpadu yang dirancang khusus untuk memenuhi stand
 - ⚡ **Universal Smooth Progressive Loading Screen:** Mesin indikator progres global (`window.InforaProgress`) beranimasi gradien halus (*buttery smooth motion*) untuk seluruh operasi sistem.
 
 > 💡 **Dokumentasi Lengkap & Spesifikasi Arsitektur:**  
-> Untuk penjelasan mendalam mengenai rasionalisasi desain sistem, standar upload Base64, reduksi batasan unik, dan rincian teknis lengkap dari setiap fitur di atas, silakan baca **[detail/README.md](detail/README.md)**.
+> - Untuk penjelasan mendalam mengenai rasionalisasi desain sistem, standar upload Base64, reduksi batasan unik, dan rincian teknis fitur, silakan baca **[detail/README.md](detail/README.md)**.  
+> - Untuk panduan lengkap katalog komponen Blade UI dan contoh implementasinya, silakan baca **[docs/COMPONENTS.md](docs/COMPONENTS.md)**.
 
 ---
 

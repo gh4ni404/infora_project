@@ -2,7 +2,7 @@
 > **Information Network for Organization, Records, & Accreditation (INFORA)**  
 > *"Era Baru Sistem Informasi Sekolah Menengah (SMA & SMK) Terpadu & Siap Akreditasi"*
 
-Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian lengkap dari seluruh fitur unggulan platform **INFORA**. Untuk ringkasan umum dan panduan instalasi, silakan kembali ke **[README Utama](../README.md)**.
+Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian lengkap dari seluruh fitur unggulan platform **INFORA**. Untuk panduan katalog seluruh komponen UI Blade dan contoh penggunaannya, silakan baca **[Panduan Komponen Blade](../docs/COMPONENTS.md)**. Untuk ringkasan umum dan instalasi, kembali ke **[README Utama](../README.md)**.
 
 ---
 
