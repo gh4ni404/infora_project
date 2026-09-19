@@ -7,6 +7,7 @@
     'hint' => null,
     'required' => false,
     'groupClass' => '',
+    'options' => [],
 ])
 
 @php
@@ -34,6 +35,18 @@
     >
         @if ($placeholder)
             <option value="" @selected(blank($selectedValue))>{{ $placeholder }}</option>
+        @endif
+
+        @if (!empty($options))
+            @foreach ($options as $value => $label)
+                @php
+                    $val = is_object($label) ? ($label->id ?? $value) : $value;
+                    $text = is_object($label) ? ($label->name ?? $label->label ?? $label) : $label;
+                @endphp
+                <option value="{{ $val }}" @selected(!blank($selectedValue) && (string) $val === (string) $selectedValue)>
+                    {{ $text }}
+                </option>
+            @endforeach
         @endif
 
         {{ $slot }}

@@ -210,6 +210,21 @@ test('form-select renders options, placeholder, label, and required indicator', 
     $view->assertSee('<option value="SMA">SMA</option>', false);
 });
 
+test('form-select renders options from options array prop and marks selected', function () {
+    $options = ['smk' => 'SMK Negeri 1', 'sma' => 'SMA Negeri 2'];
+
+    $view = $this->blade(
+        '<x-form-select name="unit" :options="$options" selected="sma" />',
+        ['options' => $options]
+    );
+
+    $view->assertSee('value="smk"', false);
+    $view->assertSee('SMK Negeri 1');
+    $view->assertSee('value="sma"', false);
+    $view->assertSee('selected', false);
+    $view->assertSee('SMA Negeri 2');
+});
+
 test('form-textarea renders multiline text, rows, and hint', function () {
     $view = $this->blade(
         '<x-form-textarea
