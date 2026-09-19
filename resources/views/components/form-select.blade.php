@@ -40,8 +40,12 @@
         @if (!empty($options))
             @foreach ($options as $value => $label)
                 @php
-                    $val = is_object($label) ? ($label->id ?? $value) : $value;
-                    $text = is_object($label) ? ($label->name ?? $label->label ?? $label) : $label;
+                    $val = is_object($label)
+                        ? ($label->id ?? $value)
+                        : (is_array($label) ? ($label['id'] ?? $label['value'] ?? $value) : $value);
+                    $text = is_object($label)
+                        ? ($label->name ?? $label->label ?? $label)
+                        : (is_array($label) ? ($label['label'] ?? $label['name'] ?? $label['text'] ?? $value) : $label);
                 @endphp
                 <option value="{{ $val }}" @selected(!blank($selectedValue) && (string) $val === (string) $selectedValue)>
                     {{ $text }}
