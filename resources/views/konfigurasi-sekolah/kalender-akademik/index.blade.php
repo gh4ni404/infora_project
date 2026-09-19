@@ -21,28 +21,16 @@
             @endif
 
             {{-- View Switcher (Kalender vs Tabel) Menggunakan Sistem Tab Pills Global --}}
-            <div class="tab-pills" role="tablist" aria-label="Pilihan Tampilan">
-                <button type="button" class="tab-pill {{ $activeView === 'kalender' ? 'active' : '' }}"
-                    id="btnToggleCalendarView" title="Tampilan Kalender Bulanan"
-                    aria-selected="{{ $activeView === 'kalender' ? 'true' : 'false' }}">
-                    <x-icon name="calendar" size="15" />
-                    <span>Kalender</span>
-                </button>
-                <button type="button" class="tab-pill {{ $activeView === 'tabel' ? 'active' : '' }}"
-                    id="btnToggleTableView" title="Tampilan Tabel Agenda"
-                    aria-selected="{{ $activeView === 'tabel' ? 'true' : 'false' }}">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="8" y1="6" x2="21" y2="6"></line>
-                        <line x1="8" y1="12" x2="21" y2="12"></line>
-                        <line x1="8" y1="18" x2="21" y2="18"></line>
-                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
-                    </svg>
-                    <span>Tabel Agenda</span>
-                </button>
-            </div>
+            <x-tab-pills label="Pilihan Tampilan">
+                <x-tab-pill id="btnToggleCalendarView" :active="$activeView === 'kalender'" icon="calendar"
+                    title="Tampilan Kalender Bulanan">
+                    Kalender
+                </x-tab-pill>
+                <x-tab-pill id="btnToggleTableView" :active="$activeView === 'tabel'" icon="list-bullet"
+                    title="Tampilan Tabel Agenda">
+                    Tabel Agenda
+                </x-tab-pill>
+            </x-tab-pills>
 
             {{-- Tombol Tambah Agenda --}}
             <button type="button" class="btn-primary" id="btnOpenCreateKalender">
@@ -65,46 +53,52 @@
                 {{-- Navigasi Bulan / Tahun Universal --}}
                 <div class="toolbar-nav">
                     <button type="button" class="btn-icon" id="btnPrevMonth" title="Bulan Sebelumnya">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="15 18 9 12 15 6"></polyline>
-                        </svg>
+                        <x-icon name="chevron-left" size="16" />
                     </button>
                     <div class="toolbar-label" id="calendarCurrentMonthLabel">
                         <!-- Diisi JavaScript -->
                     </div>
                     <button type="button" class="btn-icon" id="btnNextMonth" title="Bulan Selanjutnya">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
+                        <x-icon name="chevron-right" size="16" />
                     </button>
                     <button type="button" class="btn-secondary" id="btnCalendarToday">Hari Ini</button>
                 </div>
 
                 {{-- Quick Jump Dropdown --}}
                 <div class="page-actions">
-                    <select id="selectCalendarMonth" class="form-select-sm" title="Lompat ke Bulan">
-                        <option value="1">Januari</option>
-                        <option value="2">Februari</option>
-                        <option value="3">Maret</option>
-                        <option value="4">April</option>
-                        <option value="5">Mei</option>
-                        <option value="6">Juni</option>
-                        <option value="7">Juli</option>
-                        <option value="8">Agustus</option>
-                        <option value="9">September</option>
-                        <option value="10">Oktober</option>
-                        <option value="11">November</option>
-                        <option value="12">Desember</option>
-                    </select>
+                    <x-form-select
+                        id="selectCalendarMonth"
+                        name="calendar_month"
+                        class="form-select-sm"
+                        title="Lompat ke Bulan"
+                        :selected="(int) date('n')"
+                        :options="[
+                            1 => 'Januari',
+                            2 => 'Februari',
+                            3 => 'Maret',
+                            4 => 'April',
+                            5 => 'Mei',
+                            6 => 'Juni',
+                            7 => 'Juli',
+                            8 => 'Agustus',
+                            9 => 'September',
+                            10 => 'Oktober',
+                            11 => 'November',
+                            12 => 'Desember',
+                        ]"
+                    />
 
-                    <select id="selectCalendarYear" class="form-select-sm" title="Lompat ke Tahun">
-                        @for ($y = (int) date('Y') - 2; $y <= (int) date('Y') + 3; $y++)
-                            <option value="{{ $y }}" {{ $y === (int) date('Y') ? 'selected' : '' }}>
-                                {{ $y }}</option>
-                        @endfor
-                    </select>
+                    <x-form-select
+                        id="selectCalendarYear"
+                        name="calendar_year"
+                        class="form-select-sm"
+                        title="Lompat ke Tahun"
+                        :selected="(int) date('Y')"
+                        :options="array_combine(
+                            range((int) date('Y') - 2, (int) date('Y') + 3),
+                            range((int) date('Y') - 2, (int) date('Y') + 3),
+                        )"
+                    />
                 </div>
             </div>
 
@@ -159,193 +153,148 @@
      TAMPILAN 2: TABEL AGENDA KOMPREHENSIF
      ======================================================================== --}}
     <div id="panelTableView" class="{{ $activeView === 'tabel' ? '' : 'hidden' }}">
-        <div class="table-card">
-            <div class="table-toolbar">
-                <form method="GET" action="{{ route('konfigurasi-sekolah.kalender-akademik') }}"
-                    class="table-toolbar-form">
-                    <input type="hidden" name="view" value="tabel">
-                    <input type="hidden" name="school_id" value="{{ $selectedSchoolId }}">
+        <x-data-table
+            route="{{ route('konfigurasi-sekolah.kalender-akademik') }}"
+            search-placeholder="Cari kegiatan, kategori, TA..."
+            :per-page="$perPageInput">
 
-                    <div class="page-actions">
-                        <div class="per-page-selector">
-                            <label for="table_per_page" class="table-cell-muted">Tampilkan:</label>
-                            <select id="table_per_page" name="per_page" class="form-select-sm"
-                                onchange="this.form.submit()">
-                                <option value="15" {{ $perPageInput === '15' ? 'selected' : '' }}>15</option>
-                                <option value="30" {{ $perPageInput === '30' ? 'selected' : '' }}>30</option>
-                                <option value="90" {{ $perPageInput === '90' ? 'selected' : '' }}>90</option>
-                                <option value="semua"
-                                    {{ in_array($perPageInput, ['semua', 'all'], true) ? 'selected' : '' }}>Semua</option>
-                            </select>
-                            <span class="table-cell-muted">data</span>
-                        </div>
+            <x-slot:filters>
+                <input type="hidden" name="view" value="tabel">
+                <input type="hidden" name="school_id" value="{{ $selectedSchoolId }}">
 
-                        <select name="kategori" class="form-select-sm" onchange="this.form.submit()">
-                            <option value="">Semua Kategori</option>
-                            @foreach ($kategoriOptions as $key => $opt)
-                                <option value="{{ $key }}" {{ request('kategori') === $key ? 'selected' : '' }}>
-                                    {{ $opt['label'] }}
-                                </option>
-                            @endforeach
-                        </select>
+                <x-form-select
+                    id="selectKategori"
+                    name="kategori"
+                    class="form-select-sm"
+                    placeholder="Semua Kategori"
+                    :selected="request('kategori')"
+                    :options="$kategoriOptions"
+                    onchange="this.form.submit()"
+                />
 
-                        <select name="semester" class="form-select-sm" onchange="this.form.submit()">
-                            <option value="">Semua Semester</option>
-                            <option value="ganjil" {{ request('semester') === 'ganjil' ? 'selected' : '' }}>Ganjil
-                            </option>
-                            <option value="genap" {{ request('semester') === 'genap' ? 'selected' : '' }}>Genap</option>
-                        </select>
+                <x-form-select 
+                    id="semester"
+                    name="semester"
+                    class="form-select-sm"
+                    placeholder="Semua Semester"
+                    :selected="request('semester')"
+                    :options="[
+                        'ganjil' => 'Ganjil',
+                        'genap' => 'Genap',
+                    ]"
+                    onchange="this.form.submit()"
+                />
 
-                        @if ($availableYears->isNotEmpty())
-                            <select name="tahun_ajaran" class="form-select-sm" onchange="this.form.submit()">
-                                <option value="">Semua Tahun Ajaran</option>
-                                @foreach ($availableYears as $ta)
-                                    <option value="{{ $ta }}"
-                                        {{ request('tahun_ajaran') === $ta ? 'selected' : '' }}>{{ $ta }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        @endif
-                    </div>
+                @if ($availableYears->isNotEmpty())
+                    <x-form-select 
+                        id="tahun_ajaran"
+                        name="tahun_ajaran"
+                        class="form-select-sm"
+                        placeholder="Semua Tahun Ajaran"
+                        :selected="request('tahun_ajaran')"
+                        :options="$availableYears->combine($availableYears)"
+                        onchange="this.form.submit()"
+                    />
+                @endif
+            </x-slot:filters>
 
-                    <div class="search-box toolbar-search-box">
-                        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        </svg>
-                        <input type="text" name="search" class="search-input"
-                            placeholder="Cari kegiatan, kategori, TA..." value="{{ request('search') }}">
-                    </div>
-                </form>
-            </div>
-
-            <div class="table-container table-responsive-scroll">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th class="table-col-w-sm text-center">No</th>
-                            <th>Tanggal Kegiatan</th>
-                            <th>Nama Kegiatan</th>
-                            <th>Kategori</th>
-                            <th>Semester / TA</th>
-                            <th class="text-center">Libur KBM</th>
-                            <th class="table-col-w-action text-right">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($agendaList as $index => $item)
-                            <tr>
-                                <td class="text-center">{{ $agendaList->firstItem() + $index }}</td>
-                                <td>
-                                    <strong>{{ $item->rentang_tanggal_formatted }}</strong>
-                                    <div class="table-cell-muted">
-                                        @if ($item->tanggal_mulai && $item->tanggal_selesai && $item->tanggal_mulai->ne($item->tanggal_selesai))
-                                            {{ $item->tanggal_mulai->diffInDays($item->tanggal_selesai) + 1 }} hari
-                                        @else
-                                            1 hari
-                                        @endif
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="font-semibold">{{ $item->judul_kegiatan }}</div>
-                                    @if ($item->keterangan)
-                                        <div class="table-cell-muted">{{ Str::limit($item->keterangan, 60) }}</div>
-                                    @endif
-                                </td>
-                                <td>
-                                    <span class="badge {{ $item->badge_class }}">
-                                        {{ $item->kategori }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="table-cell-muted">Semester {{ ucfirst($item->semester) }} &bull;
-                                        {{ $item->tahun_ajaran }}</span>
-                                </td>
-                                <td class="text-center">
-                                    @if ($item->libur_kbm)
-                                        <span class="badge badge-rose">Ya (Libur)</span>
-                                    @else
-                                        <span class="badge badge-success">Tidak</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <div class="table-actions table-actions-right">
-                                        <button type="button" class="btn-edit btn-open-edit-kalender"
-                                            title="Ubah Agenda"
-                                            data-event="{{ json_encode([
-                                                'id' => $item->id,
-                                                'school_id' => $item->school_id,
-                                                'judul_kegiatan' => $item->judul_kegiatan,
-                                                'tanggal_mulai' => $item->tanggal_mulai?->format('Y-m-d'),
-                                                'tanggal_selesai' => $item->tanggal_selesai?->format('Y-m-d'),
-                                                'tahun_ajaran' => $item->tahun_ajaran,
-                                                'semester' => $item->semester,
-                                                'kategori' => $item->kategori,
-                                                'warna' => $item->warna,
-                                                'libur_kbm' => $item->libur_kbm,
-                                                'keterangan' => $item->keterangan,
-                                            ]) }}"
-                                            data-action="{{ route('konfigurasi-sekolah.kalender-akademik.update', $item) }}">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                stroke-linejoin="round">
-                                                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
-                                            </svg>
-                                        </button>
-                                        <button type="button" class="btn-delete btn-open-delete-kalender"
-                                            title="Hapus Agenda" data-title="{{ $item->judul_kegiatan }}"
-                                            data-kategori="{{ $item->kategori }}"
-                                            data-action="{{ route('konfigurasi-sekolah.kalender-akademik.destroy', $item) }}">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                stroke-linejoin="round">
-                                                <polyline points="3 6 5 6 21 6"></polyline>
-                                                <path
-                                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
-                                                </path>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            @php
-                                $isFiltered = request()->filled('search') || request()->filled('kategori') || request()->filled('semester') || request()->filled('tahun_ajaran');
-                                $emptyText = $isFiltered
-                                    ? 'Tidak ada agenda kegiatan akademik yang cocok dengan kriteria filter pencarian Anda.'
-                                    : 'Belum ada agenda kalender akademik yang tercatat. Klik "Tambah Agenda" di atas untuk menambahkan agenda baru.';
-                            @endphp
-
-                            <x-empty-state
-                                icon="calendar"
-                                iconSize="48"
-                                colspan="7"
-                                :text="$emptyText">
-                                {{-- @if ($isFiltered)
-                                    <x-slot:action>
-                                        <a href="{{ route('konfigurasi-sekolah.kalender-akademik', ['school_id' => $selectedSchoolId, 'view' => 'tabel']) }}" class="btn-secondary">
-                                            Reset Filter Pencarian
-                                        </a>
-                                    </x-slot:action>
+            <thead>
+                <tr>
+                    <th class="table-col-w-sm text-center">No</th>
+                    <th>Tanggal Kegiatan</th>
+                    <th>Nama Kegiatan</th>
+                    <th>Kategori</th>
+                    <th>Semester / TA</th>
+                    <th class="text-center">Libur KBM</th>
+                    <th class="table-col-w-action text-right">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($agendaList as $index => $item)
+                    <tr>
+                        <td class="text-center">{{ $agendaList->firstItem() + $index }}</td>
+                        <td>
+                            <strong>{{ $item->rentang_tanggal_formatted }}</strong>
+                            <div class="table-cell-muted">
+                                @if ($item->tanggal_mulai && $item->tanggal_selesai && $item->tanggal_mulai->ne($item->tanggal_selesai))
+                                    {{ $item->tanggal_mulai->diffInDays($item->tanggal_selesai) + 1 }} hari
                                 @else
-                                    <x-slot:action>
-                                        <button type="button" class="btn-primary" id="btnEmptyCreateKalender">
-                                            <x-icon name="add" size="16" />
-                                            <span>Tambah Agenda</span>
-                                        </button>
-                                    </x-slot:action>
-                                @endif --}}
-                            </x-empty-state>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                                    1 hari
+                                @endif
+                            </div>
+                        </td>
+                        <td>
+                            <div class="font-semibold">{{ $item->judul_kegiatan }}</div>
+                            @if ($item->keterangan)
+                                <div class="table-cell-muted">{{ Str::limit($item->keterangan, 60) }}</div>
+                            @endif
+                        </td>
+                        <td>
+                            <span class="badge {{ $item->badge_class }}">
+                                {{ $item->kategori }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="table-cell-muted">Semester {{ ucfirst($item->semester) }} &bull;
+                                {{ $item->tahun_ajaran }}</span>
+                        </td>
+                        <td class="text-center">
+                            @if ($item->libur_kbm)
+                                <span class="badge badge-rose">Ya (Libur)</span>
+                            @else
+                                <span class="badge badge-success">Tidak</span>
+                            @endif
+                        </td>
+                        <td class="table-col-w-action text-right">
+                            <x-table-actions align="right">
+                                <button type="button" class="btn-edit btn-open-edit-kalender"
+                                    title="Ubah Agenda"
+                                    data-event="{{ json_encode([
+                                        'id' => $item->id,
+                                        'school_id' => $item->school_id,
+                                        'judul_kegiatan' => $item->judul_kegiatan,
+                                        'tanggal_mulai' => $item->tanggal_mulai?->format('Y-m-d'),
+                                        'tanggal_selesai' => $item->tanggal_selesai?->format('Y-m-d'),
+                                        'tahun_ajaran' => $item->tahun_ajaran,
+                                        'semester' => $item->semester,
+                                        'kategori' => $item->kategori,
+                                        'warna' => $item->warna,
+                                        'libur_kbm' => $item->libur_kbm,
+                                        'keterangan' => $item->keterangan,
+                                    ]) }}"
+                                    data-action="{{ route('konfigurasi-sekolah.kalender-akademik.update', $item) }}">
+                                    <x-icon name="pencil" size="14" />
+                                </button>
+                                <button type="button" class="btn-delete btn-open-delete-kalender"
+                                    title="Hapus Agenda" data-title="{{ $item->judul_kegiatan }}"
+                                    data-kategori="{{ $item->kategori }}"
+                                    data-action="{{ route('konfigurasi-sekolah.kalender-akademik.destroy', $item) }}">
+                                    <x-icon name="trash" size="14" />
+                                </button>
+                            </x-table-actions>
+                        </td>
+                    </tr>
+                @empty
+                    @php
+                        $isFiltered = request()->filled('search') || request()->filled('kategori') || request()->filled('semester') || request()->filled('tahun_ajaran');
+                        $emptyText = $isFiltered
+                            ? 'Tidak ada agenda kegiatan akademik yang cocok dengan kriteria filter pencarian Anda.'
+                            : 'Belum ada agenda kalender akademik yang tercatat. Klik "Tambah Agenda" di atas untuk menambahkan agenda baru.';
+                    @endphp
 
-            <div class="table-footer">
-                {{ $agendaList->links() }}
-            </div>
-        </div>
+                    <x-empty-state
+                        icon="calendar"
+                        iconSize="48"
+                        colspan="7"
+                        :text="$emptyText"
+                    />
+                @endforelse
+            </tbody>
+
+            <x-slot:footer>
+                <x-pagination-summary :paginator="$agendaList" />
+            </x-slot:footer>
+        </x-data-table>
     </div>
 
     {{-- Modal Konfirmasi Hapus Agenda Component --}}
@@ -870,11 +819,7 @@
                     if (events.length === 0) {
                         listDateDetail.innerHTML = `
                             <div class="empty-state">
-                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="empty-state-icon">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <line x1="12" y1="8" x2="12" y2="12"></line>
-                                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                                </svg>
+                                <x-icon name="info-circle" size="40" class="empty-state-icon" />
                                 <span class="empty-state-text">Tidak ada kegiatan akademik pada tanggal ini. Klik tombol di bawah untuk menambahkan agenda baru.</span>
                             </div>
                         `;
@@ -896,9 +841,7 @@
                                 ${item.keterangan ? `<div class="card-list-item-desc">${item.keterangan}</div>` : ''}
                                 <div class="table-actions table-actions-right card-list-item-actions">
                                     <button type="button" class="btn-secondary btn-sm btn-edit-from-detail" title="Ubah Agenda Ini">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
-                                        </svg>
+                                        <x-icon name="pencil" size="14" />
                                         <span>Ubah Agenda</span>
                                     </button>
                                 </div>

@@ -3818,9 +3818,9 @@ body.modal-open {
    ========================================================================== */
 
 /* Full-Height Responsive Calendar View (Menyesuaikan Tinggi Selayar Penuh & Skala Layar 125%) */
-.layout-main-body:has(#panelCalendarView:not(.hidden)) {
+/* .layout-main-body:has(#panelCalendarView:not(.hidden)) {
     padding: 1rem 1.5rem;
-}
+} */
 
 .layout-main-body:has(#panelCalendarView:not(.hidden)) .page-header {
     margin-bottom: 0.75rem;

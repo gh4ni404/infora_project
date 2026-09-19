@@ -71,6 +71,8 @@ test('super admin can view academic calendar events in list', function () {
     $response->assertSee('Penilaian Tengah Semester (PTS)');
     $response->assertSee('Ujian/Asesmen');
     $response->assertSee('2026/2027');
+    $response->assertSee('selectKategori', false);
+    $response->assertSee('Semua Semester');
 });
 
 test('super admin can store new academic calendar event', function () {
