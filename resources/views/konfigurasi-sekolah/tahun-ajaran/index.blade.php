@@ -125,10 +125,12 @@
                             <button
                                 type="button"
                                 class="btn-edit btn-edit-ta"
-                                data-id="{{ $ta->id }}"
-                                data-tahun="{{ $ta->tahun }}"
-                                data-is-active="{{ $ta->is_active ? '1' : '0' }}"
-                                data-keterangan="{{ $ta->keterangan }}"
+                                data-ta="{{ json_encode([
+                                    'id' => $ta->id,
+                                    'tahun' => $ta->tahun,
+                                    'keterangan' => $ta->keterangan,
+                                    'is_active' => (bool) $ta->is_active,
+                                ]) }}"
                                 data-action="{{ route('konfigurasi-sekolah.tahun-ajaran.update', $ta) }}"
                                 title="Ubah Tahun Ajaran {{ $ta->tahun }}"
                             >
@@ -246,12 +248,14 @@
                                 <button
                                     type="button"
                                     class="btn-edit btn-edit-sem"
-                                    data-id="{{ $sem->id }}"
-                                    data-semester="{{ $sem->semester }}"
-                                    data-tanggal-mulai="{{ $sem->tanggal_mulai?->format('Y-m-d') }}"
-                                    data-tanggal-selesai="{{ $sem->tanggal_selesai?->format('Y-m-d') }}"
-                                    data-is-active="{{ $sem->is_active ? '1' : '0' }}"
-                                    data-keterangan="{{ $sem->keterangan }}"
+                                    data-sem="{{ json_encode([
+                                        'id' => $sem->id,
+                                        'semester' => $sem->semester,
+                                        'tanggal_mulai' => $sem->tanggal_mulai?->format('Y-m-d'),
+                                        'tanggal_selesai' => $sem->tanggal_selesai?->format('Y-m-d'),
+                                        'keterangan' => $sem->keterangan,
+                                        'is_active' => (bool) $sem->is_active,
+                                    ]) }}"
                                     data-action="{{ route('konfigurasi-sekolah.tahun-ajaran.semester.update', [$selectedTahunAjaran, $sem]) }}"
                                     title="Ubah Semester {{ $sem->label_semester }}"
                                 >
@@ -295,132 +299,64 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Utility Helper Modal Open & Close
-    function openModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.remove('hidden');
-            document.body.classList.add('modal-open');
-        }
-    }
-
-    function closeModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.add('hidden');
-            document.body.classList.remove('modal-open');
-        }
-    }
-
-    // Modal Create Tahun Ajaran
-    const btnOpenCreateTa = document.getElementById('btnOpenCreateTahunAjaran');
-    const btnCloseCreateTa = document.getElementById('btnCloseCreateTahunAjaran');
-    const btnCancelCreateTa = document.getElementById('btnCancelCreateTahunAjaran');
-    const modalCreateTa = document.getElementById('modalCreateTahunAjaran');
-
-    if (btnOpenCreateTa) {
-        btnOpenCreateTa.addEventListener('click', function () {
-            openModal('modalCreateTahunAjaran');
-            const inputTahun = document.getElementById('create_tahun');
-            if (inputTahun) {
-                setTimeout(() => inputTahun.focus(), 100);
-            }
-        });
-    }
-    if (btnCloseCreateTa) btnCloseCreateTa.addEventListener('click', () => closeModal('modalCreateTahunAjaran'));
-    if (btnCancelCreateTa) btnCancelCreateTa.addEventListener('click', () => closeModal('modalCreateTahunAjaran'));
-
-    // Modal Edit Tahun Ajaran
-    const btnCloseEditTa = document.getElementById('btnCloseEditTahunAjaran');
-    const btnCancelEditTa = document.getElementById('btnCancelEditTahunAjaran');
-    const formEditTa = document.getElementById('formEditTahunAjaran');
-
-    document.querySelectorAll('.btn-edit-ta').forEach(function (button) {
-        button.addEventListener('click', function () {
-            const data = this.dataset;
-            if (formEditTa) {
-                formEditTa.action = data.action;
-                const inputTahun = document.getElementById('edit_ta_tahun');
-                const inputKeterangan = document.getElementById('edit_ta_keterangan');
-                const inputIsActive = document.getElementById('edit_ta_is_active');
-
-                if (inputTahun) inputTahun.value = data.tahun || '';
-                if (inputKeterangan) inputKeterangan.value = data.keterangan || '';
-                if (inputIsActive) inputIsActive.checked = data.isActive === '1';
-
-                openModal('modalEditTahunAjaran');
-            }
-        });
+    // 1. Setup Modals (Close, Cancel, Backdrop Click, dan Escape Key)
+    InforaModals.setup('modalCreateTahunAjaran', {
+        closeBtnId: 'btnCloseCreateTahunAjaran',
+        cancelBtnId: 'btnCancelCreateTahunAjaran',
+    });
+    InforaModals.setup('modalEditTahunAjaran', {
+        closeBtnId: 'btnCloseEditTahunAjaran',
+        cancelBtnId: 'btnCancelEditTahunAjaran',
+    });
+    InforaModals.setup('modalCreateSemester', {
+        closeBtnId: 'btnCloseCreateSemester',
+        cancelBtnId: 'btnCancelCreateSemester',
+    });
+    InforaModals.setup('modalEditSemester', {
+        closeBtnId: 'btnCloseEditSemester',
+        cancelBtnId: 'btnCancelEditSemester',
     });
 
-    if (btnCloseEditTa) btnCloseEditTa.addEventListener('click', () => closeModal('modalEditTahunAjaran'));
-    if (btnCancelEditTa) btnCancelEditTa.addEventListener('click', () => closeModal('modalEditTahunAjaran'));
+    // 2. Bind Tombol Buka Modal Tambah
+    InforaModals.bindOpenButton('btnOpenCreateTahunAjaran', 'modalCreateTahunAjaran');
+    InforaModals.bindOpenButton('btnOpenCreateSemester', 'modalCreateSemester');
 
-    // Modal Create Semester
-    const btnOpenCreateSem = document.getElementById('btnOpenCreateSemester');
-    const btnCloseCreateSem = document.getElementById('btnCloseCreateSemester');
-    const btnCancelCreateSem = document.getElementById('btnCancelCreateSemester');
+    // 3. Bind Tombol Ubah Tahun Ajaran
+    InforaModals.bindEditButtons('.btn-edit-ta', 'modalEditTahunAjaran', function (modal, data) {
+        const inputTahun = document.getElementById('edit_ta_tahun');
+        const inputKeterangan = document.getElementById('edit_ta_keterangan');
+        const inputIsActive = document.getElementById('edit_ta_is_active');
 
-    if (btnOpenCreateSem) {
-        btnOpenCreateSem.addEventListener('click', function () {
-            if (!this.disabled) {
-                openModal('modalCreateSemester');
-            }
-        });
-    }
-    if (btnCloseCreateSem) btnCloseCreateSem.addEventListener('click', () => closeModal('modalCreateSemester'));
-    if (btnCancelCreateSem) btnCancelCreateSem.addEventListener('click', () => closeModal('modalCreateSemester'));
-
-    // Modal Edit Semester
-    const btnCloseEditSem = document.getElementById('btnCloseEditSemester');
-    const btnCancelEditSem = document.getElementById('btnCancelEditSemester');
-    const formEditSem = document.getElementById('formEditSemester');
-
-    document.querySelectorAll('.btn-edit-sem').forEach(function (button) {
-        button.addEventListener('click', function () {
-            const data = this.dataset;
-            if (formEditSem) {
-                formEditSem.action = data.action;
-                const inputSem = document.getElementById('edit_sem_type');
-                const inputMulai = document.getElementById('edit_sem_tanggal_mulai');
-                const inputSelesai = document.getElementById('edit_sem_tanggal_selesai');
-                const inputKeterangan = document.getElementById('edit_sem_keterangan');
-                const inputIsActive = document.getElementById('edit_sem_is_active');
-
-                if (inputSem) inputSem.value = data.semester || 'ganjil';
-                if (inputMulai) inputMulai.value = data.tanggalMulai || '';
-                if (inputSelesai) inputSelesai.value = data.tanggalSelesai || '';
-                if (inputKeterangan) inputKeterangan.value = data.keterangan || '';
-                if (inputIsActive) inputIsActive.checked = data.isActive === '1';
-
-                openModal('modalEditSemester');
-            }
-        });
+        if (inputTahun) inputTahun.value = data.tahun || '';
+        if (inputKeterangan) inputKeterangan.value = data.keterangan || '';
+        if (inputIsActive) inputIsActive.checked = Boolean(data.is_active);
     });
 
-    if (btnCloseEditSem) btnCloseEditSem.addEventListener('click', () => closeModal('modalEditSemester'));
-    if (btnCancelEditSem) btnCancelEditSem.addEventListener('click', () => closeModal('modalEditSemester'));
+    // 4. Bind Tombol Ubah Semester
+    InforaModals.bindEditButtons('.btn-edit-sem', 'modalEditSemester', function (modal, data) {
+        const inputSem = document.getElementById('edit_sem_type');
+        const inputMulai = document.getElementById('edit_sem_tanggal_mulai');
+        const inputSelesai = document.getElementById('edit_sem_tanggal_selesai');
+        const inputKeterangan = document.getElementById('edit_sem_keterangan');
+        const inputIsActive = document.getElementById('edit_sem_is_active');
 
-    // Global Overlay & Escape Close
-    const allModals = ['modalCreateTahunAjaran', 'modalEditTahunAjaran', 'modalCreateSemester', 'modalEditSemester'];
-    allModals.forEach(function (id) {
-        const modal = document.getElementById(id);
-        if (modal) {
-            modal.addEventListener('click', function (e) {
-                if (e.target === modal) {
-                    closeModal(id);
-                }
-            });
-        }
+        if (inputSem) inputSem.value = data.semester || 'ganjil';
+        if (inputMulai) inputMulai.value = data.tanggal_mulai || '';
+        if (inputSelesai) inputSelesai.value = data.tanggal_selesai || '';
+        if (inputKeterangan) inputKeterangan.value = data.keterangan || '';
+        if (inputIsActive) inputIsActive.checked = Boolean(data.is_active);
     });
 
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') {
-            allModals.forEach(closeModal);
-        }
+    // 5. Auto Re-open Modal jika terjadi error validasi
+    window.hasValidationErrors = {{ $errors->any() ? 'true' : 'false' }};
+    window.errorMethod = @json(old('_method'));
+    const isSemesterError = {{ $errors->hasAny(['semester', 'tanggal_mulai', 'tanggal_selesai']) ? 'true' : 'false' }};
+    InforaModals.reopenOnError({
+        create: isSemesterError ? 'modalCreateSemester' : 'modalCreateTahunAjaran',
+        edit: isSemesterError ? 'modalEditSemester' : 'modalEditTahunAjaran',
     });
 
-    // Auto-masking format Tahun Ajaran (YYYY/YYYY)
+    // 6. Auto-masking format Tahun Ajaran (YYYY/YYYY)
     function attachYearMask(inputElement) {
         if (!inputElement) return;
         inputElement.addEventListener('input', function (e) {
