@@ -657,6 +657,20 @@ document.addEventListener('DOMContentLoaded', () => {
             window.InforaProgress.hide();
         }
     });
+
+    // Delegated dismissal for alert components
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.alert-close-btn');
+        if (btn) {
+            const alertEl = btn.closest('.alert, .alert-success, .alert-danger, .alert-warning, .alert-info');
+            if (alertEl && !alertEl.classList.contains('alert-dismissing')) {
+                alertEl.style.maxHeight = alertEl.offsetHeight + 'px';
+                alertEl.offsetHeight;
+                alertEl.classList.add('alert-dismissing');
+                setTimeout(() => alertEl.remove(), 260);
+            }
+        }
+    });
 });
 
 // Lightweight global toast feedback notification

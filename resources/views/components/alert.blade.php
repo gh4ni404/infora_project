@@ -1,6 +1,6 @@
 @props([
     'type' => 'success',
-    'dismissible' => false,
+    'dismissible' => true,
     'title' => null,
     'message' => null,
 ])
@@ -35,12 +35,12 @@
 @endphp
 
 @if ($shouldRender)
-    <div {{ $attributes->merge(['class' => $cssClass]) }}>
+    <div {{ $attributes->merge(['class' => 'alert ' . $cssClass]) }}>
         <div class="alert-content">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="alert-icon">
                 {!! $iconSvg !!}
             </svg>
-            <div>
+            <div class="alert-body">
                 @if ($title)
                     <strong>{{ $title }}</strong>
                     @if ($hasSlot)
@@ -57,5 +57,10 @@
                 @endif
             </div>
         </div>
+        @if ($dismissible)
+            <button type="button" class="alert-close-btn" aria-label="Tutup pemberitahuan">
+                <x-icon name="close" size="16" />
+            </button>
+        @endif
     </div>
 @endif
