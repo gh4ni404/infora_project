@@ -14,7 +14,7 @@
             @if ($schools->count() > 1)
                 <form method="GET" action="{{ route('konfigurasi-sekolah.kalender-akademik') }}" id="schoolFilterForm">
                     <input type="hidden" name="view" value="{{ $activeView }}" id="schoolFilterView">
-                    <select name="school_id" class="form-select-sm" onchange="this.form.submit()"
+                    <select name="school_id" class="form-select" onchange="this.form.submit()"
                         title="Pilih Unit Sekolah">
                         @foreach ($schools as $school)
                             <option value="{{ $school->id }}" {{ $selectedSchoolId === $school->id ? 'selected' : '' }}>
@@ -64,8 +64,8 @@
     {{-- ========================================================================
      TAMPILAN 1: KALENDER BULANAN INTERAKTIF
      ======================================================================== --}}
-    <div id="panelCalendarView" class="{{ $activeView === 'kalender' ? '' : 'hidden' }}">
-        <div class="table-card">
+    <div id="panelCalendarView" class="panel-calendar-view {{ $activeView === 'kalender' ? '' : 'hidden' }}">
+        <div class="table-card calendar-card">
             <div class="table-toolbar">
                 {{-- Navigasi Bulan / Tahun Universal --}}
                 <div class="toolbar-nav">
@@ -300,6 +300,7 @@
                                         </button>
                                         <button type="button" class="btn-delete btn-open-delete-kalender"
                                             title="Hapus Agenda" data-title="{{ $item->judul_kegiatan }}"
+                                            data-kategori="{{ $item->kategori }}"
                                             data-action="{{ route('konfigurasi-sekolah.kalender-akademik.destroy', $item) }}">
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                                                 stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -314,23 +315,33 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr>
-                                <td colspan="7">
-                                    <div class="empty-state">
-                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                            stroke-linejoin="round" class="empty-state-icon">
-                                            <rect x="3" y="4" width="18" height="18" rx="2"
-                                                ry="2"></rect>
-                                            <line x1="16" y1="2" x2="16" y2="6"></line>
-                                            <line x1="8" y1="2" x2="8" y2="6"></line>
-                                            <line x1="3" y1="10" x2="21" y2="10"></line>
-                                        </svg>
-                                        <span class="empty-state-text">Belum ada agenda kalender akademik yang tercatat.
-                                            Klik "Tambah Agenda" untuk membuat kegiatan baru.</span>
-                                    </div>
-                                </td>
-                            </tr>
+                            @php
+                                $isFiltered = request()->filled('search') || request()->filled('kategori') || request()->filled('semester') || request()->filled('tahun_ajaran');
+                                $emptyText = $isFiltered
+                                    ? 'Tidak ada agenda kegiatan akademik yang cocok dengan kriteria filter pencarian Anda.'
+                                    : 'Belum ada agenda kalender akademik yang tercatat. Klik "Tambah Agenda" di atas untuk menambahkan agenda baru.';
+                            @endphp
+
+                            <x-empty-state
+                                icon="calendar"
+                                iconSize="48"
+                                colspan="7"
+                                :text="$emptyText">
+                                {{-- @if ($isFiltered)
+                                    <x-slot:action>
+                                        <a href="{{ route('konfigurasi-sekolah.kalender-akademik', ['school_id' => $selectedSchoolId, 'view' => 'tabel']) }}" class="btn-secondary">
+                                            Reset Filter Pencarian
+                                        </a>
+                                    </x-slot:action>
+                                @else
+                                    <x-slot:action>
+                                        <button type="button" class="btn-primary" id="btnEmptyCreateKalender">
+                                            <x-icon name="add" size="16" />
+                                            <span>Tambah Agenda</span>
+                                        </button>
+                                    </x-slot:action>
+                                @endif --}}
+                            </x-empty-state>
                         @endforelse
                     </tbody>
                 </table>
@@ -355,6 +366,17 @@
         close-btn-id="btnCloseDeleteKalender"
         cancel-btn-id="btnCancelDeleteKalender"
     >
+        <p class="text-sm text-gray-600 mb-2.5">
+            Apakah Anda yakin ingin menghapus agenda berikut?
+        </p>
+
+        <div class="p-3.5 my-16 mx-6 bg-slate-50 border border-slate-200/90 rounded-xl text-center shadow-xs">
+            <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-semibold bg-slate-200/80 text-slate-700 rounded-md mb-1.5">
+                <span id="deleteKalenderKategori">-</span>
+            </span>
+            <div class="text-sm font-bold text-slate-900 leading-snug" id="deleteKalenderTitle">-</div>
+        </div>
+        
         <x-slot:hiddenInputs>
             <input type="hidden" name="view" value="{{ $activeView }}">
         </x-slot:hiddenInputs>
@@ -451,7 +473,7 @@
                 });
             }
 
-            // Render Grid Kalender
+            // Render Grid Kalender dengan Logika Slot Mingguan & Segmen Rentang Berkelanjutan
             function renderCalendarGrid() {
                 if (!gridBody) return;
                 gridBody.innerHTML = '';
@@ -464,7 +486,7 @@
                 const daysInCurrentMonth = new Date(currentCalendarYear, currentCalendarMonth, 0).getDate();
 
                 // Hari dalam seminggu (0 = Minggu, 1 = Senin, ..., 6 = Sabtu)
-                // Di Indonesia kalender dimulai dari Senin (index 1) sampai Minggu (index 0 / 7)
+                // Di Indonesia kalender dimulai dari Senin (index 0) sampai Minggu (index 6)
                 let startingDayIndex = firstDayOfMonth.getDay();
                 startingDayIndex = startingDayIndex === 0 ? 6 : startingDayIndex - 1; // 0 for Senin, 6 for Minggu
 
@@ -473,28 +495,40 @@
                 const daysInPrevMonth = prevMonthDate.getDate();
 
                 const todayObj = new Date();
-                const todayString = formatDateYMD(todayObj.getFullYear(), todayObj.getMonth() + 1, todayObj
-                    .getDate());
+                const todayString = formatDateYMD(todayObj.getFullYear(), todayObj.getMonth() + 1, todayObj.getDate());
 
-                // 1. Render sel dari bulan sebelumnya
+                // Kumpulkan seluruh data sel kalender (bulan sebelumnya, bulan aktif, bulan berikutnya)
+                const calendarDays = [];
+
+                // 1. Sel dari bulan sebelumnya
                 for (let i = startingDayIndex - 1; i >= 0; i--) {
                     const dayNum = daysInPrevMonth - i;
                     const prevMonth = currentCalendarMonth === 1 ? 12 : currentCalendarMonth - 1;
                     const prevYear = currentCalendarMonth === 1 ? currentCalendarYear - 1 : currentCalendarYear;
                     const dateStr = formatDateYMD(prevYear, prevMonth, dayNum);
 
-                    createDayCell(dayNum, dateStr, true);
+                    calendarDays.push({
+                        dayNum,
+                        dateStr,
+                        isOtherMonth: true,
+                        isToday: false
+                    });
                 }
 
-                // 2. Render sel bulan saat ini
+                // 2. Sel bulan saat ini
                 for (let dayNum = 1; dayNum <= daysInCurrentMonth; dayNum++) {
                     const dateStr = formatDateYMD(currentCalendarYear, currentCalendarMonth, dayNum);
-                    const isToday = dateStr === todayString;
+                    const isToday = (dateStr === todayString);
 
-                    createDayCell(dayNum, dateStr, false, isToday);
+                    calendarDays.push({
+                        dayNum,
+                        dateStr,
+                        isOtherMonth: false,
+                        isToday
+                    });
                 }
 
-                // 3. Render sel bulan berikutnya agar genap kelipatan 7
+                // 3. Sel bulan berikutnya agar genap kelipatan 7
                 const totalCellsSoFar = startingDayIndex + daysInCurrentMonth;
                 const remainingCells = (7 - (totalCellsSoFar % 7)) % 7;
                 for (let dayNum = 1; dayNum <= remainingCells; dayNum++) {
@@ -502,19 +536,102 @@
                     const nextYear = currentCalendarMonth === 12 ? currentCalendarYear + 1 : currentCalendarYear;
                     const dateStr = formatDateYMD(nextYear, nextMonth, dayNum);
 
-                    createDayCell(dayNum, dateStr, true);
+                    calendarDays.push({
+                        dayNum,
+                        dateStr,
+                        isOtherMonth: true,
+                        isToday: false
+                    });
+                }
+
+                // Proses kalender per minggu (kelompok 7 hari) untuk alokasi slot vertikal yang sejajar
+                const maxVisible = 2;
+                for (let w = 0; w < calendarDays.length; w += 7) {
+                    const weekDays = calendarDays.slice(w, w + 7);
+
+                    // A. Kumpulkan semua event unik yang aktif pada minggu ini
+                    const activeEventsInWeek = [];
+                    const seenEventIds = new Set();
+                    weekDays.forEach(day => {
+                        const dayEvents = getEventsForDate(day.dateStr);
+                        dayEvents.forEach(evt => {
+                            if (!seenEventIds.has(evt.id)) {
+                                seenEventIds.add(evt.id);
+                                activeEventsInWeek.push(evt);
+                            }
+                        });
+                    });
+
+                    // B. Prioritaskan event berentang panjang (multi-day) agar berada di slot atas
+                    activeEventsInWeek.sort((a, b) => {
+                        const aIsMulti = (a.tanggal_mulai && a.tanggal_selesai && a.tanggal_mulai !== a.tanggal_selesai) ? 1 : 0;
+                        const bIsMulti = (b.tanggal_mulai && b.tanggal_selesai && b.tanggal_mulai !== b.tanggal_selesai) ? 1 : 0;
+                        if (aIsMulti !== bIsMulti) {
+                            return bIsMulti - aIsMulti;
+                        }
+                        if (a.tanggal_mulai !== b.tanggal_mulai) {
+                            return a.tanggal_mulai.localeCompare(b.tanggal_mulai);
+                        }
+                        const aEnd = a.tanggal_selesai || a.tanggal_mulai;
+                        const bEnd = b.tanggal_selesai || b.tanggal_mulai;
+                        if (aEnd !== bEnd) {
+                            return bEnd.localeCompare(aEnd);
+                        }
+                        return a.id - b.id;
+                    });
+
+                    // C. Alokasikan slot konsisten (0 s.d. maxVisible - 1) untuk tiap hari dalam minggu
+                    const daySlots = Array.from({ length: 7 }, () => []);
+                    const dayOverflow = Array(7).fill(0);
+
+                    activeEventsInWeek.forEach(event => {
+                        const start = event.tanggal_mulai;
+                        const end = event.tanggal_selesai || event.tanggal_mulai;
+
+                        // Cari indeks hari (0 s.d. 6) yang dicakup oleh event di minggu ini
+                        const coveredIndices = [];
+                        for (let d = 0; d < 7; d++) {
+                            const dStr = weekDays[d].dateStr;
+                            if (dStr >= start && dStr <= end) {
+                                coveredIndices.push(d);
+                            }
+                        }
+                        if (coveredIndices.length === 0) return;
+
+                        // Cari slot baris terendah yang kosong pada semua hari tersebut
+                        let targetSlot = -1;
+                        for (let slot = 0; slot < maxVisible; slot++) {
+                            const isFree = coveredIndices.every(d => !daySlots[d][slot]);
+                            if (isFree) {
+                                targetSlot = slot;
+                                break;
+                            }
+                        }
+
+                        if (targetSlot !== -1) {
+                            coveredIndices.forEach(d => {
+                                daySlots[d][targetSlot] = event;
+                            });
+                        } else {
+                            // Melebihi kapasitas tampilan slot per sel
+                            coveredIndices.forEach(d => {
+                                dayOverflow[d]++;
+                            });
+                        }
+                    });
+
+                    // D. Render 7 sel hari untuk minggu ini
+                    weekDays.forEach((dayInfo, dayIndex) => {
+                        createDayCellWithSlots(dayInfo, daySlots[dayIndex], dayOverflow[dayIndex], dayIndex);
+                    });
                 }
             }
 
-            function createDayCell(dayNum, dateStr, isOtherMonth, isToday = false) {
+            function createDayCellWithSlots(dayInfo, slots, overflowCount, dayOfWeekIndex) {
+                const { dayNum, dateStr, isOtherMonth, isToday } = dayInfo;
                 const eventsOnDate = getEventsForDate(dateStr);
                 const hasHoliday = eventsOnDate.some(e => e.libur_kbm);
-
-                const dateParts = dateStr.split('-');
-                const cellDate = new Date(parseInt(dateParts[0], 10), parseInt(dateParts[1], 10) - 1, parseInt(
-                    dateParts[2], 10));
-                const dayOfWeek = cellDate.getDay(); // 0 = Minggu, 6 = Sabtu
-                const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+                const isWeekend = (dayOfWeekIndex === 5 || dayOfWeekIndex === 6); // 5 = Sabtu, 6 = Minggu
 
                 const cell = document.createElement('div');
                 cell.className = 'schedule-day-cell';
@@ -543,30 +660,101 @@
 
                 cell.appendChild(header);
 
-                // Daftar event badge
+                // Daftar item agenda / jadwal
                 const eventsContainer = document.createElement('div');
                 eventsContainer.className = 'schedule-items';
 
-                const maxVisible = 2;
-                eventsOnDate.slice(0, maxVisible).forEach(event => {
+                // Tentukan slot teratas yang terisi pada hari ini
+                let lastFilledSlot = -1;
+                for (let s = slots.length - 1; s >= 0; s--) {
+                    if (slots[s]) {
+                        lastFilledSlot = s;
+                        break;
+                    }
+                }
+
+                // Render slot secara sejajar dari 0 sampai lastFilledSlot
+                for (let s = 0; s <= lastFilledSlot; s++) {
+                    const event = slots[s];
+                    if (!event) {
+                        // Spacer transparan untuk mempertahankan kesejajaran baris horizontal
+                        const spacer = document.createElement('div');
+                        spacer.className = 'schedule-pill-spacer';
+                        eventsContainer.appendChild(spacer);
+                        continue;
+                    }
+
+                    const isMultiDay = Boolean(event.tanggal_mulai && event.tanggal_selesai && event.tanggal_mulai !== event.tanggal_selesai);
                     const pill = document.createElement('div');
-                    pill.className = `schedule-pill pill-${event.warna || 'blue'}`;
-                    pill.textContent = event.judul_kegiatan;
+                    pill.dataset.calendarEventId = event.id;
+
+                    if (!isMultiDay) {
+                        // Agenda tunggal 1 hari
+                        pill.className = `schedule-pill pill-${event.warna || 'blue'} pill-span-single`;
+                        pill.textContent = event.judul_kegiatan;
+                    } else {
+                        // Agenda berentang multi-hari (batang menyatu)
+                        const isActualStart = (dateStr === event.tanggal_mulai);
+                        const isActualEnd = (dateStr === event.tanggal_selesai);
+                        const isRowStart = isActualStart || (dayOfWeekIndex === 0);
+                        const isRowEnd = isActualEnd || (dayOfWeekIndex === 6);
+
+                        let spanType = 'middle';
+                        if (isRowStart && isRowEnd) {
+                            spanType = 'single';
+                        } else if (isRowStart) {
+                            spanType = 'start';
+                        } else if (isRowEnd) {
+                            spanType = 'end';
+                        }
+
+                        pill.className = `schedule-pill pill-${event.warna || 'blue'} pill-span-${spanType}`;
+
+                        const textSpan = document.createElement('span');
+                        textSpan.className = 'schedule-pill-text';
+                        textSpan.textContent = event.judul_kegiatan;
+                        pill.appendChild(textSpan);
+                    }
+
                     pill.title = `${event.judul_kegiatan} (${event.kategori})`;
 
-                    // Klik pada pill langsung membuka modal edit
+                    // Sinkronisasi efek hover untuk semua segmen event yang sama
+                    pill.addEventListener('mouseenter', function() {
+                        const evId = this.dataset.calendarEventId;
+                        if (evId && gridBody) {
+                            gridBody.querySelectorAll(`.schedule-pill[data-calendar-event-id="${evId}"]`).forEach(el => {
+                                el.classList.add('is-segment-hovered');
+                            });
+                        }
+                    });
+
+                    pill.addEventListener('mouseleave', function() {
+                        const evId = this.dataset.calendarEventId;
+                        if (evId && gridBody) {
+                            gridBody.querySelectorAll(`.schedule-pill[data-calendar-event-id="${evId}"]`).forEach(el => {
+                                el.classList.remove('is-segment-hovered');
+                            });
+                        }
+                    });
+
+                    // Klik pill langsung membuka modal edit
                     pill.addEventListener('click', function(e) {
                         e.stopPropagation();
                         openEditModal(event);
                     });
 
                     eventsContainer.appendChild(pill);
-                });
+                }
 
-                if (eventsOnDate.length > maxVisible) {
+                if (overflowCount > 0) {
                     const moreCount = document.createElement('div');
                     moreCount.className = 'schedule-pill-more';
-                    moreCount.textContent = `+${eventsOnDate.length - maxVisible} lainnya`;
+                    moreCount.textContent = `+${overflowCount} lainnya`;
+                    moreCount.title = `Lihat total ${eventsOnDate.length} agenda pada tanggal ini`;
+                    moreCount.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        openDateDetailModal(dateStr, eventsOnDate);
+                    });
                     eventsContainer.appendChild(moreCount);
                 }
 
@@ -642,6 +830,7 @@
 
             // Bind tombol buka tambah agenda utama
             InforaModals.bindOpenButton('btnOpenCreateKalender', 'modalCreateKalender');
+            InforaModals.bindOpenButton('btnEmptyCreateKalender', 'modalCreateKalender');
 
             // Kategori change -> Auto color select (Create Modal)
             const createKategori = document.getElementById('create_kategori');
@@ -809,18 +998,18 @@
             // ========================================================================
             // MODAL HAPUS AGENDA
             // ========================================================================
-            document.querySelectorAll('.btn-open-delete-kalender').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const formDelete = document.getElementById('formDeleteKalender');
-                    if (formDelete) {
-                        formDelete.action = this.dataset.action || '';
+            InforaModals.bindDeleteButtons('.btn-open-delete-kalender', 'modalDeleteKalender', {
+                titleId: 'deleteKalenderTitle',
+                onOpen: function(modal, btn) {
+                    const kategoriEl = document.getElementById('deleteKalenderKategori');
+                    if (kategoriEl) {
+                        kategoriEl.textContent = btn.dataset.kategori || '-';
                     }
-                    const deleteTitle = document.getElementById('deleteKalenderTitle');
-                    if (deleteTitle) {
-                        deleteTitle.textContent = this.dataset.title || 'agenda ini';
+                    const titleEl = document.getElementById('deleteKalenderTitle');
+                    if (titleEl && btn.dataset.title) {
+                        titleEl.textContent = btn.dataset.title;
                     }
-                    InforaModals.open('modalDeleteKalender');
-                });
+                }
             });
 
             // ========================================================================

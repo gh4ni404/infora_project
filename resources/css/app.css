@@ -3817,6 +3817,108 @@ body.modal-open {
     background: var(--infora-bg);
     color: var(--infora-text-subtle);
 }
+/* Full-Height Responsive Calendar View (Menyesuaikan Tinggi Selayar Penuh & Skala Layar 125%) */
+.layout-main-body:has(#panelCalendarView:not(.hidden)) {
+    padding: 1rem 1.5rem;
+}
+
+.layout-main-body:has(#panelCalendarView:not(.hidden)) .page-header {
+    margin-bottom: 0.75rem;
+}
+
+.panel-calendar-view,
+#panelCalendarView:not(.hidden) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+#panelCalendarView .table-card,
+.calendar-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+#panelCalendarView .table-toolbar {
+    padding: 0.625rem 1.25rem;
+    gap: 0.75rem;
+}
+
+#panelCalendarView .legend-bar {
+    padding: 0.35rem 1.25rem;
+    gap: 0.5rem 1rem;
+    font-size: 0.6875rem;
+}
+
+#panelCalendarView .schedule-header-cell {
+    padding: 0.45rem 0.5rem;
+    font-size: 0.6875rem;
+}
+
+#panelCalendarView #calendarGridBody {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-auto-rows: minmax(76px, 1fr);
+    min-height: 0;
+}
+
+#panelCalendarView .schedule-day-cell {
+    min-height: 76px;
+    height: 100%;
+    padding: 0.2rem 0.5rem 0.25rem 0.5rem;
+    gap: 0.125rem;
+}
+
+#panelCalendarView .schedule-day-header {
+    margin-bottom: 0.1rem;
+}
+
+#panelCalendarView .schedule-day-num {
+    min-width: 1.35rem;
+    height: 1.35rem;
+    font-size: 0.75rem;
+    border-radius: 0.25rem;
+}
+
+#panelCalendarView .schedule-items {
+    gap: 0.125rem;
+}
+
+#panelCalendarView .schedule-pill,
+#panelCalendarView .schedule-pill-spacer {
+    height: 1.25rem;
+    font-size: 0.6875rem;
+    padding: 0.05rem 0.35rem;
+    line-height: 1.2;
+}
+
+#panelCalendarView .schedule-pill-more {
+    font-size: 0.625rem;
+    font-weight: 700;
+    color: var(--infora-brand-primary, #2563EB);
+    padding: 0.05rem 0.25rem;
+    line-height: 1.1;
+    margin-top: 1px;
+    cursor: pointer;
+    border-radius: 0.25rem;
+    transition: background-color 0.1s ease, color 0.1s ease;
+    display: inline-block;
+    align-self: flex-start;
+}
+
+#panelCalendarView .schedule-pill-more:hover {
+    background-color: var(--infora-brand-soft, #EFF6FF);
+    text-decoration: underline;
+}
+
+#panelCalendarView .schedule-day-cell:nth-last-child(-n+7) {
+    border-bottom: none;
+}
+
 
 .schedule-day-cell.is-weekend.is-other-month {
     background: #FCFAFA;
@@ -3918,7 +4020,9 @@ body.modal-open {
 /* Pill Item Agenda Universal */
 .schedule-pill {
     display: block;
-    padding: 0.2rem 0.4rem;
+    height: 1.45rem;
+    padding: 0.15rem 0.4rem;
+    box-sizing: border-box;
     border-radius: 0.25rem;
     font-size: 0.6875rem;
     font-weight: 600;
@@ -3928,13 +4032,87 @@ body.modal-open {
     white-space: nowrap;
     border-left-width: 3px;
     border-left-style: solid;
-    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
     cursor: pointer;
 }
 
-.schedule-pill:hover {
+.schedule-pill:hover,
+.schedule-pill.is-segment-hovered {
     transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    filter: brightness(0.95);
+    z-index: 5 !important;
+}
+
+/* Spacer untuk menjaga konsistensi posisi slot baris vertikal antar tanggal */
+.schedule-pill-spacer {
+    display: block;
+    height: 1.45rem;
+    box-sizing: border-box;
+    visibility: hidden;
+    pointer-events: none;
+    margin: 0;
+}
+
+/* Segmen Rentang Agenda (Multi-Day Span) */
+.schedule-pill.pill-span-start {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none !important;
+    margin-right: calc(-0.5rem - 1px);
+    margin-left: 0;
+    z-index: 2;
+}
+
+.schedule-pill.pill-span-middle {
+    border-radius: 0;
+    border-left: none !important;
+    border-right: none !important;
+    margin-left: -0.5rem;
+    margin-right: calc(-0.5rem - 1px);
+    z-index: 2;
+}
+
+.schedule-pill.pill-span-middle .schedule-pill-text {
+    visibility: hidden;
+}
+
+.schedule-pill.pill-span-end {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-left: none !important;
+    margin-left: -0.5rem;
+    margin-right: 0;
+    z-index: 2;
+}
+
+.schedule-pill.pill-span-end .schedule-pill-text {
+    visibility: hidden;
+}
+
+.schedule-pill.pill-span-single {
+    border-radius: 0.25rem;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Batas akhir kolom Minggu (kolom ke-7) dan awal kolom Senin (kolom ke-1) */
+.schedule-day-cell:nth-child(7n) .schedule-pill.pill-span-start,
+.schedule-day-cell:nth-child(7n) .schedule-pill.pill-span-middle {
+    margin-right: 0;
+    border-top-right-radius: 0.25rem;
+    border-bottom-right-radius: 0.25rem;
+    border-right-width: 1px !important;
+    border-right-style: solid !important;
+}
+
+.schedule-day-cell:nth-child(7n + 1) .schedule-pill.pill-span-end,
+.schedule-day-cell:nth-child(7n + 1) .schedule-pill.pill-span-middle {
+    margin-left: 0;
+    border-top-left-radius: 0.25rem;
+    border-bottom-left-radius: 0.25rem;
+    border-left-width: 1px !important;
+    border-left-style: solid !important;
 }
 
 .schedule-pill-more {
@@ -3995,6 +4173,7 @@ body.modal-open {
 }
 
 .card-list-item-header {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
