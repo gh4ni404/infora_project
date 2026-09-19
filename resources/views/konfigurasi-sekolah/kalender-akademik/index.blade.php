@@ -14,14 +14,9 @@
             @if ($schools->count() > 1)
                 <form method="GET" action="{{ route('konfigurasi-sekolah.kalender-akademik') }}" id="schoolFilterForm">
                     <input type="hidden" name="view" value="{{ $activeView }}" id="schoolFilterView">
-                    <select name="school_id" class="form-select" onchange="this.form.submit()"
-                        title="Pilih Unit Sekolah">
-                        @foreach ($schools as $school)
-                            <option value="{{ $school->id }}" {{ $selectedSchoolId === $school->id ? 'selected' : '' }}>
-                                {{ $school->name }} ({{ $school->school_type }})
-                            </option>
-                        @endforeach
-                    </select>
+                    <x-form-select name="school_id" id="school_id" :selected="$selectedSchoolId"
+                        :options="$schools->mapWithKeys(fn($school) => [$school->id => $school->name . ' (' . $school->school_type . ')'])"
+                        onchange="this.form.submit()" title="Pilih Unit Sekolah" />
                 </form>
             @endif
 
