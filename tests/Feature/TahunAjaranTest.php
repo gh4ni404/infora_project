@@ -44,7 +44,7 @@ test('super admin can view tahun ajaran master detail page', function () {
     $response = $this->actingAs($this->superAdmin)->get(route('konfigurasi-sekolah.tahun-ajaran'));
 
     $response->assertOk();
-    $response->assertSee('Tahun Ajaran & Semester', false);
+    $response->assertSee('Tahun Ajaran dan Semester', false);
     $response->assertSee('cardTahunAjaranMaster', false);
     $response->assertSee('cardSemesterDetail', false);
     $response->assertSee('modalCreateTahunAjaran', false);
