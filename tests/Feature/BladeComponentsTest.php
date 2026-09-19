@@ -63,6 +63,21 @@ test('search toolbar renders the filter form with search input and per-page sele
     $view->assertSee('name="search"', false);
 });
 
+test('search toolbar renders customizable total prefix', function () {
+    $defaultView = $this->blade(
+        '<x-search-toolbar :total="10" total-label="siswa" />'
+    );
+    $defaultView->assertSee('Total:');
+    $defaultView->assertSee('10');
+    $defaultView->assertSee('siswa');
+
+    $customView = $this->blade(
+        '<x-search-toolbar :total="10" total-label="siswa" total-prefix="Jumlah Keseluruhan:" />'
+    );
+    $customView->assertSee('Jumlah Keseluruhan:');
+    $customView->assertDontSee('Total:');
+});
+
 test('data table renders custom filters slot inside search toolbar', function () {
     $view = $this->blade(
         '<x-data-table route="/test-route" :per-page="15">
@@ -80,6 +95,62 @@ test('data table renders custom filters slot inside search toolbar', function ()
     $view->assertSee('Ujian');
     $view->assertSee('table-responsive', false);
     $view->assertSee('data-table', false);
+});
+
+test('data table renders custom toolbar slot when provided', function () {
+    $view = $this->blade(
+        '<x-data-table id="customCardTable">
+            <x-slot:toolbar>
+                <span class="custom-title">Judul Tabel Khusus</span>
+                <button type="button" class="btn-primary">Tambah</button>
+            </x-slot:toolbar>
+            <thead><tr><th>Nama</th></tr></thead>
+            <tbody><tr><td>Data</td></tr></tbody>
+        </x-data-table>'
+    );
+
+    $view->assertSee('id="customCardTable"', false);
+    $view->assertSee('table-toolbar', false);
+    $view->assertSee('Judul Tabel Khusus');
+    $view->assertSee('Tambah');
+    $view->assertDontSee('table-toolbar-form', false);
+    $view->assertSee('table-responsive', false);
+    $view->assertSee('data-table', false);
+});
+
+test('data table renders title preset toolbar with total and actions slot', function () {
+    $view = $this->blade(
+        '<x-data-table title="Daftar Guru" :total="25" total-label="Orang">
+            <x-slot:actions>
+                <button type="button" class="btn-primary">Tambah Guru</button>
+            </x-slot:actions>
+            <thead><tr><th>Nama</th></tr></thead>
+            <tbody><tr><td>Data</td></tr></tbody>
+        </x-data-table>'
+    );
+
+    $view->assertSee('table-toolbar', false);
+    $view->assertSee('Daftar Guru');
+    $view->assertSee('25 Orang');
+    $view->assertSee('Tambah Guru');
+    $view->assertDontSee('table-toolbar-form', false);
+});
+
+test('data table renders title preset toolbar with subtitle slot', function () {
+    $view = $this->blade(
+        '<x-data-table title="Daftar Semester">
+            <x-slot:subtitle>
+                Tahun: <strong>2026/2027</strong>
+            </x-slot:subtitle>
+            <thead><tr><th>Semester</th></tr></thead>
+            <tbody><tr><td>Ganjil</td></tr></tbody>
+        </x-data-table>'
+    );
+
+    $view->assertSee('table-toolbar', false);
+    $view->assertSee('Daftar Semester');
+    $view->assertSee('Tahun: <strong>2026/2027</strong>', false);
+    $view->assertDontSee('table-toolbar-form', false);
 });
 
 test('modal renders delete form with csrf method override and html body and footer slots', function () {
