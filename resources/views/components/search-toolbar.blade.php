@@ -30,7 +30,7 @@
             </div>
         @endif
 
-        {{ $filters ?? '' }}
+        {{ $filters ?? $slot ?? '' }}
     </div>
 
     <div class="search-box toolbar-search-box">

@@ -63,6 +63,25 @@ test('search toolbar renders the filter form with search input and per-page sele
     $view->assertSee('name="search"', false);
 });
 
+test('data table renders custom filters slot inside search toolbar', function () {
+    $view = $this->blade(
+        '<x-data-table route="/test-route" :per-page="15">
+            <x-slot:filters>
+                <select name="kategori"><option value="ujian">Ujian</option></select>
+            </x-slot:filters>
+            <thead><tr><th>Nama</th></tr></thead>
+            <tbody><tr><td>Data</td></tr></tbody>
+        </x-data-table>'
+    );
+
+    $view->assertSee('table-toolbar-form', false);
+    $view->assertSee('name="kategori"', false);
+    $view->assertSee('value="ujian"', false);
+    $view->assertSee('Ujian');
+    $view->assertSee('table-responsive', false);
+    $view->assertSee('data-table', false);
+});
+
 test('modal renders delete form with csrf method override and html body and footer slots', function () {
     $view = $this->blade(
         '<x-modal id="modalDelete" title="Konfirmasi Hapus" method="DELETE">
@@ -225,6 +244,25 @@ test('form-select renders options from options array prop and marks selected', f
     $view->assertSee('SMA Negeri 2');
 });
 
+test('form-select renders options from nested array with label key', function () {
+    $options = [
+        'kbm' => ['label' => 'KBM Efektif', 'color' => 'blue'],
+        'ujian' => ['label' => 'Ujian Akhir', 'color' => 'red'],
+    ];
+
+    $view = $this->blade(
+        '<x-form-select name="kategori" :options="$options" selected="kbm" placeholder="Semua Kategori" />',
+        ['options' => $options]
+    );
+
+    $view->assertSee('Semua Kategori');
+    $view->assertSee('value="kbm"', false);
+    $view->assertSee('selected', false);
+    $view->assertSee('KBM Efektif');
+    $view->assertSee('value="ujian"', false);
+    $view->assertSee('Ujian Akhir');
+});
+
 test('form-textarea renders multiline text, rows, and hint', function () {
     $view = $this->blade(
         '<x-form-textarea
@@ -260,4 +298,43 @@ test('form-checkbox renders check input with label and checked state', function 
     $view->assertSee('name="is_active"', false);
     $view->assertSee('value="1"', false);
     $view->assertSee('checked', false);
+});
+
+test('tab-pills renders wrapper with tablist role and accessible label', function () {
+    $view = $this->blade(
+        '<x-tab-pills label="Pilihan Tampilan">
+            <x-tab-pill id="btnTab1" :active="true" icon="calendar">Kalender</x-tab-pill>
+            <x-tab-pill id="btnTab2" :active="false" icon="list-bullet">Tabel Agenda</x-tab-pill>
+        </x-tab-pills>'
+    );
+
+    $view->assertSee('class="tab-pills"', false);
+    $view->assertSee('role="tablist"', false);
+    $view->assertSee('aria-label="Pilihan Tampilan"', false);
+    $view->assertSee('<button type="button"', false);
+    $view->assertSee('id="btnTab1"', false);
+    $view->assertSee('class="tab-pill active"', false);
+    $view->assertSee('aria-selected="true"', false);
+    $view->assertSee('Kalender');
+    $view->assertSee('id="btnTab2"', false);
+    $view->assertSee('class="tab-pill"', false);
+    $view->assertSee('aria-selected="false"', false);
+    $view->assertSee('Tabel Agenda');
+});
+
+test('tab-pill renders anchor tag when href is provided and supports badge', function () {
+    $view = $this->blade(
+        '<x-tab-pill href="/pengguna" :active="true" badge="12" badge-class="badge-blue">
+            Daftar Pengguna
+        </x-tab-pill>'
+    );
+
+    $view->assertSee('<a href="/pengguna"', false);
+    $view->assertSee('class="tab-pill active"', false);
+    $view->assertSee('role="tab"', false);
+    $view->assertSee('aria-selected="true"', false);
+    $view->assertSee('aria-current="page"', false);
+    $view->assertSee('Daftar Pengguna');
+    $view->assertSee('class="badge badge-blue"', false);
+    $view->assertSee('12');
 });

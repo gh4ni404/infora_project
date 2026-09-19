@@ -17,7 +17,9 @@
             :total="$total"
             :total-label="$totalLabel"
         >
-            {{ $filters ?? '' }}
+            <x-slot:filters>
+                {{ $filters ?? '' }}
+            </x-slot:filters>
         </x-search-toolbar>
     </div>
 
