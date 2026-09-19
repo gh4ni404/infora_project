@@ -36,7 +36,7 @@ window.InforaModals = (function () {
         modal.classList.remove('hidden');
         getBody().classList.add('modal-open');
 
-        const firstInput = modal.querySelector('input:not([type="hidden"]), textarea, select');
+        const firstInput = modal.querySelector('input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), select:not([disabled])');
         if (firstInput) {
             setTimeout(() => firstInput.focus(), 50);
         }
@@ -113,7 +113,10 @@ window.InforaModals = (function () {
     function bindOpenButton(btnId, modalId) {
         const btn = document.getElementById(btnId);
         if (btn) {
-            btn.addEventListener('click', () => open(modalId));
+            btn.addEventListener('click', () => {
+                if (btn.disabled || btn.hasAttribute('disabled')) return;
+                open(modalId);
+            });
         }
     }
 
@@ -128,12 +131,22 @@ window.InforaModals = (function () {
 
         document.querySelectorAll(selector).forEach((btn) => {
             btn.addEventListener('click', function () {
-                let data;
-                try {
-                    const rawKey = Object.keys(this.dataset).find((k) => k !== 'action');
-                    data = JSON.parse(this.dataset[rawKey] || '{}');
-                } catch (_) {
-                    data = {};
+                let data = {};
+                for (const key of Object.keys(this.dataset)) {
+                    if (key === 'action') continue;
+                    try {
+                        const parsed = JSON.parse(this.dataset[key]);
+                        if (parsed && typeof parsed === 'object') {
+                            data = parsed;
+                            break;
+                        }
+                    } catch (_) {}
+                }
+
+                // Fallback: jika tidak ada atribut bertipe JSON object, gunakan seluruh atribut dataset (selain action)
+                if (Object.keys(data).length === 0) {
+                    data = Object.assign({}, this.dataset);
+                    delete data.action;
                 }
 
                 const actionUrl = this.dataset.action || '';
@@ -146,7 +159,7 @@ window.InforaModals = (function () {
                     registry.get(modalId).editData = data;
                 }
 
-                populateFn(document.getElementById(modalId), data, formEdit);
+                populateFn(document.getElementById(modalId), data, formEdit, this);
                 open(modalId);
             });
         });
