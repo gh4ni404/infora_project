@@ -488,6 +488,15 @@
             <polyline points="7 3 7 8 15 8"></polyline>
         </svg>
         @break
+
+    @case('x-mark')
+    @case('times')
+    @case('close')
+        <svg {{ $attributes }} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+        </svg>
+        @break    
     
     @default
         <svg {{ $attributes }} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
