@@ -51,6 +51,10 @@ test('super admin can view tahun ajaran master detail page', function () {
     $response->assertSee('modalEditTahunAjaran', false);
     $response->assertSee('modalCreateSemester', false);
     $response->assertSee('modalEditSemester', false);
+    $response->assertSee('InforaModals.setup', false);
+    $response->assertSee('InforaModals.bindOpenButton', false);
+    $response->assertSee('InforaModals.bindEditButtons', false);
+    $response->assertSee('InforaModals.reopenOnError', false);
 });
 
 test('validation fails when storing tahun ajaran with invalid format', function () {
