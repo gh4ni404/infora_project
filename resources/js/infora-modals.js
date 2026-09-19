@@ -12,7 +12,10 @@
  *   InforaModals.getModal('modalId')  — get a modal instance
  *
  *   // Register edit-data population callback
- *   InforaModals.onEdit('provinsi', function(modal, data) { ... });
+ *   InforaModals.bindEditButtons('.btn-open-edit', 'modalEdit', function(modal, data, form) { ... });
+ *
+ *   // Bind delete confirmation buttons
+ *   InforaModals.bindDeleteButtons('.btn-open-delete', 'modalDelete', { titleId: 'deleteTitle' });
  *
  *   // Auto-reopen on validation errors
  *   InforaModals.reopenOnError({ create: 'modalCreateX', edit: 'modalEditX' });
@@ -150,6 +153,55 @@ window.InforaModals = (function () {
     }
 
     /**
+     * Bind multiple delete buttons to configure and open a confirmation delete modal.
+     * @param {string} selector — CSS selector for delete trigger buttons
+     * @param {string} modalId — ID of the delete modal
+     * @param {object|function} [optionsOrCallback] — Options object or custom callback function(modal, buttonElement, formDelete)
+     * @param {string} [optionsOrCallback.titleId] — Element ID to update with the item title/name
+     * @param {string} [optionsOrCallback.titleKey] — Dataset key to use for title (defaults to title, nama, name, or label)
+     * @param {string} [optionsOrCallback.formId] — Custom form ID (defaults to form inside modal)
+     * @param {function} [optionsOrCallback.onOpen] — Callback before opening: function(modal, buttonElement, formDelete)
+     */
+    function bindDeleteButtons(selector, modalId, optionsOrCallback = {}) {
+        const isCallback = typeof optionsOrCallback === 'function';
+        const options = isCallback ? {} : optionsOrCallback;
+        const callback = isCallback ? optionsOrCallback : options.onOpen;
+
+        document.querySelectorAll(selector).forEach((btn) => {
+            btn.addEventListener('click', function () {
+                const modal = document.getElementById(modalId);
+                if (!modal) return;
+
+                const formDelete = options.formId
+                    ? document.getElementById(options.formId)
+                    : modal.querySelector('form');
+
+                const actionUrl = this.dataset.action || '';
+                if (formDelete && actionUrl) {
+                    formDelete.action = actionUrl;
+                }
+
+                const titleKey = options.titleKey || ['title', 'nama', 'name', 'label'].find((k) => this.dataset[k]);
+                const itemTitle = titleKey ? this.dataset[titleKey] : '';
+
+                const titleEl = options.titleId
+                    ? document.getElementById(options.titleId)
+                    : (modal.querySelector('#deleteItemTitle') || document.getElementById('deleteItemTitle'));
+
+                if (titleEl && itemTitle) {
+                    titleEl.textContent = itemTitle;
+                }
+
+                if (typeof callback === 'function') {
+                    callback(modal, this, formDelete);
+                }
+
+                open(modalId);
+            });
+        });
+    }
+
+    /**
      * Auto-reopen modal on validation errors (for store/update failures).
      */
     function reopenOnError(modalIds) {
@@ -196,6 +248,7 @@ window.InforaModals = (function () {
         setup,
         bindOpenButton,
         bindEditButtons,
+        bindDeleteButtons,
         reopenOnError,
     };
 })();
