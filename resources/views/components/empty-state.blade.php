@@ -11,7 +11,7 @@
     <td colspan="{{ $colspan }}">
         <div class="empty-state">
             <div class="empty-state-icon">
-                <x-icon :name="$icon" :size="$iconSize" class="" />
+                <x-icon :name="$icon" :size="$iconSize" class="empty-state-icon" />
             </div>
             @if ($title)
                 <h3 class="empty-state-title">{{ $title }}</h3>
