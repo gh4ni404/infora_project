@@ -65,12 +65,12 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th class="col-w-sm">Urutan</th>
+                    <th>Urutan</th>
                     <th>Induk Menu</th>
                     <th>Nama Sub-Menu</th>
                     <th>Rute Navigasi</th>
                     <th>Status</th>
-                    <th class="col-w-actions">Aksi</th>
+                    <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>

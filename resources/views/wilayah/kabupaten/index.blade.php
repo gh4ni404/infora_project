@@ -111,14 +111,14 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th class="col-w-sm">No</th>
+                    <th>No</th>
                     <th>Kode</th>
                     <th>Provinsi</th>
                     <th>Tipe</th>
                     <th>Nama Wilayah</th>
                     <th>Status</th>
                     <th>Diperbarui</th>
-                    <th class="col-w-actions">Aksi</th>
+                    <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>

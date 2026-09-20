@@ -89,12 +89,12 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th class="col-w-sm">No</th>
+                    <th>No</th>
                     <th>Kode</th>
                     <th>Nama Provinsi</th>
                     <th>Status</th>
                     <th>Diperbarui</th>
-                    <th class="col-w-actions">Aksi</th>
+                    <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>

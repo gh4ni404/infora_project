@@ -54,11 +54,11 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th class="col-w-sm">Urutan</th>
+                    <th>Urutan</th>
                     <th>Nama Modul</th>
                     <th>Jumlah Menu</th>
                     <th>Status</th>
-                    <th class="col-w-actions">Aksi</th>
+                    <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>

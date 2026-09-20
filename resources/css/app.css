@@ -1986,14 +1986,14 @@ body {
     width: 100%;
 }
 
-.col-w-sm {
+/* .col-w-sm {
     width: 70px;
-}
+} */
 
-.col-w-actions {
+/* .col-w-actions {
     width: 160px;
-    text-align: right;
-}
+    text-align: center;
+} */
 
 .table-actions-right {
     justify-content: flex-end;
