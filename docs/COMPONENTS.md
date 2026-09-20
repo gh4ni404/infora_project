@@ -429,74 +429,116 @@ Menampilkan ilustrasi ikon dan pesan ramah saat tabel tidak memiliki data atau p
 ## 🪟 4. Komponen Dialog & Modal
 
 ### `<x-modal>`
-Komponen dialog interaktif yang fleksibel untuk modal informasi maupun modal form (Create, Edit, Delete). Dilengkapi dengan form wrapper otomatis, `@csrf`, method spoofing (`@method`), dan sticky footer tanpa masalah pemotongan tampilan (*zero-clipping*).
+Komponen dialog interaktif yang fleksibel untuk modal informasi, formulir data (Create, Edit), maupun preset konfirmasi hapus (*delete confirmation*). Dilengkapi pembungkus form otomatis, `@csrf`, method spoofing (`@method`), serta integrasi penuh dengan modul JavaScript `InforaModals`.
+
+#### Variasi / Mode Tampilan
+1. **Mode Standar (`@default`)**: Digunakan untuk formulir Tambah (*Create*), Ubah (*Edit*), maupun dialog rincian/informasi.
+2. **Mode Preset Delete (`name="delete"`)**: Tampilan elegan khusus konfirmasi hapus (*danger theme*) dengan ambient halo icon merah, judul peringatan, kartu detail item dinamis, serta tombol aksi simetris (Batal & Hapus).
 
 #### Props
-| Prop | Tipe | Default | Deskripsi |
-| :--- | :--- | :--- | :--- |
-| `id` | `string` | - | **Wajib**. ID unik backdrop modal (misal: `modalCreateJurusan`). |
-| `title` | `string` | - | **Wajib**. Judul header modal. |
-| `subtitle` | `string` | `null` | Subjudul deskripsi kecil di bawah judul. |
-| `size` | `string` | `'default'` | Ukuran modal (`'default'` atau `'lg'`). |
-| `action` | `string` | `null` | URL tujuan form action. Jika diisi, modal otomatis membungkus body dengan `<form>`. |
-| `method` | `string` | `null` | Method HTTP form (`POST`, `PUT`, `PATCH`, `DELETE`). |
-| `formId` | `string` | `null` | ID elemen tag `<form>`. |
-| `danger` | `bool` | `false` | Menjadikan judul modal berwarna merah (khusus modal konfirmasi hapus). |
-| `closeLabel` | `string` | `'Tutup'` | Label aria tombol tutup silang. |
+| Prop | Tipe | Default | Mode | Deskripsi |
+| :--- | :--- | :--- | :--- | :--- |
+| `name` | `string` | `null` | Semua | Nama varian modal. Gunakan `name="delete"` untuk mengaktifkan preset modal konfirmasi hapus. |
+| `id` | `string` | `null` | Semua | **Wajib**. ID unik elemen modal backdrop (misal: `modalCreateJurusan`, `modalDeleteJurusan`). |
+| `title` | `string` | `null` | Semua | Judul header modal (pada modal delete dapat diisi langsung atau dinamis via JavaScript). |
+| `subtitle` | `string` | `null` | Standar | Subjudul deskripsi kecil di bawah judul header. |
+| `size` | `string` | `'default'` | Standar | Ukuran lebar dialog modal (`'default'`, `'sm'`, atau `'lg'`). Pada modal delete otomatis `'sm'`. |
+| `action` | `string` | `null` | Semua | URL tujuan form action. Jika diisi/terdapat `method`, modal otomatis membungkus body dengan tag `<form>`. |
+| `method` | `string` | `null` | Semua | Method HTTP form (`'POST'`, `'PUT'`, `'PATCH'`, `'DELETE'`). Pada modal delete otomatis `'DELETE'`. |
+| `formId` | `string` | `null` | Semua | Atribut `id` untuk elemen tag `<form>`. |
+| `messageId` | `string` | `null` | Delete | ID elemen paragraf pesan konfirmasi untuk dimanipulasi via script. |
+| `badgeId` | `string` | `null` | Delete | ID elemen badge kategori/kode untuk dimanipulasi via script. |
+| `itemTitleId` | `string` | `null` | Delete | ID elemen judul/nama item yang akan dihapus untuk dimanipulasi via script. |
+| `cancelBtnId` | `string` | `null` | Delete | ID tombol "Batal" untuk dihubungkan dengan `InforaModals.setup`. |
+| `confirmBtnId` | `string` | `null` | Delete | ID tombol "Hapus" (submit). |
 
 #### Slots
-- **`{{ $slot }}`**: Body modal (isi form / teks konfirmasi).
-- **`<x-slot:footer>`**: Tombol aksi di bagian bawah (Batal, Simpan, Hapus).
+- **`{{ $slot }}`**: Konten utama modal (field formulir pada modal standar, atau custom body pada modal delete).
+- **`<x-slot:footer>`**: Tombol aksi bagian bawah pada modal standar (Batal, Simpan, dll).
+- **`<x-slot:hiddenInputs>`**: Input hidden tambahan khusus pada modal delete (misal: filter `view`).
 
-#### Contoh Penggunaan: Modal Form Create
+#### Contoh Penggunaan 1: Modal Form Tambah (Create)
 ```blade
 <x-modal
     id="modalCreateJurusan"
     title="Tambah Data Jurusan Baru"
+    subtitle="Tambahkan data konsentrasi keahlian baru"
     size="lg"
     action="{{ route('master.data-jurusan.store') }}"
     form-id="formCreateJurusan">
 
-    {{-- Body Modal --}}
+    {{-- Body Formulir --}}
     <x-form-input name="kode" label="Kode Jurusan" required />
     <x-form-input name="nama" label="Nama Jurusan" required />
 
     {{-- Footer Modal --}}
     <x-slot:footer>
-        <button type="button" class="btn-secondary" id="btnCancelCreate">Batal</button>
+        <button type="button" class="btn-secondary" id="btnCancelCreateJurusan">Batal</button>
         <button type="submit" class="btn-primary">Simpan</button>
     </x-slot:footer>
 </x-modal>
 ```
 
-#### Contoh Penggunaan: Modal Konfirmasi Hapus
+#### Contoh Penggunaan 2: Modal Form Ubah (Edit)
 ```blade
 <x-modal
-    id="modalDeleteJurusan"
-    title="Konfirmasi Hapus Data"
-    subtitle="Tindakan ini permanen dan tidak dapat dibatalkan"
-    method="DELETE"
-    action=""
-    form-id="formDeleteJurusan"
-    danger>
+    id="modalEditJurusan"
+    title="Ubah Data Jurusan"
+    subtitle="Perbarui rincian informasi jurusan"
+    size="lg"
+    method="PUT"
+    form-id="formEditJurusan">
 
-    <p>Apakah Anda yakin ingin menghapus jurusan <strong id="deleteJurusanNama"></strong>?</p>
+    <x-form-input name="kode" id="edit_kode" label="Kode Jurusan" required />
+    <x-form-input name="nama" id="edit_nama" label="Nama Jurusan" required />
 
     <x-slot:footer>
-        <button type="button" class="btn-secondary" id="btnCancelDelete">Batal</button>
-        <button type="submit" class="btn-delete">Ya, Hapus Data</button>
+        <button type="button" class="btn-secondary" id="btnCancelEditJurusan">Batal</button>
+        <button type="submit" class="btn-primary">Perbarui Data</button>
     </x-slot:footer>
 </x-modal>
 ```
 
-#### Cara Buka / Tutup via JavaScript
-Setiap modal memiliki class awal `modal-backdrop hidden`. Untuk membuka atau menutupnya:
-```javascript
-// Membuka Modal
-document.getElementById('modalCreateJurusan').classList.remove('hidden');
+#### Contoh Penggunaan 3: Preset Modal Konfirmasi Hapus (Delete)
+```blade
+<x-modal
+    name="delete"
+    id="modalDeleteJurusan"
+    form-id="formDeleteJurusan"
+    cancel-btn-id="btnCancelDeleteJurusan"
+    confirm-btn-id="btnConfirmDeleteJurusan"
+    message-id="deleteJurusanMessage"
+    badge-id="deleteJurusanBadge"
+    item-title-id="deleteJurusanTitle" />
+```
 
-// Menutup Modal
-document.getElementById('modalCreateJurusan').classList.add('hidden');
+#### Integrasi JavaScript (`InforaModals`)
+Seluruh interaksi pembukaan, penutupan, maupun penyuntikan data modal ditangani melalui modul JavaScript `InforaModals`:
+
+```javascript
+document.addEventListener('DOMContentLoaded', function () {
+    // 1. Setup penutupan modal (Tombol Batal, Klik Backdrop, dan Tombol Escape)
+    InforaModals.setup('modalCreateJurusan', { cancelBtnId: 'btnCancelCreateJurusan' });
+    InforaModals.setup('modalEditJurusan', { cancelBtnId: 'btnCancelEditJurusan' });
+    InforaModals.setup('modalDeleteJurusan', { cancelBtnId: 'btnCancelDeleteJurusan' });
+
+    // 2. Hubungkan tombol buka modal tambah
+    InforaModals.bindOpenButton('btnOpenCreateJurusan', 'modalCreateJurusan');
+
+    // 3. Hubungkan tombol edit di tabel (otomatis mengisi form.action & nilai input)
+    InforaModals.bindEditButtons('.btn-open-edit-jurusan', 'modalEditJurusan', function (modal, data, formEdit) {
+        document.getElementById('edit_kode').value = data.kode || '';
+        document.getElementById('edit_nama').value = data.nama || '';
+    });
+
+    // 4. Hubungkan tombol hapus di tabel (otomatis mengisi form.action ke URL destroy item)
+    InforaModals.bindDeleteButtons('.btn-open-delete-jurusan', 'modalDeleteJurusan', function (modal, btn) {
+        document.getElementById('modalDeleteJurusanTitle').textContent = 'Hapus Jurusan ' + btn.dataset.kode + '?';
+        document.getElementById('deleteJurusanMessage').textContent = 'Apakah Anda yakin ingin menghapus jurusan berikut?';
+        document.getElementById('deleteJurusanBadge').textContent = btn.dataset.kode || '-';
+        document.getElementById('deleteJurusanTitle').textContent = btn.dataset.nama || '-';
+    });
+});
 ```
 
 ---
