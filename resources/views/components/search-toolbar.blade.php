@@ -8,6 +8,7 @@
     'perPageText' => 'data',
     'total' => null,
     'totalLabel' => 'data',
+    'totalPrefix' => 'Total:',
     'showTotal' => true,
 ])
 
@@ -46,7 +47,7 @@
 
     @if ($showTotal && $total !== null)
         <div class="table-cell-muted">
-            Total: <strong>{{ number_format($total) }}</strong> {{ $totalLabel }}
+            {{ $totalPrefix }} <strong>{{ number_format($total) }}</strong> {{ $totalLabel }}
         </div>
     @endif
 </form>
