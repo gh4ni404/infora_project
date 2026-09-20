@@ -140,18 +140,16 @@
 
                             {{-- Tombol Hapus Tahun Ajaran --}}
                             @if (! $ta->is_active && ! $ta->hasActiveSemester())
-                                <form
-                                    method="POST"
-                                    action="{{ route('konfigurasi-sekolah.tahun-ajaran.destroy', $ta) }}"
-                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus Tahun Ajaran {{ $ta->tahun }} beserta semesternya? Tindakan ini tidak dapat dibatalkan.');"
+                                <button
+                                    type="button"
+                                    class="btn-delete btn-open-delete-ta"
+                                    data-action="{{ route('konfigurasi-sekolah.tahun-ajaran.destroy', $ta) }}"
+                                    data-tahun="{{ $ta->tahun }}"
+                                    data-semesters-count="{{ $ta->semesters_count }}"
+                                    title="Hapus Tahun Ajaran {{ $ta->tahun }}"
                                 >
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn-delete" title="Hapus Tahun Ajaran {{ $ta->tahun }}">
-                                        <x-icon name="delete" size="14" />
-                                        {{-- <span>Hapus</span> --}}
-                                    </button>
-                                </form>
+                                    <x-icon name="delete" size="14" />
+                                </button>
                             @endif
                         </x-table-actions>
                     </td>
@@ -265,18 +263,17 @@
 
                                 {{-- Tombol Hapus Semester --}}
                                 @if (! $sem->is_active)
-                                    <form
-                                        method="POST"
-                                        action="{{ route('konfigurasi-sekolah.tahun-ajaran.semester.destroy', [$selectedTahunAjaran, $sem]) }}"
-                                        onsubmit="return confirm('Apakah Anda yakin ingin menghapus Semester {{ $sem->label_semester }} dari Tahun Ajaran {{ $selectedTahunAjaran->tahun }}?');"
+                                    <button
+                                        type="button"
+                                        class="btn-delete btn-open-delete-sem"
+                                        data-action="{{ route('konfigurasi-sekolah.tahun-ajaran.semester.destroy', [$selectedTahunAjaran, $sem]) }}"
+                                        data-semester="{{ $sem->label_semester }}"
+                                        data-tahun="{{ $selectedTahunAjaran->tahun }}"
+                                        data-rentang="{{ $sem->rentang_tanggal_formatted }}"
+                                        title="Hapus Semester {{ $sem->label_semester }}"
                                     >
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn-delete" title="Hapus Semester {{ $sem->label_semester }}">
-                                            <x-icon name="delete" size="14" />
-                                            {{-- <span>Hapus</span> --}}
-                                        </button>
-                                    </form>
+                                        <x-icon name="delete" size="14" />
+                                    </button>
                                 @endif
                             </x-table-actions>
                         </td>
@@ -296,26 +293,25 @@
 {{-- Modals Tambah & Ubah --}}
 @include('konfigurasi-sekolah.tahun-ajaran.modal-tahun-ajaran')
 @include('konfigurasi-sekolah.tahun-ajaran.modal-semester')
+{{-- Modal Konfirmasi Hapus Bersama (Shared Delete Modal) --}}
+<x-modal
+    name="delete"
+    id="modalDeleteShared"
+    form-id="formDeleteShared"
+    cancel-btn-id="btnCancelDeleteShared"
+    confirm-btn-id="btnConfirmDeleteShared"
+    badge-id="modalDeleteBadge"
+    message-id="modalDeleteMessage"
+    item-title-id="modalDeleteItemTitleId" />
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     // 1. Setup Modals (Close, Cancel, Backdrop Click, dan Escape Key)
-    InforaModals.setup('modalCreateTahunAjaran', {
-        closeBtnId: 'btnCloseCreateTahunAjaran',
-        cancelBtnId: 'btnCancelCreateTahunAjaran',
-    });
-    InforaModals.setup('modalEditTahunAjaran', {
-        closeBtnId: 'btnCloseEditTahunAjaran',
-        cancelBtnId: 'btnCancelEditTahunAjaran',
-    });
-    InforaModals.setup('modalCreateSemester', {
-        closeBtnId: 'btnCloseCreateSemester',
-        cancelBtnId: 'btnCancelCreateSemester',
-    });
-    InforaModals.setup('modalEditSemester', {
-        closeBtnId: 'btnCloseEditSemester',
-        cancelBtnId: 'btnCancelEditSemester',
-    });
+    InforaModals.setup('modalCreateTahunAjaran', { cancelBtnId: 'btnCancelCreateTahunAjaran', });
+    InforaModals.setup('modalEditTahunAjaran', { cancelBtnId: 'btnCancelEditTahunAjaran', });
+    InforaModals.setup('modalCreateSemester', { cancelBtnId: 'btnCancelCreateSemester', });
+    InforaModals.setup('modalEditSemester', { cancelBtnId: 'btnCancelEditSemester', });
+    InforaModals.setup('modalDeleteShared', { cancelBtnId: 'btnCancelDeleteShared', });
 
     // 2. Bind Tombol Buka Modal Tambah
     InforaModals.bindOpenButton('btnOpenCreateTahunAjaran', 'modalCreateTahunAjaran');
@@ -347,7 +343,29 @@ document.addEventListener('DOMContentLoaded', function () {
         if (inputIsActive) inputIsActive.checked = Boolean(data.is_active);
     });
 
-    // 5. Auto Re-open Modal jika terjadi error validasi
+    // 5. Bind Tombol Hapus Tahun Ajaran
+    InforaModals.bindDeleteButtons('.btn-open-delete-ta', 'modalDeleteShared', function (modal, btn) {
+        document.getElementById('modalDeleteSharedTitle').textContent = 'Hapus Tahun Ajaran?';
+        document.getElementById('modalDeleteMessage').textContent = 'Apakah Anda yakin ingin menghapus Tahun Ajaran berikut beserta seluruh semesternya?';
+        document.getElementById('modalDeleteBadge').textContent = 'Tahun Ajaran ' + (btn.dataset.tahun || '-');
+        
+        const count = parseInt(btn.dataset.semestersCount || '0', 10);
+        document.getElementById('modalDeleteItemTitleId').textContent = count > 0
+            ? `${count} data semester terkait akan ikut terhapus.`
+            : 'Belum ada data semester terdaftar.';
+    });
+
+    // 6. Bind Tombol Hapus Semester
+    InforaModals.bindDeleteButtons('.btn-open-delete-sem', 'modalDeleteShared', function (modal, btn) {
+        document.getElementById('modalDeleteSharedTitle').textContent = 'Hapus Semester?';
+        document.getElementById('modalDeleteMessage').textContent = `Apakah Anda yakin ingin menghapus Semester berikut dari Tahun Ajaran ${btn.dataset.tahun || '-'}?`;
+        document.getElementById('modalDeleteBadge').textContent = 'Semester ' + (btn.dataset.semester || '-');
+        document.getElementById('modalDeleteItemTitleId').textContent = btn.dataset.rentang
+            ? `Rentang KBM: ${btn.dataset.rentang}`
+            : `Tahun Ajaran ${btn.dataset.tahun || '-'}`;
+    });
+
+    // 7. Auto Re-open Modal jika terjadi error validasi
     window.hasValidationErrors = {{ $errors->any() ? 'true' : 'false' }};
     window.errorMethod = @json(old('_method'));
     const isSemesterError = {{ $errors->hasAny(['semester', 'tanggal_mulai', 'tanggal_selesai']) ? 'true' : 'false' }};
@@ -356,7 +374,7 @@ document.addEventListener('DOMContentLoaded', function () {
         edit: isSemesterError ? 'modalEditSemester' : 'modalEditTahunAjaran',
     });
 
-    // 6. Auto-masking format Tahun Ajaran (YYYY/YYYY)
+    // 8. Auto-masking format Tahun Ajaran (YYYY/YYYY)
     function attachYearMask(inputElement) {
         if (!inputElement) return;
         inputElement.addEventListener('input', function (e) {
