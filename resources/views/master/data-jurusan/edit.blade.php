@@ -9,7 +9,7 @@
 >
     <x-form-input type="hidden" name="school_id" id="edit_school_id" :value="$selectedSchoolId" />
 
-    <div class="form-section-label">Unit Sekolah &amp; Jenjang</div>
+    <div class="form-section-label">Unit Sekolah dan Jenjang</div>
     <div class="form-grid-2col">
         <x-form-input
             name="school_name"
@@ -24,10 +24,14 @@
             name="jenjang"
             id="edit_jenjang"
             label="Jenjang Pendidikan"
-            required>
-            <option value="SMK" {{ old('jenjang', $selectedSchool?->school_type) === 'SMK' ? 'selected' : '' }}>SMK (Konsentrasi Keahlian)</option>
-            <option value="SMA" {{ old('jenjang', $selectedSchool?->school_type) === 'SMA' ? 'selected' : '' }}>SMA (Peminatan / Fase)</option>
-        </x-form-select>
+            :selected="$selectedSchool?->school_type"
+            :options="[
+                'SMK' => 'SMK (Konsentrasi Keahlian)',
+                'SMA' => 'SMA (Peminatan / Fase)',
+                'MA'  => 'MA (Peminatan / Fase)',
+            ]"
+            required
+        />
     </div>
 
     <div class="form-section-label">Identitas Jurusan</div>
@@ -61,7 +65,7 @@
         required
     />
 
-    <div class="form-section-label">Struktur Keahlian &amp; Pimpinan</div>
+    <div class="form-section-label">Struktur Keahlian dan Pimpinan</div>
     <div class="form-grid-2col">
         <x-form-input
             name="bidang_keahlian"
@@ -92,7 +96,7 @@
         maxlength="100"
     />
 
-    <div class="form-section-label">Status &amp; Keterangan</div>
+    <div class="form-section-label">Status dan Keterangan</div>
     <x-form-textarea
         name="deskripsi"
         id="edit_deskripsi"

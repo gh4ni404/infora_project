@@ -14,16 +14,15 @@
         <x-slot:actions>
             {{-- Selector Unit Sekolah --}}
             @if ($schools->count() > 1)
-                <form method="GET" action="{{ route('master.data-jurusan') }}" id="schoolFilterForm">
-                    <x-form-select name="school_id" id="school_id" :selected="$selectedSchoolId"
-                        onchange="this.form.requestSubmit ? this.form.requestSubmit() : this.form.submit()"
-                        title="Pilih Unit Sekolah">
-                        @foreach ($schools as $school)
-                            <option value="{{ $school->id }}" {{ $selectedSchoolId === $school->id ? 'selected' : '' }}>
-                                {{ $school->name }} ({{ $school->school_type }})
-                            </option>
-                        @endforeach
-                    </x-form-select>
+                <form method="GET" action="{{ route('master.data-jurusan.index') }}" id="schoolFilterForm">
+                    <x-form-select
+                        name="school_id"
+                        id="school_id"
+                        :selected="$selectedSchoolId"
+                        :options="$schools->mapWithKeys(fn($school) => [$school->id => $school->name . ' (' . $school->school_type . ')'])"
+                        onchange="this.form.submit()"
+                        title="Pilih Unit Sekolah"
+                    />
                 </form>
             @endif
 
@@ -48,27 +47,33 @@
     </x-stats-grid>
 
     {{-- Tabel Data Jurusan --}}
-    <x-data-table route="{{ route('master.data-jurusan') }}"
+    <x-data-table route="{{ route('master.data-jurusan.index') }}"
         search-placeholder="Cari kode, nama jurusan, bidang, atau kaprog..." :per-page="$perPageInput">
         <x-slot:filters>
             <input type="hidden" name="school_id" value="{{ $selectedSchoolId }}">
-            <select name="status" class="form-select-sm"
-                onchange="this.form.requestSubmit ? this.form.requestSubmit() : this.form.submit()" title="Filter Status">
-                <option value="">Semua Status</option>
-                <option value="aktif" {{ request('status') === 'aktif' ? 'selected' : '' }}>Status Aktif</option>
-                <option value="nonaktif" {{ request('status') === 'nonaktif' ? 'selected' : '' }}>Status Nonaktif</option>
-            </select>
+            <x-form-select 
+            name="status" 
+            id="filterStatus"
+            class="form-select-sm"
+            placeholder="Semua Status"
+            onchange="this.form.submit()"
+            :selected="request('status')"
+            :options="[
+                'aktif'     => 'Aktif',
+                'nonaktif'  => 'Nonaktif'
+            ]"
+            />
         </x-slot:filters>
 
         <thead>
             <tr>
                 <th class="col-w-idx">No</th>
-                <th>Kode &amp; Inisial</th>
-                <th>Nama Jurusan &amp; Jenjang</th>
-                <th>Bidang &amp; Program Keahlian</th>
+                <th>Kode dan Inisial</th>
+                <th>Nama Jurusan dan Jenjang</th>
+                <th>Bidang dan Program Keahlian</th>
                 <th>Kepala Jurusan (Kaprog)</th>
                 <th>Status</th>
-                <th class="col-w-actions">Aksi</th>
+                <th>Aksi</th>
             </tr>
         </thead>
         <tbody>
@@ -148,13 +153,6 @@
                 <x-empty-state icon="book" iconSize="48" colspan="7" :text="request()->filled('search') || request()->filled('status')
                     ? 'Tidak ada data jurusan yang cocok dengan kriteria filter pencarian Anda.'
                     : 'Belum terdapat data jurusan yang terdaftar pada unit sekolah ini.'">
-                    {{-- @if (request()->filled('search') || request()->filled('status'))
-                    <x-slot:action>
-                        <a href="{{ route('master.data-jurusan', ['school_id' => $selectedSchoolId]) }}" class="btn-secondary">
-                            Reset Filter Pencarian
-                        </a>
-                    </x-slot:action>
-                @endif --}}
                 </x-empty-state>
             @endforelse
         </tbody>

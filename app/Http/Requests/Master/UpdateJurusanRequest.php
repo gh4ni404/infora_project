@@ -38,7 +38,7 @@ class UpdateJurusanRequest extends FormRequest
             'kode' => ['required', 'string', 'max:20'],
             'nama' => ['required', 'string', 'max:150'],
             'singkatan' => ['nullable', 'string', 'max:20'],
-            'jenjang' => ['required', 'string', 'in:SMK,SMA'],
+            'jenjang' => ['required', 'string', 'in:SMK,SMA,MA'],
             'bidang_keahlian' => ['nullable', 'string', 'max:100'],
             'program_keahlian' => ['nullable', 'string', 'max:100'],
             'kepala_jurusan' => ['nullable', 'string', 'max:100'],
