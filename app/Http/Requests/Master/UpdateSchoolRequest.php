@@ -36,7 +36,7 @@ class UpdateSchoolRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'npsn' => ['required', 'string', 'size:8', 'regex:/^\d{8}$/'],
             'nss' => ['nullable', 'string', 'max:20'],
-            'school_type' => ['required', 'string', 'in:SMA,SMK'],
+            'school_type' => ['required', 'string', 'in:SMA,SMK,MA'],
             'status' => ['required', 'string', 'in:Negeri,Swasta'],
             'accreditation' => ['nullable', 'string', 'in:A,B,C,Belum'],
             'provinsi_id' => ['nullable', 'integer', 'exists:provinsi,id'],

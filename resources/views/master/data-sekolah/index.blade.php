@@ -1,271 +1,144 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="page-header">
-    <div>
-        <h2 class="page-title">Data Sekolah</h2>
-        <div class="page-subtitle">Kelola registri sekolah SMA & SMK dalam platform INFORA</div>
-    </div>
-    <div class="page-actions">
+<x-page-header title="Data Sekolah">
+    <x-slot:subtitle>
+        Kelola registri sekolah SMA dan SMK dalam platform INFORA
+    </x-slot:subtitle>
+    <x-slot:actions>
         <button type="button" class="btn-primary" id="btnOpenCreateSchool">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-            <span>Tambah Sekolah</span>
+            <x-icon name="add" size="18" />
         </button>
-    </div>
-</div>
+    </x-slot:actions>
+</x-page-header>
 
-@if (session('success'))
-    <div class="alert-success">
-        <div class="alert-content">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
-            <span>{{ session('success') }}</span>
-        </div>
-    </div>
-@endif
+{{-- Flash Alerts --}}
+<x-alert type="success" />
+<x-alert type="error" />
+<x-alert type="validation" />
 
-@if ($errors->any())
-    <div class="alert-danger">
-        <div class="alert-content">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <span>{{ $errors->first() }}</span>
-        </div>
-    </div>
-@endif
-
-<div class="table-card">
-    <div class="table-toolbar">
-        <form method="GET" action="{{ route('master.data-sekolah.index') }}" class="table-toolbar-form">
-            <div class="page-actions">
-                <div class="per-page-selector">
-                    <label for="table_per_page" class="table-cell-muted">Tampilkan:</label>
-                    <select id="table_per_page" name="per_page" class="form-select-sm" onchange="this.form.submit()">
-                        <option value="15" {{ request('per_page', '15') === '15' ? 'selected' : '' }}>15</option>
-                        <option value="30" {{ request('per_page') === '30' ? 'selected' : '' }}>30</option>
-                        <option value="90" {{ request('per_page') === '90' ? 'selected' : '' }}>90</option>
-                        <option value="semua" {{ in_array(request('per_page'), ['semua', 'all'], true) ? 'selected' : '' }}>Semua</option>
-                    </select>
-                    <span class="table-cell-muted">data</span>
+<x-data-table route="{{ route('master.data-sekolah.index') }}" search-placeholder="Cari nama sekolah, NPSN, atau kota..." :per-page="$perPageInput">
+    <x-slot:filters>
+        <x-form-select 
+        id="school_type"
+        name="school_type"
+        class="form-select-sm"
+        onchange="this.form.submit()"
+        placeholder="Semua Jenis"
+        :selected="request('school_type')"
+        :options="['SMA' => 'SMA', 'SMK' => 'SMK', 'MA' => 'MA']" />
+    </x-slot:filters>
+    <thead>
+        <tr>
+            <th>Sekolah</th>
+            <th>NPSN</th>
+            <th>Jenis</th>
+            <th>Status</th>
+            <th>Akreditasi</th>
+            <th>Kota</th>
+            <th>Kondisi</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+    <tbody>
+    @forelse ($schools as $school)
+        <tr>
+            <td>
+                <div class="alert-content">
+                    @if ($school->logo_path)
+                        <img src="{{ asset('storage/' . $school->logo_path) }}" alt="Logo" class="entity-logo-thumb">
+                    @else
+                        <span class="entity-logo-placeholder">
+                            <x-icon name="home" size="18" />
+                        </span>
+                    @endif
+                    <div>
+                        <div class="table-cell-bold">{{ $school->name }}</div>
+                    </div>
                 </div>
-
-                <select name="school_type" class="form-select-sm" onchange="this.form.submit()">
-                    <option value="">Semua Jenis</option>
-                    <option value="SMA" {{ request('school_type') === 'SMA' ? 'selected' : '' }}>SMA</option>
-                    <option value="SMK" {{ request('school_type') === 'SMK' ? 'selected' : '' }}>SMK</option>
-                </select>
-            </div>
-
-            <div class="search-box toolbar-search-box">
-                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-                <input
-                    type="text"
-                    name="search"
-                    class="search-input"
-                    placeholder="Cari nama sekolah, NPSN, atau kota..."
-                    value="{{ request('search') }}"
-                >
-            </div>
-        </form>
-    </div>
-
-    <div class="table-responsive">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Sekolah</th>
-                    <th>NPSN</th>
-                    <th>Jenis</th>
-                    <th>Status</th>
-                    <th>Akreditasi</th>
-                    <th>Kota</th>
-                    <th>Kondisi</th>
-                    <th class="col-w-actions">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($schools as $school)
-                    <tr>
-                        <td>
-                            <div class="alert-content">
-                                @if ($school->logo_path)
-                                    <img src="{{ asset('storage/' . $school->logo_path) }}" alt="Logo" class="entity-logo-thumb">
-                                @else
-                                    <span class="entity-logo-placeholder">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                                        </svg>
-                                    </span>
-                                @endif
-                                <div>
-                                    <div class="table-cell-bold">{{ $school->name }}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <code class="text-brand">{{ $school->npsn }}</code>
-                        </td>
-                        <td>
-                            @if ($school->school_type === 'SMA')
-                                <span class="badge badge-primary">SMA</span>
-                            @else
-                                <span class="badge badge-cyan">SMK</span>
-                            @endif
-                        </td>
-                        <td>
-                            @if ($school->status === 'Negeri')
-                                <span class="badge badge-success">Negeri</span>
-                            @else
-                                <span class="badge badge-warning">Swasta</span>
-                            @endif
-                        </td>
-                        <td>
-                            @switch($school->accreditation)
-                                @case('A')
-                                    <span class="badge badge-success">A</span>
-                                    @break
-                                @case('B')
-                                    <span class="badge badge-cyan">B</span>
-                                    @break
-                                @case('C')
-                                    <span class="badge badge-warning">C</span>
-                                    @break
-                                @case('Belum')
-                                    <span class="badge badge-neutral">Belum</span>
-                                    @break
-                                @default
-                                    <span class="table-cell-muted">-</span>
-                            @endswitch
-                        </td>
-                        <td>
-                            <span class="table-cell-muted">{{ $school->kabupaten?->nama ?? $school->city ?? '-' }}</span>
-                        </td>
-                        <td>
-                            @if ($school->is_active)
-                                <span class="badge badge-success">Aktif</span>
-                            @else
-                                <span class="badge badge-neutral">Nonaktif</span>
-                            @endif
-                        </td>
-                        <td>
-                            <div class="table-actions table-actions-right">
-                                <button
-                                    type="button"
-                                    class="btn-edit btn-open-edit-school"
-                                    title="Edit Data Sekolah"
-                                    data-school="{{ json_encode($school) }}"
-                                    data-action="{{ route('master.data-sekolah.update', $school) }}"
-                                    @if ($school->logo_path)
-                                        data-logo-url="{{ asset('storage/' . $school->logo_path) }}"
-                                    @endif
-                                >
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
-                                    </svg>
-                                    <!-- <span>Edit</span> -->
-                                </button>
-                                <form method="POST" action="{{ route('master.data-sekolah.destroy', $school) }}" onsubmit="return confirm('Hapus data sekolah {{ $school->name }} dari registri?');" class="form-inline-action">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn-delete" title="Hapus Sekolah">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <polyline points="3 6 5 6 21 6"></polyline>
-                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                        </svg>
-                                        <!-- <span>Hapus</span> -->
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="8">
-                            <div class="empty-state">
-                                <svg class="empty-state-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                                </svg>
-                                <span class="empty-state-text">Belum ada data sekolah yang terdaftar. Klik "Tambah Sekolah" untuk mendaftarkan sekolah pertama.</span>
-                            </div>
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    <div class="table-footer">
-        <div class="pagination-summary">
-            @if ($schools->total() > 0)
-                Menampilkan <strong>{{ $schools->firstItem() ?? 1 }}</strong> &ndash; <strong>{{ $schools->lastItem() ?? $schools->total() }}</strong> dari <strong>{{ $schools->total() }}</strong> Sekolah
-            @else
-                Menampilkan <strong>0</strong> Sekolah
-            @endif
-        </div>
-
-        @if ($schools->hasPages())
-            <nav class="pagination-nav" role="navigation" aria-label="Navigasi Halaman">
-                {{-- Tombol Sebelumnya --}}
-                @if ($schools->onFirstPage())
-                    <span class="pagination-btn disabled" aria-disabled="true">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="15 18 9 12 15 6"></polyline>
-                        </svg>
-                        <span>Sebelumnya</span>
-                    </span>
+            </td>
+            <td>
+                <code class="text-brand">{{ $school->npsn }}</code>
+            </td>
+            <td>
+                @if ($school->school_type === 'SMA')
+                    <span class="badge badge-primary">SMA</span>
                 @else
-                    <a href="{{ $schools->previousPageUrl() }}" class="pagination-btn" rel="prev">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="15 18 9 12 15 6"></polyline>
-                        </svg>
-                        <span>Sebelumnya</span>
-                    </a>
+                    <span class="badge badge-cyan">SMK</span>
                 @endif
-
-                {{-- Nomor Halaman --}}
-                <div class="pagination-pages">
-                    @foreach ($schools->getUrlRange(1, $schools->lastPage()) as $page => $url)
-                        @if ($page == $schools->currentPage())
-                            <span class="pagination-page active" aria-current="page">{{ $page }}</span>
-                        @else
-                            <a href="{{ $url }}" class="pagination-page">{{ $page }}</a>
+            </td>
+            <td>
+                @if ($school->status === 'Negeri')
+                    <span class="badge badge-success">Negeri</span>
+                @else
+                    <span class="badge badge-warning">Swasta</span>
+                @endif
+            </td>
+            <td>
+                @switch($school->accreditation)
+                    @case('A')
+                        <span class="badge badge-success">A</span>
+                        @break
+                    @case('B')
+                        <span class="badge badge-cyan">B</span>
+                        @break
+                    @case('C')
+                        <span class="badge badge-warning">C</span>
+                        @break
+                    @case('Belum')
+                        <span class="badge badge-neutral">Belum</span>
+                        @break
+                    @default
+                        <span class="table-cell-muted">-</span>
+                @endswitch
+            </td>
+            <td>
+                <span class="table-cell-muted">{{ $school->kabupaten?->nama ?? $school->city ?? '-' }}</span>
+            </td>
+            <td>
+                @if ($school->is_active)
+                    <span class="badge badge-success">Aktif</span>
+                @else
+                    <span class="badge badge-neutral">Nonaktif</span>
+                @endif
+            </td>
+            <td>
+                <div class="table-actions table-actions-right">
+                    <button
+                        type="button"
+                        class="btn-edit btn-open-edit-school"
+                        title="Edit Data Sekolah"
+                        data-school="{{ json_encode($school) }}"
+                        data-action="{{ route('master.data-sekolah.update', $school) }}"
+                        @if ($school->logo_path)
+                            data-logo-url="{{ asset('storage/' . $school->logo_path) }}"
                         @endif
-                    @endforeach
+                    >
+                        <x-icon name="edit" size="14" />
+                        <!-- <span>Edit</span> -->
+                    </button>
+                    <form method="POST" action="{{ route('master.data-sekolah.destroy', $school) }}" onsubmit="return confirm('Hapus data sekolah {{ $school->name }} dari registri?');" class="form-inline-action">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn-delete" title="Hapus Sekolah">
+                            <x-icon name="delete" size="14" />
+                            <!-- <span>Hapus</span> -->
+                        </button>
+                    </form>
                 </div>
-
-                {{-- Tombol Selanjutnya --}}
-                @if ($schools->hasMorePages())
-                    <a href="{{ $schools->nextPageUrl() }}" class="pagination-btn" rel="next">
-                        <span>Selanjutnya</span>
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                    </a>
-                @else
-                    <span class="pagination-btn disabled" aria-disabled="true">
-                        <span>Selanjutnya</span>
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                    </span>
-                @endif
-            </nav>
-        @endif
-    </div>
-</div>
+            </td>
+        </tr>
+    @empty
+        <x-empty-state icon="home" iconSize="48" colspan="8" :text="request()->filled('search') || request()->filled('school_type') 
+            ? 'Hasil pencarian tidak ditemukan.' 
+            : 'Belum ada data sekolah yang terdaftar. Klik tombol Tambah untuk mendaftarkan sekolah pertama.'">
+        </x-empty-state>
+    @endforelse
+    </tbody>
+    <x-slot:footer>
+        <x-pagination-summary :paginator="$schools" />
+    </x-slot>
+</x-data-table>
 
 <!-- Modal Tambah Sekolah Component -->
 @include('master.data-sekolah.create')
