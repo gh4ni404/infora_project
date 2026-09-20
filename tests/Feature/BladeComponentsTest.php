@@ -175,16 +175,35 @@ test('modal renders delete form with csrf method override and html body and foot
 
 test('modal renders delete variant with preset danger, size sm, alert, and footer buttons', function () {
     $view = $this->blade(
-        '<x-modal name="delete" id="modalDeleteTest" item-name="jurusan" />'
+        '<x-modal
+            name="delete"
+            id="modalDeleteTest"
+            form-id="formDeleteTest"
+            cancel-btn-id="btnCancelDeleteTest"
+            confirm-btn-id="btnConfirmDeleteTest"
+            title="Hapus Data Test"
+            message-id="deleteTestMessage"
+            badge-id="deleteTestBadge"
+            item-title-id="deleteTestTitle"
+        />'
     );
 
     $view->assertSee('modal-backdrop', false);
+    $view->assertSee('id="modalDeleteTest"', false);
     $view->assertSee('modal-sm', false);
     $view->assertSee('text-danger', false);
     $view->assertSee('name="_method" value="DELETE"', false);
-    $view->assertSee('Apakah Anda yakin ingin menghapus jurusan');
+    $view->assertSee('id="formDeleteTest"', false);
+    $view->assertSee('id="btnCancelDeleteTest"', false);
+    $view->assertSee('id="btnConfirmDeleteTest"', false);
+    $view->assertSee('id="deleteTestMessage"', false);
+    $view->assertSee('id="deleteTestBadge"', false);
+    $view->assertSee('id="deleteTestTitle"', false);
+    $view->assertSee('Hapus Data Test');
     $view->assertSee('Tindakan ini tidak dapat dibatalkan.');
     $view->assertSee('btn-delete', false);
+    $view->assertSee('Batal');
+    $view->assertSee('Hapus');
 });
 
 test('modal renders a plain dialog when no form method is given', function () {
@@ -197,18 +216,15 @@ test('modal renders a plain dialog when no form method is given', function () {
     $view->assertDontSee('<form', false);
 });
 
-test('empty state renders icon, title, text, and action inside a table row', function () {
+test('empty state renders icon, title, and text inside a table row', function () {
     $view = $this->blade(
-        '<x-empty-state colspan="6" title="Belum Ada Data" text="Silakan tambahkan data baru.">
-            <x-slot:action><a href="/tambah" class="btn-primary">Tambah Data</a></x-slot:action>
-        </x-empty-state>'
+        '<x-empty-state colspan="6" title="Belum Ada Data" text="Silakan tambahkan data baru." />'
     );
 
     $view->assertSee('colspan="6"', false);
     $view->assertSee('empty-state', false);
     $view->assertSee('Belum Ada Data');
     $view->assertSee('Silakan tambahkan data baru.');
-    $view->assertSee('href="/tambah"', false);
 });
 
 test('table actions renders the action container with given alignment', function () {
