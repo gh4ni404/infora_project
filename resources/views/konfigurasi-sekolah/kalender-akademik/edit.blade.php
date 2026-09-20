@@ -7,7 +7,6 @@
     method="PUT"
     action=""
     form-id="formEditKalender"
-    close-btn-id="btnCloseEditKalender"
 >
     <x-form-input type="hidden" name="view" :value="$activeView" />
     <x-form-input type="hidden" name="kalender_id" id="edit_kalender_id" />

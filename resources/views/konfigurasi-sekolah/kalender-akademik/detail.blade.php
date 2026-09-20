@@ -3,7 +3,6 @@
     id="modalDateDetail"
     title="Rincian Agenda Tanggal"
     subtitle="Daftar kegiatan akademik yang terjadwal"
-    close-btn-id="btnCloseDateDetail"
 >
     <div id="dateDetailEventsList">
         <!-- Diisi secara dinamis via JavaScript -->

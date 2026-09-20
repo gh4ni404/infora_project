@@ -6,7 +6,6 @@
     size="lg"
     action="{{ route('konfigurasi-sekolah.kalender-akademik.store') }}"
     form-id="formCreateKalender"
-    close-btn-id="btnCloseCreateKalender"
 >
     <x-form-input type="hidden" name="view" :value="$activeView" />
 

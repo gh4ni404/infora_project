@@ -301,26 +301,14 @@
     <x-modal
         name="delete"
         id="modalDeleteKalender"
-        title="Hapus Agenda Kalender"
-        subtitle="Konfirmasi penghapusan kegiatan akademik"
         form-id="formDeleteKalender"
-        item-title-id="deleteKalenderTitle"
-        item-name="agenda"
-        context="kalender akademik"
-        close-btn-id="btnCloseDeleteKalender"
         cancel-btn-id="btnCancelDeleteKalender"
-    >
-        <p class="text-sm text-gray-600 mb-2.5">
-            Apakah Anda yakin ingin menghapus agenda berikut?
-        </p>
-
-        <div class="p-3.5 my-16 mx-6 bg-slate-50 border border-slate-200/90 rounded-xl text-center shadow-xs">
-            <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-semibold bg-slate-200/80 text-slate-700 rounded-md mb-1.5">
-                <span id="deleteKalenderKategori">-</span>
-            </span>
-            <div class="text-sm font-bold text-slate-900 leading-snug" id="deleteKalenderTitle">-</div>
-        </div>
-        
+        confirm-btn-id="btnConfirmDeleteKalender"
+        title="Hapus Agenda Kalender"
+        message-id="deleteKalenderMessage"
+        badge-id="deleteKalenderBadge"
+        item-title-id="deleteKalenderTitle"
+        >        
         <x-slot:hiddenInputs>
             <input type="hidden" name="view" value="{{ $activeView }}">
         </x-slot:hiddenInputs>
@@ -756,10 +744,10 @@
             // ========================================================================
             // MANAJEMEN MODAL MENGGUNAKAN InforaModals
             // ========================================================================
-            InforaModals.setup('modalCreateKalender', { closeBtnId: 'btnCloseCreateKalender', cancelBtnId: 'btnCancelCreateKalender' });
-            InforaModals.setup('modalDateDetail', { closeBtnId: 'btnCloseDateDetail', cancelBtnId: 'btnDismissDateDetail' });
-            InforaModals.setup('modalEditKalender', { closeBtnId: 'btnCloseEditKalender', cancelBtnId: 'btnCancelEditKalender' });
-            InforaModals.setup('modalDeleteKalender', { closeBtnId: 'btnCloseDeleteKalender', cancelBtnId: 'btnCancelDeleteKalender' });
+            InforaModals.setup('modalCreateKalender', { cancelBtnId: 'btnCancelCreateKalender' });
+            InforaModals.setup('modalDateDetail', { cancelBtnId: 'btnDismissDateDetail' });
+            InforaModals.setup('modalEditKalender', { cancelBtnId: 'btnCancelEditKalender' });
+            InforaModals.setup('modalDeleteKalender', { cancelBtnId: 'btnCancelDeleteKalender' });
 
             // Helper membuka modal tambah dengan opsi prefill tanggal
             function openCreateModal(prefillDate = null) {
@@ -936,18 +924,10 @@
             // ========================================================================
             // MODAL HAPUS AGENDA
             // ========================================================================
-            InforaModals.bindDeleteButtons('.btn-open-delete-kalender', 'modalDeleteKalender', {
-                titleId: 'deleteKalenderTitle',
-                onOpen: function(modal, btn) {
-                    const kategoriEl = document.getElementById('deleteKalenderKategori');
-                    if (kategoriEl) {
-                        kategoriEl.textContent = btn.dataset.kategori || '-';
-                    }
-                    const titleEl = document.getElementById('deleteKalenderTitle');
-                    if (titleEl && btn.dataset.title) {
-                        titleEl.textContent = btn.dataset.title;
-                    }
-                }
+            InforaModals.bindDeleteButtons('.btn-open-delete-kalender', 'modalDeleteKalender', function(modal, btn) {
+                document.getElementById('deleteKalenderMessage').textContent = 'Apakah Anda yakin ingin menghapus agenda berikut?';
+                document.getElementById('deleteKalenderBadge').textContent = btn.dataset.kategori || '-';
+                document.getElementById('deleteKalenderTitle').textContent = btn.dataset.title || '-';
             });
 
             // ========================================================================
