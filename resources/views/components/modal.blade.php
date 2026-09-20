@@ -1,40 +1,26 @@
 @props([
-    'name' => null,
-    'type' => null,
-    'id' => null,
-    'title' => null,
-    'subtitle' => null,
-    'size' => null,
-    'closeBtnId' => null,
-    'closeLabel' => 'Tutup',
+    'name' => null, //dipakai di case delete dan standar
+    'id' => null, //dipakai di case delete dan standar
+    'title' => null, //dipakai di case standar
+    'subtitle' => null, //dipakai di case standar
+    'size' => null, //dipakai di case standar
     'method' => null,
-    'action' => null,
-    'formId' => null,
-    'danger' => false,
-    // Props khusus untuk preset (seperti name/type="delete")
-    'itemTitleId' => 'deleteItemTitle',
-    'itemName' => 'data ini',
-    'context' => null,
+    'action' => null, //dipakai di case standar
+    'formId' => null, //dipakai di case delete dan standar
+    'messageId' => null, // dipakai di case delete
+    'badgeId' => null, // dipakai di case delete
+    'itemTitleId' => null, //dipakai di case delete
     'cancelBtnId' => null,
     'confirmBtnId' => null,
-    'confirmText' => 'Hapus Sekarang',
-    'confirmIcon' => 'trash',
 ])
 
 @php
-    $variant = strtolower($name ?? $type ?? 'default');
+    $variant = strtolower($name ?? 'default');
 
     // Preset nilai berdasarkan variant / case
     if ($variant === 'delete') {
-        $id = $id ?? 'modalDelete';
-        $title = $title ?? ('Hapus ' . ucfirst($itemName) . '?');
-        $subtitle = $subtitle ?? null;
         $size = $size ?? 'sm';
         $method = $method ?? 'DELETE';
-        $danger = true;
-        $formId = $formId ?? 'formDelete';
-        $cancelBtnId = $cancelBtnId ?? ('btnCancel' . Str::studly($id));
-        $confirmBtnId = $confirmBtnId ?? ('btnConfirm' . Str::studly($id));
     } else {
         $size = $size ?? 'default';
     }
@@ -45,7 +31,6 @@
         default => '',
     };
     $method = strtoupper($method ?? '');
-    $resolvedCloseBtnId = $closeBtnId ?? ('btnClose' . Str::studly($id ?? 'modal'));
     $hasSlot = isset($slot) && $slot->isNotEmpty();
     $hasFooter = isset($footer) && $footer->isNotEmpty();
 @endphp
@@ -81,35 +66,37 @@
                         </h3>
                         <!-- Konten Pesan Hapus -->
                         <div class="text-sm text-gray-600 leading-relaxed max-w-sm w-full">
-                            {{-- @if ($hasSlot) --}}
+                            @if ($hasSlot)
                                 {{ $slot }}
-                            {{-- @else
-                                <p class="mb-3">
-                                    Apakah Anda yakin ingin menghapus {{ $itemName }} <strong id="{{ $itemTitleId }}" class="font-semibold text-gray-900"></strong>{{ $context ? " dari {$context}" : '' }}?
+                            @else
+                                <p class="text-sm text-gray-600 mb-2.5" id="{{ $messageId }}">
+                                    -
                                 </p>
-                                <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-100">
+
+                                <div class="p-3.5 my-8 mx-6 bg-slate-50 border border-slate-200/90 rounded-xl text-center shadow-xs">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-mono font-bold bg-slate-200/80 text-slate-700 rounded-md mb-1.5">
+                                        <span id="{{ $badgeId }}">-</span>
+                                    </span>
+                                    <div class="text-sm font-bold text-slate-900 leading-snug" id="{{ $itemTitleId }}">-</div>
+                                </div>
+
+                                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-red-50 text-red-700 border border-red-100">
+                                    <x-icon name="alert-circle" size="14" />
                                     <span>Tindakan ini tidak dapat dibatalkan.</span>
                                 </div>
-                            @endif --}}
+                            @endif
                             {{ $hiddenInputs ?? '' }}
                         </div>
                     </div>
                     {{-- Footer: Tombol Aksi Simetris (Grid 50/50) --}}
-                    {{-- @if (!$hasFooter) --}}
-                        <div class="modal-footer grid grid-cols-2 gap-3 p-4 bg-slate-50/80 border-t border-slate-100">
-                            <button type="button" class="btn-secondary w-full justify-center font-medium" id="{{ $cancelBtnId }}">
-                                Batal
-                            </button>
-                            <button type="submit" class="btn-delete w-full justify-center font-medium" id="{{ $confirmBtnId }}">
-                                {{-- <x-icon :name="$confirmIcon" size="16" /> --}}
-                                <span>{{ $confirmText }}</span>
-                            </button>
-                        </div>
-                    {{-- @else
-                        <div class="modal-footer grid grid-cols-2 gap-3 p-4 bg-slate-50/80 border-t border-slate-100">
-                            {{ $footer }}
-                        </div> --}}
-                    {{-- @endif --}}
+                    <div class="modal-footer grid grid-cols-2 gap-3 p-4 bg-slate-50/80 border-t border-slate-100">
+                        <button type="button" class="btn-secondary w-full justify-center font-medium" id="{{ $cancelBtnId }}">
+                            <span>Batal</span>
+                        </button>
+                        <button type="submit" class="btn-delete w-full justify-center font-medium" id="{{ $confirmBtnId }}">
+                            <span>Hapus</span>
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -129,17 +116,11 @@
             <div class="modal-dialog {{ $sizeClass }}">
                 <div class="modal-header">
                     <div>
-                        <h3 class="modal-title {{ $danger ? 'text-danger' : '' }}" id="{{ $id }}Title">{{ $title }}</h3>
+                        <h3 class="modal-title" id="{{ $id }}Title">{{ $title }}</h3>
                         @if ($subtitle)
                             <p class="modal-subtitle" id="{{ $id }}Subtitle">{{ $subtitle }}</p>
                         @endif
                     </div>
-                    <button type="button" class="modal-close-btn" id="{{ $resolvedCloseBtnId }}" aria-label="{{ $closeLabel }}">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
                 </div>
 
                 @if ($action !== null || $method)
