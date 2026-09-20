@@ -174,37 +174,20 @@
         id="modalDeleteJurusan" 
         form-id="formDeleteJurusan" 
         cancel-btn-id="btnCancelDeleteJurusan"
-        confirm-btn-id="btnConfirmDeleteJurusan" 
-        confirm-text="Hapus Jurusan">
-        
-        <p class="text-sm text-gray-600 mb-2.5">
-            Apakah Anda yakin ingin menghapus jurusan berikut?
-        </p>
-        <div class="p-3.5 my-16 mx-6 bg-slate-50 border border-slate-200/90 rounded-xl text-center shadow-xs">
-            <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-mono font-bold bg-slate-200/80 text-slate-700 rounded-md mb-1.5">
-                <span id="deleteJurusanKode">-</span>
-            </span>
-            <div class="text-sm font-bold text-slate-900 leading-snug" id="deleteJurusanNama">-</div>
-        </div>
-        <x-alert type="error">
-            Tindakan ini tidak dapat dibatalkan.
-        </x-alert>
-    </x-modal>
-
+        confirm-btn-id="btnConfirmDeleteJurusan"
+        message-id="deleteJurusanMessage"
+        badge-id="deleteJurusanBadge"
+        item-title-id="deleteJurusanTitle" />
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Modal Tambah
-            InforaModals.setup('modalCreateJurusan', {
-                cancelBtnId: 'btnCancelCreateJurusan'
-            });
+            InforaModals.setup('modalCreateJurusan', { cancelBtnId: 'btnCancelCreateJurusan', });
             InforaModals.bindOpenButton('btnOpenCreateJurusan', 'modalCreateJurusan');
             InforaModals.bindOpenButton('btnEmptyCreateJurusan', 'modalCreateJurusan');
 
             // Modal Ubah Data
-            InforaModals.setup('modalEditJurusan', {
-                cancelBtnId: 'btnCancelEditJurusan'
-            });
+            InforaModals.setup('modalEditJurusan', { cancelBtnId: 'btnCancelEditJurusan', });
             InforaModals.bindEditButtons('.btn-open-edit-jurusan', 'modalEditJurusan', function(modal, data,
                 formEdit) {
                 document.getElementById('edit_jenjang').value = data.jenjang || 'SMK';
@@ -219,22 +202,12 @@
             });
 
             // Modal Konfirmasi Hapus
-            InforaModals.setup('modalDeleteJurusan', {
-                cancelBtnId: 'btnCancelDeleteJurusan'
-            });
+            InforaModals.setup('modalDeleteJurusan', { cancelBtnId: 'btnCancelDeleteJurusan' });
             InforaModals.bindDeleteButtons('.btn-open-delete-jurusan', 'modalDeleteJurusan', function(modal, btn) {
-                const titleEl = document.getElementById('modalDeleteJurusanTitle');
-                if (titleEl && btn.dataset.kode) {
-                    titleEl.textContent = 'Hapus ' + btn.dataset.kode + '?';
-                }
-                const namaEl = document.getElementById('deleteJurusanNama');
-                if (namaEl) {
-                    namaEl.textContent = btn.dataset.nama || '-';
-                }
-                const kodeEl = document.getElementById('deleteJurusanKode');
-                if (kodeEl) {
-                    kodeEl.textContent = btn.dataset.kode || '-';
-                }
+                document.getElementById('modalDeleteJurusanTitle').textContent = 'Hapus Jurusan ' + btn.dataset.kode + '?';
+                document.getElementById('deleteJurusanMessage').textContent = 'Apakah Anda yakin ingin menghapus jurusan berikut?';
+                document.getElementById('deleteJurusanBadge').textContent = btn.dataset.kode;
+                document.getElementById('deleteJurusanTitle').textContent = btn.dataset.nama;
             });
 
             // Reopen modal otomatis saat terjadi error validasi
