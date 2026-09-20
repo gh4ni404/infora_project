@@ -11,20 +11,15 @@
     <x-form-input type="hidden" name="view" :value="$activeView" />
     <x-form-input type="hidden" name="kalender_id" id="edit_kalender_id" />
 
-    <div class="form-section-label">Informasi Sekolah &amp; Periode</div>
+    <div class="form-section-label">Informasi Sekolah dan Periode</div>
     <div class="form-grid-2col">
         <x-form-select
             name="school_id"
             id="edit_school_id"
             label="Unit Sekolah"
+            :options="$schools->mapWithKeys(fn($school) => [$school->id => $school->name . ' (' . $school->school_type . ')'])"
             required
-        >
-            @foreach ($schools as $school)
-                <option value="{{ $school->id }}">
-                    {{ $school->name }} ({{ $school->school_type }})
-                </option>
-            @endforeach
-        </x-form-select>
+        />
 
         <div class="form-grid-2col">
             <x-form-input
@@ -39,16 +34,17 @@
                 name="semester"
                 id="edit_semester"
                 label="Semester"
+                :options="[
+                    'ganjil' => 'Ganjil',
+                    'genap' => 'Genap',
+                ]"
                 required
-            >
-                <option value="ganjil">Ganjil</option>
-                <option value="genap">Genap</option>
-            </x-form-select>
+            />
         </div>
     </div>
 
     <div class="form-section-divider"></div>
-    <div class="form-section-label">Detail Agenda &amp; Tanggal Kegiatan</div>
+    <div class="form-section-label">Detail Agenda dan Tanggal Kegiatan</div>
 
     <x-form-input
         name="judul_kegiatan"
@@ -97,14 +93,9 @@
             id="edit_warna"
             label="Warna Penanda"
             hint="Warna badge dan highlight pada grid kalender."
+            :options="$warnaOptions"
             required
-        >
-            @foreach ($warnaOptions as $colorKey => $colorLabel)
-                <option value="{{ $colorKey }}">
-                    {{ $colorLabel }}
-                </option>
-            @endforeach
-        </x-form-select>
+        />
     </div>
 
     <x-form-checkbox

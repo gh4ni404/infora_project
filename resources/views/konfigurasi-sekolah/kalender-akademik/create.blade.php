@@ -9,20 +9,16 @@
 >
     <x-form-input type="hidden" name="view" :value="$activeView" />
 
-    <div class="form-section-label">Informasi Sekolah &amp; Periode</div>
+    <div class="form-section-label">Informasi Sekolah dan Periode</div>
     <div class="form-grid-2col">
         <x-form-select
             name="school_id"
             id="create_school_id"
             label="Unit Sekolah"
+            :selected="$selectedSchoolId"
+            :options="$schools->mapWithKeys(fn($school) => [$school->id => $school->name . ' (' . $school->school_type . ')'])"
             required
-        >
-            @foreach ($schools as $school)
-                <option value="{{ $school->id }}" {{ (string) old('school_id', $selectedSchoolId) === (string) $school->id ? 'selected' : '' }}>
-                    {{ $school->name }} ({{ $school->school_type }})
-                </option>
-            @endforeach
-        </x-form-select>
+        />
 
         <div class="form-grid-2col">
             <x-form-input
@@ -38,16 +34,18 @@
                 name="semester"
                 id="create_semester"
                 label="Semester"
+                selected="ganjil"
+                :options="[
+                    'ganjil' => 'Ganjil',
+                    'genap' => 'Genap',
+                ]"
                 required
-            >
-                <option value="ganjil" {{ old('semester', 'ganjil') === 'ganjil' ? 'selected' : '' }}>Ganjil</option>
-                <option value="genap" {{ old('semester', 'ganjil') === 'genap' ? 'selected' : '' }}>Genap</option>
-            </x-form-select>
+            />
         </div>
     </div>
 
     <div class="form-section-divider"></div>
-    <div class="form-section-label">Detail Agenda &amp; Tanggal Kegiatan</div>
+    <div class="form-section-label">Detail Agenda dan Tanggal Kegiatan</div>
 
     <x-form-input
         name="judul_kegiatan"
@@ -85,7 +83,7 @@
             required
         >
             @foreach ($kategoriOptions as $key => $opt)
-                <option value="{{ $key }}" data-default-color="{{ $opt['color'] }}" {{ old('kategori', 'Kegiatan Sekolah') === $key ? 'selected' : '' }}>
+                <option value="{{ $key }}" data-default-color="{{ $opt['color'] }}" @selected(old('kategori', 'Kegiatan Sekolah') === $key)>
                     {{ $opt['label'] }} ({{ $opt['description'] }})
                 </option>
             @endforeach
@@ -96,14 +94,10 @@
             id="create_warna"
             label="Warna Penanda"
             hint="Warna badge dan highlight pada grid kalender."
+            selected="blue"
+            :options="$warnaOptions"
             required
-        >
-            @foreach ($warnaOptions as $colorKey => $colorLabel)
-                <option value="{{ $colorKey }}" {{ old('warna', 'blue') === $colorKey ? 'selected' : '' }}>
-                    {{ $colorLabel }}
-                </option>
-            @endforeach
-        </x-form-select>
+        />
     </div>
 
     <x-form-checkbox

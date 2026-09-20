@@ -14,9 +14,14 @@
             @if ($schools->count() > 1)
                 <form method="GET" action="{{ route('konfigurasi-sekolah.kalender-akademik') }}" id="schoolFilterForm">
                     <input type="hidden" name="view" value="{{ $activeView }}" id="schoolFilterView">
-                    <x-form-select name="school_id" id="school_id" :selected="$selectedSchoolId"
+                    <x-form-select
+                        name="school_id"
+                        id="school_id"
+                        :selected="$selectedSchoolId"
                         :options="$schools->mapWithKeys(fn($school) => [$school->id => $school->name . ' (' . $school->school_type . ')'])"
-                        onchange="this.form.submit()" title="Pilih Unit Sekolah" />
+                        onchange="this.form.submit()"
+                        title="Pilih Unit Sekolah"
+                    />
                 </form>
             @endif
 
@@ -200,13 +205,13 @@
 
             <thead>
                 <tr>
-                    <th class="table-col-w-sm text-center">No</th>
+                    <th>No</th>
                     <th>Tanggal Kegiatan</th>
                     <th>Nama Kegiatan</th>
                     <th>Kategori</th>
                     <th>Semester / TA</th>
                     <th class="text-center">Libur KBM</th>
-                    <th class="table-col-w-action text-right">Aksi</th>
+                    <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -245,7 +250,7 @@
                                 <span class="badge badge-success">Tidak</span>
                             @endif
                         </td>
-                        <td class="table-col-w-action text-right">
+                        <td>
                             <x-table-actions align="right">
                                 <button type="button" class="btn-edit btn-open-edit-kalender"
                                     title="Ubah Agenda"
