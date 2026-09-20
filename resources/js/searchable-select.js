@@ -16,7 +16,7 @@ export class SearchableSelect {
         this.element.__searchableSelect = this;
 
         this.inputId = element.dataset.inputId;
-        this.placeholder = element.dataset.placeholder || '-- Pilih Salah Satu --';
+        this.placeholder = element.dataset.placeholder || 'Pilih Salah Satu';
         this.emptyText = element.dataset.emptyText || 'Data tidak ditemukan';
         this.isClearable = element.dataset.clearable === '1';
         this.isDisabled = element.dataset.disabled === '1';

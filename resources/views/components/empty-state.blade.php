@@ -17,9 +17,6 @@
                 <h3 class="empty-state-title">{{ $title }}</h3>
             @endif
             <span class="empty-state-text">{{ $text }}</span>
-            {{-- @if ($action)
-                    {{ $action }}
-            @endif --}}
         </div>
     </td>
 </tr>

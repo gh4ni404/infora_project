@@ -301,7 +301,7 @@ test('form-input renders hidden input cleanly without form-group wrapper', funct
 
 test('form-select renders options, placeholder, label, and required indicator', function () {
     $view = $this->blade(
-        '<x-form-select name="jenjang" label="Jenjang Pendidikan" placeholder="-- Pilih Jenjang --" required>
+        '<x-form-select name="jenjang" label="Jenjang Pendidikan" placeholder="Pilih Jenjang" required>
             <option value="SMK">SMK</option>
             <option value="SMA">SMA</option>
         </x-form-select>'
@@ -311,7 +311,7 @@ test('form-select renders options, placeholder, label, and required indicator', 
     $view->assertSee('Jenjang Pendidikan');
     $view->assertSee('<span class="text-danger">*</span>', false);
     $view->assertSee('name="jenjang"', false);
-    $view->assertSee('-- Pilih Jenjang --');
+    $view->assertSee('Pilih Jenjang');
     $view->assertSee('<option value="SMK">SMK</option>', false);
     $view->assertSee('<option value="SMA">SMA</option>', false);
 });

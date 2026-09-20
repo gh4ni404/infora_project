@@ -98,7 +98,7 @@ Komponen dropdown select standar dengan dukungan placeholder dan opsi kustom via
 | `label` | `string` | `null` | Opsional | Label teks dropdown. |
 | `id` | `string` | `$name` | Opsional | ID elemen select. |
 | `selected` | `mixed` | `null` | Opsional | Nilai yang terpilih secara bawaan. |
-| `placeholder`| `string` | `null` | Opsional | Opsi pertama kosong/pilihan awal (misal: `"-- Pilih Jenjang --"`). |
+| `placeholder`| `string` | `null` | Opsional | Opsi pertama kosong/pilihan awal (misal: `"Pilih Jenjang"`). |
 | `hint` | `string` | `null` | Opsional | Teks petunjuk di bawah select. |
 | `required` | `bool` | `false` | Opsional | Menandai field wajib dipilih. |
 | `groupClass`| `string` | `''` | Opsional | Class CSS tambahan pada `.form-group`. |
@@ -112,7 +112,7 @@ Komponen dropdown select standar dengan dukungan placeholder dan opsi kustom via
     name="jenjang"
     id="create_jenjang"
     label="Jenjang Pendidikan"
-    placeholder="-- Pilih Jenjang --"
+    placeholder="Pilih Jenjang"
     required>
     <option value="SMK" {{ old('jenjang', $selectedSchool?->school_type) === 'SMK' ? 'selected' : '' }}>SMK (Konsentrasi Keahlian)</option>
     <option value="SMA" {{ old('jenjang', $selectedSchool?->school_type) === 'SMA' ? 'selected' : '' }}>SMA (Peminatan / Fase)</option>
@@ -327,7 +327,7 @@ Komponen terpadu untuk membungkus tabel data dengan form pencarian, pemilih juml
 #### Props `<x-data-table>`
 | Prop | Tipe | Default | Deskripsi |
 | :--- | :--- | :--- | :--- |
-| `route` | `string` | - | URL aksi pencarian (misal: `route('master.data-jurusan')`). |
+| `route` | `string` | - | URL aksi pencarian (misal: `route('master.data-jurusan.index')`). |
 | `searchPlaceholder` | `string` | `'Cari data...'` | Placeholder kotak input cari. |
 | `perPage` | `int` | `15` | Nilai per_page aktif saat ini. |
 | `perPageText` | `string` | `'data'` | Teks di samping per_page (misal: `'jurusan'`). |
@@ -340,7 +340,7 @@ Komponen terpadu untuk membungkus tabel data dengan form pencarian, pemilih juml
 #### Contoh Penggunaan
 ```blade
 <x-data-table
-    :route="route('master.data-jurusan')"
+    :route="route('master.data-jurusan.index')"
     search-placeholder="Cari nama, kode jurusan..."
     :per-page="$perPageInput"
     per-page-text="jurusan">
