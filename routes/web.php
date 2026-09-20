@@ -55,8 +55,6 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
         Route::resource('data-sekolah', SchoolController::class)->except(['show', 'create']);
         Route::resource('data-jurusan', JurusanController::class)->parameters([
             'data-jurusan' => 'jurusan',
-        ])->names([
-            'index' => 'data-jurusan',
         ])->except(['show', 'create']);
         Route::post('data-jurusan/{jurusan}/toggle-status', [JurusanController::class, 'toggleStatus'])->name('data-jurusan.toggle-status');
     });

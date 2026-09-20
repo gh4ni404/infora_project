@@ -135,7 +135,7 @@ class JurusanController extends Controller
         $jurusan = Jurusan::create($data);
 
         return redirect()
-            ->route('master.data-jurusan', ['school_id' => $jurusan->school_id])
+            ->route('master.data-jurusan.index', ['school_id' => $jurusan->school_id])
             ->with('success', "Jurusan {$jurusan->kode} ({$jurusan->nama}) berhasil ditambahkan ke dalam sistem.");
     }
 
@@ -149,7 +149,7 @@ class JurusanController extends Controller
         $jurusan->update($data);
 
         return redirect()
-            ->route('master.data-jurusan', ['school_id' => $jurusan->school_id])
+            ->route('master.data-jurusan.index', ['school_id' => $jurusan->school_id])
             ->with('success', "Data jurusan {$jurusan->kode} ({$jurusan->nama}) berhasil diperbarui.");
     }
 
@@ -164,7 +164,7 @@ class JurusanController extends Controller
         $jurusan->delete();
 
         return redirect()
-            ->route('master.data-jurusan', ['school_id' => $schoolId])
+            ->route('master.data-jurusan.index', ['school_id' => $schoolId])
             ->with('success', "Data jurusan {$label} berhasil dihapus dari sistem.");
     }
 
@@ -180,7 +180,7 @@ class JurusanController extends Controller
         $statusText = $jurusan->is_active ? 'diaktifkan' : 'dinonaktifkan';
 
         return redirect()
-            ->route('master.data-jurusan', ['school_id' => $jurusan->school_id])
+            ->route('master.data-jurusan.index', ['school_id' => $jurusan->school_id])
             ->with('success', "Status jurusan {$jurusan->kode} berhasil {$statusText}.");
     }
 }
