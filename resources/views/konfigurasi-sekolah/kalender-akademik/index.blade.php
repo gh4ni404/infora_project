@@ -53,34 +53,22 @@
 
     {{-- Status Banner Jika Sekolah Belum Terhubung --}}
     @if (! $selectedSchool)
-        <div class="alert-info">
-            <div class="alert-content">
-                <x-icon name="info-circle" size="20" />
-                <div>
-                    <strong>Unit Sekolah Belum Dikonfigurasi:</strong>
-                    Akun Anda belum terhubung dengan unit sekolah manapun. Silakan hubungi Super Administrator untuk konfigurasi unit sekolah.
-                </div>
-            </div>
-            <span class="badge badge-warning">Perlu Konfigurasi</span>
-        </div>
+        <x-status-banner
+            title="Unit Sekolah Belum Dikonfigurasi:"
+            message="Akun Anda belum terhubung dengan unit sekolah manapun. Silakan hubungi Super Administrator untuk konfigurasi unit sekolah."
+            badge="Perlu Konfigurasi"
+        />
     @elseif (! $hasTahunAjaran)
-        <div class="alert-info">
-            <div class="alert-content">
-                <x-icon name="info-circle" size="20" />
-                <div>
-                    <strong>Tahun Ajaran Belum Dikonfigurasi:</strong>
-                    Unit sekolah <strong>{{ $selectedSchool->name }}</strong> belum memiliki Tahun Ajaran.
-                    Kalender akademik membutuhkan setidaknya satu Tahun Ajaran untuk dapat menambahkan agenda kegiatan sekolah.
-                    <div class="alert-actions">
-                        <a href="{{ route('konfigurasi-sekolah.tahun-ajaran', array_filter(['school_id' => $user->isSuperAdmin() ? $selectedSchoolId : null])) }}" class="btn-secondary btn-sm">
-                            <x-icon name="settings" size="14" />
-                            <span>Konfigurasi Tahun Ajaran Sekarang</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <span class="badge badge-warning">Tahun Ajaran Diperlukan</span>
-        </div>
+        <x-status-banner
+            title="Tahun Ajaran Belum Dikonfigurasi:"
+            badge="Tahun Ajaran Diperlukan"
+            action-icon="settings"
+            action-title="Konfigurasi Sekarang"
+            :action-href="route('konfigurasi-sekolah.tahun-ajaran', array_filter(['school_id' => $user->isSuperAdmin() ? $selectedSchoolId : null]))"
+        >
+            <br>Unit sekolah <strong>{{ $selectedSchool->name }}</strong>  belum memiliki Tahun Ajaran.
+            Kalender akademik membutuhkan setidaknya satu Tahun Ajaran untuk dapat menambahkan agenda kegiatan sekolah.
+        </x-status-banner>
     @endif
 
     {{-- ========================================================================

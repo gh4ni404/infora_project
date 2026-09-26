@@ -33,40 +33,19 @@
 
 {{-- Status Banner Semester Aktif Global --}}
 @if (! $selectedSchool)
-    <div class="alert-info">
-        <div class="alert-content">
-            <x-icon name="info-circle" size="20" />
-            <div>
-                <strong>Unit Sekolah Belum Dikonfigurasi:</strong>
-                Akun Anda belum terhubung dengan unit sekolah manapun. Silakan hubungi Super Administrator untuk konfigurasi unit sekolah.
-            </div>
-        </div>
-        <span class="badge badge-warning">Perlu Konfigurasi</span>
-    </div>
+    <x-status-banner
+        title="Unit Sekolah Belum Dikonfigurasi:"
+        message="Akun Anda belum terhubung dengan unit sekolah manapun. Silakan hubungi Super Administrator untuk konfigurasi unit sekolah."
+        badge="Perlu Konfigurasi"
+    />
 @elseif ($activeSemester)
-    <div class="alert-info">
-        <div class="alert-content">
-            <x-icon name="info-circle" size="20" />
-            <div>
-                <strong>Semester Aktif Saat Ini:</strong>
-                {{ $activeSemester->nama_lengkap }}
-                &bull; Rentang KBM: <strong>{{ $activeSemester->rentang_tanggal_formatted }}</strong>
-                &bull; Unit: <strong>{{ $selectedSchool->name }}</strong>
-            </div>
-        </div>
-        <span class="badge badge-success">Aktif</span>
-    </div>
+    <x-status-banner title="Saat Ini:" badge="Aktif" badge-color="success">
+        {{ $activeSemester->nama_lengkap }}
+    </x-status-banner>
 @else
-    <div class="alert-info">
-        <div class="alert-content">
-            <x-icon name="info-circle" size="20" />
-            <div>
-                <strong>Belum Ada Semester Aktif:</strong>
-                Unit sekolah ini belum memiliki semester yang aktif. Silakan pilih salah satu semester pada tabel di bawah lalu klik tombol <strong>Jadikan Aktif</strong>.
-            </div>
-        </div>
-        <span class="badge badge-warning">Belum Aktif</span>
-    </div>
+    <x-status-banner title="Belum Ada Semester Aktif:" badge="Belum Aktif">
+        Unit sekolah ini belum memiliki semester yang aktif. Silakan pilih salah satu semester pada tabel di bawah lalu klik tombol <strong>Jadikan Aktif</strong>.
+    </x-status-banner>
 @endif
 
 {{-- ========================================================================
