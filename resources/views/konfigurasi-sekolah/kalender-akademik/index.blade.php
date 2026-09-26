@@ -5,9 +5,9 @@
         <x-slot:subtitle>
             Manajemen agenda kegiatan sekolah, jadwal ujian, rentang semester, dan hari libur
             @if ($selectedSchool)
-                &ndash; <strong class="text-primary">{{ $selectedSchool->name }}</strong>
+                &ndash; <strong class="text-brand">{{ $selectedSchool->name }}</strong>
             @else
-                &ndash; <span class="text-secondary">Belum Terhubung Unit Sekolah</span>
+                &ndash; <span class="text-muted">Belum Terhubung Unit Sekolah</span>
             @endif
         </x-slot:subtitle>
 
@@ -71,7 +71,7 @@
                     <strong>Tahun Ajaran Belum Dikonfigurasi:</strong>
                     Unit sekolah <strong>{{ $selectedSchool->name }}</strong> belum memiliki Tahun Ajaran.
                     Kalender akademik membutuhkan setidaknya satu Tahun Ajaran untuk dapat menambahkan agenda kegiatan sekolah.
-                    <div style="margin-top: var(--space-2);">
+                    <div class="alert-actions">
                         <a href="{{ route('konfigurasi-sekolah.tahun-ajaran', array_filter(['school_id' => $user->isSuperAdmin() ? $selectedSchoolId : null])) }}" class="btn-secondary btn-sm">
                             <x-icon name="settings" size="14" />
                             <span>Konfigurasi Tahun Ajaran Sekarang</span>

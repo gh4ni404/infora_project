@@ -5,9 +5,9 @@
     <x-slot:subtitle>
         Konfigurasi tahun ajaran dan semester aktif untuk seluruh modul operasional sekolah
         @if ($selectedSchool)
-            &ndash; <strong class="text-primary">{{ $selectedSchool->name }}</strong>
+            &ndash; <strong class="text-brand">{{ $selectedSchool->name }}</strong>
         @else
-            &ndash; <span class="text-secondary">Belum Terhubung Unit Sekolah</span>
+            &ndash; <span class="text-muted">Belum Terhubung Unit Sekolah</span>
         @endif
     </x-slot:subtitle>
     @if ($user->isSuperAdmin() && $schools->count() > 1)
@@ -185,7 +185,7 @@
     <x-data-table id="cardSemesterDetail" title="Daftar Semester">
         <x-slot:subtitle>
             @if ($selectedTahunAjaran)
-                Tahun: <strong class="text-primary">{{ $selectedTahunAjaran->tahun }}</strong>
+                Tahun: <strong class="text-brand">{{ $selectedTahunAjaran->tahun }}</strong>
             @else
                 Pilih Tahun Ajaran di Kiri
             @endif

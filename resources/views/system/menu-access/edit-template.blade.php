@@ -248,7 +248,7 @@
     size="sm"
 >
     <div class="p-3.5 bg-slate-50 border border-slate-200/90 rounded-xl text-center mb-4">
-        <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-semibold bg-blue-50 text-primary border border-blue-100 rounded-md mb-1.5">
+        <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-semibold bg-blue-50 text-brand border border-blue-100 rounded-md mb-1.5">
             Template Peran
         </span>
         <div class="text-sm font-bold text-slate-900 leading-snug">

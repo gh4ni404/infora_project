@@ -1,6 +1,6 @@
 @php
     $createSemesterSubtitle = new \Illuminate\Support\HtmlString(
-        'Tahun Ajaran: <strong class="text-primary">' . e($selectedTahunAjaran?->tahun ?? '-') . '</strong> &bull; ' . e($selectedSchool?->name ?? '-')
+        'Tahun Ajaran: <strong class="text-brand">' . e($selectedTahunAjaran?->tahun ?? '-') . '</strong> &bull; ' . e($selectedSchool?->name ?? '-')
     );
 @endphp
 

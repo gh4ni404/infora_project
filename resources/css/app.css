@@ -286,6 +286,13 @@ body {
     overflow: hidden;
 }
 
+.alert-actions {
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 /* Buttons */
 .btn-primary {
     display: inline-flex;

@@ -5,7 +5,7 @@
         <x-slot:subtitle>
             Kelola data konsentrasi keahlian (SMK) dan peminatan (SMA) per unit sekolah
             @if ($selectedSchool)
-                &ndash; <strong class="text-primary">{{ $selectedSchool->name }}</strong>
+                &ndash; <strong class="text-brand">{{ $selectedSchool->name }}</strong>
                 <span
                     class="badge {{ $selectedSchool->school_type === 'SMK' ? 'badge-primary' : 'badge-cyan' }}">{{ $selectedSchool->school_type }}</span>
             @endif

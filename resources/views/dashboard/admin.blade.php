@@ -3,7 +3,7 @@
 @section('content')
 <x-page-header title="Dashboard Administrator Sekolah">
     <x-slot:subtitle>
-        Selamat datang kembali, <strong class="text-primary">{{ $user->name }}</strong> &ndash; Ringkasan operasional dan tata kelola unit sekolah
+        Selamat datang kembali, <strong class="text-brand">{{ $user->name }}</strong> &ndash; Ringkasan operasional dan tata kelola unit sekolah
     </x-slot:subtitle>
 
     @if ($user->isSuperAdmin() && $schools->count() > 1)
