@@ -42,10 +42,10 @@
     </div>
 
     <div class="card-body">
-        <div class="alert-info" style="display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1.5rem;">
+        <div class="alert-info">
             <x-icon name="info" size="40" />
             <div>
-                <strong style="color: var(--infora-brand-primary);">Navigasi Telah Terdaftar:</strong> <br>
+                <strong>Navigasi Telah Terdaftar:</strong> <br>
                 Item <strong>{{ $item->name }}</strong> sudah berhasil terdaftar pada navigasi sistem INFORA. 
                 Tautan di sidebar diarahkan ke halaman pratinjau ini karena rute backend <code>{{ $rawRoute ?: '(kosong)' }}</code> belum diaktifkan di file <code>routes/web.php</code>.
             </div>
