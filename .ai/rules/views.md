@@ -17,7 +17,10 @@ Before creating or modifying any view, strictly follow the design specifications
 Before writing manual HTML markup or wrapper structures, always consult `docs/COMPONENTS.md` and reuse existing components in `resources/views/components/`:
 - Use `<x-data-table>` for data tables instead of manually writing `<div class="table-card">` or `<div class="table-toolbar">`.
 - Use `<x-empty-state>` for empty states instead of writing manual `<div class="empty-state">` markup.
-- Use `<x-page-header>`, `<x-stats-grid>`, `<x-stat-card>`, `<x-alert>`, `<x-form-select>`, `<x-modal>`, and other system components.
+- Use `<x-page-header>`, `<x-stats-grid>`, `<x-stat-card>`, `<x-alert>`, `<x-status-banner>`, `<x-form-select>`, `<x-modal>`, and other system components.
 
 ## Avoid Component Overengineering
-When adapting existing components for greater flexibility (e.g. supporting standalone contexts outside tables), make minimal, non-breaking adjustments. Do not bloat components with unnecessary props or speculative logic; keep component APIs simple, clean, and intuitive.
+When designing or adapting Blade components, strictly maintain a lean, intuitive, and clean API:
+- **No Speculative Props (KISS & YAGNI)**: Only introduce props that fulfill concrete, immediate requirements. Do not bloat components with dozens of speculative styling or format options that can be handled by standard classes or defaults.
+- **Single Source of Truth / Strict No Aliases**: Never introduce duplicate or optional alias props (e.g. do NOT support both `badgeColor` and `badgeClass`, or `actionHref` and `actionUrl`). Enforce a single canonical prop name to prevent template inconsistency and unpredictable rendering outputs.
+- **No Redundant Defensive Fallbacks (Fail Fast)**: Do not add redundant null-coalescing operators (`??`) or defensive fallbacks when a prop already has a default value and deterministic mapping keys. Allow invalid values or typos to fail fast during development rather than silently masking errors.

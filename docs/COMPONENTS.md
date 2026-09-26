@@ -1,6 +1,6 @@
 # 🧩 Panduan Lengkap Blade Components — INFORA
 
-Dokumentasi resmi ini merangkum seluruh **22 Anonymous Blade Components** yang tersedia di aplikasi **INFORA** ([`resources/views/components/`](file:///home/gania/infora_project/resources/views/components/)). Komponen-komponen ini dirancang untuk memastikan konsistensi antarmuka pengguna (UI/UX), mereduksi pengulangan kode (*boilerplate*), dan menyatu secara native dengan sistem desain di [`resources/css/app.css`](file:///home/gania/infora_project/resources/css/app.css).
+Dokumentasi resmi ini merangkum seluruh **23 Anonymous Blade Components** yang tersedia di aplikasi **INFORA** ([`resources/views/components/`](file:///home/gania/infora_project/resources/views/components/)). Komponen-komponen ini dirancang untuk memastikan konsistensi antarmuka pengguna (UI/UX), mereduksi pengulangan kode (*boilerplate*), dan menyatu secara native dengan sistem desain di [`resources/css/app.css`](file:///home/gania/infora_project/resources/css/app.css).
 
 ---
 
@@ -19,6 +19,7 @@ Dokumentasi resmi ini merangkum seluruh **22 Anonymous Blade Components** yang t
    - [`<x-tab-pills>` dan `<x-tab-pill>`](#x-tab-pills--x-tab-pill)
    - [`<x-stats-grid>` dan `<x-stat-card>`](#x-stats-grid--x-stat-card)
    - [`<x-alert>`](#x-alert)
+   - [`<x-status-banner>`](#x-status-banner)
 3. [Komponen Tabel dan Penyajian Data](#-3-komponen-tabel--penyajian-data)
    - [`<x-data-table>`](#x-data-table)
    - [`<x-search-toolbar>`](#x-search-toolbar)
@@ -474,6 +475,79 @@ Komponen notifikasi pesan kilas (*flash messages*) atau peringatan validasi deng
 <x-alert type="warning" title="Peringatan Tahun Ajaran" :dismissible="false">
     Tahun ajaran ini memiliki semester yang sedang berjalan. Perubahan data dapat mempengaruhi jadwal KBM.
 </x-alert>
+```
+
+---
+
+### `<x-status-banner>`
+Komponen spanduk status kontekstual (*persistent context banner*) untuk menampilkan status sistem, kondisi prasyarat konfigurasi, atau status aktif halaman dengan indikator badge dan tombol aksi opsional.
+
+#### Perbedaan Utama dengan `<x-alert>`
+- **`<x-alert>`**: Digunakan untuk *transient flash messages* (notifikasi session sukses/gagal dari controller) yang dilengkapi tombol penutup (*dismissible*).
+- **`<x-status-banner>`**: Digunakan untuk *persistent context banner* (status kontekstual permanen yang melekat pada halaman, misalnya status keterhubungan unit sekolah, status semester aktif, atau prasyarat data) dengan badge status di sebelah kanan dan tanpa tombol penutup.
+
+#### Props
+| Prop | Tipe | Default | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `type` | `string` | `'info'` | Jenis tema warna alert (`info`, `success`, `warning`, `danger`, `error`). Menghasilkan class `.alert-{$type}` serta otomatis menentukan ikon dan warna badge bawaan. |
+| `title` | `string` | `null` | Judul tebal status banner (dirender di dalam tag `<strong>`). |
+| `message` | `string` | `null` | Isi pesan teks status banner jika tidak menggunakan slot default. |
+| `badge` | `string` | `null` | Teks badge status. |
+| `badgeColor` | `string` | `null` | Override warna badge (misal: `'success'`, `'warning'`, `'danger'`). Jika kosong, otomatis mengikuti tema `type`. |
+| `actionTitle` | `string` | `null` | Teks label pada tombol atau tautan aksi. |
+| `actionHref` | `string` | `null` | URL target tautan aksi (menghasilkan tag `<a>`). |
+| `actionType` | `string` | `null` | Tipe elemen aksi (`'link'` / `'a'` atau `'button'`). Otomatis `'button'` jika `actionHref` kosong. |
+| `actionIcon` | `string` | `null` | Nama ikon `<x-icon>` di dalam tombol aksi (otomatis berukuran 14px). |
+| `actionId` | `string` | `null` | Atribut ID pada elemen aksi. |
+| `actionOnClick` | `string` | `null` | Atribut handler JavaScript `onclick` pada tombol aksi. |
+
+#### Slots
+- **`{{ $slot }}`**: Konten pesan utama (teks/HTML dinamis) untuk menggantikan prop `message`.
+- **`<x-slot:actions>`**: Slot aksi tingkat lanjut untuk tombol majemuk/kustom di dalam banner (`.alert-actions`).
+- **`<x-slot:badge>`**: Konten badge kustom di dalam wadah teks.
+- **`<x-slot:right>`**: Konten kustom pengganti badge.
+
+#### Contoh Penggunaan 1: Banner Satu Baris (Pesan Statis)
+```blade
+<x-status-banner 
+    title="Unit Sekolah Belum Dikonfigurasi:" 
+    message="Akun Anda belum terhubung dengan unit sekolah manapun. Silakan hubungi Super Administrator untuk konfigurasi unit sekolah." 
+    badge="Perlu Konfigurasi" 
+/>
+```
+
+#### Contoh Penggunaan 2: Banner dengan Slot Teks Dinamis & Badge Override
+```blade
+<x-status-banner title="Saat Ini:" badge="Aktif" badge-color="success">
+    {{ $activeSemester->nama_lengkap }}
+</x-status-banner>
+```
+
+#### Contoh Penggunaan 3: Banner dengan Aksi Tautan (Link / `<a>`)
+```blade
+<x-status-banner
+    title="Tahun Ajaran Belum Dikonfigurasi:"
+    badge="Tahun Ajaran Diperlukan"
+    action-icon="settings"
+    action-title="Konfigurasi Sekarang"
+    :action-href="route('konfigurasi-sekolah.tahun-ajaran')">
+    <br>Unit sekolah <strong>{{ $selectedSchool->name }}</strong> belum memiliki Tahun Ajaran.
+    Kalender akademik membutuhkan setidaknya satu Tahun Ajaran untuk dapat menambahkan agenda kegiatan sekolah.
+</x-status-banner>
+```
+
+#### Contoh Penggunaan 4: Banner dengan Aksi Tombol (`<button>`)
+```blade
+<x-status-banner
+    title="Diagnostik Sistem"
+    badge="Siap"
+    badge-color="cyan"
+    action-type="button"
+    action-id="btnRunDiagnostic"
+    action-icon="play"
+    action-title="Jalankan Diagnostik"
+    message="Klik tombol di bawah untuk memeriksa integritas tabel database."
+/>
 ```
 
 ---
