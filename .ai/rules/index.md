@@ -12,3 +12,4 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Http/Requests/** | .ai/rules/requests.md |
 | tests/** | .ai/rules/tests.md |
 | resources/views/** | .ai/rules/views.md |
+| ** (git commits) | .ai/rules/git.md |
