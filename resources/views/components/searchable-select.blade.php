@@ -2,7 +2,7 @@
     'name',
     'id' => null,
     'value' => null,
-    'placeholder' => '-- Pilih Salah Satu --',
+    'placeholder' => 'Pilih Salah Satu',
     'searchPlaceholder' => 'Ketik untuk mencari...',
     'options' => [],
     'required' => false,
@@ -75,9 +75,7 @@
 
         <div class="searchable-select-actions">
             <span class="searchable-select-loading hidden" id="loading_{{ $inputId }}" title="Memuat data...">
-                <svg class="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-linecap="round"></circle>
-                </svg>
+                <x-icon name="loader-ring" class="animate-spin" size="16" />
             </span>
             @if ($clearable)
                 <span
@@ -88,16 +86,11 @@
                     title="Hapus pilihan"
                     aria-label="Hapus pilihan"
                 >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
+                    <x-icon name="close" size="14" />
                 </span>
             @endif
             <span class="searchable-select-arrow" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
+                <x-icon name="chevron-down" size="16" />
             </span>
         </div>
     </button>
@@ -110,10 +103,7 @@
     >
         <!-- Bar Pencarian Input -->
         <div class="searchable-select-search-bar">
-            <svg class="searchable-select-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
+            <x-icon name="search" class="searchable-select-search-icon" size="16" />
             <input
                 type="text"
                 class="searchable-select-search-input"
@@ -147,9 +137,7 @@
                                 <span class="searchable-select-option-badge">{{ $optExtra }}</span>
                             @endif
                         </div>
-                        <svg class="searchable-select-check-icon {{ $isSelected ? '' : 'hidden' }}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
+                        <x-icon name="check" size="16" class="searchable-select-check-icon {{ $isSelected ? '' : 'hidden' }}" />
                     </div>
                 @endforeach
             @endif
@@ -175,7 +163,7 @@
             this.element.__searchableSelect = this;
 
             this.inputId = element.dataset.inputId;
-            this.placeholder = element.dataset.placeholder || '-- Pilih Salah Satu --';
+            this.placeholder = element.dataset.placeholder || 'Pilih Salah Satu';
             this.emptyText = element.dataset.emptyText || 'Data tidak ditemukan';
             this.isClearable = element.dataset.clearable === '1';
             this.isDisabled = element.dataset.disabled === '1' || element.classList.contains('is-disabled');
@@ -368,9 +356,7 @@
                             <span class="searchable-select-option-text">${this.escapeHtml(text)}</span>
                             ${extra ? `<span class="searchable-select-option-badge">${this.escapeHtml(extra)}</span>` : ''}
                         </div>
-                        <svg class="searchable-select-check-icon ${isSelected ? '' : 'hidden'}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
+                        <x-icon name="check" size="16" class="searchable-select-check-icon ${isSelected ? '' : 'hidden'}" />
                     `;
 
                     this.optionsList.insertBefore(optEl, emptyEl);

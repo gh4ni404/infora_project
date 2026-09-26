@@ -8,36 +8,18 @@
     </div>
 </div>
 
-@if (session('success'))
-    <div class="alert-success">
-        <div class="alert-content">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
-            <span>{{ session('success') }}</span>
-        </div>
-    </div>
-@endif
+<x-alert type="success" />
 
 <!-- Tab Navigasi Utama: Daftar Pengguna vs Template Peran -->
 <div class="card-surface">
     <div class="card-header">
         <div class="tab-pills">
             <a href="{{ route('sistem.user', ['tab' => 'users']) }}" class="tab-pill {{ $activeTab !== 'templates' ? 'active' : '' }}">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                </svg>
+                <x-icon name="users" size="16" />
                 <span>Hak Akses per Pengguna</span>
             </a>
             <a href="{{ route('sistem.user', ['tab' => 'templates']) }}" class="tab-pill {{ $activeTab === 'templates' ? 'active' : '' }}">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect width="18" height="18" x="3" y="3" rx="2"></rect>
-                    <path d="m9 12 2 2 4-4"></path>
-                </svg>
+                <x-icon name="square-check" size="16" />
                 <span>Template Peran Sistem</span>
             </a>
         </div>
@@ -47,16 +29,11 @@
     @if ($activeTab === 'templates')
         <!-- TAB 2: DAFTAR TEMPLATE PERAN -->
         <div class="card-body">
-            <div class="alert-info">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="16" x2="12" y2="12"></line>
-                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                </svg>
-                <div>
-                    <strong>Template Peran Dinamis:</strong> Super Admin dapat menentukan menu dan hak akses bawaan untuk setiap peran di bawah ini. Template ini dapat diterapkan langsung ke akun guru atau siswa saat melakukan pengaturan izin.
-                </div>
-            </div>
+            <x-alert type="info" :dismissible="false" title="Template Peran Dinamis:" >
+                <x-slot>
+                    Super Admin dapat menentukan menu dan hak akses bawaan untuk setiap peran di bawah ini. Template ini dapat diterapkan langsung ke akun guru atau siswa saat melakukan pengaturan izin.
+                </x-slot>
+            </x-alert>
 
             <div class="template-grid">
                 @foreach ($templates as $tmpl)
@@ -74,10 +51,7 @@
                         </div>
                         <div class="template-card-footer">
                             <a href="{{ route('sistem.user.template', $tmpl->role_key) }}" class="btn-secondary">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 20h9"></path>
-                                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                                </svg>
+                                <x-icon name="pencil" size="16" />
                                 <span>Atur Menu Bawaan</span>
                             </a>
                         </div>
@@ -104,17 +78,8 @@
                         <input type="hidden" name="role" value="{{ $currentRole }}">
                     @endif
                     <div class="search-box toolbar-search-box">
-                        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        </svg>
-                        <input
-                            type="text"
-                            name="search"
-                            class="search-input"
-                            placeholder="Cari nama, username, email..."
-                            value="{{ $search }}"
-                        >
+                        <x-icon name="search" class="search-icon" size="16" />
+                        <input type="text" name="search" class="search-input" placeholder="Cari nama, username, email..." value="{{ $search }}">
                     </div>
                 </form>
             </div>
@@ -157,22 +122,13 @@
                                 </td>
                                 <td class="text-right">
                                     <a href="{{ route('sistem.user.user', $user) }}" class="btn-secondary">
-                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect width="18" height="18" x="3" y="3" rx="2"></rect>
-                                            <path d="m9 12 2 2 4-4"></path>
-                                        </svg>
+                                        <x-icon name="square-check" size="16" />
                                         <span>Kelola Hak Akses</span>
                                     </a>
                                 </td>
                             </tr>
                         @empty
-                            <tr>
-                                <td colspan="4" class="text-center">
-                                    <div class="empty-state">
-                                        <span class="empty-state-text">Tidak ada data pengguna yang sesuai dengan filter.</span>
-                                    </div>
-                                </td>
-                            </tr>
+                            <x-empty-state icon="help-circle" colspan="4" text="Tidak ada data pengguna yang sesuai dengan filter." />
                         @endforelse
                     </tbody>
                 </table>

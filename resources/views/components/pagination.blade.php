@@ -8,16 +8,12 @@
             {{-- Tombol Sebelumnya (Previous) --}}
             @if ($paginator->onFirstPage())
                 <span class="pagination-btn disabled" aria-disabled="true" aria-label="Halaman Sebelumnya">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="15 18 9 12 15 6"></polyline>
-                    </svg>
+                    <x-icon name="chevron-left" size="15" />
                     <span>Sebelumnya</span>
                 </span>
             @else
                 <a href="{{ $paginator->previousPageUrl() }}" class="pagination-btn" rel="prev" aria-label="Halaman Sebelumnya">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="15 18 9 12 15 6"></polyline>
-                    </svg>
+                    <x-icon name="chevron-left" size="15" />
                     <span>Sebelumnya</span>
                 </a>
             @endif
@@ -47,16 +43,12 @@
             @if ($paginator->hasMorePages())
                 <a href="{{ $paginator->nextPageUrl() }}" class="pagination-btn" rel="next" aria-label="Halaman Selanjutnya">
                     <span>Selanjutnya</span>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
+                    <x-icon name="chevron-right" size="15" />
                 </a>
             @else
                 <span class="pagination-btn disabled" aria-disabled="true" aria-label="Halaman Selanjutnya">
                     <span>Selanjutnya</span>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
+                    <x-icon name="chevron-right" size="15" />
                 </span>
             @endif
         </nav>

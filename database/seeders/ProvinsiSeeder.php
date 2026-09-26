@@ -33,7 +33,7 @@ class ProvinsiSeeder extends Seeder
             ['kode' => '35', 'nama' => 'Jawa Timur'],
             ['kode' => '36', 'nama' => 'Banten'],
 
-            // Kepulauan Nusa Tenggara & Bali
+            // Kepulauan Nusa Tenggara dan Bali
             ['kode' => '51', 'nama' => 'Bali'],
             ['kode' => '52', 'nama' => 'Nusa Tenggara Barat'],
             ['kode' => '53', 'nama' => 'Nusa Tenggara Timur'],

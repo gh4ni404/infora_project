@@ -1,32 +1,22 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="page-header">
-    <div>
-        <h2 class="page-title">Konfigurasi Template Peran: {{ $templateInfo->role_name }}</h2>
-        <div class="page-subtitle">Atur menu dan wewenang aksi bawaan yang akan disalin saat menerapkan template ini ke pengguna</div>
-    </div>
-    <div class="page-actions">
+<x-page-header
+    :title="'Konfigurasi Template Peran: ' . $templateInfo->role_name"
+    subtitle="Atur menu dan wewenang aksi bawaan yang akan disalin saat menerapkan template ini ke pengguna"
+>
+    <x-slot:actions>
         <a href="{{ route('sistem.user', ['tab' => 'templates']) }}" class="btn-secondary">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
+            <x-icon name="chevron-left" size="18" />
             <span>Kembali ke Template</span>
         </a>
-    </div>
-</div>
+    </x-slot:actions>
+</x-page-header>
 
-@if (session('success'))
-    <div class="alert-success">
-        <div class="alert-content">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
-            <span>{{ session('success') }}</span>
-        </div>
-    </div>
-@endif
+{{-- Flash Alerts --}}
+<x-alert type="success" />
+<x-alert type="error" />
+<x-alert type="validation" />
 
 <div class="card-surface">
     <div class="card-header">
@@ -39,38 +29,32 @@
             @csrf
             @method('PUT')
 
-            <div class="form-group">
-                <label for="role_name" class="form-label">Nama Tampilan Template <span class="text-danger">*</span></label>
-                <input
-                    type="text"
-                    id="role_name"
-                    name="role_name"
-                    class="form-input @error('role_name') border-danger @enderror"
-                    data-transform="title-case"
-                    value="{{ old('role_name', $templateInfo->role_name) }}"
-                    required
-                >
-                @error('role_name')
-                    <div class="form-error">{{ $message }}</div>
-                @enderror
-                <div class="form-hint">Nama deskriptif peran yang mudah dikenali (contoh: Guru Pengajar, Wali Kelas, Wakasek Kurikulum).</div>
-            </div>
+            <x-form-input
+                name="role_name"
+                id="role_name"
+                label="Nama Tampilan Template"
+                :value="$templateInfo->role_name"
+                data-transform="title-case"
+                hint="Nama deskriptif peran yang mudah dikenali (contoh: Guru Pengajar, Wali Kelas, Wakasek Kurikulum)."
+                required
+            />
 
-            <div class="form-group">
-                <label for="role_category" class="form-label">Kategori Peran <span class="text-danger">*</span></label>
-                <select id="role_category" name="role_category" class="form-select @error('role_category') border-danger @enderror" required>
-                    <option value="guru" {{ old('role_category', $templateInfo->role_category) === 'guru' ? 'selected' : '' }}>Guru & Tenaga Pendidik</option>
-                    <option value="staf" {{ old('role_category', $templateInfo->role_category) === 'staf' ? 'selected' : '' }}>Staf Tata Usaha</option>
-                    <option value="siswa" {{ old('role_category', $templateInfo->role_category) === 'siswa' ? 'selected' : '' }}>Siswa</option>
-                </select>
-                @error('role_category')
-                    <div class="form-error">{{ $message }}</div>
-                @enderror
-            </div>
+            <x-form-select
+                name="role_category"
+                id="role_category"
+                label="Kategori Peran"
+                :selected="$templateInfo->role_category"
+                :options="[
+                    'guru' => 'Guru dan Tenaga Pendidik',
+                    'staf' => 'Staf Tata Usaha',
+                    'siswa' => 'Siswa',
+                ]"
+                required
+            />
 
             <!-- Toolbar Pintas Matriks -->
             <div class="matrix-action-bar">
-                <div class="user-name-text">Matriks Menu & Wewenang Template</div>
+                <div class="user-name-text">Matriks Menu dan Wewenang Template</div>
                 <div class="page-actions">
                     <button type="button" class="btn-secondary" id="btnSelectAllView">
                         <span>Centang Semua Lihat</span>
@@ -185,9 +169,6 @@
                                                 <tr class="matrix-row-submenu" data-row-id="sub_{{ $subMenu->id }}" data-parent-menu="menu_{{ $menu->id }}">
                                                     <td>
                                                         <div class="matrix-item-name matrix-submenu-indent">
-                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                                <polyline points="9 18 15 12 9 6"></polyline>
-                                                            </svg>
                                                             <span>{{ $subMenu->name }}</span>
                                                         </div>
                                                         <input type="hidden" name="permissions[{{ $rowIndex }}][menu_id]" value="">
@@ -251,111 +232,49 @@
 
             <!-- Tombol Aksi Simpan -->
             <div class="form-actions">
-                <button type="submit" class="btn-primary">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                        <polyline points="7 3 7 8 15 8"></polyline>
-                    </svg>
-                    <span>Simpan Template Peran</span>
-                </button>
-                <a href="{{ route('sistem.user', ['tab' => 'templates']) }}" class="btn-secondary">
-                    <span>Batal</span>
-                </a>
+                <button type="button" class="btn-primary" id="btnOpenConfirmModal">Simpan</button>
+                <a href="{{ route('sistem.user', ['tab' => 'templates']) }}" class="btn-secondary">Batal</a>
             </div>
         </form>
     </div>
 </div>
 
+{{-- Modal Konfirmasi Simpan Template --}}
+<x-modal
+    id="modalConfirmSave"
+    title="Konfirmasi Simpan Perubahan"
+    subtitle="Pastikan konfigurasi wewenang template sudah sesuai sebelum disimpan"
+    size="sm"
+>
+    <div class="p-3.5 bg-slate-50 border border-slate-200/90 rounded-xl text-center mb-4">
+        <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-semibold bg-blue-50 text-primary border border-blue-100 rounded-md mb-1.5">
+            Template Peran
+        </span>
+        <div class="text-sm font-bold text-slate-900 leading-snug">
+            {{ $templateInfo->role_name }}
+        </div>
+        <div class="text-xs text-slate-500 mt-1">
+            Kategori: {{ strtoupper($templateInfo->role_category) }}
+        </div>
+    </div>
+
+    <p class="text-sm text-gray-600 leading-relaxed text-center mb-0">
+        Apakah Anda yakin ingin menyimpan seluruh perubahan konfigurasi wewenang untuk template peran ini?
+    </p>
+
+    <x-slot:footer>
+        <button type="button" class="btn-secondary" id="btnCancelConfirmSave">Batal</button>
+        <button type="submit" form="templateForm" class="btn-primary" id="btnSubmitConfirmSave">
+            <x-icon name="save" size="18" />
+            <span>Ya, Simpan</span>
+        </button>
+    </x-slot:footer>
+</x-modal>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Sinkronisasi: jika can_view mati, disable aksi CRUD
-    document.querySelectorAll('.perm-view').forEach(function (viewBox) {
-        viewBox.addEventListener('change', function () {
-            var rowId = this.dataset.targetRow;
-            var isChecked = this.checked;
-            var actionBoxes = document.querySelectorAll('.perm-action[data-target-row="' + rowId + '"]');
-
-            actionBoxes.forEach(function (box) {
-                box.disabled = !isChecked;
-                if (!isChecked) {
-                    box.checked = false;
-                }
-            });
-
-            if (isChecked && viewBox.dataset.parentRow) {
-                var parentView = document.querySelector('.perm-view[data-target-row="' + viewBox.dataset.parentRow + '"]');
-                if (parentView && !parentView.checked) {
-                    parentView.checked = true;
-                    parentView.dispatchEvent(new Event('change'));
-                }
-            }
-        });
-    });
-
-    document.querySelectorAll('.perm-action').forEach(function (actionBox) {
-        actionBox.addEventListener('change', function () {
-            if (this.checked) {
-                var rowId = this.dataset.targetRow;
-                var viewBox = document.querySelector('.perm-view[data-target-row="' + rowId + '"]');
-                if (viewBox && !viewBox.checked) {
-                    viewBox.checked = true;
-                    viewBox.dispatchEvent(new Event('change'));
-                }
-            }
-        });
-    });
-
-    var btnSelectAllView = document.getElementById('btnSelectAllView');
-    if (btnSelectAllView) {
-        btnSelectAllView.addEventListener('click', function () {
-            document.querySelectorAll('.perm-view').forEach(function (box) {
-                box.checked = true;
-                box.dispatchEvent(new Event('change'));
-            });
-        });
-    }
-
-    var btnSelectAllCRUD = document.getElementById('btnSelectAllCRUD');
-    if (btnSelectAllCRUD) {
-        btnSelectAllCRUD.addEventListener('click', function () {
-            document.querySelectorAll('.perm-view').forEach(function (box) {
-                box.checked = true;
-                box.dispatchEvent(new Event('change'));
-            });
-            document.querySelectorAll('.perm-action').forEach(function (box) {
-                box.disabled = false;
-                box.checked = true;
-            });
-        });
-    }
-
-    var btnUncheckAll = document.getElementById('btnUncheckAll');
-    if (btnUncheckAll) {
-        btnUncheckAll.addEventListener('click', function () {
-            document.querySelectorAll('.matrix-checkbox').forEach(function (box) {
-                box.checked = false;
-            });
-            document.querySelectorAll('.perm-action').forEach(function (box) {
-                box.disabled = true;
-            });
-        });
-    }
-
-    document.querySelectorAll('.btn-check-module').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            var modId = this.dataset.moduleId;
-            var table = document.querySelector('table[data-module-id="' + modId + '"]');
-            if (table) {
-                var views = table.querySelectorAll('.perm-view');
-                var allChecked = Array.from(views).every(function (v) { return v.checked; });
-                views.forEach(function (v) {
-                    v.checked = !allChecked;
-                    v.dispatchEvent(new Event('change'));
-                });
-            }
-        });
-    });
+    InforaModals.setup('modalConfirmSave', { cancelBtnId: 'btnCancelConfirmSave' });
+    InforaModals.bindOpenButton('btnOpenConfirmModal', 'modalConfirmSave');
 });
 </script>
 @endsection

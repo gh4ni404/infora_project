@@ -59,7 +59,7 @@ test('super admin can view backup-restore page with database and storage stats',
     $response = $this->actingAs($this->superAdmin)->get('/backup-restore');
 
     $response->assertOk();
-    $response->assertSee('Cadangan & Pemulihan Sistem', false);
+    $response->assertSee('Cadangan dan Pemulihan Sistem', false);
     $response->assertSee('Basis Data Aktif');
     $response->assertSee('Total Tabel Sistem');
     $response->assertSee('Aset Storage Pengguna');
@@ -73,7 +73,7 @@ test('backup-restore menu is marked active when on /backup-restore route', funct
         ['route_name' => 'backup-restore'],
         [
             'module_id' => $module->id,
-            'name' => 'Backup & Restore',
+            'name' => 'Backup dan Restore',
             'icon' => 'folder',
             'order' => 1,
             'is_active' => true,

@@ -67,7 +67,7 @@ test('super admin can view create module page', function () {
 
 test('super admin can store new module with valid data', function () {
     $payload = [
-        'name' => 'Kesiswaan & Ekstrakurikuler',
+        'name' => 'Kesiswaan dan Ekstrakurikuler',
         'order' => 3,
         'is_active' => '1',
     ];
@@ -78,7 +78,7 @@ test('super admin can store new module with valid data', function () {
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('modules', [
-        'name' => 'KESISWAAN & EKSTRAKURIKULER',
+        'name' => 'KESISWAAN DAN EKSTRAKURIKULER',
         'order' => 3,
         'is_active' => true,
     ]);

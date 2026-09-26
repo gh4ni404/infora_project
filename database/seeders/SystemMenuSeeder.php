@@ -96,11 +96,11 @@ class SystemMenuSeeder extends Seeder
             ]
         );
 
-        // Direct Menu: Backup & Restore
+        // Direct Menu: Backup Dan Restore
         Menu::firstOrCreate(
             [
                 'module_id' => $systemModule->id,
-                'name' => 'Backup & Restore',
+                'name' => 'Backup Dan Restore',
             ],
             [
                 'route_name' => 'backup-restore',

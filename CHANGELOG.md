@@ -1,6 +1,6 @@
 # 📝 Changelog
 
-Semua perubahan penting pada proyek **INFORA (Information Network for Organization, Records, & Accreditation)** akan dicatat dalam berkas ini.
+Semua perubahan penting pada proyek **INFORA (Information Network for Organization, Records, dan Accreditation)** akan dicatat dalam berkas ini.
 
 Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/1.1.0/), dan proyek ini mematuhi [Semantic Versioning (SemVer)](https://semver.org/lang/id/).
 
@@ -9,12 +9,53 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 ## [Unreleased]
 
 ### Added
+- **Master Data Jurusan / Konsentrasi Keahlian dan Peminatan (SMA, SMK, dan MA):**
+  - Mengimplementasikan CRUD lengkap data jurusan dan program peminatan pada rute `/master/data-jurusan` (`master.data-jurusan.*`).
+  - Mendukung struktur program keahlian lintas jenjang: Konsentrasi Keahlian (SMK), Peminatan/Fase Kurikulum Merdeka (SMA), dan Program Keagamaan/Peminatan (Madrasah Aliyah - MA).
+  - Isolasi data per unit sekolah dengan filter pemilih unit (`schoolFilterForm`).
+  - Tombol toggle status aktif/non-aktif cepat 1-klik: `POST /master/data-jurusan/{jurusan}/toggle-status`.
+  - Integrasi dialog modal interaktif `InforaModals` (`modalCreateJurusan`, `modalEditJurusan`, `modalDeleteJurusan`) langsung di atas tabel data tanpa reload halaman.
+  - Automated Pest test suite di [`tests/Feature/JurusanTest.php`](file:///home/gania/infora_project/tests/Feature/JurusanTest.php).
+- **Konfigurasi Sekolah: Manajemen Tahun Ajaran dan Semester:**
+  - Mengimplementasikan tata kelola siklus akademik pada rute `/konfigurasi-sekolah/tahun-ajaran` (`konfigurasi-sekolah.tahun-ajaran.*`).
+  - Entitas induk `TahunAjaran` dengan rentang tanggal dan status aktif, serta sub-entitas `Semester` (Ganjil dan Genap) dengan rentang tanggal pelaksanaan.
+  - Fitur aktivasi 1-klik (`POST /konfigurasi-sekolah/tahun-ajaran/{tahunAjaran}/semester/{semester}/activate`) dengan proteksi semester aktif tunggal.
+  - Arsitektur dialog modal modular: `modal-tahun-ajaran.blade.php` dan `modal-semester.blade.php`.
+  - Automated Pest test suite di [`tests/Feature/TahunAjaranTest.php`](file:///home/gania/infora_project/tests/Feature/TahunAjaranTest.php).
+- **Konfigurasi Sekolah: Kalender Akademik Terpadu dan Agenda Kegiatan Multi-Day:**
+  - Mengimplementasikan Kalender Akademik interaktif pada rute `/konfigurasi-sekolah/kalender-akademik` (`konfigurasi-sekolah.kalender-akademik.*`).
+  - Tampilan ganda yang dapat dialihkan via komponen `<x-tab-pills>`:
+    1. **Tampilan Kalender Bulanan Interaktif (*Monthly Grid View*):** Kotak hari kalender, navigasi antar bulan, indikator hari ini (*today badge*), dan strip penanda kegiatan.
+    2. **Tampilan Tabel Daftar Agenda (*Tabular Agenda View*):** Tabel pencarian cepat seluruh kegiatan dengan filter kategori.
+  - Dukungan rentang kegiatan multi-hari (*multi-day event spanning*) dengan kalkulasi badge durasi hari otomatis (*"3 hari"*).
+  - Standarisasi pewarnaan kategori agenda (Libur Nasional/Keagamaan, Penilaian/Ujian, KBM, Ekstrakurikuler, Rapat Dinas).
+  - Endpoint JSON `GET /konfigurasi-sekolah/kalender-akademik/events` untuk memuat acara kalender secara asinkron berdasarkan unit sekolah yang aktif.
+  - Automated Pest test suite di [`tests/Feature/KalenderAkademikTest.php`](file:///home/gania/infora_project/tests/Feature/KalenderAkademikTest.php).
+- **Standarisasi Service `ImageUploader` (`App\Support\ImageUploader`) dan Komponen `<x-image-upload>`:**
+  - Service mandiri murni PHP untuk validasi ketat MIME type (`png`, `jpg`, `jpeg`, `webp`, `gif`, `svg`), batasan ukuran maks. 1MB (`DEFAULT_MAX_BYTES = 1048576`), dan penamaan semantik collision-proof `{modul}_u{user_id}_{timestamp}_{random8}.{ext}`.
+  - Komponen Blade `<x-image-upload>` dengan dropzone modern, live base64 conversion di browser via FileReader API, pratinjau bentuk lingkaran/membulat, flag penghapusan foto, dan modul JavaScript pendamping `window.ImageUpload`.
+  - Migrasi pengolahan logo sekolah pada `Master\SchoolController` ke `ImageUploader::uploadBase64()`.
+  - Unit test suite di [`tests/Unit/ImageUploaderTest.php`](file:///home/gania/infora_project/tests/Unit/ImageUploaderTest.php).
+- **Pengendali Matriks Hak Akses Terprogram (`PermissionMatrix`):**
+  - Modul client-side terpusat `resources/js/permission-matrix.js` untuk mengelola tabel matriks RBAC pada Hak Akses Pengguna dan Template Peran.
+  - Otomatisasi dependensi baris (menonaktifkan *Lihat* otomatis menonaktifkan aksi CRUD; memilih aksi CRUD otomatis mengaktifkan *Lihat*).
+  - Sinkronisasi hierarki (mengaktifkan *Lihat* pada sub-menu otomatis mencentang *Lihat* pada menu induk).
+  - Toolbar aksi cepat: *Centang Semua Lihat*, *Centang Semua CRUD*, *Kosongkan Semua*, serta *Toggle per Modul*.
+- **Ekosistem 22 Anonymous Blade Components dan Dokumentasi Lengkap (`docs/COMPONENTS.md`):**
+  - Dokumentasi resmi 22 komponen Blade Anonymous dan 5 modul JavaScript pendamping (`InforaModals`, `SearchableSelect`, `ImageUpload`, `PermissionMatrix`, `InforaProgress`).
+  - Standarisasi props, fallback error bag yang aman dari unit-testing, dan pengujian regresi di `BladeComponentsTest.php`.
+- **Dukungan Jenjang Madrasah Aliyah (MA):**
+  - Memperluas cakupan platform dengan menambahkan jenjang MA di samping SMA dan SMK pada entitas Data Sekolah (`School`) dan Data Jurusan (`Jurusan`).
+- **Pembersihan View Legacy dan Refactoring Desain:**
+  - Membersihkan seluruh class lebar kolom legacy dan inline styling pada modul sistem, wilayah administratif, master data, dan konfigurasi sekolah.
+- **Ekspansi Test Suite: 250 Tests Lolos 100% (1.123 Assertions):**
+  - Total pengujian otomatis Pest melonjak menjadi **250 feature dan unit tests lulus 100% tanpa risiko/kegagalan (1.123 assertions)**.
 - **Master Data Wilayah Administratif Pemerintahan Berbasis Kode Kemendagri (Hierarki 4 Tingkat):**
   - Mengimplementasikan CRUD lengkap untuk 4 tingkat hierarki wilayah: **Provinsi** (`/wilayah/provinsi`), **Kabupaten/Kota** (`/wilayah/kabupaten`), **Kecamatan** (`/wilayah/kecamatan`), dan **Kelurahan/Desa** (`/wilayah/kelurahan`) di bawah modul Master Wilayah Administratif.
   - **Standardisasi Kode Wilayah Resmi Kemendagri (Bukan BPS)**:
     - Kewajiban penggunaan standar resmi Kementerian Dalam Negeri RI dalam format numerik murni tanpa tanda titik: 2 digit Provinsi (`73`), 4 digit Kabupaten/Kota (`7308`), 6/7 digit Kecamatan (`730801`), dan 10 digit Kelurahan/Desa (`7308011001`).
     - Penegakan aturan konsistensi: menolak kode wilayah statistik BPS (Wilkerstat) yang kerap berbeda signifikan (misal: Kab. Bone Kemendagri = `7308`, bukan BPS `7311`). Aturan terdokumentasi permanen di `.agents/rules/regional-codes-standard.md`.
-  - **Model, Relasi Berjenjang & Mutator**:
+  - **Model, Relasi Berjenjang dan Mutator**:
     - Model `Provinsi`, `Kabupaten`, `Kecamatan`, dan `Kelurahan` dilengkapi relasi hierarki langsung dan *has-many-through* (`provinsi` ➔ `kabupaten` ➔ `kecamatan` ➔ `kelurahan/desa`), serta relasi `sekolah()` pada masing-masing entitas.
     - Mutator otomatis `TextFormatter::titleCase()` untuk preservasi huruf kapital dan akronim pada nama wilayah, mutator UPPERCASE pada singkatan provinsi, serta scope query `aktif()`.
     - Proteksi integritas relasional: Kelurahan yang masih dirujuk oleh data sekolah tidak dapat dihapus (*restricted deletion guard*).
@@ -24,21 +65,21 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
     - `ProvinsiSeeder`: 38 Provinsi resmi Republik Indonesia.
     - `KabupatenSeeder`: 24 Kabupaten/Kota se-Sulawesi Selatan dan kota-kota percontohan nasional.
     - `KecamatanSeeder`: Seluruh 27 Kecamatan se-Kabupaten Bone.
-    - `KelurahanSeeder`: Seluruh 372 Kelurahan & Desa resmi se-Kabupaten Bone.
-  - **66 Automated Feature Tests**: Test suite `ProvinsiTest.php`, `KabupatenTest.php`, `KecamatanTest.php`, dan `KelurahanTest.php` mencakup otentikasi super admin, listing & pencarian, filter cascading, validasi format kode & hierarki wilayah, mutator title case, operasi CRUD, dan proteksi integritas relasi. Total suite pengujian aplikasi melonjak menjadi **167 tests lulus 100% (727 assertions)**.
-- **Arsitektur Tata Letak 3-Tier dengan Docked Footer & Scroll Internal Independen (`layouts/app.blade.php` & `resources/css/app.css`):**
+    - `KelurahanSeeder`: Seluruh 372 Kelurahan dan Desa resmi se-Kabupaten Bone.
+  - **66 Automated Feature Tests**: Test suite `ProvinsiTest.php`, `KabupatenTest.php`, `KecamatanTest.php`, dan `KelurahanTest.php` mencakup otentikasi super admin, listing dan pencarian, filter cascading, validasi format kode dan hierarki wilayah, mutator title case, operasi CRUD, dan proteksi integritas relasi. Total suite pengujian aplikasi melonjak menjadi **167 tests lulus 100% (727 assertions)**.
+- **Arsitektur Tata Letak 3-Tier dengan Docked Footer dan Scroll Internal Independen (`layouts/app.blade.php` dan `resources/css/app.css`):**
   - Menerapkan arsitektur layout 3-tier: Topbar (*header*) tetap di atas, footer docked (*docked bottom dock*) permanen di bawah viewport, dan scrolling internal independen pada area konten utama (`.app-content`) dan sidebar navigasi (`.sidebar-content`).
   - Mengeliminasi isu *double scrollbar* pada window browser dan memastikan footer sistem selalu terlihat rapi tanpa terdorong ke luar layar.
-- **Komponen Paginasi Responsif Global & Toolbar Tabel (`<x-pagination>`):**
+- **Komponen Paginasi Responsif Global dan Toolbar Tabel (`<x-pagination>`):**
   - Komponen Blade reusable `<x-pagination>` di `resources/views/components/pagination.blade.php` dengan badge informasi jumlah data yang adaptif, tombol navigasi sebelumnya/selanjutnya yang mobile-friendly, dan link nomor halaman yang ringkas.
   - Terdaftar secara terpusat sebagai default pagination view pada `AppServiceProvider` via `Paginator::defaultView('components.pagination')`.
   - Komponen `.table-toolbar-responsive` untuk tata letak toolbar pencarian, filter dropdown, dan tombol aksi yang membungkus (*wrap*) secara proporsional di layar ponsel dan tablet.
   - Modifier `.table-responsive-scroll` dengan batas ketinggian 440px dan sticky header untuk kenyamanan navigasi tabel bervolume besar.
-- **Otomatisasi Urutan Tampil Mulai 1 & Dual Field Nama Rute Sub-Menu:**
+- **Otomatisasi Urutan Tampil Mulai 1 dan Dual Field Nama Rute Sub-Menu:**
   - Mengubah nilai default order migrasi tabel `modules`, `menus`, dan `sub_menus` menjadi 1 (menggantikan default 0).
   - Menambahkan method pembantu `nextOrder()` pada model `Module`, `Menu`, dan `SubMenu` untuk mengisi nomor urut otomatis berikutnya pada formulir tambah data.
   - Tampilan input dual-field nama rute pada formulir sub-menu (tampilan visual prefix rute menu induk yang terkunci + input nama sub-rute mandiri) guna mencegah salah ketik nama rute.
-- **Perluasan Katalog Ikon Lucide Kategori Wilayah & Data:**
+- **Perluasan Katalog Ikon Lucide Kategori Wilayah dan Data:**
   - Menambahkan koleksi ikon baru pada konfigurasi katalog `config/icons.php` dan komponen SVG `<x-icon>`: kategori Wilayah (`map`, `map-pin`, `landmark`, `building`, `building-2`, `globe`) dan kategori Data (`table`, dll.) yang dapat dipilih langsung via `<x-icon-picker>`.
 - **Arsitektur Modal Interaktif Edit Data (`edit.blade.php` sebagai Komponen Modal Modular):**
   - Mentransformasikan seluruh formulir pengubahan data (*edit*) yang sebelumnya berupa halaman terpisah menjadi modal dialog interaktif langsung di atas tabel data (`index.blade.php`) tanpa reload halaman (*zero-reload workflow*).
@@ -52,85 +93,85 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
   - **Backward Compatibility Rute**: Mengubah metode `edit()` pada `SchoolController`, `ModuleController`, `MenuController`, dan `SubMenuController` untuk mengalihkan (*redirect*) ke route `index` terkait alih-alih 404/menampilkan view lama, memastikan tautan lama atau bookmark tetap mendarat aman di halaman tabel.
   - **100% Kepatuhan Arsitektur Bebas Inline Styles**: Mengandalkan sistem kelas modal universal di `resources/css/app.css` tanpa satupun atribut `style="..."` maupun tag `<style>`.
   - **Automated Feature Testing**: Memperbarui dan menyelaraskan seluruh skenario pengujian di `SchoolTest.php`, `ModuleCrudTest.php`, `MenuCrudTest.php`, dan `SubMenuCrudTest.php` untuk memvalidasi alur modal edit baru dan status redirect `edit()`. Seluruh 101 tests aplikasi lulus 100% (474 assertions).
-- **Pemisahan & Penyempurnaan Dokumentasi Fitur Unggulan (`detail/README.md` & `README.md`):**
+- **Pemisahan dan Penyempurnaan Dokumentasi Fitur Unggulan (`detail/README.md` dan `README.md`):**
   - Memisahkan dan merinci seluruh 15 spesifikasi fitur unggulan secara komprehensif ke berkas `detail/README.md`.
   - Merestrukturisasi berkas `README.md` utama menjadi ringkasan yang ringkas, tajam, dan elegan, dilengkapi penunjuk tautan langsung ke `detail/README.md` untuk eksplorasi teknis mendalam.
-- **Fitur Master Data Sekolah (Multi-Record Registry & Kesiapan Bridging):**
+- **Fitur Master Data Sekolah (Multi-Record Registry dan Kesiapan Bridging):**
   - Membangun fitur manajemen registri sekolah pada rute `/master/data-sekolah` (`master.data-sekolah.*`) di bawah modul Administrasi ➔ Master ➔ Data Sekolah.
   - Mendukung multi-record registri sekolah (SMA dan SMK, berstatus Negeri maupun Swasta) untuk kebutuhan pengelolaan multi-unit yayasan serta kesiapan bridging API Dapodik.
   - **Skema Basis Data (`schools`)**: Menyimpan identitas resmi (`name`, `npsn`, `nss`, `school_type`, `status`, `accreditation`), alamat lengkap (`address`, `village`, `district`, `city`, `province`, `postal_code`), kontak (`phone`, `fax`, `email`, `website`), pimpinan (`principal_name`, `principal_nip`), yayasan (`foundation_name`), `logo_path`, dan `is_active`.
   - Mengimplementasikan prinsip reduksi batasan unik: kolom `npsn` di-index tanpa `unique` constraint sesuai kebutuhan fleksibilitas operasional.
-  - **Model & Mutator**: Model `School` dilengkapi mutator otomatis `TextFormatter::titleCase()` pada kolom `name` untuk menjamin konsistensi huruf kapital (Title Case) dan preservasi akronim (`SMA`, `SMK`).
+  - **Model dan Mutator**: Model `School` dilengkapi mutator otomatis `TextFormatter::titleCase()` pada kolom `name` untuk menjamin konsistensi huruf kapital (Title Case) dan preservasi akronim (`SMA`, `SMK`).
   - **Pipeline Unggah Logo Base64 (Maks. 1MB)**: Mendukung pengunggahan logo sekolah format string Base64 via JSON/form dengan live preview, validasi ukuran maks. 1MB, dan penyimpanan ke storage publik (`storage/app/public/logos`) dengan penamaan semantik collision-proof: `sekolah_u{user_id}_{timestamp}_{random8}.{ext}`.
   - **Antarmuka Pengguna Terpadu**:
     - Data Table dengan pencarian dinamis (nama sekolah, NPSN, kota), dropdown filter jenis sekolah (SMA/SMK), badge warna status/akreditasi/jenis (`badge-purple`, `badge-cyan`, `badge-success`, `badge-amber`), dan paginasi 15/halaman.
     - Modal interaktif tambah sekolah (`modalCreateSchool`) dengan auto-reopen saat validasi error.
     - Modal interaktif edit data sekolah (`modalEditSchool` via komponen modular `master.data-sekolah.edit`).
-  - **15 Automated Pest Feature Tests**: Test suite `SchoolTest.php` mencakup autentikasi & otorisasi super admin, listing & empty state, pencarian & filter jenis, validasi form, mutator title-case, Base64 logo upload & storage, update & hapus logo, penghapusan data & berkas fisik, serta verifikasi zero inline styles (15 passed, 63 assertions). Total pengujian aplikasi mencapai 101 tests lulus 100%.
+  - **15 Automated Pest Feature Tests**: Test suite `SchoolTest.php` mencakup autentikasi dan otorisasi super admin, listing dan empty state, pencarian dan filter jenis, validasi form, mutator title-case, Base64 logo upload dan storage, update dan hapus logo, penghapusan data dan berkas fisik, serta verifikasi zero inline styles (15 passed, 63 assertions). Total pengujian aplikasi mencapai 101 tests lulus 100%.
 
-### Changed & Refactored
+### Changed dan Refactored
 - **Modularisasi Komponen Modal Tambah Data (`create.blade.php` sebagai Komponen Modal Modular):**
   - Memisahkan formulir dialog modal tambah sekolah ke dalam berkas modular terpisah `resources/views/master/data-sekolah/create.blade.php` yang di-include ke `index.blade.php`.
   - Menerapkan pola yang sama secara seragam pada seluruh modul wilayah (`provinsi/create.blade.php`, `kabupaten/create.blade.php`, `kecamatan/create.blade.php`, `kelurahan/create.blade.php`), menjadikan arsitektur modal CRUD sepenuhnya modular (`index.blade.php`, `create.blade.php`, dan `edit.blade.php`).
-- **Penyempurnaan Interaktivitas Navigasi Sidebar & Animasi Accordion:**
+- **Penyempurnaan Interaktivitas Navigasi Sidebar dan Animasi Accordion:**
   - Menambahkan `flex-shrink: 0` pada item navigasi sidebar untuk mencegah pemerasan/pemotongan teks menu saat accordion dibuka.
   - Menghapus outline fokus kaku pada pemicu accordion menu dan memperhalus kurva transisi buka-tutup dengan fungsi *cubic-bezier*.
   - Menambahkan logika penyesuaian scroll otomatis saat accordion submenu di bagian bawah sidebar dibuka pengguna.
-- **Standarisasi Komponen Metrik Universal & Utilitas Dropzone:**
+- **Standarisasi Komponen Metrik Universal dan Utilitas Dropzone:**
   - Menggantikan class CSS ad-hoc `.backup-*` dengan komponen metrik universal di `resources/css/app.css`: `.stats-grid`, `.stat-card`, `.callout-danger`, dan `.grid-split-2-1`.
   - Standarisasi class `.dropzone`, `.dropzone-icon`, `.dropzone-text`, dan area pratinjau unggahan berkas tanpa class alias.
-- **Penyempurnaan Sistem Dialog Modal & Normalisasi Margin/Padding UI (`resources/css/app.css`):**
-  - **Arsitektur Flexbox Terpadu**: Menambahkan aturan `.modal-dialog form { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; margin: 0; }` serta `.modal-header` & `.modal-footer { flex-shrink: 0; }`. Memastikan footer modal (tombol Batal & Simpan) selalu utuh, tidak pernah terpotong di bagian bawah dialog pada resolusi/tinggi layar berapa pun.
+- **Penyempurnaan Sistem Dialog Modal dan Normalisasi Margin/Padding UI (`resources/css/app.css`):**
+  - **Arsitektur Flexbox Terpadu**: Menambahkan aturan `.modal-dialog form { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; margin: 0; }` serta `.modal-header` dan `.modal-footer { flex-shrink: 0; }`. Memastikan footer modal (tombol Batal dan Simpan) selalu utuh, tidak pernah terpotong di bagian bawah dialog pada resolusi/tinggi layar berapa pun.
   - **Eliminasi Margin Ganda (Double Spacing)**: Menormalkan `.modal-body .form-group { margin-bottom: 0; gap: 0.375rem; }` dan `.form-grid-2col .form-group { margin-bottom: 0; }`, menghilangkan jarak vertikal berlebih antar-input yang sebelumnya mencapai 40px akibat tumpukan `gap` dan `margin-bottom`.
-  - **Divider & Label Seksi Form Terstandarisasi**: Mengatur `.form-section-divider` dengan warna border standar desain aplikasi (`border-top: 1px solid var(--infora-border); width: 100%; height: 0;`), serta mentransformasikan `.form-section-label` menjadi badge edukasi khas INFORA dengan indikator titik biru (`--infora-brand-soft` background, `--infora-brand-border`, dan `--infora-brand-primary`).
+  - **Divider dan Label Seksi Form Terstandarisasi**: Mengatur `.form-section-divider` dengan warna border standar desain aplikasi (`border-top: 1px solid var(--infora-border); width: 100%; height: 0;`), serta mentransformasikan `.form-section-label` menjadi badge edukasi khas INFORA dengan indikator titik biru (`--infora-brand-soft` background, `--infora-brand-border`, dan `--infora-brand-primary`).
   - **Pelebaran Modal Dialog**: Meningkatkan lebar `.modal-dialog.modal-lg` menjadi `760px` agar form 2-kolom memiliki proporsi visual yang lega, serta menambahkan *slim scrollbar* 6px berujung bulat pada `.modal-body`.
-- **Portabilitas Symlink Storage Relatif (*Docker & Host Relative Symlink Preservation*)**:
+- **Portabilitas Symlink Storage Relatif (*Docker dan Host Relative Symlink Preservation*)**:
   - Mengonfigurasi pembuatan symbolic link `public/storage` menggunakan path relatif (`../storage/app/public` via `storage:link --relative`) pada skrip dan `DatabaseBackupService::ensureStorageLink()`.
   - Mengeliminasi galat 403 Forbidden pada Nginx container saat mencoba membaca symlink yang sebelumnya mengarah ke path absolut mesin host (`/home/...`), menjamin berkas gambar/logo publik dapat diakses mulus dari browser baik di dalam Docker maupun di luar container.
 
 - **Universal Smooth Real-Time Progressive Loading Screen (*Global System Indicator Engine*):**
-  - Mentransformasikan indikator proses menjadi mesin *Universal Progressive Loading Screen* yang dapat dipanggil dan digunakan kembali oleh seluruh modul dan fitur aplikasi INFORA (bukan hanya Backup & Restore).
-  - Menyediakan antarmuka visual minimalis, elegan, dan tenang tanpa elemen kaku: menggantikan *stepper* bertingkat dan kotak log teknis dengan kartu melayang modern berbalut *backdrop blur*, *ambient status orb* berdenyut lembut, judul & teks aktivitas ringkas dinamis, serta bar progres ramping (*sleek pill bar*) 9px.
-  - **Animasi Sangat Halus (*Buttery Smooth Motion & Gradient Shimmer*)**: Bar progres dilengkapi sapuan gradien bercahaya Royal Blue (`#2563EB`) ke Cyan (`#06B6D4`) yang mengalir kontinu (`@keyframes progressGradientShimmer`), transisi pergerakan kurva `cubic-bezier(0.25, 1, 0.5, 1)`, serta interpolasi numerik persentase yang mengalir halus berbasis `requestAnimationFrame`.
+  - Mentransformasikan indikator proses menjadi mesin *Universal Progressive Loading Screen* yang dapat dipanggil dan digunakan kembali oleh seluruh modul dan fitur aplikasi INFORA (bukan hanya Backup dan Restore).
+  - Menyediakan antarmuka visual minimalis, elegan, dan tenang tanpa elemen kaku: menggantikan *stepper* bertingkat dan kotak log teknis dengan kartu melayang modern berbalut *backdrop blur*, *ambient status orb* berdenyut lembut, judul dan teks aktivitas ringkas dinamis, serta bar progres ramping (*sleek pill bar*) 9px.
+  - **Animasi Sangat Halus (*Buttery Smooth Motion dan Gradient Shimmer*)**: Bar progres dilengkapi sapuan gradien bercahaya Royal Blue (`#2563EB`) ke Cyan (`#06B6D4`) yang mengalir kontinu (`@keyframes progressGradientShimmer`), transisi pergerakan kurva `cubic-bezier(0.25, 1, 0.5, 1)`, serta interpolasi numerik persentase yang mengalir halus berbasis `requestAnimationFrame`.
   - **Komponen Blade Global (`<x-progress-modal />`)**: Ditanamkan terpusat pada layout master [app.blade.php](file:///home/gania/infora_project/resources/views/layouts/app.blade.php) sehingga siap digunakan di halaman mana pun tanpa duplikasi markup.
   - **Universal JavaScript API (`window.InforaProgress`)**: Modul mandiri [infora-progress.js](file:///home/gania/infora_project/resources/js/infora-progress.js) dengan metode `show()`, `set()`, `finish()`, `error()`, `hide()`, dan `stream(url, formData, options)` untuk otomasi konsumsi *Server-Sent Events* (SSE).
   - **100% Kepatuhan Arsitektur Bebas Inline Styles**: Seluruh styling visual terpusat di `resources/css/app.css` tanpa satupun atribut `style="..."` maupun tag `<style>`.
   - Penyesuaian batas unggahan berkas cadangan menjadi **250 MB** pada `RestoreBackupRequest` (256.000 KB), Nginx (`client_max_body_size 250M;`), dan PHP-FPM (`upload_max_filesize = 250M`, `post_max_size = 250M`).
   - Sinkronisasi zona waktu server dan aplikasi ke **`Asia/Makassar`** (WITA, GMT+8) di `docker/php/php.ini`, `config/app.php`, `.env`, dan `.env.example`.
   - Seluruh pengujian fitur dan unit test Pest lulus 100% (86 passed, 398 assertions).
-- **Sistem Cadangan & Pemulihan Sistem Lengkap (*Full System Snapshot & Server Migration Ready*):**
-  - Meningkatkan fitur Backup & Restore pada rute `/backup-restore` (`backup-restore`) di bawah modul PENGATURAN SISTEM dari sekadar dump database menjadi snapshot sistem terpadu berformat `.zip`.
+- **Sistem Cadangan dan Pemulihan Sistem Lengkap (*Full System Snapshot dan Server Migration Ready*):**
+  - Meningkatkan fitur Backup dan Restore pada rute `/backup-restore` (`backup-restore`) di bawah modul PENGATURAN SISTEM dari sekadar dump database menjadi snapshot sistem terpadu berformat `.zip`.
   - Mengemas basis data (`database.sql`), seluruh berkas/gambar unggahan pengguna (`storage/app/public/`), dan berkas `manifest.json` metadata ke dalam satu arsip portabel mandiri via native PHP `ZipArchive`.
   - Pengecualian cerdas pada folder `vendor/`, `node_modules/`, `.git/`, dan `storage/framework/` agar ukuran arsip tetap ringkas dan bebas konflik binary OS antar server.
-  - **Pencegahan Otomatis Gambar 404 (*Symlink Health Check & Auto-Repair*)**: Saat pemulihan (*restore*), sistem memeriksa kesehatan symlink `public/storage`; jika sudah terhubung valid ke target lokal, sistem melanjutkan tanpa operasi berlebih; jika belum ada atau rusak (*broken link* dari server lama), sistem otomatis membuat ulang symlink (`Artisan::call('storage:link')`).
-  - **Menu Dasar Bawaan Sistem (*Baseline System Seeder*)**: Menu mandiri **Backup & Restore** (`route: backup-restore`, `icon: folder`, `order: 2`) resmi dijadikan menu sistem dasar di [SystemMenuSeeder.php](file:///home/gania/infora_project/database/seeders/SystemMenuSeeder.php) di bawah modul PENGATURAN SISTEM, menjamin menu ini langsung aktif di sidebar saat *fresh installation* (`php artisan migrate:fresh --seed`) agar proses pemulihan data dapat langsung dieksekusi seketika.
+  - **Pencegahan Otomatis Gambar 404 (*Symlink Health Check dan Auto-Repair*)**: Saat pemulihan (*restore*), sistem memeriksa kesehatan symlink `public/storage`; jika sudah terhubung valid ke target lokal, sistem melanjutkan tanpa operasi berlebih; jika belum ada atau rusak (*broken link* dari server lama), sistem otomatis membuat ulang symlink (`Artisan::call('storage:link')`).
+  - **Menu Dasar Bawaan Sistem (*Baseline System Seeder*)**: Menu mandiri **Backup dan Restore** (`route: backup-restore`, `icon: folder`, `order: 2`) resmi dijadikan menu sistem dasar di [SystemMenuSeeder.php](file:///home/gania/infora_project/database/seeders/SystemMenuSeeder.php) di bawah modul PENGATURAN SISTEM, menjamin menu ini langsung aktif di sidebar saat *fresh installation* (`php artisan migrate:fresh --seed`) agar proses pemulihan data dapat langsung dieksekusi seketika.
   - Test suite Pest diperluas dengan [SystemBaselineSeederTest.php](file:///home/gania/infora_project/tests/Feature/System/SystemBaselineSeederTest.php) (total 83 tests aplikasi lulus 100%, 377 assertions).
-- **Sistem Tata Kelola Menu Akses & Dynamic Role Templates (User-Centric Granular Permissions):**
+- **Sistem Tata Kelola Menu Akses dan Dynamic Role Templates (User-Centric Granular Permissions):**
   - Mengimplementasikan otorisasi navigasi berbasis pengguna pada rute `/sistem/menu-akses` (`sistem.menu-akses`) lengkap dengan 4 hak aksi granular: Lihat (`can_view`), Tambah (`can_create`), Ubah (`can_edit`), dan Hapus (`can_delete`).
   - Sistem template peran dinamis (`menu_access_templates`) yang dapat dikonfigurasi penuh oleh Super Admin untuk beragam peran (Guru Pengajar, Wali Kelas, Wakasek Kurikulum, Wakasek Kesiswaan, Staf TU, Siswa Reguler, Siswa PKL) melalui antarmuka khusus.
   - Fitur 1-Klik Salin Template Peran (*Apply Preset*) saat mengelola izin pengguna untuk pengisian hak akses instan dalam 1 detik.
   - Antarmuka manajemen lengkap di `resources/views/system/menu-access/` dengan kepatuhan arsitektur 100% bebas *inline style* dan bebas tag `<style>`.
   - Integrasi filtering dinamis pada `SidebarComposer` dengan proteksi *root bypass* permanen untuk Super Admin.
   - Test suite terintegrasi Pest `MenuAccessTest.php` (total 67 tests aplikasi lulus 100%, 299 assertions).
-- **Halaman Placeholder "Fitur Dalam Pengembangan" & Dynamic Fallback (Zero Dead Links):**
+- **Halaman Placeholder "Fitur Dalam Pengembangan" dan Dynamic Fallback (Zero Dead Links):**
   - Mengeliminasi tautan mati (`href="#"`) di sidebar: Setiap menu atau sub-menu yang dibuat oleh Super Admin namun belum memiliki rute implementasi aktif di `routes/web.php` secara otomatis mengarah ke halaman pratinjau `/system/under-development?type={menu|submenu}&id={id}`.
   - Implementasi `UnderDevelopmentController` yang mengekstrak informasi hierarki entitas navigasi (Modul, Menu, Sub-Menu) dan menghasilkan saran cetak biru (*blueprint*) pengembang berupa snippet rute Laravel dan perintah CLI `php artisan make:controller ...`.
-  - Tampilan antarmuka profesional `resources/views/system/under-development.blade.php` dengan tema visual Infora, breadcrumbs navigasi, badge status *Under Development*, kartu detail entitas, dan tombol aksi cepat (*Edit Konfigurasi* & *Kembali ke Dashboard*).
+  - Tampilan antarmuka profesional `resources/views/system/under-development.blade.php` dengan tema visual Infora, breadcrumbs navigasi, badge status *Under Development*, kartu detail entitas, dan tombol aksi cepat (*Edit Konfigurasi* dan *Kembali ke Dashboard*).
   - Preservasi state aktif sidebar: Saat halaman placeholder diakses, accordion menu induk otomatis tetap terbuka (`is-open active-parent`) dan sub-menu bersangkutan disorot aktif (`active`).
   - Suite pengujian fitur otomatis (`UnderDevelopmentTest.php`) dan penyesuaian assertions pada `SidebarFrontendTest.php`, seluruh 59 test suite aplikasi lulus 100% (261 assertions).
-- **Ikon Pencarian Interaktif pada Sidebar Ciut & Shortcut Keyboard (`Ctrl+K`):**
+- **Ikon Pencarian Interaktif pada Sidebar Ciut dan Shortcut Keyboard (`Ctrl+K`):**
   - Mengubah kotak pencarian (`.sidebar-search .search-box`) menjadi tombol ikon 40px x 40px interaktif saat sidebar dalam keadaan ciut (72px), mengisi ruang kosong di atas menu Dashboard dengan fungsi yang produktif dan estetik.
   - Mengklik tombol pencarian pada mode ciut akan langsung membuka sidebar secara otomatis dan memfokuskan kursor ke input pencarian (`#sidebarMenuSearch`).
   - Dukungan shortcut keyboard global `Ctrl+K` atau `/` (saat tidak sedang mengetik di input/textarea) untuk membuka sidebar dan memfokuskan pencarian menu dari mana saja di dalam aplikasi.
-- **Seksi Profil Pengguna & Dropup Popover Interaktif di Sidebar Footer:**
+- **Seksi Profil Pengguna dan Dropup Popover Interaktif di Sidebar Footer:**
   - Memindahkan informasi profil pengguna dan aksi keluar dari topbar ke bagian bawah sidebar (*sidebar footer*), menghadirkan topbar yang bersih, fokus, dan lapang.
   - Kartu pengguna interaktif (`#userProfileTrigger`) yang memicu popover menu melayang ke atas (*dropup*) saat diklik, dilengkapi indikator panah *chevron* yang berputar 180° saat terbuka.
   - Menu popover lengkap: Header ringkasan akun dengan avatar inisial, opsi **Pengaturan Profile**, **Ubah Password**, **Bantuan** (Pusat Bantuan INFORA), serta tombol **Keluar / Logout** aman berbalut aksi destruktif (*danger styling*).
   - Interaksi aksesibel: Menutup otomatis via tombol `Escape`, menutup saat mengklik area di luar (*click outside*), dan notifikasi melayang (*floating toast*) non-intrusif pada fitur yang sedang dipersiapkan.
   - Responsif pada sidebar ciut: Saat sidebar diciutkan (72px), menu otomatis melayang ke arah samping kanan (`left: 76px; bottom: 8px; width: 230px`) sehingga seluruh navigasi tetap dapat dijangkau dengan mudah.
 
-### Changed & Refactored
-- **Penyempurnaan Animasi Menu Ikon & Penjangkaran 26px (*Buttery Smooth Anchored Transition*):**
+### Changed dan Refactored
+- **Penyempurnaan Animasi Menu Ikon dan Penjangkaran 26px (*Buttery Smooth Anchored Transition*):**
   - Mengeliminasi efek hentakan visual (*abrupt jump*) pada ikon-ikon navigasi menu saat sidebar diciutkan atau dibuka.
   - Menjaga koordinat horizontal ikon terkunci stabil pada margin 26px dari tepi kiri (`16px padding container + 10px padding tombol = 26px`), baik saat terbuka (260px) maupun ciut (72px) tanpa mengubah padding menjadi 0 atau memaksakan `justify-content: center`.
   - Menggantikan `display: none` pada teks menu, badge jumlah, dan panah accordion dengan transisi kurva halus `opacity: 0.2s` dan `transform: translateX(-10px)`.
@@ -145,21 +186,21 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
   - Mengunci posisi avatar pada koordinat horizontal tetap 17px dari tepi kiri layar (`padding: 0.75rem 12px` pada footer + `padding: 0.375rem 5px` pada kartu = 17px), identik dengan margin emblem logo header (`padding: 1.25rem 17px`).
   - Menjaga alignment selalu `justify-content: flex-start` (tanpa pernah berganti ke `center`).
   - Menerapkan transisi halus `opacity: 0.2s ease` dan `transform: translateX(-10px)` pada nama pengguna dan ikon chevron, sehingga teks memudar mulus selaras dengan penyusutan lebar sidebar (260px ke 72px).
-- **Pemisah Modul Classic Minimalist & Eliminasi Opsi Icon Modul:**
+- **Pemisah Modul Classic Minimalist dan Eliminasi Opsi Icon Modul:**
   - Menerapkan desain pemisah kategori modul *Classic Minimalist* (`.menu-category-label` dengan garis pembatas tipis atas dan tipografi uppercase elegan) yang rapi dan profesional.
   - Menghapus atribut dan kolom `icon` dari tabel database `modules`, model, factory, seeder, Form Requests, dan views modul karena kategori modul berfungsi sebagai header pengelompokan yang tidak menampilkan icon di sidebar.
 
-- **Modal Interaktif Formulir Tambah (Modul, Menu, & Sub-Menu):**
+- **Modal Interaktif Formulir Tambah (Modul, Menu, dan Sub-Menu):**
   - Alih-alih berpindah/redirect ke halaman baru saat mengklik tombol "+ Tambah", sistem kini memunculkan modal dialog interaktif langsung pada halaman index (`system/modules`, `system/menus`, `system/sub-menus`).
   - Arsitektur styling modal global reusable di `resources/css/app.css` (`.modal-backdrop`, `.modal-dialog`, `.modal-header`, `.modal-body`, `.modal-footer`).
   - Layering Z-Index berlapis: Modal form berada pada `z-index: 9000` dan Modal Icon Picker berada pada `z-index: 10000`, memungkinkan katalog visual ikon dibuka di atas modal formulir secara mulus.
   - Penanganan validasi cerdas: Modal otomatis terbuka kembali (*auto-reopen*) ketika terdapat kesalahan input dari server (`$errors->any()`).
-- **Visual Icon Picker Interaktif & Katalog Ikon Terkurasi (100% Free - Lucide Icons):**
+- **Visual Icon Picker Interaktif dan Katalog Ikon Terkurasi (100% Free - Lucide Icons):**
   - Komponen Blade reusable `<x-icon-picker>` di `resources/views/components/icon-picker.blade.php` dengan live preview card terpilih, pencarian instan (nama/kata kunci Indonesia), filter kategori (Navigasi, Akademik, Data, Pengguna, Sistem, Umum), dan modal katalog visual yang mudah diklik tanpa perlu mengetik manual.
   - Konfigurasi katalog ikon resmi di `config/icons.php` berisi ~38 ikon Lucide SVG 100% gratis dan open-source (berlisensi ISC tanpa biaya/lisensi berbayar).
   - Perluasan komponen `<x-icon>` dengan dukungan SVG path lengkap untuk seluruh koleksi ikon (`school`, `graduation-cap`, `book-open`, `award`, `database`, `users`, `compass`, `settings`, dll).
   - Integrasi Icon Picker pada formulir Tambah/Edit Modul dan Menu.
-- **Resolusi Rute Fleksibel & Panduan Informatif Nama Rute:**
+- **Resolusi Rute Fleksibel dan Panduan Informatif Nama Rute:**
   - Metode cerdas pada model `Menu` dan `SubMenu` (`getRouteUrlAttribute()`, `isRouteActive()`, `hasActiveSubMenu()`) yang otomatis mencocokkan format hierarki sederhana `modul.menu` atau `modul.menu.submenu` tanpa mewajibkan pengguna menambahkan akhiran teknis `.index`.
   - Kotak panduan informatif (`.route-guide-box`) pada formulir Menu dan Sub-Menu yang menjelaskan kapan rute harus dikosongkan (menu induk dropdown) dan kapan harus diisi, dilengkapi *quick suggestion pills* dan `<datalist>` rute terdaftar.
 - **Penyempurnaan UI/UX Sub-Menu Sidebar:**
@@ -168,13 +209,13 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 - **Modul Autentikasi Super Admin:**
   - Login multi-identifier fleksibel via **Username** maupun **Email** dengan proteksi session fixation.
   - Verifikasi status keaktifan akun (`is_active`).
-  - Fitur logout aman (session invalidation & token CSRF regeneration).
+  - Fitur logout aman (session invalidation dan token CSRF regeneration).
   - Middleware `SuperAdminMiddleware` untuk membatasi akses khusus akun bertipe `super_admin`.
-- **Database & Model:**
+- **Database dan Model:**
   - Migrasi penambahan kolom sistem pada tabel `users`: `username`, `user_type`, `is_active`, `avatar_path`.
   - Seeder default Super Admin (`superadmin` / `password` / `superadmin@infora.test`).
   - Helper methods pada model `User`: `isSuperAdmin()`, `isAdmin()`, `isGuru()`, `isSiswa()`.
-- **Design System & Antarmuka Awal:**
+- **Design System dan Antarmuka Awal:**
   - Standardisasi class CSS global reusable di `resources/css/app.css` (bebas class ad-hoc, tanpa *inline styles*, dan tanpa tag `<style>`).
   - Master layout `layouts/auth.blade.php` dan `layouts/app.blade.php`.
   - Tampilan Dashboard awal Super Admin dengan **1 menu tunggal: Dashboard**.
@@ -187,7 +228,7 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
   - Migrasi skema database terstruktur: tabel `modules`, `menus`, dan `sub_menus` tanpa kolom unik yang membebani (bebas bentrok penamaan, murni mengandalkan Primary Key ID).
   - Model Eloquent `Module`, `Menu`, `SubMenu` lengkap dengan relasi berjenjang `hasMany`/`belongsTo`, casts, dan factories pendukung.
   - Seeder default `SystemMenuSeeder` yang mendaftarkan 3 menu sistem dasar (*Modul*, *Menu*, *Sub-Menu*) pada modul "Pengaturan Sistem" serta menu "Dashboard" pada modul "Navigasi Utama".
-- **Integrasi Sidebar Frontend Dinamis & Interaktif:**
+- **Integrasi Sidebar Frontend Dinamis dan Interaktif:**
   - View Composer `SidebarComposer` yang menginjeksi daftar modul, menu, dan sub-menu aktif ke `layouts.app` dengan proteksi tabel `Schema::hasTable('modules')`.
   - Dukungan render hierarki 3 tingkat (*Modules* ➔ *Menus* ➔ *Sub-Menus*) dengan komponen ikon `<x-icon>` yang mendukung ikon Lucide SVG (`layout-dashboard`, `layers`, `menu`, `list-tree`, `shield-check`, `settings`, dll).
   - Dropdown Accordion sub-menu interaktif (`.nav-group-item`, `.nav-group-trigger`, `.nav-arrow-icon`, `.nav-submenu-list`) dengan rotasi panah halus 180° dan auto-uncollapse sidebar saat menu ber-sub-menu diklik dari status *collapsed*.
@@ -199,28 +240,28 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
   - Controller CRUD lengkap di namespace `App\Http\Controllers\System`:
     - `ModuleController`: daftar modul dengan hitungan relasi menu (`menus_count`), pencarian, form tambah/edit, dan cascade delete.
     - `MenuController`: daftar menu dengan relasi modul dan hitungan sub-menu (`sub_menus_count`), filter dropdown modul, dan cascade delete.
-    - `SubMenuController`: daftar sub-menu dengan relasi induk menu & modul, filter dropdown menu, dan form tambah/edit.
-  - Komponen Desain Global & Antarmuka Manajemen (9 views di `resources/views/system/`):
+    - `SubMenuController`: daftar sub-menu dengan relasi induk menu dan modul, filter dropdown menu, dan form tambah/edit.
+  - Komponen Desain Global dan Antarmuka Manajemen (9 views di `resources/views/system/`):
     - Komponen tabel data elegan (`.table-card`, `.table-toolbar`, `.data-table`, `.table-actions`, `.table-footer`).
     - Alert notifikasi sukses/gagal (`.alert-success`, `.alert-danger`).
     - Komponen form input, select, checkbox, hint, dan tombol aksi (`.btn-edit`, `.btn-delete`, `.btn-primary`, `.btn-secondary`).
     - 100% mematuhi aturan strict arsitektur: **Zero inline styles (`style=""`) dan Zero tag `<style>`**.
-- **Sistem Otomatisasi Kapitalisasi Teks Input (UPPERCASE Modul & Title Case Menu/Sub-Menu):**
-  - Helper terpusat `App\Support\TextFormatter` untuk pemformatan teks konsisten: metode `upper()` dan `titleCase()` yang cerdas mempertahankan akronim standar pendidikan & teknologi (`SMK`, `SMA`, `SIM`, `PKL`, `KBM`, `GTK`, `BAN-SM`, `RPP`, `IT`, `TU`, dll.).
+- **Sistem Otomatisasi Kapitalisasi Teks Input (UPPERCASE Modul dan Title Case Menu/Sub-Menu):**
+  - Helper terpusat `App\Support\TextFormatter` untuk pemformatan teks konsisten: metode `upper()` dan `titleCase()` yang cerdas mempertahankan akronim standar pendidikan dan teknologi (`SMK`, `SMA`, `SIM`, `PKL`, `KBM`, `GTK`, `BAN-SM`, `RPP`, `IT`, `TU`, dll.).
   - Eloquent Attribute Mutators pada Model `Module` (nama otomatis tersimpan dalam format **UPPERCASE**) serta `Menu` dan `SubMenu` (nama otomatis tersimpan dalam format **Capitalize Each Word / Title Case** dengan preservasi akronim).
-  - Integrasi Frontend Reaktif & CSS Utilitas:
+  - Integrasi Frontend Reaktif dan CSS Utilitas:
     - Atribut `data-transform="uppercase"` pada formulir modul dengan auto-uppercase instan saat mengetik tanpa merusak posisi kursor (*caret range*).
-    - Atribut `data-transform="title-case"` pada formulir menu & sub-menu dengan pemformatan otomatis saat event `blur` dan sebelum `submit`.
+    - Atribut `data-transform="title-case"` pada formulir menu dan sub-menu dengan pemformatan otomatis saat event `blur` dan sebelum `submit`.
     - Kelas utilitas CSS `.text-uppercase` dan `.text-capitalize` di `resources/css/app.css` untuk feedback visual seketika.
-  - Pembaruan seeder baseline `SystemMenuSeeder` dengan nama modul berformat kapital (`NAVIGASI UTAMA` & `PENGATURAN SISTEM`).
+  - Pembaruan seeder baseline `SystemMenuSeeder` dengan nama modul berformat kapital (`NAVIGASI UTAMA` dan `PENGATURAN SISTEM`).
   - Unit test baru `TextFormatterTest` dan peningkatan test suite hingga **54 tests lulus 100% (242 assertions)**.
-- **Automated Testing & Jaminan Kualitas:**
+- **Automated Testing dan Jaminan Kualitas:**
   - Penambahan feature dan unit tests baru (`TextFormatterTest`, `SidebarFrontendTest`, `ModuleCrudTest`, `MenuCrudTest`, `SubMenuCrudTest`).
   - Total test suite mencapai **54 tests lulus 100% (242 assertions)**.
   - 100% lulus standardisasi formatting Laravel Pint (PSR-12).
 
 ### Changed
-- **Transformasi Desain Sistem ke Nuansa Terang, Ramah & Keterbacaan Tinggi:**
+- **Transformasi Desain Sistem ke Nuansa Terang, Ramah dan Keterbacaan Tinggi:**
   - Pembaruan tema visual global di `resources/css/app.css` dari nuansa gelap ke tema terang (*bright, smooth, clean modern*).
   - Peningkatan kontras teks (`Slate-900 #0F172A` di atas latar kanvas sejuk `#F8FAFC` dan kartu `#FFFFFF`) untuk menjamin keterbacaan maksimal (WCAG AAA) yang nyaman bagi guru dan siswa.
   - Harmonisasi palet warna aksen pendidikan: Sky Blue (`#0284C7`) dan Royal Blue (`#2563EB`) dengan latar navigasi aktif *soft blue* (`#EFF6FF`).
@@ -228,8 +269,8 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 
 ### Planned (Tahap Berikutnya)
 - Skema tabel profil relasional 1-to-1 (`student_profiles`, `teacher_profiles`, `staff_profiles`).
-- Dedicated Layout lanjutan: Mobile App-like (`layouts/mobile.blade.php`) & Desktop Power-Dashboard (`layouts/desktop.blade.php`).
-- Registry menu terpusat (`config/menu.php`) dengan alokasi hak akses *User-Centric* & de-duplikasi otomatis.
+- Dedicated Layout lanjutan: Mobile App-like (`layouts/mobile.blade.php`) dan Desktop Power-Dashboard (`layouts/desktop.blade.php`).
+- Registry menu terpusat (`config/menu.php`) dengan alokasi hak akses *User-Centric* dan de-duplikasi otomatis.
 
 ---
 
@@ -241,9 +282,9 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
   - Skrip automasi serbaguna lintas platform: `./dev` (Bash untuk Linux/macOS/WSL) dan `dev.ps1` (PowerShell untuk Windows).
   - Konfigurasi environment `.env.docker.example` dan template koneksi database lokal/remote.
 - **Standar Arsitektur Inti Platform:**
-  - **API-First & System Bridging:** Arsitektur modular siap bridging dengan Dapodik, e-Rapor, LMS, dan WhatsApp Gateway.
+  - **API-First dan System Bridging:** Arsitektur modular siap bridging dengan Dapodik, e-Rapor, LMS, dan WhatsApp Gateway.
   - **Pure JSON Response Contract:** Seluruh endpoint dan interaksi data wajib mengembalikan format `application/json` murni; secara ketat menghindari format HTML pada respons data.
-  - **Mobile-First & Dedicated Layouts:** Pemisahan struktur fisik template antara Desktop (power-dashboard analitik) dan Mobile (app-like bottom navigation & card drawer).
+  - **Mobile-First dan Dedicated Layouts:** Pemisahan struktur fisik template antara Desktop (power-dashboard analitik) dan Mobile (app-like bottom navigation dan card drawer).
   - **Standar Reusable Global CSS:** Seluruh styling antarmuka wajib menggunakan class global reusable; dilarang keras membuat class khusus/ad-hoc, tanpa *inline styles* (`style="..."`), dan tanpa tag `<style>` pada view.
   - **Standar Media Upload Base64:** Seluruh pengunggahan dokumentasi foto (KBM, PKL, Akreditasi) menggunakan string Base64 maksimal 1MB per berkas dengan preservasi kualitas visual.
   - **Pola Penamaan Berkas Semantik:** Standarisasi nama file otomatis `{modul}_u{user_id}_{YYYYMMDD_His}_{random_8char}.{ekstensi}` untuk audit trail dan pencegahan tabrakan nama berkas.
@@ -256,5 +297,5 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
   - `detail/docs/BRANDING.md`: Filosofi penamaan brand INFORA, palet warna, dan aset logo.
 
 ### Removed
-- Seluruh referensi modul presensi digital / absensi / RFID / geofencing dari template lama yang tidak relevan dengan fokus SIM SMA & SMK.
+- Seluruh referensi modul presensi digital / absensi / RFID / geofencing dari template lama yang tidak relevan dengan fokus SIM SMA dan SMK.
 - Berkas dokumentasi redundan `detail/README.md`.

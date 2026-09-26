@@ -40,7 +40,7 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
         Route::resource('sub-menus', SubMenuController::class)->except(['show']);
     });
 
-    // Tata Kelola Menu Akses & Template Peran
+    // Tata Kelola Menu Akses dan Template Peran
     Route::prefix('sistem')->name('sistem.')->group(function () {
         Route::get('/user', [MenuAccessController::class, 'index'])->name('user');
         Route::get('/user/user/{user}', [MenuAccessController::class, 'editUser'])->name('user.user');
@@ -61,7 +61,7 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
 
     // Konfigurasi Sekolah
     Route::prefix('konfigurasi-sekolah')->name('konfigurasi-sekolah.')->group(function () {
-        // Tahun Ajaran & Semester
+        // Tahun Ajaran dan Semester
         Route::get('/tahun-ajaran', [TahunAjaranController::class, 'index'])->name('tahun-ajaran');
         Route::post('/tahun-ajaran', [TahunAjaranController::class, 'store'])->name('tahun-ajaran.store');
         Route::put('/tahun-ajaran/{tahunAjaran}', [TahunAjaranController::class, 'update'])->name('tahun-ajaran.update');
@@ -111,7 +111,7 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
         });
     });
 
-    // Cadangan & Pemulihan Basis Data (Backup & Restore)
+    // Cadangan dan Pemulihan Basis Data (Backup dan Restore)
     Route::get('/backup-restore', [BackupRestoreController::class, 'index'])->name('backup-restore');
     Route::post('/backup-restore', [BackupRestoreController::class, 'store'])->name('backup-restore.create');
     Route::get('/backup-restore/download/{filename}', [BackupRestoreController::class, 'download'])->name('backup-restore.download');

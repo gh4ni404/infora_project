@@ -39,7 +39,7 @@
 @switch($variant)
     @case('delete')
         {{-- ============================================================
-             TAMPILAN KHUSUS MODAL DELETE (Elegan, Modern & Terpusat)
+             TAMPILAN KHUSUS MODAL DELETE (Elegan, Modern dan Terpusat)
              ============================================================ --}}
         <div
             class="modal-backdrop hidden"
@@ -54,7 +54,7 @@
                     @if (in_array($method, ['PUT', 'PATCH', 'DELETE'], true))
                         @method($method)
                     @endif
-                    {{-- Body Terpadu: Ikon Ambient Halo, Judul, & Pesan Konfirmasi --}}
+                    {{-- Body Terpadu: Ikon Ambient Halo, Judul, dan Pesan Konfirmasi --}}
                     <div class="modal-body items-center">
                         <!-- Ambient Danger Halo Icon -->
                         <div class="modal-danger-halo w-28 h-28 rounded-full bg-red-50 text-red-600 ring-8 ring-red-50/60 flex items-center justify-center my-8 shrink-0 mx-auto">

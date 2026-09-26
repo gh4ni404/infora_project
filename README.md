@@ -1,8 +1,8 @@
-# 🌐 INFORA — Sistem Informasi Manajemen SMA & SMK
+# 🌐 INFORA — Sistem Informasi Manajemen SMA, SMK, dan MA
 
 <p align="center">
-  <strong>Information Network for Organization, Records, & Accreditation</strong><br>
-  <em>"Era Baru Sistem Informasi Sekolah Menengah Terpadu & Siap Akreditasi"</em>
+  <strong>Information Network for Organization, Records, dan Accreditation</strong><br>
+  <em>"Era Baru Sistem Informasi Sekolah Menengah Terpadu dan Siap Akreditasi"</em>
 </p>
 
 <p align="center">
@@ -11,18 +11,19 @@
   <img src="https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
   <img src="https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
   <img src="https://img.shields.io/badge/Vite-HMR-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite">
-  <img src="https://img.shields.io/badge/Architecture-API--First_&_Bridging-00D2FF?style=for-the-badge&logo=fastapi&logoColor=white" alt="API-First & Bridging">
-  <img src="https://img.shields.io/badge/UI--UX-Mobile--First_&_Dedicated_Layouts-10B981?style=for-the-badge&logo=pwa&logoColor=white" alt="Mobile-First & Dedicated Layouts">
-  <img src="https://img.shields.io/badge/Data_Contract-Modular_&_Pure_JSON-F59E0B?style=for-the-badge&logo=json&logoColor=white" alt="Modular & Pure JSON">
+  <img src="https://img.shields.io/badge/Tests-250_Passed_%7C_1123_Assertions-10B981?style=for-the-badge&logo=pest&logoColor=white" alt="Pest Tests">
+  <img src="https://img.shields.io/badge/Architecture-API--First_&_Bridging-00D2FF?style=for-the-badge&logo=fastapi&logoColor=white" alt="API-First dan Bridging">
+  <img src="https://img.shields.io/badge/UI--UX-Mobile--First_&_Dedicated_Layouts-10B981?style=for-the-badge&logo=pwa&logoColor=white" alt="Mobile-First dan Dedicated Layouts">
+  <img src="https://img.shields.io/badge/Data_Contract-Modular_&_Pure_JSON-F59E0B?style=for-the-badge&logo=json&logoColor=white" alt="Modular dan Pure JSON">
 </p>
 
 ---
 
 ## 📖 Tentang INFORA
 
-**INFORA** adalah platform Sistem Informasi Manajemen (SIM) sekolah menengah generasi baru yang dirancang untuk menjawab kebutuhan operasional **SMA** dan **SMK**. 
+**INFORA** adalah platform Sistem Informasi Manajemen (SIM) sekolah menengah generasi baru yang dirancang untuk menjawab kebutuhan operasional **SMA**, **SMK**, dan **Madrasah Aliyah (MA)**. 
 
-Dibangun dengan arsitektur **API-First & System Bridging**, **Pengembangan Berbasis Modul (Modular Architecture)**, serta filosofi **Mobile-First Development dengan Pemisahan Layout Dedicated (Desktop & Mobile)**, INFORA mengintegrasikan seluruh lini tata kelola sekolah. Seluruh komunikasi data dirancang menggunakan format **JSON murni** (*zero HTML in response data*) untuk memastikan integrasi yang bersih, terstandarisasi, dan mudah dikonsumsi oleh aplikasi mobile, frontend modern, maupun sistem eksternal.
+Dibangun dengan arsitektur **API-First dan System Bridging**, **Pengembangan Berbasis Modul (Modular Architecture)**, serta filosofi **Mobile-First Development dengan Pemisahan Layout Dedicated (Desktop dan Mobile)**, INFORA mengintegrasikan seluruh lini tata kelola sekolah. Seluruh komunikasi data dirancang menggunakan format **JSON murni** (*zero HTML in response data*) untuk memastikan integrasi yang bersih, terstandarisasi, dan mudah dikonsumsi oleh aplikasi mobile, frontend modern, maupun sistem eksternal.
 
 ---
 
@@ -30,47 +31,53 @@ Dibangun dengan arsitektur **API-First & System Bridging**, **Pengembangan Berba
 
 INFORA menghadirkan ekosistem terpadu yang dirancang khusus untuk memenuhi standar tata kelola dan akreditasi sekolah menengah:
 
-- 🏫 **Manajemen Terpadu SMA & SMK:** Struktur akademik fleksibel (Peminatan/Fase SMA & Konsentrasi Keahlian SMK), Jurnal Digital KBM Guru harian, dan modul Kesiswaan & Bimbingan Konseling (BK).
-- 🏭 **Kemitraan Industri & Magang PKL (Khusus SMK):** Database mitra DUDI, monitoring penempatan magang, plotting guru pembimbing, dan rekap Tracer Study alumni.
+- 🏫 **Manajemen Terpadu SMA, SMK, dan MA:** Registri multi-sekolah, struktur akademik fleksibel (Konsentrasi Keahlian SMK, Peminatan/Fase SMA, dan Program Peminatan/Keagamaan MA), Jurnal Digital KBM Guru harian, dan modul BK.
+- 🎓 **Master Data Jurusan dan Peminatan:** Tata kelola program keahlian/peminatan berbasis unit sekolah, toggle status aktif 1-klik, dan dialog modal CRUD interaktif.
+- 📅 **Konfigurasi Sekolah (Tahun Ajaran dan Semester):** Manajemen siklus tahun ajaran dan semester aktif dengan tanggal pelaksanaan terpadu serta aktivasi 1-klik.
+- 📆 **Kalender Akademik Terpadu dan Agenda Multi-Day:** Tampilan ganda via `<x-tab-pills>` (Grid Bulanan Interaktif dan Tabel Agenda), rentang kegiatan multi-hari, filter kategori, dan feed JSON real-time.
+- 🧩 **22 Anonymous Blade Components dan Client Engines:** Katalog komponen UI universal (`<x-data-table>`, `<x-searchable-select>`, `<x-image-upload>`, `<x-modal>`, `<x-tab-pills>`) berpadu dengan controller JavaScript terpadu (`InforaModals`, `SearchableSelect`, `ImageUpload`, `PermissionMatrix`).
+- 📸 **Layanan Unggah Gambar Terpusat (`ImageUploader`):** Pipeline Base64 native PHP tanpa library pihak ketiga, penamaan semantik collision-proof `{modul}_u{user_id}_{timestamp}_{random8}.{ext}`, dan validasi ketat 1MB.
+- 🏭 **Kemitraan Industri dan Magang PKL (Khusus SMK):** Database mitra DUDI, monitoring penempatan magang, plotting guru pembimbing, dan rekap Tracer Study alumni.
 - 🏆 **Automasi Instrumen Akreditasi (BAN-SM / IASP):** Dashboard kesiapan 4 komponen mutu, penyimpanan terstruktur bank dokumen digital, serta portal audit khusus asesor.
-- 🔌 **API-First Architecture & System Bridging:** RESTful API terstandarisasi, jembatan integrasi (*bridging*) dengan ekosistem Dapodik/LMS/WhatsApp, otorisasi Sanctum, dan kontrak respons *Pure JSON*.
-- 📱 **Mobile-First & Dedicated Layout System:** Pemisahan struktur layout native antara Desktop Power-Dashboard dan Mobile App-Like (bukan sekadar responsive CSS hiding).
-- 🗂️ **Navigasi Dinamis & Tata Kelola Menu Akses:** Hierarki navigasi sistem (Modul ➔ Menu ➔ Sub-Menu) berbasis data, otorisasi granular *user-centric*, template peran dinamis, dan fallback aman *Zero Dead Links*.
-- 💾 **Cadangan & Pemulihan Sistem Lengkap:** Snapshot portabel satu-klik (.zip), mesin backup mandiri native PHP/PDO tanpa dependensi luar, dan auto-repair symlink storage.
-- 🏫 **Master Data Sekolah:** Registri multi-sekolah SMA & SMK, alur kerja interaktif berbasis dialog modal (Create & Edit) tanpa reload halaman, dan upload logo Base64.
-- 🗺️ **Master Wilayah Administratif Kemendagri:** Hierarki 4 tingkat (Provinsi, Kabupaten/Kota, Kecamatan, Kelurahan & Desa) berbasis standar resmi Kemendagri RI, cascading filter 3 tingkat dinamis, proteksi relasi sekolah, dan seeder resmi lengkap.
-- 📐 **Tata Letak 3-Tier & Paginasi Responsif:** Arsitektur antarmuka 3-tier (fixed topbar, docked footer, dan scroll internal independen) berpadu dengan komponen paginasi universal `<x-pagination>` dan toolbar tabel adaptif.
-- ⚡ **Universal Smooth Progressive Loading Screen:** Mesin indikator progres global (`window.InforaProgress`) beranimasi gradien halus (*buttery smooth motion*) untuk seluruh operasi sistem.
+- 🔌 **API-First Architecture dan System Bridging:** RESTful API terstandarisasi, jembatan integrasi (*bridging*) dengan ekosistem Dapodik/LMS/WhatsApp, otorisasi Sanctum, dan kontrak respons *Pure JSON*.
+- 📱 **Mobile-First dan Dedicated Layout System:** Pemisahan struktur layout native antara Desktop Power-Dashboard dan Mobile App-Like (bukan sekadar responsive CSS hiding).
+- 🗂️ **Navigasi Dinamis dan Tata Kelola Menu Akses:** Hierarki navigasi sistem (Modul ➔ Menu ➔ Sub-Menu) berbasis data, otorisasi granular *user-centric*, modul `PermissionMatrix`, template peran dinamis, dan fallback aman *Zero Dead Links*.
+- 💾 **Cadangan dan Pemulihan Sistem Lengkap:** Snapshot portabel satu-klik (.zip), mesin backup mandiri native PHP/PDO tanpa dependensi luar, dan auto-repair symlink storage.
+- 🗺️ **Master Wilayah Administratif Kemendagri:** Hierarki 4 tingkat (Provinsi, Kabupaten/Kota, Kecamatan, Kelurahan dan Desa) berbasis standar resmi Kemendagri RI numerik murni, cascading filter 3 tingkat dinamis, proteksi relasi sekolah, dan seeder resmi lengkap.
+- 📐 **Tata Letak 3-Tier dan Paginasi Responsif:** Arsitektur antarmuka 3-tier (fixed topbar, docked footer, dan scroll internal independen) berpadu dengan komponen paginasi universal `<x-pagination>` dan toolbar tabel adaptif.
+- ⚡ **Universal Smooth Progressive Loading Screen:** Mesin indikator progres global (`window.InforaProgress`) beranimasi gradien halus (*buttery smooth motion*) untuk seluruh operasi sistem, navigasi link, dan form submissions.
 
-> 💡 **Dokumentasi Lengkap & Spesifikasi Arsitektur:**  
+> 💡 **Dokumentasi Lengkap dan Spesifikasi Arsitektur:**  
 > - Untuk penjelasan mendalam mengenai rasionalisasi desain sistem, standar upload Base64, reduksi batasan unik, dan rincian teknis fitur, silakan baca **[detail/README.md](detail/README.md)**.  
 > - Untuk panduan lengkap katalog komponen Blade UI dan contoh implementasinya, silakan baca **[docs/COMPONENTS.md](docs/COMPONENTS.md)**.
 
 ---
 
-## 💻 Tech Stack & Arsitektur
+## 💻 Tech Stack dan Arsitektur
 
-- **Backend:** Laravel (Versi Terbaru) — *Modular Monolith, RESTful API & Bridging Core*
-- **Navigation & Hierarchy:** System-Driven Dynamic Navigation (Modul ➔ Menu ➔ Sub-Menu), 3 Baseline Bootstrap Menus, User-Centric Menu Access Control, Configurable Role Templates, Dynamic Under-Development Fallback (Zero Dead Links), Non-Unique Entity Convention, Automatic Order & Dual-Field Routing
-- **School Master Registry:** Multi-Record School Management (SMA & SMK, Public & Private), Dynamic Filtering, Base64 Logo Pipeline, Title-Case Auto Formatting, Bridging-Ready Architecture
+- **Backend:** Laravel (Versi Terbaru) — *Modular Monolith, RESTful API dan Bridging Core*
+- **Automated Testing:** Pest PHP — **250 Tests Passed dan 1,123 Assertions (100% Pass Rate)**
+- **UI Components:** 22 Anonymous Blade Components ([`docs/COMPONENTS.md`](docs/COMPONENTS.md)) dan Reusable Global CSS Tokens (`resources/css/app.css`, Zero Inline Styles)
+- **JavaScript Client Engines:** `InforaModals` (CRUD modals), `SearchableSelect` (cascading dynamic dropdowns), `ImageUpload` (Base64 file pipeline), `PermissionMatrix` (RBAC access matrix), `InforaProgress` (global smooth loading indicator)
+- **Navigation dan Hierarchy:** System-Driven Dynamic Navigation (Modul ➔ Menu ➔ Sub-Menu), 3 Baseline Bootstrap Menus, User-Centric Menu Access Control, Configurable Role Templates, Dynamic Under-Development Fallback (Zero Dead Links), Non-Unique Entity Convention, Automatic Order dan Dual-Field Routing
+- **School Master dan Academic:** Multi-Record School Management (SMA, SMK, dan MA, Public dan Private), Unit School Filter, Jurusan/Konsentrasi Keahlian/Peminatan Registry, Tahun Ajaran dan Semester Management, Academic Calendar with Multi-Day Event Spanning
 - **Regional Administrative Master:** Kemendagri 4-Tier Standard (Provinsi, Kabupaten/Kota, Kecamatan, Kelurahan/Desa), Pure Numeric Codes (Non-BPS), 3-Tier Cascading Filter, School Relation Integrity Guard
-- **Layout & Pagination Architecture:** 3-Tier Docked Layout (Fixed Topbar, Docked Bottom Footer, Independent Internal Scrolling), Universal Responsive Pagination Component (`<x-pagination>`, Registered Global via `Paginator::defaultView`)
+- **Layout dan Pagination Architecture:** 3-Tier Docked Layout (Fixed Topbar, Docked Bottom Footer, Independent Internal Scrolling), Universal Responsive Pagination Component (`<x-pagination>`, Registered Global via `Paginator::defaultView`)
 - **Global Indicator Engine:** Universal Smooth Real-Time Progressive Indicator (`window.InforaProgress`, `<x-progress-modal />`, SSE Stream Reader, Zero Inline Styles)
-- **Universal Modal & Form UI:** Flexbox-Driven Modal Architecture (Zero-Clipping Sticky Footers, Dynamic Scrolling Body), Interactive Modular Modal CRUD (`create.blade.php` & `edit.blade.php` as Components in `index`), Margin Normalization, Standard Design Border Dividers, Accessible Slim Scrollbar
-- **Data & Response Contract:** Pure JSON Responses (`application/json`), Eloquent API Resources, Zero HTML in Data Payloads
-- **Media & File Handling:** Base64 Uploads (Maks. 1MB/file, Preservasi Kualitas, Pola Nama: `{modul}_u{user_id}_{timestamp}_{random8}.{ext}`)
-- **Styling & UI Convention:** Reusable Global CSS Classes (Light, Smooth & Clean Theme, Strict No Ad-Hoc/Specific Classes), Zero Inline Styles (`style=""`), Zero `<style>` Tags in Views
-- **Database & Timezone:** MySQL 8.0 & Redis Cache (Server Timezone: `Asia/Makassar` / WITA, GMT+8)
+- **Data dan Response Contract:** Pure JSON Responses (`application/json`), Eloquent API Resources, Zero HTML in Data Payloads
+- **Media dan File Handling:** Unified `ImageUploader` Service, Base64 Uploads (Maks. 1MB/file, Preservasi Kualitas, Pola Nama: `{modul}_u{user_id}_{timestamp}_{random8}.{ext}`)
+- **Styling dan UI Convention:** Reusable Global CSS Classes (Light, Smooth dan Clean Theme, Strict No Ad-Hoc/Specific Classes), Zero Inline Styles (`style=""`), Zero `<style>` Tags in Views
+- **Database dan Timezone:** MySQL 8.0 dan Redis Cache (Server Timezone: `Asia/Makassar` / WITA, GMT+8)
 - **Web Server:** Nginx (Alpine Linux, `client_max_body_size 250M`)
-- **Frontend / Client:** Blade, Alpine.js, TailwindCSS — *Mobile-First Architecture & Dedicated Layouts (Desktop & Mobile)*
-- **Containerization:** Docker & Docker Compose (Native Multi-Platform)
+- **Frontend / Client:** Blade, Alpine.js, TailwindCSS — *Mobile-First Architecture dan Dedicated Layouts (Desktop dan Mobile)*
+- **Containerization:** Docker dan Docker Compose (Native Multi-Platform)
 
 ---
 
 ## 🛠️ Panduan Memulai Cepat (Quick Start)
 
 ### Prasyarat
-- [Docker](https://docs.docker.com/get-docker/) & [Docker Compose](https://docs.docker.com/compose/) (atau Docker Desktop) terpasang di komputer Anda.
+- [Docker](https://docs.docker.com/get-docker/) dan [Docker Compose](https://docs.docker.com/compose/) (atau Docker Desktop) terpasang di komputer Anda.
 - Git.
 
 ### 1. Kloning Repositori
@@ -94,7 +101,7 @@ Gunakan helper script bawaan untuk kemudahan lintas OS:
 .\dev.ps1 start
 ```
 
-### 4. Setup Aplikasi & Migrasi Database
+### 4. Setup Aplikasi dan Migrasi Database
 ```bash
 # Linux / macOS / WSL
 ./dev artisan migrate

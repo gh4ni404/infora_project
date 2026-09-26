@@ -26,10 +26,7 @@
                 </form>
             @endif
 
-            <button type="button" class="btn-primary" id="btnOpenCreateJurusan">
-                <x-icon name="add" size="18" />
-                <span>Tambah Jurusan</span>
-            </button>
+            <button type="button" class="btn-primary" id="btnOpenCreateJurusan"><x-icon name="add" size="18" /></button>
         </x-slot:actions>
     </x-page-header>
 

@@ -1,23 +1,17 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="page-header">
-    <div>
-        <h2 class="page-title">Cadangan & Pemulihan Sistem</h2>
-        <div class="page-subtitle">Pencadangan portabel (basis data & berkas aset) untuk migrasi server dan disaster recovery INFORA</div>
-    </div>
-    <div class="page-actions page-actions-group">
+<x-page-header
+    title="Cadangan dan Pemulihan Sistem"
+    subtitle="Pencadangan portabel (basis data dan berkas aset) untuk migrasi server dan disaster recovery INFORA">
+    <x-slot:actions>
         <!-- Cadangan Lengkap ZIP (Primary) -->
         <form method="POST" action="{{ route('backup-restore.create') }}" class="form-inline-action form-backup-trigger" data-progress-stream>
             @csrf
             <input type="hidden" name="type" value="full">
-            <button type="submit" class="btn-primary" id="btnCreateFullBackup" title="Buat arsip ZIP terpadu berisi basis data dan seluruh berkas aset pengguna">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                <span>Buat Cadangan Lengkap (ZIP)</span>
+            <button type="submit" class="btn-primary" id="btnCreateFullBackup" title="Buat Cadangan Lengkap (ZIP) - Buat arsip ZIP terpadu berisi basis data dan seluruh berkas aset pengguna">
+                <x-icon name="download" size="16" />
+                {{-- <span>Buat Cadangan Lengkap (ZIP)</span> --}}
             </button>
         </form>
 
@@ -25,365 +19,251 @@
         <form method="POST" action="{{ route('backup-restore.create') }}" class="form-inline-action form-backup-trigger" data-progress-stream>
             @csrf
             <input type="hidden" name="type" value="database">
-            <button type="submit" class="btn-outline-primary" id="btnCreateDbBackup" title="Ekspor dump skema dan data basis data saja">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
-                    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
-                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
-                </svg>
-                <span>Cadangan Database (SQL)</span>
+            <button type="submit" class="btn-outline-primary" id="btnCreateDbBackup" title="Cadangan Database (SQL) - Ekspor dump skema dan data basis data saja">
+                <x-icon name="database" size="16" />
+                {{-- <span>Cadangan Database (SQL)</span> --}}
             </button>
         </form>
-    </div>
-</div>
+    </x-slot:actions>
+</x-page-header>
 
-@if (session('success'))
-    <div class="alert-success">
-        <div class="alert-content">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
-            <span>{{ session('success') }}</span>
-        </div>
-    </div>
-@endif
+<x-alert type="success" />
+<x-alert type="info" />
+<x-alert type="error" />
+<x-alert type="validation" />
 
-@if (session('info'))
-    <div class="alert-info">
-        <div class="alert-content">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="16" x2="12" y2="12"></line>
-                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-            </svg>
-            <span>{{ session('info') }}</span>
-        </div>
-    </div>
-@endif
+<!-- Database dan Storage Summary Statistics -->
+<x-stats-grid>
+    <x-stat-card icon="database" color="primary" label="Basis Data Aktif" value="{{ $stats['database_name'] }}" />
+    <x-stat-card icon="layout-dashboard" color="cyan" label="Total Tabel Sistem" value="{{ $stats['total_tables'] }} Tabel" />
+    <x-stat-card icon="folder" color="success" label="Aset Storage Pengguna" value="{{ $stats['public_storage_file_count'] }} Berkas ({{ $stats['public_storage_human'] }})" />
+    <x-stat-card icon="cloud-download" color="amber" label="Arsip Cadangan Tersimpan" value="{{ $stats['backup_count'] }} Berkas ({{ $stats['total_storage_human'] }})" />
+</x-stats-grid>
 
-@if (session('error'))
-    <div class="alert-danger">
-        <div class="alert-content">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <span>{{ session('error') }}</span>
-        </div>
-    </div>
-@endif
-
-@if ($errors->any())
-    <div class="alert-danger">
-        <div class="alert-content">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <span>{{ $errors->first() }}</span>
-        </div>
-    </div>
-@endif
-
-<!-- Database & Storage Summary Statistics -->
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-icon is-primary">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
-                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
-                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
-            </svg>
-        </div>
-        <div class="stat-content">
-            <span class="stat-label">Basis Data Aktif</span>
-            <span class="stat-value">{{ $stats['database_name'] }}</span>
-        </div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-icon is-cyan">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect>
-                <line x1="3" y1="9" x2="21" y2="9"></line>
-                <line x1="9" y1="21" x2="9" y2="9"></line>
-            </svg>
-        </div>
-        <div class="stat-content">
-            <span class="stat-label">Total Tabel Sistem</span>
-            <span class="stat-value">{{ $stats['total_tables'] }} Tabel</span>
-        </div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-icon is-success">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-            </svg>
-        </div>
-        <div class="stat-content">
-            <span class="stat-label">Aset Storage Pengguna</span>
-            <span class="stat-value">{{ $stats['public_storage_file_count'] }} Berkas ({{ $stats['public_storage_human'] }})</span>
-        </div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-icon is-amber">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
-                <path d="M12 12v9"></path>
-                <path d="m8 17 4 4 4-4"></path>
-            </svg>
-        </div>
-        <div class="stat-content">
-            <span class="stat-label">Arsip Cadangan Tersimpan</span>
-            <span class="stat-value">{{ $stats['backup_count'] }} Berkas ({{ $stats['total_storage_human'] }})</span>
-        </div>
-    </div>
-</div>
-
-<!-- Security Alert Notice -->
-<div class="callout-danger">
-    <div class="callout-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
-            <line x1="12" y1="9" x2="12" y2="13"></line>
-            <line x1="12" y1="17" x2="12.01" y2="17"></line>
-        </svg>
-    </div>
-    <div class="callout-text">
-        <div class="callout-title">Perhatian Khusus Pemulihan Data (*Full System Restore*)</div>
-        Operasi pemulihan sistem bersifat <strong>destruktif menyeluruh</strong>. Data pada tabel dan berkas di dalam <code>storage/app/public/</code> akan digantikan oleh data dari berkas cadangan. Sistem secara otomatis memverifikasi dan menyambungkan kembali <em>symbolic link</em> storage agar seluruh aset gambar tetap terhubung dan bebas galat 404.
-    </div>
-</div>
-
-<!-- Main Split: Archive List & Upload Form -->
+<!-- Main Split: Archive List dan Upload Form -->
 <div class="grid-split-2-1">
     <!-- Archive Table Card -->
-    <div class="table-card">
-        <div class="table-toolbar">
-            <div class="flex items-center gap-2">
-                <span class="table-cell-bold">Riwayat Berkas Cadangan Tersimpan</span>
-                <span class="table-cell-muted">&bull; Total: <strong>{{ $backups->count() }}</strong> Berkas</span>
-            </div>
+    <x-data-table
+        title="Riwayat Berkas Cadangan Tersimpan"
+        :total="$backups->count()"
+        total-label="Berkas">
+        @if ($backups->isNotEmpty())
+            <x-slot:actions>
+                <button type="button" class="btn-delete" id="btnOpenDeleteAllBackups" title="Hapus semua berkas cadangan dari server">
+                    <x-icon name="delete-2" size="18" />
+                    {{-- <span>Hapus Semua Cadangan</span> --}}
+                </button>
+            </x-slot:actions>
+        @endif
 
-            @if ($backups->isNotEmpty())
-                <form method="POST" action="{{ route('backup-restore.destroy-all') }}" onsubmit="return confirm('PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA ({{ $backups->count() }}) berkas cadangan dari server? Tindakan ini tidak dapat dibatalkan.');" class="form-inline-action">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn-delete" id="btnDeleteAllBackups" title="Hapus semua berkas cadangan dari server">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                            <line x1="10" y1="11" x2="10" y2="17"></line>
-                            <line x1="14" y1="11" x2="14" y2="17"></line>
-                        </svg>
-                        <span>Hapus Semua Cadangan</span>
-                    </button>
-                </form>
-            @endif
-        </div>
+        <thead>
+            <tr>
+                <th>Nama Berkas</th>
+                <th>Tipe Cadangan</th>
+                <th>Ukuran</th>
+                <th>Waktu Pembuatan</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($backups as $backup)
+                <tr>
+                    <td>
+                        <div class="table-cell-bold">{{ $backup['filename'] }}</div>
+                    </td>
+                    <td>
+                        @if ($backup['type'] === 'full')
+                            <span class="badge badge-primary" title="Snapshot Lengkap: Basis Data + Seluruh Berkas Aset">ZIP</span>
+                        @else
+                            <span class="badge badge-cyan" title="Hanya Skema dan Data Basis Data">SQL</span>
+                        @endif
+                    </td>
+                    <td>
+                        <span class="table-cell-bold">{{ $backup['size_human'] }}</span>
+                    </td>
+                    <td>
+                        <span class="table-cell-muted">{{ $backup['created_at']->translatedFormat('d M Y, H:i') }}</span>
+                    </td>
+                    <td>
+                        <x-table-actions>
+                            <a href="{{ route('backup-restore.download', $backup['filename']) }}" class="btn-download" data-no-progress download title="Unduh Berkas Cadangan">
+                                <x-icon name="download" size="14" />
+                                <!-- <span>Unduh</span> -->
+                            </a>
 
-        <div class="table-responsive table-responsive-scroll">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Nama Berkas</th>
-                        <th>Tipe Cadangan</th>
-                        <th>Ukuran</th>
-                        <th>Waktu Pembuatan</th>
-                        <th class="col-w-actions">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($backups as $backup)
-                        <tr>
-                            <td>
-                                <div class="table-cell-bold">{{ $backup['filename'] }}</div>
-                            </td>
-                            <td>
-                                @if ($backup['type'] === 'full')
-                                    <span class="badge badge-primary" title="Snapshot Lengkap: Basis Data + Seluruh Berkas Aset">ZIP</span>
-                                @else
-                                    <span class="badge badge-cyan" title="Hanya Skema & Data Basis Data">SQL</span>
-                                @endif
-                            </td>
-                            <td>
-                                <span class="table-cell-bold">{{ $backup['size_human'] }}</span>
-                            </td>
-                            <td>
-                                <span class="table-cell-muted">{{ $backup['created_at']->translatedFormat('d M Y, H:i') }}</span>
-                            </td>
-                            <td>
-                                <div class="table-actions table-actions-right">
-                                    <a href="{{ route('backup-restore.download', $backup['filename']) }}" class="btn-download" data-no-progress download title="Unduh Berkas Cadangan">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                            <polyline points="7 10 12 15 17 10"></polyline>
-                                            <line x1="12" y1="15" x2="12" y2="3"></line>
-                                        </svg>
-                                        <!-- <span>Unduh</span> -->
-                                    </a>
+                            <button
+                                type="button"
+                                class="btn-restore btn-trigger-restore"
+                                data-filename="{{ $backup['filename'] }}"
+                                data-type="{{ $backup['type_label'] }}"
+                                data-size="{{ $backup['size_human'] }}"
+                                data-date="{{ $backup['created_at']->translatedFormat('d M Y, H:i:s') }}"
+                                title="Pulihkan Sistem dari Berkas Ini">
+                                <x-icon name="restore" size="14" />
+                                <!-- <span>Pulihkan</span> -->
+                            </button>
 
-                                    <button
-                                        type="button"
-                                        class="btn-restore btn-trigger-restore"
-                                        data-filename="{{ $backup['filename'] }}"
-                                        data-type="{{ $backup['type_label'] }}"
-                                        data-size="{{ $backup['size_human'] }}"
-                                        data-date="{{ $backup['created_at']->translatedFormat('d M Y, H:i:s') }}"
-                                        title="Pulihkan Sistem dari Berkas Ini"
-                                    >
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-                                            <path d="M3 3v5h5"></path>
-                                        </svg>
-                                        <!-- <span>Pulihkan</span> -->
-                                    </button>
+                            <button type="button" class="btn-delete btn-open-delete-backup" title="Hapus Berkas Cadangan"
+                                data-filename="{{ $backup['filename'] }}"
+                                data-type="{{ $backup['type'] === 'full' ? 'ZIP' : 'SQL' }}"
+                                data-action="{{ route('backup-restore.destroy', $backup['filename']) }}">
+                                <x-icon name="delete" size="14" />
+                                <!-- <span>Hapus</span> -->
+                            </button>
+                        </x-table-actions>
+                    </td>
+                </tr>
+            @empty
+                <x-empty-state icon="folder" colspan="5" title="Belum ada berkas cadangan di server." text='Klik "Buat Cadangan Lengkap (ZIP)" untuk membuat cadangan portabel pertama Anda.'/>
+            @endforelse
+        </tbody>
+    </x-data-table>
 
-                                    <form method="POST" action="{{ route('backup-restore.destroy', $backup['filename']) }}" onsubmit="return confirm('Hapus permanen berkas cadangan {{ $backup['filename'] }} dari server?');" class="form-inline-action">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn-delete" title="Hapus Berkas Cadangan">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <polyline points="3 6 5 6 21 6"></polyline>
-                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                            </svg>
-                                            <!-- <span>Hapus</span> -->
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5">
-                                <div class="empty-state">
-                                    <svg class="empty-state-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                                    </svg>
-                                    <span class="empty-state-text">Belum ada berkas cadangan di server. Klik "Buat Cadangan Lengkap (ZIP)" untuk membuat cadangan portabel pertama Anda.</span>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Upload & Restore Card -->
+    <!-- Upload dan Restore Card -->
     <div class="card-surface">
         <div class="card-header">
             <div>
-                <span class="table-cell-bold">Unggah & Pulihkan Eksternal</span>
+                <span class="table-cell-bold">Unggah dan Pulihkan Eksternal</span>
                 <div class="form-hint">Migrasi dari server lain / pulihkan berkas lokal</div>
             </div>
             <span class="badge badge-amber">Maks 250MB</span>
         </div>
         <div class="card-body">
+            <!-- Security Alert Notice -->
+            <div class="callout-danger">
+                <div class="callout-icon">
+                    <x-icon name="alert-triangle" size="22" />
+                </div>
+                <div class="callout-text">
+                    <div class="callout-title">Perhatian Khusus Pemulihan Data (*Full System Restore*)</div>
+                    Operasi pemulihan sistem bersifat <strong>destruktif menyeluruh</strong>. Data pada tabel dan berkas di dalam <code>storage/app/public/</code> akan digantikan oleh data dari berkas cadangan. Sistem secara otomatis memverifikasi dan menyambungkan kembali <em>symbolic link</em> storage agar seluruh aset gambar tetap terhubung dan bebas galat 404.
+                </div>
+            </div>
             <form method="POST" action="{{ route('backup-restore.restore') }}" enctype="multipart/form-data" id="formUploadRestore" data-progress-stream>
                 @csrf
-                <div class="form-group">
-                    <label for="backupFileInput" class="form-label">Pilih Berkas Cadangan (.zip atau .sql)</label>
-                    <input
-                        type="file"
-                        id="backupFileInput"
-                        name="backup_file"
-                        accept=".zip,.sql,.txt"
-                        class="form-input"
-                        required
-                    >
-                    <div class="form-hint">Mendukung paket snapshot lengkap (ZIP) atau skrip SQL basis data maksimal 250 megabyte.</div>
-                </div>
+                <x-form-input
+                    type="file"
+                    name="backup_file"
+                    id="backupFileInput"
+                    label="Pilih Berkas Cadangan (.zip atau .sql)"
+                    hint="Mendukung paket snapshot lengkap (ZIP) atau skrip SQL basis data maksimal 250 megabyte."
+                    accept=".zip,.sql,.txt"
+                    required
+                />
 
                 <div class="form-group">
                     <button type="button" class="btn-restore" id="btnTriggerUploadRestore">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="17 8 12 3 7 8"></polyline>
-                            <line x1="12" y1="3" x2="12" y2="15"></line>
-                        </svg>
-                        <span>Unggah & Mulai Pemulihan</span>
+                        <x-icon name="upload" size="16" />
+                        <span>Unggah dan Mulai Pemulihan</span>
                     </button>
                 </div>
             </form>
         </div>
-    </div>
+    </div>    
 </div>
 
 <!-- Modal Konfirmasi Pemulihan Data (Danger Confirmation Modal) -->
-<div class="modal-backdrop hidden" id="modalRestoreConfirmation" role="dialog" aria-modal="true" aria-labelledby="modalRestoreTitle">
-    <div class="modal-dialog">
-        <div class="modal-header">
-            <div>
-                <h3 class="modal-title text-danger" id="modalRestoreTitle">Konfirmasi Bahaya Pemulihan Sistem</h3>
-                <p class="modal-subtitle">Tindakan ini akan menimpa basis data aktif dan menyelaraskan berkas penyimpanan</p>
-            </div>
-            <button type="button" class="modal-close-btn" id="btnCloseRestoreModal" aria-label="Tutup Dialog">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
+<x-modal
+    id="modalRestoreConfirmation"
+    title="Konfirmasi Bahaya Pemulihan Sistem"
+    subtitle="Tindakan ini akan menimpa basis data aktif dan menyelaraskan berkas penyimpanan"
+    action="{{ route('backup-restore.restore') }}"
+    form-id="formConfirmRestore">
+
+    <x-form-input
+        type="hidden"
+        name="filename"
+        id="restoreFilenameInput"
+        value=""
+    />
+
+    <div class="callout-danger">
+        <div class="callout-icon">
+            <x-icon name="alert-triangle" size="22" />
         </div>
-
-        <form method="POST" action="{{ route('backup-restore.restore') }}" id="formConfirmRestore" data-progress-stream>
-            @csrf
-            <input type="hidden" name="filename" id="restoreFilenameInput" value="">
-
-            <div class="modal-body">
-                <div class="callout-danger">
-                    <div class="callout-icon">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
-                            <line x1="12" y1="9" x2="12" y2="13"></line>
-                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                        </svg>
-                    </div>
-                    <div class="callout-text">
-                        Anda akan memulihkan data sistem menggunakan berkas:
-                        <div class="table-cell-bold" id="restoreTargetFilenameText">-</div>
-                        <div class="form-hint" id="restoreTargetMetaText">-</div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Ketik kata <strong>PULIHKAN</strong> di bawah untuk membuka kunci:</label>
-                    <input
-                        type="text"
-                        id="restoreConfirmKeyword"
-                        class="form-input"
-                        placeholder="Ketik PULIHKAN"
-                        autocomplete="off"
-                    >
-                    <div class="form-hint">Proteksi pencegahan eksekusi tidak sengaja.</div>
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button type="button" class="btn-secondary" id="btnCancelRestoreModal">Batal</button>
-                <button type="submit" class="btn-delete" id="btnSubmitRestore" disabled>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-                        <path d="M3 3v5h5"></path>
-                    </svg>
-                    <span>Lanjutkan Pemulihan Sekarang</span>
-                </button>
-            </div>
-        </form>
+        <div class="callout-text">
+            Anda akan memulihkan data sistem menggunakan berkas:
+            <div class="table-cell-bold" id="restoreTargetFilenameText">-</div>
+            <div class="form-hint" id="restoreTargetMetaText">-</div>
+        </div>
     </div>
-</div>
+
+    <x-form-input
+        name="confirm_keyword"
+        id="restoreConfirmKeyword"
+        placeholder="Ketik PULIHKAN"
+        hint="Proteksi pencegahan eksekusi tidak sengaja."
+        autocomplete="off"
+    >
+        <x-slot:label>
+            Ketik kata <strong>PULIHKAN</strong> di bawah untuk membuka kunci:
+        </x-slot:label>
+    </x-form-input>
+
+    <x-slot:footer>
+        <button type="button" class="btn-secondary" id="btnCancelRestoreModal">Batal</button>
+        <button type="submit" class="btn-delete" id="btnSubmitRestore" disabled>
+            <span>Pulihkan</span>
+        </button>
+    </x-slot:footer>
+</x-modal>
+
+{{-- Modal Konfirmasi Hapus Berkas Cadangan Satuan --}}
+<x-modal 
+    name="delete" 
+    id="modalDeleteBackup" 
+    form-id="formDeleteBackup" 
+    cancel-btn-id="btnCancelDeleteBackup"
+    confirm-btn-id="btnConfirmDeleteBackup"
+    message-id="deleteBackupMessage"
+    badge-id="deleteBackupBadge"
+    item-title-id="deleteBackupTitle" />
+
+{{-- Modal Konfirmasi Hapus Semua Cadangan --}}
+@if ($backups->isNotEmpty())
+    <x-modal 
+        name="delete" 
+        id="modalDeleteAllBackups" 
+        title="Hapus Semua Cadangan?"
+        action="{{ route('backup-restore.destroy-all') }}"
+        form-id="formDeleteAllBackups" 
+        cancel-btn-id="btnCancelDeleteAllBackups"
+        confirm-btn-id="btnConfirmDeleteAllBackups">
+        <p class="text-sm text-gray-600 mb-2.5">
+            PERINGATAN: Apakah Anda yakin ingin menghapus seluruh berkas cadangan dari server?
+        </p>
+        <div class="p-3.5 my-8 mx-6 bg-slate-50 border border-slate-200/90 rounded-xl text-center shadow-xs">
+            <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-mono font-bold bg-red-100 text-red-700 rounded-md mb-1.5">
+                {{ $backups->count() }} Berkas Tersimpan
+            </span>
+            <div class="text-sm font-bold text-slate-900 leading-snug">Semua Berkas Cadangan Server</div>
+        </div>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-red-50 text-red-700 border border-red-100">
+            <x-icon name="alert-circle" size="14" />
+            <span>Tindakan ini permanen dan tidak dapat dibatalkan.</span>
+        </div>
+    </x-modal>
+@endif
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Confirmation modal elements
-    const modalConfirm = document.getElementById('modalRestoreConfirmation');
-    const btnCloseConfirm = document.getElementById('btnCloseRestoreModal');
-    const btnCancelConfirm = document.getElementById('btnCancelRestoreModal');
+    // 1. Setup Modal Konfirmasi Pemulihan
+    InforaModals.setup('modalRestoreConfirmation', { cancelBtnId: 'btnCancelRestoreModal' });
+
+    // 2. Setup dan Binding Modal Hapus Berkas Cadangan Satuan
+    InforaModals.setup('modalDeleteBackup', { cancelBtnId: 'btnCancelDeleteBackup' });
+    InforaModals.bindDeleteButtons('.btn-open-delete-backup', 'modalDeleteBackup', function(modal, btn) {
+        document.getElementById('modalDeleteBackupTitle').textContent = 'Hapus Berkas Cadangan?';
+        document.getElementById('deleteBackupMessage').textContent = 'Apakah Anda yakin ingin menghapus berkas cadangan berikut dari server?';
+        document.getElementById('deleteBackupBadge').textContent = btn.dataset.type || (btn.dataset.filename.endsWith('.zip') ? 'ZIP' : 'SQL');
+        document.getElementById('deleteBackupTitle').textContent = btn.dataset.filename;
+    });
+
+    // 3. Setup dan Binding Modal Hapus Semua Berkas Cadangan
+    InforaModals.setup('modalDeleteAllBackups', { cancelBtnId: 'btnCancelDeleteAllBackups' });
+    InforaModals.bindOpenButton('btnOpenDeleteAllBackups', 'modalDeleteAllBackups');
+
+    // Elemen modal konfirmasi pemulihan
     const filenameInput = document.getElementById('restoreFilenameInput');
     const targetFilenameText = document.getElementById('restoreTargetFilenameText');
     const targetMetaText = document.getElementById('restoreTargetMetaText');
@@ -391,7 +271,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const submitConfirmBtn = document.getElementById('btnSubmitRestore');
     const restoreTriggers = document.querySelectorAll('.btn-trigger-restore');
 
-    // Upload & restore elements
+    // Elemen unggah dan formulir pemulihan
     const btnTriggerUploadRestore = document.getElementById('btnTriggerUploadRestore');
     const backupFileInput = document.getElementById('backupFileInput');
     const formUploadRestore = document.getElementById('formUploadRestore');
@@ -400,23 +280,18 @@ document.addEventListener('DOMContentLoaded', function() {
     let activeRestoreMode = 'server'; // 'server' or 'upload'
 
     function openRestoreModal(filename, metaText, mode) {
-        if (!modalConfirm) return;
         activeRestoreMode = mode;
-        filenameInput.value = filename || '';
-        targetFilenameText.textContent = filename || 'Berkas Unggahan Komputer';
-        targetMetaText.textContent = metaText || '';
-        keywordInput.value = '';
-        submitConfirmBtn.disabled = true;
+        if (filenameInput) filenameInput.value = filename || '';
+        if (targetFilenameText) targetFilenameText.textContent = filename || 'Berkas Unggahan Komputer';
+        if (targetMetaText) targetMetaText.textContent = metaText || '';
+        if (keywordInput) keywordInput.value = '';
+        if (submitConfirmBtn) submitConfirmBtn.disabled = true;
 
-        modalConfirm.classList.remove('hidden');
-        document.body.classList.add('modal-open');
-        setTimeout(() => keywordInput.focus(), 50);
+        InforaModals.open('modalRestoreConfirmation');
     }
 
     function closeRestoreModal() {
-        if (!modalConfirm) return;
-        modalConfirm.classList.add('hidden');
-        document.body.classList.remove('modal-open');
+        InforaModals.close('modalRestoreConfirmation');
     }
 
     restoreTriggers.forEach(function(btn) {
@@ -442,22 +317,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    keywordInput && keywordInput.addEventListener('input', function() {
-        if (keywordInput.value.trim().toUpperCase() === 'PULIHKAN') {
-            submitConfirmBtn.disabled = false;
-        } else {
-            submitConfirmBtn.disabled = true;
-        }
-    });
-
-    btnCloseConfirm && btnCloseConfirm.addEventListener('click', closeRestoreModal);
-    btnCancelConfirm && btnCancelConfirm.addEventListener('click', closeRestoreModal);
-
-    modalConfirm && modalConfirm.addEventListener('click', function(e) {
-        if (e.target === modalConfirm) {
-            closeRestoreModal();
-        }
-    });
+    if (keywordInput) {
+        keywordInput.addEventListener('input', function() {
+            submitConfirmBtn.disabled = this.value.trim().toUpperCase() !== 'PULIHKAN';
+        });
+    }
 
     // Attach stream handler to backup generation forms via Universal InforaProgress API
     const backupForms = document.querySelectorAll('.form-backup-trigger');
@@ -515,12 +379,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && modalConfirm && !modalConfirm.classList.contains('hidden')) {
-            closeRestoreModal();
-        }
-    });
 });
 </script>
 @endsection

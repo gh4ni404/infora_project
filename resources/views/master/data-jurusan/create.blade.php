@@ -3,7 +3,7 @@
     id="modalCreateJurusan"
     title="Tambah Data Jurusan Baru"
     subtitle="Tambahkan data konsentrasi keahlian (SMK) atau peminatan (SMA) untuk unit sekolah terpilih"
-    size="lg"
+    {{-- size="lg" --}}
     action="{{ route('master.data-jurusan.store') }}"
     form-id="formCreateJurusan">
     <x-form-input type="hidden" name="school_id" :value="$selectedSchoolId" />
@@ -115,14 +115,11 @@
 
     <x-slot:footer>
         <button type="button" class="btn-secondary" id="btnCancelCreateJurusan">Batal</button>
-        <button type="submit" class="btn-primary" id="btnSubmitCreateJurusan">
-            <x-icon name="save" size="18" />
-            <span>Simpan Jurusan</span>
-        </button>
+        <button type="submit" class="btn-primary" id="btnSubmitCreateJurusan">Simpan</button>
     </x-slot:footer>
 </x-modal>
 
-{{-- Datalist Referensi Bidang & Program Keahlian --}}
+{{-- Datalist Referensi Bidang dan Program Keahlian --}}
 <datalist id="list_bidang_keahlian">
     @foreach ($recommendedBidang as $bidang)
         <option value="{{ $bidang }}"></option>

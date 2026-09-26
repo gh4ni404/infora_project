@@ -3,7 +3,7 @@
     id="modalCreateSchool"
     title="Tambah Sekolah Baru"
     subtitle="Daftarkan data sekolah SMA atau SMK ke dalam registri platform INFORA"
-    size="lg"
+    {{-- size="lg" --}}
     action="{{ route('master.data-sekolah.store') }}"
     form-id="formCreateSchool">
 
@@ -222,23 +222,12 @@
     <div class="form-section-divider"></div>
     <div class="form-section-label">Logo Sekolah</div>
 
-    <div class="form-group">
-        <div class="dropzone-upload" id="createLogoUploadArea">
-            <input type="hidden" name="logo" id="create_logo_base64">
-            <input type="file" id="create_logo_file" accept="image/png,image/jpeg,image/webp,image/gif" class="hidden">
-            <div class="dropzone-upload-content" id="createLogoPlaceholder">
-                <x-icon name="upload-image" size="32" />
-                <span>Klik untuk unggah logo sekolah</span>
-                <span class="form-hint">Format: PNG, JPG, WebP, GIF. Maks 1MB.</span>
-            </div>
-            <div class="dropzone-upload-preview hidden" id="createLogoPreview">
-                <img id="createLogoPreviewImg" alt="Preview Logo">
-                <button type="button" class="dropzone-remove-btn" id="createLogoRemoveBtn" title="Hapus Logo">
-                    <x-icon name="close" size="16" />
-                </button>
-            </div>
-        </div>
-    </div>
+    <x-image-upload
+        name="logo"
+        id="create_logo"
+        placeholder="Klik untuk unggah logo sekolah"
+        hint="Format: PNG, JPG, WebP, GIF. Maks 1MB."
+    />
 
     <x-form-checkbox
         name="is_active"
@@ -250,8 +239,6 @@
 
     <x-slot:footer>
         <button type="button" class="btn-secondary" id="btnCancelCreateSchool">Batal</button>
-        <button type="submit" class="btn-primary">
-            <span>Simpan</span>
-        </button>
+        <button type="submit" class="btn-primary">Simpan</button>
     </x-slot:footer>
 </x-modal>

@@ -22,7 +22,7 @@ class BackupRestoreController extends Controller
     ) {}
 
     /**
-     * Display a listing of database & full system backups, storage usage, and system stats.
+     * Display a listing of database dan full system backups, storage usage, and system stats.
      */
     public function index(): View
     {
@@ -67,7 +67,7 @@ class BackupRestoreController extends Controller
                     });
 
                     $label = $backup['type'] === 'full'
-                        ? 'Cadangan lengkap sistem (Basis Data & Berkas Aset)'
+                        ? 'Cadangan lengkap sistem (Basis Data dan Berkas Aset)'
                         : 'Cadangan basis data';
 
                     $msg = "{$label} berhasil dibuat: {$backup['filename']} ({$backup['size_human']}).";
@@ -87,7 +87,7 @@ class BackupRestoreController extends Controller
             $backup = $this->backupService->createBackup($type);
 
             $label = $backup['type'] === 'full'
-                ? 'Cadangan lengkap sistem (Basis Data & Berkas Aset)'
+                ? 'Cadangan lengkap sistem (Basis Data dan Berkas Aset)'
                 : 'Cadangan basis data';
 
             return redirect()

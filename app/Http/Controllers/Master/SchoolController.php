@@ -7,10 +7,9 @@ use App\Http\Requests\Master\StoreSchoolRequest;
 use App\Http\Requests\Master\UpdateSchoolRequest;
 use App\Models\Provinsi;
 use App\Models\School;
+use App\Support\ImageUploader;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class SchoolController extends Controller
@@ -69,7 +68,7 @@ class SchoolController extends Controller
         $data = $request->validated();
 
         if (! empty($data['logo'])) {
-            $data['logo_path'] = $this->processBase64Logo($data['logo']);
+            $data['logo_path'] = ImageUploader::uploadBase64($data['logo'], 'logos', 'sekolah');
         }
         unset($data['logo']);
 
@@ -97,7 +96,7 @@ class SchoolController extends Controller
 
         // Handle logo removal
         if ($request->boolean('remove_logo') && $dataSekolah->logo_path) {
-            $this->deleteLogoFile($dataSekolah->logo_path);
+            ImageUploader::delete($dataSekolah->logo_path);
             $data['logo_path'] = null;
         }
 
@@ -105,9 +104,9 @@ class SchoolController extends Controller
         if (! empty($data['logo'])) {
             // Remove old logo if exists
             if ($dataSekolah->logo_path) {
-                $this->deleteLogoFile($dataSekolah->logo_path);
+                ImageUploader::delete($dataSekolah->logo_path);
             }
-            $data['logo_path'] = $this->processBase64Logo($data['logo']);
+            $data['logo_path'] = ImageUploader::uploadBase64($data['logo'], 'logos', 'sekolah');
         }
         unset($data['logo'], $data['remove_logo']);
 
@@ -125,7 +124,7 @@ class SchoolController extends Controller
     {
         // Remove logo file if exists
         if ($dataSekolah->logo_path) {
-            $this->deleteLogoFile($dataSekolah->logo_path);
+            ImageUploader::delete($dataSekolah->logo_path);
         }
 
         $dataSekolah->delete();
@@ -133,52 +132,5 @@ class SchoolController extends Controller
         return redirect()
             ->route('master.data-sekolah.index')
             ->with('success', 'Data sekolah berhasil dihapus dari sistem.');
-    }
-
-    /**
-     * Process Base64-encoded logo image and store to disk.
-     * Naming convention: {modul}_u{user_id}_{YYYYMMDD_His}_{random_8char}.{ext}
-     */
-    private function processBase64Logo(string $base64String): ?string
-    {
-        if (! preg_match('/^data:image\/(png|jpe?g|gif|webp|svg\+xml);base64,/', $base64String, $matches)) {
-            return null;
-        }
-
-        $extension = match ($matches[1]) {
-            'jpeg', 'jpg' => 'jpg',
-            'svg+xml' => 'svg',
-            default => $matches[1],
-        };
-
-        $imageData = base64_decode(preg_replace('/^data:image\/[a-z+]+;base64,/', '', $base64String), true);
-        if ($imageData === false) {
-            return null;
-        }
-
-        // Validate file size (max 1MB)
-        if (strlen($imageData) > 1048576) {
-            return null;
-        }
-
-        $userId = auth()->id() ?? 0;
-        $timestamp = now()->format('Ymd_His');
-        $randomHash = Str::random(8);
-        $filename = "sekolah_u{$userId}_{$timestamp}_{$randomHash}.{$extension}";
-
-        $path = 'logos/'.$filename;
-        Storage::disk('public')->put($path, $imageData);
-
-        return $path;
-    }
-
-    /**
-     * Delete a logo file from storage.
-     */
-    private function deleteLogoFile(string $logoPath): void
-    {
-        if (Storage::disk('public')->exists($logoPath)) {
-            Storage::disk('public')->delete($logoPath);
-        }
     }
 }

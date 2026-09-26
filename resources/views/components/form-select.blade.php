@@ -8,6 +8,7 @@
     'required' => false,
     'groupClass' => '',
     'options' => [],
+    'optionAttributes' => null,
 ])
 
 @php
@@ -15,6 +16,7 @@
     $selectId = $id ?? $name;
     $hasError = $errors->has($name);
     $selectedValue = old($name, $selected);
+    $isCallableAttributes = is_callable($optionAttributes);
 @endphp
 
 <div class="form-group {{ $groupClass }}">
@@ -40,14 +42,26 @@
         @if (!empty($options))
             @foreach ($options as $value => $label)
                 @php
-                    $val = is_object($label)
-                        ? ($label->id ?? $value)
-                        : (is_array($label) ? ($label['id'] ?? $label['value'] ?? $value) : $value);
-                    $text = is_object($label)
-                        ? ($label->name ?? $label->label ?? $label)
-                        : (is_array($label) ? ($label['label'] ?? $label['name'] ?? $label['text'] ?? $value) : $label);
+                    if (is_object($label)) {
+                        $val = $label->id ?? $value;
+                        $text = $label->name ?? $label->label;
+                    } elseif (is_array($label)) {
+                        $val = $label['id'] ?? $value;
+                        $text = $label['name'] ?? $label['label'];
+                    } else {
+                        $val = $value;
+                        $text = $label;
+                    }
+
+                    $optAttrs = $isCallableAttributes
+                        ? $optionAttributes($label, $val)
+                        : ($optionAttributes[$val] ?? ($label['attributes'] ?? null));
                 @endphp
-                <option value="{{ $val }}" @selected(!blank($selectedValue) && (string) $val === (string) $selectedValue)>
+                <option
+                    value="{{ $val }}"
+                    @selected(!blank($selectedValue) && (string) $val === (string) $selectedValue)
+                    @if ($optAttrs) {{ new \Illuminate\View\ComponentAttributeBag($optAttrs) }} @endif
+                >
                     {{ $text }}
                 </option>
             @endforeach

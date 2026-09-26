@@ -3,7 +3,7 @@
 return [
     /*
     |--------------------------------------------------------------------------
-    | Katalog Ikon Resmi INFORA (100% Free & Open Source - Lucide Icons)
+    | Katalog Ikon Resmi INFORA (100% Free dan Open Source - Lucide Icons)
     |--------------------------------------------------------------------------
     |
     | Seluruh ikon di bawah ini berasal dari keluarga Lucide Icons berlisensi
@@ -14,17 +14,17 @@ return [
 
     'categories' => [
         'all' => 'Semua Ikon',
-        'navigasi' => 'Navigasi & Tampilan',
-        'wilayah' => 'Wilayah & Lokasi',
-        'akademik' => 'Sekolah & Akademik',
-        'data' => 'Data & Arsip',
-        'pengguna' => 'Pengguna & SDM',
-        'sistem' => 'Sistem & Keamanan',
-        'umum' => 'Komunikasi & Umum',
+        'navigasi' => 'Navigasi dan Tampilan',
+        'wilayah' => 'Wilayah dan Lokasi',
+        'akademik' => 'Sekolah dan Akademik',
+        'data' => 'Data dan Arsip',
+        'pengguna' => 'Pengguna dan SDM',
+        'sistem' => 'Sistem dan Keamanan',
+        'umum' => 'Komunikasi dan Umum',
     ],
 
     'icons' => [
-        // Navigasi & Tampilan
+        // Navigasi dan Tampilan
         [
             'name' => 'compass',
             'label' => 'Kompas / Penjelajah',
@@ -50,7 +50,7 @@ return [
             'keywords' => 'pohon hierarki sub-menu cabang relasi tree',
         ],
         [
-            'name' => 'layout-dashboard',
+            'name' => 'dashboard',
             'label' => 'Dashboard Utama',
             'category' => 'navigasi',
             'keywords' => 'dashboard beranda ringkasan statistik panel utama',
@@ -68,7 +68,7 @@ return [
             'keywords' => 'tautan luar link eksternal portal buka tab baru website redirect url',
         ],
 
-        // Wilayah & Lokasi
+        // Wilayah dan Lokasi
         [
             'name' => 'map-pin',
             'label' => 'Pin Lokasi / Wilayah',
@@ -112,7 +112,7 @@ return [
             'keywords' => 'papan arah rute simpang persimpangan daerah wilayah penunjuk jalan plang marka',
         ],
 
-        // Sekolah & Akademik
+        // Sekolah dan Akademik
         [
             'name' => 'school',
             'label' => 'Gedung Sekolah',
@@ -139,7 +139,7 @@ return [
         ],
         [
             'name' => 'award',
-            'label' => 'Prestasi & Nilai',
+            'label' => 'Prestasi dan Nilai',
             'category' => 'akademik',
             'keywords' => 'prestasi penghargaan medali piagam sertifikat nilai raport ranking',
         ],
@@ -150,7 +150,7 @@ return [
             'keywords' => 'kalkulator hitung nilai matematika statistik bobot',
         ],
 
-        // Data & Arsip
+        // Data dan Arsip
         [
             'name' => 'database',
             'label' => 'Basis Data / Master Data',
@@ -189,7 +189,7 @@ return [
         ],
         [
             'name' => 'building',
-            'label' => 'Fasilitas & Sarpras',
+            'label' => 'Fasilitas dan Sarpras',
             'category' => 'data',
             'keywords' => 'sarana prasarana gedung ruangan fasilitas kelas laboratorium',
         ],
@@ -212,7 +212,7 @@ return [
             'keywords' => 'cetak print printer cetakan dokumen laporan kertas cetak-data',
         ],
 
-        // Pengguna & SDM
+        // Pengguna dan SDM
         [
             'name' => 'users',
             'label' => 'Grup Siswa / Pengguna',
@@ -244,10 +244,10 @@ return [
             'keywords' => 'guru tenaga pendidik staf karyawan tata usaha pegawai sdm',
         ],
 
-        // Sistem & Keamanan
+        // Sistem dan Keamanan
         [
             'name' => 'shield-check',
-            'label' => 'Keamanan & Hak Akses',
+            'label' => 'Keamanan dan Hak Akses',
             'category' => 'sistem',
             'keywords' => 'keamanan hak akses permission proteksi role peran firewall aman',
         ],
@@ -289,15 +289,15 @@ return [
         ],
         [
             'name' => 'bar-chart',
-            'label' => 'Statistik & Grafik',
+            'label' => 'Statistik dan Grafik',
             'category' => 'sistem',
             'keywords' => 'statistik grafik performa visualisasi data metrik diagram',
         ],
 
-        // Komunikasi & Umum
+        // Komunikasi dan Umum
         [
             'name' => 'bell',
-            'label' => 'Notifikasi & Pengumuman',
+            'label' => 'Notifikasi dan Pengumuman',
             'category' => 'umum',
             'keywords' => 'lonceng notifikasi pengumuman pemberitahuan info peringatan',
         ],

@@ -5,10 +5,10 @@
     <div>
         <div class="page-breadcrumbs" style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; color: var(--infora-text-muted); margin-bottom: 0.375rem;">
             <span>{{ $module?->name ?? 'SISTEM' }}</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            <x-icon name="chevron-right" size="14" />
             @if ($itemType === 'Sub-Menu' && $menu)
                 <span>{{ $menu->name }}</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                <x-icon name="chevron-right" size="14" />
             @endif
             <span style="color: var(--infora-brand-primary); font-weight: 600;">{{ $item->name }}</span>
         </div>
@@ -17,16 +17,11 @@
     </div>
     <div class="page-actions">
         <a href="{{ $editUrl }}" class="btn-secondary" title="Ubah data {{ strtolower($itemType) }}">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 20h9"></path>
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-            </svg>
+            <x-icon name="pencil" size="18" />
             <span>Edit {{ $itemType }}</span>
         </a>
         <a href="{{ route('dashboard') }}" class="btn-secondary" title="Kembali ke Dashboard">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
+            <x-icon name="chevron-left" size="18" />
             <span>Dashboard</span>
         </a>
     </div>
@@ -36,9 +31,7 @@
     <div class="card-header">
         <div style="display: flex; align-items: center; gap: 0.75rem;">
             <div style="width: 36px; height: 36px; border-radius: 0.5rem; background: rgba(245, 158, 11, 0.12); color: #f59e0b; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(245, 158, 11, 0.25);">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-                </svg>
+                <x-icon name="tool" size="20" />
             </div>
             <div>
                 <span class="user-name-text">Status Fitur: Dalam Tahap Pengembangan</span>
@@ -50,13 +43,9 @@
 
     <div class="card-body">
         <div class="alert-info" style="display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1.5rem;">
-            <svg style="flex-shrink: 0; margin-top: 2px;" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="16" x2="12" y2="12"></line>
-                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-            </svg>
+            <x-icon name="info" size="40" />
             <div>
-                <strong style="color: var(--infora-brand-primary);">Navigasi Telah Terdaftar:</strong> 
+                <strong style="color: var(--infora-brand-primary);">Navigasi Telah Terdaftar:</strong> <br>
                 Item <strong>{{ $item->name }}</strong> sudah berhasil terdaftar pada navigasi sistem INFORA. 
                 Tautan di sidebar diarahkan ke halaman pratinjau ini karena rute backend <code>{{ $rawRoute ?: '(kosong)' }}</code> belum diaktifkan di file <code>routes/web.php</code>.
             </div>
@@ -114,10 +103,7 @@
 
         <div class="route-guide-box" style="margin-top: 1rem; padding: 1.25rem; background: var(--infora-surface-card); border: 1px solid var(--infora-border);">
             <div class="route-guide-title" style="font-size: 0.9375rem; margin-bottom: 0.75rem;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="16 18 22 12 16 6"></polyline>
-                    <polyline points="8 6 2 12 8 18"></polyline>
-                </svg>
+                <x-icon name="code" size="18" />
                 <span>Panduan Developer (Blueprint Implementasi)</span>
             </div>
             <p style="color: var(--infora-text-muted); font-size: 0.8125rem; margin-bottom: 0.75rem;">
@@ -145,10 +131,7 @@
 
         <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--infora-border);">
             <a href="{{ $editUrl }}" class="btn-primary">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 20h9"></path>
-                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                </svg>
+                <x-icon name="pencil" size="16" />
                 <span>Edit Konfigurasi {{ $itemType }}</span>
             </a>
             <a href="{{ route('dashboard') }}" class="btn-secondary">

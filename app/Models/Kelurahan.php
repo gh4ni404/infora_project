@@ -60,7 +60,7 @@ class Kelurahan extends Model
     }
 
     /**
-     * Mutator & accessor untuk nama kelurahan/desa.
+     * Mutator dan accessor untuk nama kelurahan/desa.
      * Format otomatis Title Case dengan preservasi akronim resmi.
      */
     protected function nama(): Attribute

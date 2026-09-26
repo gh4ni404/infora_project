@@ -290,7 +290,7 @@
     </x-data-table>
 </div>
 
-{{-- Modals Tambah & Ubah --}}
+{{-- Modals Tambah dan Ubah --}}
 @include('konfigurasi-sekolah.tahun-ajaran.modal-tahun-ajaran')
 @include('konfigurasi-sekolah.tahun-ajaran.modal-semester')
 {{-- Modal Konfirmasi Hapus Bersama (Shared Delete Modal) --}}

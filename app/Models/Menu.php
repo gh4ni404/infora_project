@@ -167,9 +167,8 @@ class Menu extends Model
             return 'system';
         }
 
-        // Ambil kata pertama sebelum tanda '&' atau '/', lalu ubah ke slug
-        $base = explode('&', $this->name)[0];
-        $base = explode('/', $base)[0];
+        // Ambil kata pertama sebelum tanda '&', '/', atau kata hubung 'dan', lalu ubah ke slug
+        $base = preg_split('#\s+(?:dan|&)\s+|[&/]#i', $this->name)[0] ?? $this->name;
 
         return Str::slug(trim($base));
     }

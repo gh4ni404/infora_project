@@ -3,7 +3,7 @@
     id="modalEditKalender"
     title="Ubah Agenda Kalender Akademik"
     subtitle="Perbarui rincian kegiatan, jadwal tanggal, semester, atau kategori"
-    size="lg"
+    {{-- size="lg" --}}
     method="PUT"
     action=""
     form-id="formEditKalender"
@@ -79,14 +79,11 @@
             name="kategori"
             id="edit_kategori"
             label="Kategori Kegiatan"
+            placeholder="Pilih Kategori Kegiatan"
+            :options="collect($kategoriOptions)->mapWithKeys(fn($opt, $key) => [$key => $opt['label'] . ' (' . $opt['description'] . ')'])"
+            :option-attributes="fn($label, $key) => ['data-default-color' => $kategoriOptions[$key]['color'] ?? '']"
             required
-        >
-            @foreach ($kategoriOptions as $key => $opt)
-                <option value="{{ $key }}" data-default-color="{{ $opt['color'] }}">
-                    {{ $opt['label'] }} ({{ $opt['description'] }})
-                </option>
-            @endforeach
-        </x-form-select>
+        />
 
         <x-form-select
             name="warna"
@@ -111,13 +108,12 @@
         label="Keterangan / Catatan"
         rows="3"
         placeholder="Deskripsi singkat, instruksi, atau catatan kegiatan (opsional)..."
+        maxlength="1000"
+        hint="Maksimal 1000 karakter (opsional)."
     />
 
     <x-slot:footer>
         <button type="button" class="btn-secondary" id="btnCancelEditKalender">Batal</button>
-        <button type="submit" class="btn-primary" id="btnSubmitEditKalender">
-            <x-icon name="save" size="18" />
-            <span>Perbarui Kegiatan</span>
-        </button>
+        <button type="submit" class="btn-primary" id="btnSubmitEditKalender">Update</button>
     </x-slot:footer>
 </x-modal>

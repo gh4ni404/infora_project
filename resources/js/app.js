@@ -5,6 +5,7 @@
 import './infora-progress';
 import './searchable-select';
 import './infora-modals';
+import './permission-matrix';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Password visibility toggle
@@ -32,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Login form submission loading indicator & anti-spam click
+    // Login form submission loading indicator dan anti-spam click
     const loginForm = document.querySelector('form[action*="login"]');
     const btnLogin = document.getElementById('btnLogin');
 
@@ -82,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Sidebar menu real-time search & accordion interaction
+    // Sidebar menu real-time search dan accordion interaction
     const menuSearchInput = document.getElementById('sidebarMenuSearch');
     const menuSearchClear = document.getElementById('sidebarSearchClear');
     const sidebarNavMenu = document.getElementById('sidebarNavMenu');
@@ -284,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Sidebar collapsible toggle & state persistence
+    // Sidebar collapsible toggle dan state persistence
     if (sidebarToggleBtn && layoutSidebar) {
         const isCollapsed = localStorage.getItem('infora_sidebar_collapsed') === 'true';
         if (isCollapsed) {
@@ -298,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('infora_sidebar_collapsed', nowCollapsed ? 'true' : 'false');
         });
 
-        // Click search box when sidebar is collapsed to auto-expand & focus input
+        // Click search box when sidebar is collapsed to auto-expand dan focus input
         const sidebarSearchBox = document.getElementById('sidebarSearchBox');
         if (sidebarSearchBox) {
             sidebarSearchBox.addEventListener('click', () => {
@@ -444,7 +445,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // =========================================================================
-    // Global Loading Screen — Navigation & Form Interceptors
+    // Global Loading Screen — Navigation dan Form Interceptors
     // Intercepts all navigation links and form submissions to show InforaProgress
     // globally. Forms with data-no-progress or that already use InforaProgress.stream()
     // are automatically skipped.
@@ -505,7 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return {
                 title: isJurusan ? 'Memuat Data Jurusan' : 'Memuat Data Sekolah',
                 statusText: 'Beralih ke unit sekolah yang dipilih...',
-                detail: isJurusan ? 'Mengambil data konsentrasi keahlian & peminatan...' : 'Mengambil data dan konfigurasi sekolah...',
+                detail: isJurusan ? 'Mengambil data konsentrasi keahlian dan peminatan...' : 'Mengambil data dan konfigurasi sekolah...',
             };
         }
 
@@ -686,11 +687,7 @@ window.showToast = function (message) {
     const toast = document.createElement('div');
     toast.className = 'toast-pill';
     toast.innerHTML = `
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="16" x2="12" y2="12"></line>
-            <line x1="12" y1="8" x2="12.01" y2="8"></line>
-        </svg>
+        <x-icon name="info" size="16" />
         <span>${message}</span>
     `;
     container.appendChild(toast);

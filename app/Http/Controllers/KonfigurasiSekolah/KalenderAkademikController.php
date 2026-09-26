@@ -21,10 +21,10 @@ class KalenderAkademikController extends Controller
     public const KATEGORI_OPTIONS = [
         'KBM Efektif' => ['color' => 'blue', 'label' => 'KBM Efektif', 'description' => 'Kegiatan Belajar Mengajar Reguler'],
         'Ujian/Asesmen' => ['color' => 'indigo', 'label' => 'Ujian / Asesmen', 'description' => 'PTS, PAS, PAT, ANBK, Ujian Sekolah'],
-        'Libur Nasional' => ['color' => 'rose', 'label' => 'Libur Nasional', 'description' => 'Hari Libur Nasional & Cuti Bersama'],
+        'Libur Nasional' => ['color' => 'rose', 'label' => 'Libur Nasional', 'description' => 'Hari Libur Nasional dan Cuti Bersama'],
         'Libur Semester' => ['color' => 'amber', 'label' => 'Libur Semester', 'description' => 'Libur Akhir Semester Ganjil / Genap'],
         'Kegiatan Sekolah' => ['color' => 'emerald', 'label' => 'Kegiatan Sekolah', 'description' => 'MPLS, Peringatan Hari Besar, Rapat Guru'],
-        'Khusus SMK' => ['color' => 'purple', 'label' => 'Khusus SMK', 'description' => 'UKK, Pelepasan & Penarikan PKL Magang'],
+        'Khusus SMK' => ['color' => 'purple', 'label' => 'Khusus SMK', 'description' => 'UKK, Pelepasan dan Penarikan PKL Magang'],
     ];
 
     /**
@@ -57,7 +57,7 @@ class KalenderAkademikController extends Controller
             $selectedSchoolId = $selectedSchool->id;
         }
 
-        // Filter bulan & tahun untuk kalender visual
+        // Filter bulan dan tahun untuk kalender visual
         $currentMonth = (int) $request->query('bulan', Carbon::now()->month);
         $currentYear = (int) $request->query('tahun', Carbon::now()->year);
 

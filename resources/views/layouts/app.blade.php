@@ -36,10 +36,7 @@
 
             <div class="sidebar-search">
                 <div class="search-box" id="sidebarSearchBox" title="Cari menu...">
-                    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
+                    <x-icon name="search" size="16" class="search-icon" />
                     <input
                         type="text"
                         id="sidebarMenuSearch"
@@ -55,10 +52,7 @@
                         aria-label="Bersihkan pencarian"
                         title="Bersihkan pencarian"
                     >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
+                        <x-icon name="close" size="14" />
                     </button>
                 </div>
             </div>
@@ -81,9 +75,7 @@
                                             <x-icon :name="$menu->icon" class="nav-item-icon" />
                                             <span class="nav-item-title">{{ $menu->name }}</span>
                                             <!-- <span class="nav-count-badge">{{ $menu->subMenus->count() }}</span> -->
-                                            <svg class="nav-arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                                <polyline points="6 9 12 15 18 9"></polyline>
-                                            </svg>
+                                            <x-icon name="chevron-down" size="16" class="nav-arrow-icon" />
                                         </button>
                                         <div class="nav-submenu-list">
                                             @foreach ($menu->subMenus as $subMenu)
@@ -109,17 +101,13 @@
                 @else
                     <div class="menu-category-label">Menu Utama</div>
                     <a href="{{ route('dashboard') }}" class="nav-link-item active" title="Dashboard">
-                        <x-icon name="layout-dashboard" class="nav-item-icon" />
+                        <x-icon name="dashboard" class="nav-item-icon" />
                         <span>Dashboard</span>
                     </a>
                 @endif
 
                 <div id="menuSearchEmpty" class="empty-state hidden">
-                    <svg class="empty-state-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        <line x1="8" y1="11" x2="14" y2="11"></line>
-                    </svg>
+                    <x-icon name="search-minus" class="empty-state-icon" size="22" />
                     <span class="empty-state-text">Menu tidak ditemukan</span>
                 </div>
             </nav>
@@ -134,31 +122,21 @@
                             </div>
                             <div class="user-meta-info">
                                 <span class="user-name-text">{{ auth()->user()->name }}</span>
-                                <span class="brand-subtitle">Super Administrator</span>
+                                <span class="brand-subtitle">{{ auth()->user()?->isSuperAdmin() ? 'Super Administrator' : match(auth()->user()?->user_type) { 'admin' => 'Administrator Sekolah', 'guru' => 'Tenaga Pendidik', 'siswa' => 'Peserta Didik', default => 'Pengguna Sistem' } }}</span>
                             </div>
                         </div>
                         <div class="dropdown-divider"></div>
                         <div class="dropdown-list">
                             <a href="#pengaturan-profile" class="dropdown-item" role="menuitem" onclick="event.preventDefault(); window.showToast ? window.showToast('Fitur Pengaturan Profile segera hadir.') : null;">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                                    <circle cx="12" cy="7" r="4"></circle>
-                                </svg>
+                                <x-icon name="user" size="16" />
                                 <span>Pengaturan Profile</span>
                             </a>
                             <a href="#ubah-password" class="dropdown-item" role="menuitem" onclick="event.preventDefault(); window.showToast ? window.showToast('Fitur Ubah Password segera hadir.') : null;">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
-                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                                </svg>
+                                <x-icon name="lock" size="16" />
                                 <span>Ubah Password</span>
                             </a>
                             <a href="#bantuan" class="dropdown-item" role="menuitem" onclick="event.preventDefault(); window.showToast ? window.showToast('Pusat Bantuan INFORA segera hadir.') : null;">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                                </svg>
+                                <x-icon name="help-circle" size="16" />
                                 <span>Bantuan</span>
                             </a>
                         </div>
@@ -166,11 +144,7 @@
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit" class="dropdown-item is-danger" role="menuitem">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                                    <polyline points="16 17 21 12 16 7"></polyline>
-                                    <line x1="21" x2="9" y1="12" y2="12"></line>
-                                </svg>
+                                <x-icon name="log-out" size="16" />
                                 <span>Keluar</span>
                             </button>
                         </form>
@@ -185,9 +159,7 @@
                             <span class="user-name-text">{{ auth()->user()->name }}</span>
                             <span class="brand-subtitle">@<span>{{ auth()->user()->username ?? 'superadmin' }}</span></span>
                         </div>
-                        <svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="m18 15-6-6-6 6"></path>
-                        </svg>
+                        <x-icon name="chevron-up" size="16" class="chevron-icon" />
                     </button>
                 </div>
             </div>
@@ -199,11 +171,7 @@
             <header class="topbar-header">
                 <div class="topbar-left">
                     <button type="button" id="sidebarToggle" class="btn-icon" aria-label="Buka / Tutup Sidebar" title="Buka / Tutup Sidebar">
-                        <svg class="icon-toggle-sidebar" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <rect width="18" height="18" x="3" y="3" rx="2"></rect>
-                            <path d="M9 3v18"></path>
-                            <path class="toggle-arrow" d="m14 9-3 3 3 3"></path>
-                        </svg>
+                        <x-icon name="sidebar-close" class="icon-toggle-sidebar" size="20" />
                     </button>
                     <span class="badge badge-cyan">Entitas Pengembang Platform</span>
                 </div>

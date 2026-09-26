@@ -3,7 +3,7 @@
     id="modalEditJurusan"
     title="Ubah Data Jurusan"
     subtitle="Perbarui informasi konsentrasi keahlian atau peminatan sekolah"
-    size="lg"
+    {{-- size="lg" --}}
     method="PUT"
     form-id="formEditJurusan"
 >
@@ -114,9 +114,6 @@
 
     <x-slot:footer>
         <button type="button" class="btn-secondary" id="btnCancelEditJurusan">Batal</button>
-        <button type="submit" class="btn-primary" id="btnSubmitEditJurusan">
-            <x-icon name="save" size="14" />
-            <span>Simpan Perubahan</span>
-        </button>
+        <button type="submit" class="btn-primary" id="btnSubmitEditJurusan">Update</button>
     </x-slot:footer>
 </x-modal>

@@ -3,7 +3,7 @@
     id="modalEditSchool"
     title="Formulir Perubahan Data Sekolah"
     subtitle="Perbarui informasi profil dan identitas sekolah dalam platform INFORA"
-    size="lg"
+    {{-- size="lg" --}}
     method="PUT"
     form-id="formEditSchool">
 
@@ -222,26 +222,14 @@
     <div class="form-section-divider"></div>
     <div class="form-section-label">Logo Sekolah</div>
 
-    <div class="form-group">
-        <div class="dropzone-upload" id="editLogoUploadArea">
-            <input type="hidden" name="logo" id="edit_logo_base64">
-            <input type="hidden" name="remove_logo" id="edit_remove_logo" value="0">
-            <input type="file" id="edit_logo_file" accept="image/png,image/jpeg,image/webp,image/gif" class="hidden">
-
-            <div class="dropzone-upload-content" id="editLogoPlaceholder">
-                <x-icon name="upload-image" size="32" />
-                <span>Klik untuk unggah logo baru</span>
-                <span class="form-hint">Format: PNG, JPG, WebP, GIF. Maks 1MB.</span>
-            </div>
-
-            <div class="dropzone-upload-preview hidden" id="editLogoPreview">
-                <img id="editLogoPreviewImg" src="" alt="Preview Logo">
-                <button type="button" class="dropzone-remove-btn" id="editLogoRemoveBtn" title="Hapus Logo">
-                    <x-icon name="close" size="16" />
-                </button>
-            </div>
-        </div>
-    </div>
+    <x-image-upload
+        name="logo"
+        id="edit_logo"
+        remove-name="remove_logo"
+        remove-id="edit_remove_logo"
+        placeholder="Klik untuk unggah logo baru"
+        hint="Format: PNG, JPG, WebP, GIF. Maks 1MB."
+    />
 
     <x-form-checkbox
         name="is_active"
@@ -253,8 +241,6 @@
 
     <x-slot:footer>
         <button type="button" class="btn-secondary" id="btnCancelEditSchool">Batal</button>
-        <button type="submit" class="btn-primary">
-            <span>Update</span>
-        </button>
+        <button type="submit" class="btn-primary">Update</button>
     </x-slot:footer>
 </x-modal>

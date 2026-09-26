@@ -51,5 +51,7 @@
         @error($name)
             <div class="form-error">{{ $message }}</div>
         @enderror
+
+        {{ $slot ?? '' }}
     </div>
 @endif

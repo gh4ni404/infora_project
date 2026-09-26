@@ -51,7 +51,7 @@ test('sidebar renders seeded baseline modules and menus dynamically', function (
 
 test('sidebar correctly renders accordion group when a menu has sub-menus', function () {
     $module = Module::create([
-        'name' => 'Akademik & Pembelajaran',
+        'name' => 'Akademik dan Pembelajaran',
         'order' => 10,
         'is_active' => true,
     ]);
@@ -66,7 +66,7 @@ test('sidebar correctly renders accordion group when a menu has sub-menus', func
 
     SubMenu::create([
         'menu_id' => $menu->id,
-        'name' => 'Silabus & RPP',
+        'name' => 'Silabus dan RPP',
         'route_name' => 'dashboard', // Existing route for testing
         'order' => 1,
         'is_active' => true,
@@ -83,9 +83,9 @@ test('sidebar correctly renders accordion group when a menu has sub-menus', func
     $response = $this->actingAs($this->user)->get('/dashboard');
 
     $response->assertOk();
-    $response->assertSee('AKADEMIK & PEMBELAJARAN');
+    $response->assertSee('AKADEMIK DAN PEMBELAJARAN');
     $response->assertSee('Kurikulum');
-    $response->assertSee('Silabus & RPP');
+    $response->assertSee('Silabus Dan RPP');
     $response->assertSee('Jadwal Pelajaran');
     $response->assertSee('nav-group-item', false);
     $response->assertSee('nav-group-trigger', false);
@@ -93,7 +93,7 @@ test('sidebar correctly renders accordion group when a menu has sub-menus', func
     $response->assertSee('nav-submenu-item', false);
     $response->assertDontSee('nav-submenu-bullet', false);
 
-    // Active parent highlighting because Silabus & RPP routes to current route 'dashboard'
+    // Active parent highlighting because Silabus dan RPP routes to current route 'dashboard'
     $response->assertSee('is-open active-parent', false);
 });
 
@@ -186,7 +186,7 @@ test('menu create views render visual icon picker with free Lucide catalog', fun
     $responseMenu->assertOk();
     $responseMenu->assertSee('icon-picker-component', false);
     $responseMenu->assertSee('data-icon-name="map-pin"', false);
-    $responseMenu->assertSee('Wilayah &amp; Lokasi', false);
+    $responseMenu->assertSee('Wilayah dan Lokasi', false);
     $responseMenu->assertSee('Panduan Nama Rute');
     $responseMenu->assertSee('registered_routes_list', false);
 });

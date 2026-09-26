@@ -17,7 +17,7 @@ use Illuminate\View\View;
 class KelurahanController extends Controller
 {
     /**
-     * Menampilkan daftar wilayah kelurahan & desa dengan filter berjenjang, tipe, status, pencarian, dan paginasi.
+     * Menampilkan daftar wilayah kelurahan dan desa dengan filter berjenjang, tipe, status, pencarian, dan paginasi.
      */
     public function index(Request $request): View
     {

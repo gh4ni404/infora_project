@@ -16,7 +16,7 @@ class MenuAccessTemplateSeeder extends Seeder
         $dashboardMenu = Menu::where('route_name', 'dashboard')->first();
 
         $templates = [
-            // Kategori Guru & Tenaga Pendidik
+            // Kategori Guru dan Tenaga Pendidik
             [
                 'role_key' => 'guru_pengajar',
                 'role_name' => 'Guru Pengajar',
@@ -37,7 +37,7 @@ class MenuAccessTemplateSeeder extends Seeder
                 'role_name' => 'Wakil Kepala Sekolah - Kesiswaan',
                 'role_category' => 'guru',
             ],
-            // Kategori Staf & Tata Usaha
+            // Kategori Staf dan Tata Usaha
             [
                 'role_key' => 'staf_tu',
                 'role_name' => 'Staf Tata Usaha',

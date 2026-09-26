@@ -274,7 +274,7 @@
                                     title="Hapus Agenda" data-title="{{ $item->judul_kegiatan }}"
                                     data-kategori="{{ $item->kategori }}"
                                     data-action="{{ route('konfigurasi-sekolah.kalender-akademik.destroy', $item) }}">
-                                    <x-icon name="trash" size="14" />
+                                    <x-icon name="delete" size="14" />
                                 </button>
                             </x-table-actions>
                         </td>
@@ -410,7 +410,7 @@
                 });
             }
 
-            // Render Grid Kalender dengan Logika Slot Mingguan & Segmen Rentang Berkelanjutan
+            // Render Grid Kalender dengan Logika Slot Mingguan dan Segmen Rentang Berkelanjutan
             function renderCalendarGrid() {
                 if (!gridBody) return;
                 gridBody.innerHTML = '';

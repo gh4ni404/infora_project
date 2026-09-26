@@ -31,12 +31,7 @@
             </div>
         </div>
         <button type="button" class="btn-secondary icon-picker-btn-open" id="btnOpen_{{ $inputId }}">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect width="7" height="7" x="3" y="3" rx="1"></rect>
-                <rect width="7" height="7" x="14" y="3" rx="1"></rect>
-                <rect width="7" height="7" x="14" y="14" rx="1"></rect>
-                <rect width="7" height="7" x="3" y="14" rx="1"></rect>
-            </svg>
+            <x-icon name="grid" size="16" />
             <span>Pilih Ikon</span>
         </button>
     </div>
@@ -48,23 +43,14 @@
             <div class="icon-picker-modal-header">
                 <div>
                     <h3 class="icon-picker-modal-title" id="modalTitle_{{ $inputId }}">Katalog Ikon Navigasi</h3>
-                    <p class="icon-picker-modal-subtitle">Pilih ikon visual (100% Gratis & Bebas Lisensi - Lucide Icons)</p>
+                    <p class="icon-picker-modal-subtitle">Pilih ikon visual (100% Gratis dan Bebas Lisensi - Lucide Icons)</p>
                 </div>
-                <button type="button" class="icon-picker-close-btn" id="btnClose_{{ $inputId }}" aria-label="Tutup Katalog">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
             </div>
 
-            <!-- Modal Search & Filters -->
+            <!-- Modal Search dan Filters -->
             <div class="icon-picker-modal-toolbar">
                 <div class="icon-picker-search-wrapper">
-                    <svg class="icon-picker-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
+                    <x-icon name="search" size="16" class="icon-picker-search-icon" />
                     <input
                         type="text"
                         class="icon-picker-search-input"
@@ -111,9 +97,7 @@
                             <span class="icon-picker-card-code">{{ $iconItem['name'] }}</span>
                             @if ($isSelected)
                                 <span class="icon-picker-check-badge">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="20 6 9 17 4 12"></polyline>
-                                    </svg>
+                                    <x-icon name="check" size="12" />
                                 </span>
                             @endif
                         </button>
@@ -224,7 +208,7 @@
         card.classList.add('is-selected');
         const badge = document.createElement('span');
         badge.className = 'icon-picker-check-badge';
-        badge.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+        badge.innerHTML = `<x-icon name="check" size="12" class="${badge.className}" />`;
         card.appendChild(badge);
 
         closeModal();

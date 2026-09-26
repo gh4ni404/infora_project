@@ -88,7 +88,7 @@ test('super admin can store new sub-menu with valid data', function () {
 test('sub-menu store automatically formats name to title case with acronyms', function () {
     $response = $this->actingAs($this->superAdmin)->post(route('system.sub-menus.store'), [
         'menu_id' => $this->menu->id,
-        'name' => 'laporan pkl smk & rekapitulasi ban-sm',
+        'name' => 'laporan pkl smk dan rekapitulasi ban-sm',
         'order' => 2,
         'is_active' => true,
     ]);
@@ -96,7 +96,7 @@ test('sub-menu store automatically formats name to title case with acronyms', fu
     $response->assertRedirect(route('system.sub-menus.index'));
     $this->assertDatabaseHas('sub_menus', [
         'menu_id' => $this->menu->id,
-        'name' => 'Laporan PKL SMK & Rekapitulasi BAN-SM',
+        'name' => 'Laporan PKL SMK Dan Rekapitulasi BAN-SM',
     ]);
 });
 
@@ -256,7 +256,7 @@ test('updating sub-menu to a new parent menu automatically assigns next order of
 test('menu route_prefix accessor generates expected prefix slug from menu name', function () {
     $menuSystem = Menu::create(['module_id' => $this->module->id, 'name' => 'Sistem', 'order' => 1, 'is_active' => true]);
     $menuMaster = Menu::create(['module_id' => $this->module->id, 'name' => 'Master', 'order' => 2, 'is_active' => true]);
-    $menuRombel = Menu::create(['module_id' => $this->module->id, 'name' => 'Rombel & Bimbingan', 'order' => 3, 'is_active' => true]);
+    $menuRombel = Menu::create(['module_id' => $this->module->id, 'name' => 'Rombel dan Bimbingan', 'order' => 3, 'is_active' => true]);
 
     expect($menuSystem->route_prefix)->toBe('system')
         ->and($menuMaster->route_prefix)->toBe('master')

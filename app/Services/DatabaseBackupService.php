@@ -87,7 +87,7 @@ class DatabaseBackupService
             // 2. Add database dump to ZIP root
             $zip->addFile($tempSqlPath, 'database.sql');
 
-            // 3. Collect & add all user uploaded files from storage/app/public/ (55% - 85%)
+            // 3. Collect dan add all user uploaded files from storage/app/public/ (55% - 85%)
             $storageFilesCount = 0;
             $storageSizeBytes = 0;
 
@@ -195,7 +195,7 @@ class DatabaseBackupService
             $dbName = DB::connection()->getDatabaseName();
             $driver = DB::connection()->getDriverName();
 
-            // Header metadata & safe SQL state
+            // Header metadata dan safe SQL state
             fwrite($handle, "-- ========================================================\n");
             fwrite($handle, "-- INFORA PLATFORM - DATABASE BACKUP DUMP\n");
             fwrite($handle, '-- Tanggal Pembuatan : '.Carbon::now()->translatedFormat('d F Y H:i:s')."\n");
@@ -294,7 +294,7 @@ class DatabaseBackupService
     }
 
     /**
-     * List all database & full backups ordered by newest first.
+     * List all database dan full backups ordered by newest first.
      *
      * @return Collection<int, array{filename: string, path: string, size_bytes: int, size_human: string, created_at: Carbon, timestamp: int, type: string, type_label: string}>
      */

@@ -181,11 +181,11 @@ test('super admin can activate a semester and atomic switch occurs', function ()
 
     $response->assertRedirect();
 
-    // Verifikasi semester baru aktif & semester lama nonaktif
+    // Verifikasi semester baru aktif dan semester lama nonaktif
     expect($semBaru->fresh()->is_active)->toBeTrue();
     expect($semLama->fresh()->is_active)->toBeFalse();
 
-    // Verifikasi tahun ajaran baru aktif & tahun ajaran lama nonaktif
+    // Verifikasi tahun ajaran baru aktif dan tahun ajaran lama nonaktif
     expect($ta2->fresh()->is_active)->toBeTrue();
     expect($ta1->fresh()->is_active)->toBeFalse();
 

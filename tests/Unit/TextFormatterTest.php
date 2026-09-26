@@ -8,7 +8,7 @@ test('text formatter upper converts text to uppercase cleanly', function () {
     expect(TextFormatter::upper('   '))->toBe('');
     expect(TextFormatter::upper('pengaturan sistem'))->toBe('PENGATURAN SISTEM');
     expect(TextFormatter::upper('  navigasi utama  '))->toBe('NAVIGASI UTAMA');
-    expect(TextFormatter::upper('akademik & kesiswaan smk'))->toBe('AKADEMIK & KESISWAAN SMK');
+    expect(TextFormatter::upper('akademik dan kesiswaan smk'))->toBe('AKADEMIK DAN KESISWAAN SMK');
 });
 
 test('text formatter titleCase capitalizes each word cleanly', function () {

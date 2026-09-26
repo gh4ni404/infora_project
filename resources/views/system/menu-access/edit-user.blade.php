@@ -1,32 +1,21 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="page-header">
-    <div>
-        <h2 class="page-title">Kelola Hak Akses Pengguna</h2>
-        <div class="page-subtitle">Atur visibilitas menu dan wewenang aksi (Lihat, Tambah, Ubah, Hapus) untuk {{ $user->name }}</div>
-    </div>
-    <div class="page-actions">
+<x-page-header
+    title="Kelola Hak Akses Pengguna"
+    subtitle="Atur visibilitas menu dan wewenang aksi (Lihat, Tambah, Ubah, Hapus) untuk {{ $user->name }}"
+>
+    <x-slot:actions>
         <a href="{{ route('sistem.user', ['role' => $user->user_type]) }}" class="btn-secondary">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
+            <x-icon name="chevron-left" size="18" />
             <span>Kembali</span>
         </a>
-    </div>
-</div>
+    </x-slot:actions>
+</x-page-header>
 
-@if (session('success'))
-    <div class="alert-success">
-        <div class="alert-content">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
-            <span>{{ session('success') }}</span>
-        </div>
-    </div>
-@endif
+<x-alert type="success" />
+<x-alert type="error" />
+<x-alert type="validation" />
 
 <!-- Ringkasan Akun Pengguna -->
 <div class="card-surface">
@@ -43,24 +32,20 @@
     <div class="card-body">
         @if ($user->isSuperAdmin())
             <div class="alert-info">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="16" x2="12" y2="12"></line>
-                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                </svg>
+                <x-icon name="info" size="36" />
                 <div>
                     <strong>Pemberitahuan Super Admin:</strong> Akun ini memiliki status <strong>Super Administrator</strong> (Entitas Pengembang). Super Admin secara permanen memiliki akses penuh (*root bypass*) ke seluruh modul, menu, dan seluruh aksi tanpa batasan konfigurasi.
                 </div>
             </div>
         @endif
 
-        <!-- Toolbar Pintas & Terapkan Template -->
+        <!-- Toolbar Pintas dan Terapkan Template -->
         <div class="matrix-action-bar">
             <!-- Form Salin Template -->
             <form method="POST" action="{{ route('sistem.user.user.apply-template', $user) }}" class="page-actions">
                 @csrf
                 <select name="role_key" class="form-select" required>
-                    <option value="">-- Pilih Template Peran --</option>
+                    <option value="">Pilih Template Peran</option>
                     @foreach ($availableTemplates as $tmpl)
                         <option value="{{ $tmpl->role_key }}">
                             {{ $tmpl->role_name }} ({{ strtoupper($tmpl->role_category) }})
@@ -68,9 +53,7 @@
                     @endforeach
                 </select>
                 <button type="submit" class="btn-secondary" onclick="return confirm('Terapkan template peran ini? Seluruh izin saat ini akan ditimpa dengan template yang dipilih.');">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                    </svg>
+                    <x-icon name="zap" size="16" />
                     <span>Terapkan Template</span>
                 </button>
             </form>
@@ -194,9 +177,6 @@
                                                 <tr class="matrix-row-submenu" data-row-id="sub_{{ $subMenu->id }}" data-parent-menu="menu_{{ $menu->id }}">
                                                     <td>
                                                         <div class="matrix-item-name matrix-submenu-indent">
-                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                                <polyline points="9 18 15 12 9 6"></polyline>
-                                                            </svg>
                                                             <span>{{ $subMenu->name }}</span>
                                                         </div>
                                                         <input type="hidden" name="permissions[{{ $rowIndex }}][menu_id]" value="">
@@ -260,117 +240,50 @@
 
             <!-- Tombol Aksi Simpan -->
             <div class="form-actions">
-                <button type="submit" class="btn-primary">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                        <polyline points="7 3 7 8 15 8"></polyline>
-                    </svg>
-                    <span>Simpan Hak Akses</span>
-                </button>
-                <a href="{{ route('sistem.user', ['role' => $user->user_type]) }}" class="btn-secondary">
-                    <span>Batal</span>
-                </a>
+                <button type="button" class="btn-primary" id="btnOpenConfirmModal">Simpan</button>
+                <a href="{{ route('sistem.user', ['role' => $user->user_type]) }}" class="btn-secondary">Batal</a>
             </div>
         </form>
     </div>
 </div>
 
+{{-- Modal Konfirmasi Simpan Hak Akses Pengguna --}}
+<x-modal
+    id="modalConfirmSave"
+    title="Konfirmasi Simpan Hak Akses"
+    subtitle="Pastikan konfigurasi wewenang pengguna sudah sesuai sebelum disimpan"
+    size="sm"
+>
+    <div class="p-3.5 bg-slate-50 border border-slate-200/90 rounded-xl text-center mb-4">
+        <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-semibold bg-blue-50 text-primary border border-blue-100 rounded-md mb-1.5">
+            Pengguna
+        </span>
+        <div class="text-sm font-bold text-slate-900 leading-snug">
+            {{ $user->name }}
+        </div>
+        <div class="text-xs text-slate-500 mt-1">
+            {{ $user->email }} &bull; {{ strtoupper(str_replace('_', ' ', $user->user_type)) }}
+        </div>
+    </div>
+
+    <p class="text-sm text-gray-600 leading-relaxed text-center mb-0">
+        Apakah Anda yakin ingin menyimpan perubahan konfigurasi wewenang untuk pengguna ini?
+    </p>
+
+    <x-slot:footer>
+        <button type="button" class="btn-secondary" id="btnCancelConfirmSave">Batal</button>
+        <button type="submit" form="permissionForm" class="btn-primary" id="btnSubmitConfirmSave">
+            <x-icon name="save" size="18" />
+            <span>Ya, Simpan</span>
+        </button>
+    </x-slot:footer>
+</x-modal>
+
+@section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Sinkronisasi: jika can_view mati, disable aksi CRUD
-    document.querySelectorAll('.perm-view').forEach(function (viewBox) {
-        viewBox.addEventListener('change', function () {
-            var rowId = this.dataset.targetRow;
-            var isChecked = this.checked;
-            var actionBoxes = document.querySelectorAll('.perm-action[data-target-row="' + rowId + '"]');
-
-            actionBoxes.forEach(function (box) {
-                box.disabled = !isChecked;
-                if (!isChecked) {
-                    box.checked = false;
-                }
-            });
-
-            // Jika ini sub-menu dan diaktifkan, otomatis aktifkan parent menu view
-            if (isChecked && viewBox.dataset.parentRow) {
-                var parentView = document.querySelector('.perm-view[data-target-row="' + viewBox.dataset.parentRow + '"]');
-                if (parentView && !parentView.checked) {
-                    parentView.checked = true;
-                    parentView.dispatchEvent(new Event('change'));
-                }
-            }
-        });
-    });
-
-    // Jika aksi CRUD dicentang, otomatis aktifkan can_view
-    document.querySelectorAll('.perm-action').forEach(function (actionBox) {
-        actionBox.addEventListener('change', function () {
-            if (this.checked) {
-                var rowId = this.dataset.targetRow;
-                var viewBox = document.querySelector('.perm-view[data-target-row="' + rowId + '"]');
-                if (viewBox && !viewBox.checked) {
-                    viewBox.checked = true;
-                    viewBox.dispatchEvent(new Event('change'));
-                }
-            }
-        });
-    });
-
-    // Tombol Cepat: Centang Semua Lihat
-    var btnSelectAllView = document.getElementById('btnSelectAllView');
-    if (btnSelectAllView) {
-        btnSelectAllView.addEventListener('click', function () {
-            document.querySelectorAll('.perm-view').forEach(function (box) {
-                box.checked = true;
-                box.dispatchEvent(new Event('change'));
-            });
-        });
-    }
-
-    // Tombol Cepat: Centang Semua CRUD
-    var btnSelectAllCRUD = document.getElementById('btnSelectAllCRUD');
-    if (btnSelectAllCRUD) {
-        btnSelectAllCRUD.addEventListener('click', function () {
-            document.querySelectorAll('.perm-view').forEach(function (box) {
-                box.checked = true;
-                box.dispatchEvent(new Event('change'));
-            });
-            document.querySelectorAll('.perm-action').forEach(function (box) {
-                box.disabled = false;
-                box.checked = true;
-            });
-        });
-    }
-
-    // Tombol Cepat: Kosongkan Semua
-    var btnUncheckAll = document.getElementById('btnUncheckAll');
-    if (btnUncheckAll) {
-        btnUncheckAll.addEventListener('click', function () {
-            document.querySelectorAll('.matrix-checkbox').forEach(function (box) {
-                box.checked = false;
-            });
-            document.querySelectorAll('.perm-action').forEach(function (box) {
-                box.disabled = true;
-            });
-        });
-    }
-
-    // Tombol Cepat per Modul
-    document.querySelectorAll('.btn-check-module').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            var modId = this.dataset.moduleId;
-            var table = document.querySelector('table[data-module-id="' + modId + '"]');
-            if (table) {
-                var views = table.querySelectorAll('.perm-view');
-                var allChecked = Array.from(views).every(function (v) { return v.checked; });
-                views.forEach(function (v) {
-                    v.checked = !allChecked;
-                    v.dispatchEvent(new Event('change'));
-                });
-            }
-        });
-    });
+    InforaModals.setup('modalConfirmSave', { cancelBtnId: 'btnCancelConfirmSave' });
+    InforaModals.bindOpenButton('btnOpenConfirmModal', 'modalConfirmSave');
 });
 </script>
 @endsection

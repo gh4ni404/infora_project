@@ -16,14 +16,14 @@ Dokumen ini menghimpun masalah umum yang sering ditemui saat setup atau pengemba
   GET https://0.0.0.0:5173/resources/js/app.js
   ```
 
-### Penyebab & Solusi Permanen
+### Penyebab dan Solusi Permanen
 
 Masalah ini terjadi ketika Vite berjalan di dalam Docker container dengan host `0.0.0.0`, sehingga plugin Vite Laravel secara default menulis alamat internal container `http://0.0.0.0:5173` ke dalam file `public/hot`.
 
 > ✅ **Solusi Permanen (Sudah Terpasang di `vite.config.js`):**
 > Konfigurasi `server.origin: process.env.VITE_ORIGIN || 'http://localhost:5173'` telah dipasang pada `vite.config.js`. File `public/hot` kini selalu menulis URL `http://localhost:5173` sehingga browser dapat mengakses server Vite secara live tanpa error `ERR_ADDRESS_INVALID`.
 
-### 🔄 Jika Dev Server Vite Terhenti & Ingin Menggunakan Mode Production Build
+### 🔄 Jika Dev Server Vite Terhenti dan Ingin Menggunakan Mode Production Build
 
 Jika container dev server dihentikan atau Anda ingin menggunakan build statis produksi:
 
@@ -41,7 +41,7 @@ Remove-Item -Force public/hot -ErrorAction SilentlyContinue
 
 ## ❌ Halaman Kosong Setelah `./dev start` (Tanpa Error Jelas)
 
-### Penyebab & Solusi
+### Penyebab dan Solusi
 
 Entrypoint container `infora_app` sudah otomatis mengurus `.env`, `composer install`, `APP_KEY`, dan `storage:link`. Jika masih menemukan kendala:
 
@@ -62,7 +62,7 @@ Saat menjalankan `./dev artisan storage:link`, muncul pesan:
 ERROR  The [public/storage] link already exists.
 ```
 
-### Penyebab & Solusi
+### Penyebab dan Solusi
 
 Ini **bukan error fatal** — symlink storage sudah dibuat otomatis saat container pertama kali start. Anda dapat mengabaikan pesan ini.
 
@@ -97,14 +97,14 @@ docker compose ps
 
 ## 📌 Checklist Setup Awal (Developer Baru)
 
-Pengembang baru hanya memerlukan Docker & Docker Compose:
+Pengembang baru hanya memerlukan Docker dan Docker Compose:
 
 ```bash
 # 1. Clone repositori
 git clone https://github.com/gh4ni404/infora_project.git
 cd infora_project
 
-# 2. Jalankan semua container (otomatis setup .env, vendor, key, & storage link)
+# 2. Jalankan semua container (otomatis setup .env, vendor, key, dan storage link)
 # Linux / macOS / WSL:
 ./dev start
 

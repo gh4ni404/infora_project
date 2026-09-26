@@ -46,7 +46,7 @@ class Provinsi extends Model
     }
 
     /**
-     * Mutator & accessor untuk nama provinsi.
+     * Mutator dan accessor untuk nama provinsi.
      * Format otomatis Title Case dengan preservasi akronim wilayah (DKI, DI).
      */
     protected function nama(): Attribute

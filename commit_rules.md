@@ -4,7 +4,7 @@ Panduan penulisan commit message untuk project INFORA ini. Ikuti aturan ini agar
 
 ## Bahasa
 
-- **Semua commit message ditulis dalam Bahasa Indonesia** (mengikuti konvensi seluruh kode & UI di project ini).
+- **Semua commit message ditulis dalam Bahasa Indonesia** (mengikuti konvensi seluruh kode dan UI di project ini).
 - Hindari campur bahasa (Inggris + Indonesia) kecuali istilah teknis yang memang tidak ada padanannya (mis. `fix`, `refactor`, nama class/foreign key).
 
 ## Format pesan
@@ -24,7 +24,7 @@ Contoh:
 
 ```
 feat(guru): tambah pencarian guru via Select2
-fix(jadwal-pelajaran): cegah duplikat jadwal di poli & hari sama
+fix(jadwal-pelajaran): cegah duplikat jadwal di poli dan hari sama
 refactor(route): otomatisasi route dari tabel sub_menu
 chore(migration): buat 39 migration bersih dari tabel aktif
 ```
@@ -48,7 +48,7 @@ chore(migration): buat 39 migration bersih dari tabel aktif
 ## Ringkasan (subjek)
 
 - Mulai dengan **kata kerja** bentuk dasar (imperatif): `tambah`, `hapus`, `perbaiki`, `ubah`, `pindahkan`, `perbarui`, `ganti`, `bersihkan`.
-- Fokus **apa & mengapa**, bukan oke-oke-an.
+- Fokus **apa dan mengapa**, bukan oke-oke-an.
 - Jangan akhiri dengan titik (`.`).
 
 **Contoh benar:**
@@ -111,7 +111,7 @@ refactor(routing): hapus SubMenuRouter, pakai ServiceProvider
 style: format ulang seluruh model dengan pint
 test(select-option): tambah unit test SelectOption
 chore(seed): buat KelasRuangSeeder untuk data kelas awal
-build: tambah script composer lint & format
+build: tambah script composer lint dan format
 ```
 
 ## TypeScript/JS dll.

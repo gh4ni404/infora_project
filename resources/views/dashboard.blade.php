@@ -5,7 +5,7 @@
     <div class="card-header">
         <div>
             <h2 class="user-name-text">Dashboard Super Administrator</h2>
-            <div class="brand-subtitle">Tata Kelola Pusat Platform & Infrastruktur SIM INFORA</div>
+            <div class="brand-subtitle">Tata Kelola Pusat Platform dan Infrastruktur SIM INFORA</div>
         </div>
         <span class="badge badge-success">Sistem Aktif</span>
     </div>
@@ -34,7 +34,7 @@
                     <span class="text-success">{{ strtoupper($user->user_type) }}</span>
                 </div>
                 <div class="form-group">
-                    <span class="form-label">Framework & Runtime:</span>
+                    <span class="form-label">Framework dan Runtime:</span>
                     <span class="text-muted">Laravel v{{ $systemInfo['laravel_version'] }} (PHP v{{ $systemInfo['php_version'] }})</span>
                 </div>
                 <div class="form-group">

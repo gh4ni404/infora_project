@@ -69,7 +69,7 @@ class Kecamatan extends Model
     }
 
     /**
-     * Mutator & accessor untuk nama kecamatan.
+     * Mutator dan accessor untuk nama kecamatan.
      * Format otomatis Title Case dengan preservasi akronim resmi.
      */
     protected function nama(): Attribute

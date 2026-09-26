@@ -350,6 +350,21 @@ test('form-select renders options from nested array with label key', function ()
     $view->assertSee('Ujian Akhir');
 });
 
+test('form-select renders option attributes from optionAttributes callable', function () {
+    $options = [
+        ['id' => 1, 'name' => 'Modul 1'],
+        ['id' => 2, 'name' => 'Modul 2'],
+    ];
+
+    $view = $this->blade(
+        '<x-form-select name="module_id" :options="$options" :option-attributes="fn($item) => [\'data-next-order\' => $item[\'id\'] * 5]" />',
+        ['options' => $options]
+    );
+
+    $view->assertSee('data-next-order="5"', false);
+    $view->assertSee('data-next-order="10"', false);
+});
+
 test('form-textarea renders multiline text, rows, and hint', function () {
     $view = $this->blade(
         '<x-form-textarea
@@ -424,4 +439,43 @@ test('tab-pill renders anchor tag when href is provided and supports badge', fun
     $view->assertSee('Daftar Pengguna');
     $view->assertSee('class="badge badge-blue"', false);
     $view->assertSee('12');
+});
+
+test('image-upload renders dropzone, hidden base64 input, file input, and placeholder', function () {
+    $view = $this->blade(
+        '<x-image-upload
+            name="logo"
+            id="create_logo"
+            label="Logo Sekolah"
+            placeholder="Klik untuk unggah logo"
+            hint="Format PNG atau JPG."
+        />'
+    );
+
+    $view->assertSee('image-upload-component', false);
+    $view->assertSee('Logo Sekolah');
+    $view->assertSee('name="logo"', false);
+    $view->assertSee('id="create_logo_base64"', false);
+    $view->assertSee('id="create_logo_file"', false);
+    $view->assertSee('dropzone-upload', false);
+    $view->assertSee('Klik untuk unggah logo');
+    $view->assertSee('Format PNG atau JPG.');
+});
+
+test('image-upload renders remove input and visible preview when value is present', function () {
+    $view = $this->blade(
+        '<x-image-upload
+            name="logo"
+            id="edit_logo"
+            value="https://example.com/logo.png"
+            remove-name="remove_logo"
+            remove-id="edit_remove_logo"
+        />'
+    );
+
+    $view->assertSee('name="remove_logo"', false);
+    $view->assertSee('id="edit_remove_logo"', false);
+    $view->assertSee('src="https://example.com/logo.png"', false);
+    $view->assertSee('id="edit_logo_preview"', false);
+    $view->assertDontSee('id="edit_logo_preview" class="dropzone-upload-preview hidden"', false);
 });

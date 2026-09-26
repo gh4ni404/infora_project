@@ -3,7 +3,7 @@
     id="modalCreateKalender"
     title="Tambah Agenda Kalender Akademik"
     subtitle="Tambahkan agenda, ujian, libur, atau kegiatan sekolah ke dalam kalender akademik"
-    size="lg"
+    {{-- size="lg" --}}
     action="{{ route('konfigurasi-sekolah.kalender-akademik.store') }}"
     form-id="formCreateKalender"
 >
@@ -53,6 +53,7 @@
         label="Nama / Judul Kegiatan"
         placeholder="Contoh: Penilaian Tengah Semester (PTS) Ganjil"
         data-transform="title-case"
+        maxlength="150"
         required
     />
 
@@ -80,14 +81,12 @@
             name="kategori"
             id="create_kategori"
             label="Kategori Kegiatan"
+            {{-- selected="Kegiatan Sekolah" --}}
+            placeholder="Pilih Kategori Kegiatan"
+            :options="collect($kategoriOptions)->mapWithKeys(fn($opt, $key) => [$key => $opt['label'] . ' (' . $opt['description'] . ')'])"
+            :option-attributes="fn($label, $key) => ['data-default-color' => $kategoriOptions[$key]['color'] ?? '']"
             required
-        >
-            @foreach ($kategoriOptions as $key => $opt)
-                <option value="{{ $key }}" data-default-color="{{ $opt['color'] }}" @selected(old('kategori', 'Kegiatan Sekolah') === $key)>
-                    {{ $opt['label'] }} ({{ $opt['description'] }})
-                </option>
-            @endforeach
-        </x-form-select>
+        />
 
         <x-form-select
             name="warna"
@@ -105,7 +104,7 @@
         id="create_libur_kbm"
         label="Libur KBM"
         hint="Tandai sebagai hari libur (tidak ada proses pembelajaran tatap muka)."
-        :checked="(bool) old('libur_kbm')"
+        value="1"
     />
 
     <x-form-textarea
@@ -114,13 +113,12 @@
         label="Keterangan / Catatan"
         rows="3"
         placeholder="Deskripsi singkat, instruksi, atau catatan kegiatan (opsional)..."
+        maxlength="1000"
+        hint="Maksimal 1000 karakter (opsional)."
     />
 
     <x-slot:footer>
         <button type="button" class="btn-secondary" id="btnCancelCreateKalender">Batal</button>
-        <button type="submit" class="btn-primary" id="btnSubmitCreateKalender">
-            <x-icon name="save" size="18" />
-            <span>Simpan Kegiatan</span>
-        </button>
+        <button type="submit" class="btn-primary" id="btnSubmitCreateKalender">Simpan Kegiatan</button>
     </x-slot:footer>
 </x-modal>

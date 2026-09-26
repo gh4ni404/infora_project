@@ -70,7 +70,7 @@ class Kabupaten extends Model
     }
 
     /**
-     * Mutator & accessor untuk nama kabupaten/kota.
+     * Mutator dan accessor untuk nama kabupaten/kota.
      * Format otomatis Title Case dengan preservasi akronim resmi.
      */
     protected function nama(): Attribute
