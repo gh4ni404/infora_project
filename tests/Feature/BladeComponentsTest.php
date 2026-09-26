@@ -479,3 +479,83 @@ test('image-upload renders remove input and visible preview when value is presen
     $view->assertSee('id="edit_logo_preview"', false);
     $view->assertDontSee('id="edit_logo_preview" class="dropzone-upload-preview hidden"', false);
 });
+
+test('status-banner renders default info styling, icon, title, message, and badge', function () {
+    $view = $this->blade(
+        '<x-status-banner
+            title="Unit Sekolah Belum Dikonfigurasi:"
+            message="Akun Anda belum terhubung dengan unit sekolah manapun."
+            badge="Perlu Konfigurasi"
+        />'
+    );
+
+    $view->assertSee('alert-info', false);
+    $view->assertSee('Unit Sekolah Belum Dikonfigurasi:');
+    $view->assertSee('Akun Anda belum terhubung dengan unit sekolah manapun.');
+    $view->assertSee('badge badge-warning', false);
+    $view->assertSee('Perlu Konfigurasi');
+});
+
+test('status-banner renders custom slot, badge-color, and action slot', function () {
+    $view = $this->blade(
+        '<x-status-banner
+            type="warning"
+            title="Peringatan:"
+            badge="Perhatian"
+            badge-color="amber"
+        >
+            <span>Isi peringatan khusus slot</span>
+            <x-slot:actions>
+                <a href="/konfigurasi" class="btn-secondary btn-sm">Atur Sekarang</a>
+            </x-slot:actions>
+        </x-status-banner>'
+    );
+
+    $view->assertSee('alert-warning', false);
+    $view->assertSee('Peringatan:');
+    $view->assertSee('<span>Isi peringatan khusus slot</span>', false);
+    $view->assertSee('badge badge-amber', false);
+    $view->assertSee('Perhatian');
+    $view->assertSee('alert-actions', false);
+    $view->assertSee('Atur Sekarang');
+});
+
+test('status-banner renders built-in link action with action-href and icon', function () {
+    $view = $this->blade(
+        '<x-status-banner
+            title="Tahun Ajaran Belum Dikonfigurasi:"
+            badge="Perlu Konfigurasi"
+            action-title="Konfigurasi Sekarang"
+            action-href="/konfigurasi-sekolah/tahun-ajaran"
+            action-icon="settings"
+        >
+            Deskripsi teks banner.
+        </x-status-banner>'
+    );
+
+    $view->assertSee('alert-actions', false);
+    $view->assertSee('badge badge-warning', false);
+    $view->assertSee('href="/konfigurasi-sekolah/tahun-ajaran"', false);
+    $view->assertSee('btn-secondary btn-sm', false);
+    $view->assertSee('Konfigurasi Sekarang');
+});
+
+test('status-banner renders built-in button action when action-type is button', function () {
+    $view = $this->blade(
+        '<x-status-banner
+            title="Diagnostik Sistem"
+            badge="Siap"
+            action-title="Jalankan Diagnostik"
+            action-type="button"
+            action-id="btnRunDiagnostic"
+            action-icon="play"
+            message="Klik tombol untuk mulai."
+        />'
+    );
+
+    $view->assertSee('alert-actions', false);
+    $view->assertSee('<button type="button"', false);
+    $view->assertSee('id="btnRunDiagnostic"', false);
+    $view->assertSee('btn-primary', false);
+    $view->assertSee('Jalankan Diagnostik');
+});
