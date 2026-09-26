@@ -24,7 +24,7 @@ class UpdateTemplatePermissionsRequest extends FormRequest
     {
         return [
             'role_name' => ['nullable', 'string', 'max:255'],
-            'role_category' => ['nullable', 'string', 'in:guru,staf,siswa'],
+            'role_category' => ['nullable', 'string', 'in:admin,guru,staf,murid,siswa'],
             'permissions' => ['nullable', 'array'],
             'permissions.*.menu_id' => ['nullable', 'integer', 'exists:menus,id'],
             'permissions.*.sub_menu_id' => ['nullable', 'integer', 'exists:sub_menus,id'],

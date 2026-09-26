@@ -6,20 +6,24 @@
         Konfigurasi tahun ajaran dan semester aktif untuk seluruh modul operasional sekolah
         @if ($selectedSchool)
             &ndash; <strong class="text-primary">{{ $selectedSchool->name }}</strong>
+        @else
+            &ndash; <span class="text-secondary">Belum Terhubung Unit Sekolah</span>
         @endif
     </x-slot:subtitle>
-    <x-slot:actions>
-        @if ($schools->count() > 1)
+    @if ($user->isSuperAdmin() && $schools->count() > 1)
+        <x-slot:actions>
             <form action="{{ route('konfigurasi-sekolah.tahun-ajaran') }}" id="schoolFilterForm" method="GET">
                 <x-form-select 
                     name="school_id" 
                     id="school_id" 
                     :selected="$selectedSchoolId" 
                     :options="$schools->mapWithKeys(fn($school) => [$school->id => $school->name . ' (' . $school->school_type . ')'])"
-                    onchange="this.form.submit()" />
+                    onchange="this.form.submit()"
+                    title="Pilih Unit Sekolah untuk Pratinjau"
+                />
             </form>
-        @endif
-    </x-slot:actions>
+        </x-slot:actions>
+    @endif
 </x-page-header>
 
 {{-- Flash Alerts --}}
@@ -28,7 +32,18 @@
 <x-alert type="validation" />
 
 {{-- Status Banner Semester Aktif Global --}}
-@if ($activeSemester)
+@if (! $selectedSchool)
+    <div class="alert-info">
+        <div class="alert-content">
+            <x-icon name="info-circle" size="20" />
+            <div>
+                <strong>Unit Sekolah Belum Dikonfigurasi:</strong>
+                Akun Anda belum terhubung dengan unit sekolah manapun. Silakan hubungi Super Administrator untuk konfigurasi unit sekolah.
+            </div>
+        </div>
+        <span class="badge badge-warning">Perlu Konfigurasi</span>
+    </div>
+@elseif ($activeSemester)
     <div class="alert-info">
         <div class="alert-content">
             <x-icon name="info-circle" size="20" />
@@ -36,7 +51,7 @@
                 <strong>Semester Aktif Saat Ini:</strong>
                 {{ $activeSemester->nama_lengkap }}
                 &bull; Rentang KBM: <strong>{{ $activeSemester->rentang_tanggal_formatted }}</strong>
-                &bull; Unit: <strong>{{ $selectedSchool?->name }}</strong>
+                &bull; Unit: <strong>{{ $selectedSchool->name }}</strong>
             </div>
         </div>
         <span class="badge badge-success">Aktif</span>
@@ -68,7 +83,7 @@
         total-label="Data"
     >
         <x-slot:actions>
-            <button type="button" class="btn-primary" id="btnOpenCreateTahunAjaran" title="Tambah Tahun Ajaran Baru">
+            <button type="button" class="btn-primary" id="btnOpenCreateTahunAjaran" title="Tambah Tahun Ajaran Baru" {{ $selectedSchool ? '' : 'disabled' }}>
                 <x-icon name="add" size="16" />
                 {{-- <span>Tambah</span> --}}
             </button>
@@ -113,7 +128,7 @@
                         <x-table-actions align="right">
                             {{-- Tombol Pilih/Kelola Semester --}}
                             <a
-                                href="{{ route('konfigurasi-sekolah.tahun-ajaran', ['school_id' => $selectedSchoolId, 'tahun_ajaran_id' => $ta->id]) }}"
+                                href="{{ route('konfigurasi-sekolah.tahun-ajaran', array_filter(['school_id' => $user->isSuperAdmin() ? $selectedSchoolId : null, 'tahun_ajaran_id' => $ta->id])) }}"
                                 class="btn-activate {{ $isSelected ? 'is-disabled' : '' }}"
                                 title="{{ $isSelected ? 'Sedang aktif dipilih di tabel kanan' : 'Pilih tahun ajaran ini untuk mengelola semester di sebelah kanan' }}"
                             >
@@ -217,31 +232,25 @@
                             <span class="table-cell-muted">{{ $sem->rentang_tanggal_formatted }}</span>
                         </td>
                         <td>
-                            @if ($sem->is_active)
-                                <span class="badge badge-success">Aktif</span>
+                            {{-- Tombol Switch Jadikan Aktif --}}
+                            @if (! $sem->is_active)
+                                <form
+                                    method="POST"
+                                    action="{{ route('konfigurasi-sekolah.tahun-ajaran.semester.activate', [$selectedTahunAjaran, $sem]) }}"
+                                    onsubmit="return confirm('Tetapkan Semester {{ $sem->label_semester }} ({{ $selectedTahunAjaran->tahun }}) sebagai Semester Aktif? Semester aktif lain pada sekolah ini akan dinonaktifkan.');"
+                                >
+                                    @csrf
+                                    <button type="submit" class="btn-activate" title="Aktifkan">
+                                        <x-icon name="check" size="14" />
+                                        {{-- <span>Aktifkan</span> --}}
+                                    </button>
+                                </form>
                             @else
-                                <span class="badge badge-neutral">Tidak Aktif</span>
+                                <span class="badge badge-success">Aktif</span>
                             @endif
                         </td>
                         <td>
                             <x-table-actions align="right">
-                                {{-- Tombol Switch Jadikan Aktif --}}
-                                @if (! $sem->is_active)
-                                    <form
-                                        method="POST"
-                                        action="{{ route('konfigurasi-sekolah.tahun-ajaran.semester.activate', [$selectedTahunAjaran, $sem]) }}"
-                                        onsubmit="return confirm('Tetapkan Semester {{ $sem->label_semester }} ({{ $selectedTahunAjaran->tahun }}) sebagai Semester Aktif? Semester aktif lain pada sekolah ini akan dinonaktifkan.');"
-                                    >
-                                        @csrf
-                                        <button type="submit" class="btn-activate" title="Jadikan semester ini sebagai Semester Aktif tunggal">
-                                            <x-icon name="check" size="14" />
-                                            {{-- <span>Aktifkan</span> --}}
-                                        </button>
-                                    </form>
-                                @else
-                                    <span class="badge badge-primary">Aktif</span>
-                                @endif
-
                                 {{-- Tombol Ubah Semester --}}
                                 <button
                                     type="button"

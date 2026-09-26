@@ -25,7 +25,7 @@
         <!-- Sidebar Navigation -->
         <aside class="layout-sidebar" id="layoutSidebar">
             <div class="sidebar-header">
-                <a href="{{ route('dashboard') }}" class="sidebar-brand-link" title="INFORA - SIM Sekolah">
+                <a href="{{ auth()->user()?->isAdmin() ? route('dashboard.admin') : route('dashboard') }}" class="sidebar-brand-link" title="INFORA - SIM Sekolah">
                     <img src="{{ asset('images/infora-emblem-badge.png') }}" alt="INFORA Logo" class="brand-badge-img">
                     <div class="sidebar-brand-text">
                         <h1 class="brand-title">INFORA</h1>
@@ -100,7 +100,7 @@
                     @endforeach
                 @else
                     <div class="menu-category-label">Menu Utama</div>
-                    <a href="{{ route('dashboard') }}" class="nav-link-item active" title="Dashboard">
+                    <a href="{{ auth()->user()?->isAdmin() ? route('dashboard.admin') : route('dashboard') }}" class="nav-link-item active" title="Dashboard">
                         <x-icon name="dashboard" class="nav-item-icon" />
                         <span>Dashboard</span>
                     </a>
@@ -173,7 +173,7 @@
                     <button type="button" id="sidebarToggle" class="btn-icon" aria-label="Buka / Tutup Sidebar" title="Buka / Tutup Sidebar">
                         <x-icon name="sidebar-close" class="icon-toggle-sidebar" size="20" />
                     </button>
-                    <span class="badge badge-cyan">Entitas Pengembang Platform</span>
+                    <span class="badge badge-cyan">{{ auth()->user()?->isSuperAdmin() ? 'Entitas Pengembang Platform' : (auth()->user()?->school?->name ?? 'Administrator Sekolah') }}</span>
                 </div>
             </header>
 

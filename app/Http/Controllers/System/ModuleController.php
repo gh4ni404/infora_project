@@ -9,6 +9,7 @@ use App\Models\Module;
 use App\Support\SidebarCache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class ModuleController extends Controller
@@ -49,12 +50,18 @@ class ModuleController extends Controller
      */
     public function store(StoreModuleRequest $request): RedirectResponse
     {
-        Module::create($request->validated());
+        $data = $request->validated();
+
+        DB::transaction(function () use ($data) {
+            Module::adjustOrderForCreate($data['order']);
+            Module::create($data);
+        });
+
         SidebarCache::flushGlobal();
 
         return redirect()
             ->route('system.modules.index')
-            ->with('success', 'Modul berhasil ditambahkan ke dalam sistem.');
+            ->with('success', 'Modul berhasil ditambahkan dan nomor urutan telah disesuaikan.');
     }
 
     /**
@@ -70,12 +77,30 @@ class ModuleController extends Controller
      */
     public function update(UpdateModuleRequest $request, Module $module): RedirectResponse
     {
-        $module->update($request->validated());
+        $data = $request->validated();
+
+        DB::transaction(function () use ($module, $data) {
+            Module::adjustOrderForUpdate($module, $data['order']);
+            $module->update($data);
+        });
+
         SidebarCache::flushGlobal();
 
         return redirect()
             ->route('system.modules.index')
-            ->with('success', 'Data modul berhasil diperbarui.');
+            ->with('success', 'Data modul berhasil diperbarui dan nomor urutan telah disesuaikan.');
+    }
+
+    /**
+     * Sinkronkan dan rapikan kembali seluruh nomor urutan modul agar berurutan dari 1 tanpa celah.
+     */
+    public function syncOrder(): RedirectResponse
+    {
+        $count = Module::syncSequence();
+
+        return redirect()
+            ->route('system.modules.index')
+            ->with('success', "Urutan {$count} modul berhasil disinkronkan dan dirapikan kembali.");
     }
 
     /**

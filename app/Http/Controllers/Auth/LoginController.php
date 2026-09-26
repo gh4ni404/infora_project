@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Menu;
+use App\Models\User;
+use App\Support\SidebarCache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +20,9 @@ class LoginController extends Controller
     public function showLoginForm(): View|RedirectResponse
     {
         if (Auth::check()) {
-            return redirect()->route('dashboard');
+            return Auth::user()->isAdmin()
+                ? redirect()->route('dashboard.admin')
+                : redirect()->route('dashboard');
         }
 
         return view('auth.login');
@@ -42,6 +47,37 @@ class LoginController extends Controller
         // 1. Attempt authentication with active account constraint
         if (Auth::attempt([$loginField => $loginInput, 'password' => $credentials['password'], 'is_active' => true], $request->boolean('remember'))) {
             $request->session()->regenerate();
+
+            /** @var User $user */
+            $user = Auth::user();
+
+            if (! $user->isSuperAdmin()) {
+                $targetDashboardRoute = $user->isAdmin() ? 'dashboard.admin' : 'dashboard';
+                $dashboardMenu = Menu::where('route_name', $targetDashboardRoute)->first()
+                    ?? Menu::where('route_name', 'dashboard')->first();
+                $hasDashboardAccess = $dashboardMenu && $user->hasMenuAccess($dashboardMenu, 'view');
+
+                if (! $hasDashboardAccess) {
+                    $firstAllowedUrl = SidebarCache::getFirstAllowedUrl($user);
+
+                    if ($firstAllowedUrl) {
+                        return redirect()->intended($firstAllowedUrl);
+                    }
+
+                    // Pengguna tidak memiliki izin menu apa pun
+                    Auth::logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+
+                    throw ValidationException::withMessages([
+                        'login' => 'Akun Anda belum memiliki hak akses menu aktif. Silakan hubungi pengelola sistem.',
+                    ]);
+                }
+            }
+
+            if ($user->isAdmin()) {
+                return redirect()->intended(route('dashboard.admin'));
+            }
 
             return redirect()->intended(route('dashboard'));
         }

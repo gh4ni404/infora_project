@@ -12,21 +12,47 @@
     <x-form-input type="hidden" name="kalender_id" id="edit_kalender_id" />
 
     <div class="form-section-label">Informasi Sekolah dan Periode</div>
-    <div class="form-grid-2col">
-        <x-form-select
-            name="school_id"
-            id="edit_school_id"
-            label="Unit Sekolah"
-            :options="$schools->mapWithKeys(fn($school) => [$school->id => $school->name . ' (' . $school->school_type . ')'])"
-            required
-        />
-
+    @if ($user->isSuperAdmin())
         <div class="form-grid-2col">
-            <x-form-input
+            <x-form-select
+                name="school_id"
+                id="edit_school_id"
+                label="Unit Sekolah"
+                :options="$schools->mapWithKeys(fn($school) => [$school->id => $school->name . ' (' . $school->school_type . ')'])"
+                required
+            />
+
+            <div class="form-grid-2col">
+                <x-form-select
+                    name="tahun_ajaran"
+                    id="edit_tahun_ajaran"
+                    label="Tahun Ajaran"
+                    :options="$tahunAjaranOptions"
+                    placeholder="Pilih Tahun Ajaran"
+                    required
+                />
+
+                <x-form-select
+                    name="semester"
+                    id="edit_semester"
+                    label="Semester"
+                    :options="[
+                        'ganjil' => 'Ganjil',
+                        'genap' => 'Genap',
+                    ]"
+                    required
+                />
+            </div>
+        </div>
+    @else
+        <input type="hidden" name="school_id" id="edit_school_id" value="{{ $selectedSchoolId }}">
+        <div class="form-grid-2col">
+            <x-form-select
                 name="tahun_ajaran"
                 id="edit_tahun_ajaran"
                 label="Tahun Ajaran"
-                placeholder="Contoh: 2026/2027"
+                :options="$tahunAjaranOptions"
+                placeholder="Pilih Tahun Ajaran"
                 required
             />
 
@@ -41,7 +67,7 @@
                 required
             />
         </div>
-    </div>
+    @endif
 
     <div class="form-section-divider"></div>
     <div class="form-section-label">Detail Agenda dan Tanggal Kegiatan</div>

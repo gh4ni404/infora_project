@@ -31,7 +31,7 @@
         <div class="card-body">
             <x-alert type="info" :dismissible="false" title="Template Peran Dinamis:" >
                 <x-slot>
-                    Super Admin dapat menentukan menu dan hak akses bawaan untuk setiap peran di bawah ini. Template ini dapat diterapkan langsung ke akun guru atau siswa saat melakukan pengaturan izin.
+                    Super Admin dapat menentukan menu dan hak akses bawaan untuk setiap peran di bawah ini. Template ini dapat diterapkan langsung ke akun pengguna (Admin Sekolah, Guru, Staf, atau Murid) saat melakukan pengaturan izin.
                 </x-slot>
             </x-alert>
 
@@ -41,8 +41,8 @@
                         <div>
                             <div class="template-card-header">
                                 <h4 class="template-card-title">{{ $tmpl->role_name }}</h4>
-                                <span class="badge {{ $tmpl->role_category === 'guru' ? 'badge-role-guru' : ($tmpl->role_category === 'siswa' ? 'badge-role-siswa' : 'badge-role-admin') }}">
-                                    {{ strtoupper($tmpl->role_category) }}
+                                <span class="badge {{ $tmpl->role_category === 'guru' ? 'badge-role-guru' : ($tmpl->role_category === 'murid' || $tmpl->role_category === 'siswa' ? 'badge-role-murid' : 'badge-role-admin') }}">
+                                    {{ strtoupper($tmpl->role_category === 'siswa' ? 'murid' : $tmpl->role_category) }}
                                 </span>
                             </div>
                             <div class="template-card-body">
@@ -67,9 +67,9 @@
                 <div class="tab-pills">
                     <a href="{{ route('sistem.user', ['search' => $search]) }}" class="tab-pill {{ empty($currentRole) ? 'active' : '' }}">Semua</a>
                     <a href="{{ route('sistem.user', ['role' => 'super_admin', 'search' => $search]) }}" class="tab-pill {{ $currentRole === 'super_admin' ? 'active' : '' }}">Super Admin</a>
-                    <a href="{{ route('sistem.user', ['role' => 'admin', 'search' => $search]) }}" class="tab-pill {{ $currentRole === 'admin' ? 'active' : '' }}">Admin TU</a>
+                    <a href="{{ route('sistem.user', ['role' => 'admin', 'search' => $search]) }}" class="tab-pill {{ $currentRole === 'admin' ? 'active' : '' }}">Admin</a>
                     <a href="{{ route('sistem.user', ['role' => 'guru', 'search' => $search]) }}" class="tab-pill {{ $currentRole === 'guru' ? 'active' : '' }}">Guru</a>
-                    <a href="{{ route('sistem.user', ['role' => 'siswa', 'search' => $search]) }}" class="tab-pill {{ $currentRole === 'siswa' ? 'active' : '' }}">Siswa</a>
+                    <a href="{{ route('sistem.user', ['role' => 'murid', 'search' => $search]) }}" class="tab-pill {{ $currentRole === 'murid' ? 'active' : '' }}">Murid</a>
                 </div>
 
                 <!-- Search Input -->
@@ -103,12 +103,12 @@
                                 <td>
                                     <div class="user-meta-info">
                                         <div class="user-name-text">{{ $user->name }}</div>
-                                        <div class="brand-subtitle">{{ $user->email }} ({{ $user->username }})</div>
+                                        <div class="brand-subtitle">{{ $user->email ?? 'Tanpa Email' }} ({{ $user->username }})</div>
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="badge {{ 'badge-role-' . $user->user_type }}">
-                                        {{ strtoupper(str_replace('_', ' ', $user->user_type)) }}
+                                    <span class="badge {{ $user->user_type === 'murid' || $user->user_type === 'siswa' ? 'badge-role-murid' : 'badge-role-' . $user->user_type }}">
+                                        {{ strtoupper(str_replace('_', ' ', $user->user_type === 'siswa' ? 'murid' : $user->user_type)) }}
                                     </span>
                                 </td>
                                 <td>

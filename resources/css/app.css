@@ -90,6 +90,7 @@ body {
     border-radius: 1rem;
     box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    margin-bottom: 1.25rem;
 }
 
 .card-surface:hover {
@@ -2744,6 +2745,7 @@ input[data-transform="title-case"] {
     border: 1px solid rgba(16, 185, 129, 0.25);
 }
 
+.badge-role-murid,
 .badge-role-siswa {
     background-color: rgba(245, 158, 11, 0.12);
     color: #d97706;

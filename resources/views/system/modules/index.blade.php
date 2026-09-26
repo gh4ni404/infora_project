@@ -3,6 +3,10 @@
 @section('content')
 <x-page-header title="Tata Kelola Modul" subtitle="Kelola modul navigasi utama dan struktur sistem INFORA">
     <x-slot:actions>
+        <button type="button" class="btn-secondary" id="btnOpenSyncOrder" title="Sinkronkan dan Rapikan Urutan Modul">
+            <x-icon name="sort" size="16" />
+            <span>Sinkronkan Urutan</span>
+        </button>
         <button type="button" class="btn-primary" id="btnOpenCreateModule">
             <x-icon name="plus" size="18" />
         </button>
@@ -110,11 +114,46 @@
     item-title-id="deleteModuleTitle"
 />
 
+{{-- Modal Konfirmasi Sinkronisasi Urutan Modul --}}
+<x-modal 
+    id="modalSyncOrder" 
+    size="sm"
+    action="{{ route('system.modules.sync-order') }}"
+    method="POST"
+    form-id="formSyncOrder"
+>
+    <div class="text-center py-4">
+        <div class="w-16 h-16 rounded-full bg-blue-50 text-brand ring-8 ring-blue-50/60 flex items-center justify-center my-4 shrink-0 mx-auto">
+            <x-icon name="sort" size="32" />
+        </div>
+        <h3 class="text-base font-bold text-slate-900 mb-2" id="modalSyncOrderTitle">
+            Sinkronkan Urutan Modul?
+        </h3>
+        <p class="text-sm text-slate-600 mb-4 px-2">
+            Sistem akan menyusun dan merapikan kembali seluruh nomor urutan modul secara berurutan (1, 2, 3, ...) tanpa celah nomor ganda atau nomor yang terlewat.
+        </p>
+    </div>
+
+    <x-slot:footer>
+        <div class="grid grid-cols-2 gap-3 w-full">
+            <button type="button" class="btn-secondary w-full justify-center font-medium" id="btnCancelSyncOrder">
+                <span>Batal</span>
+            </button>
+            <button type="submit" class="btn-primary w-full justify-center font-medium" id="btnConfirmSyncOrder">
+                <x-icon name="check" size="16" />
+                <span>Ya, Sinkronkan</span>
+            </button>
+        </div>
+    </x-slot:footer>
+</x-modal>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // 1. Modal Tambah Modul
     InforaModals.setup('modalCreateModule', { cancelBtnId: 'btnCancelCreateModule' });
     InforaModals.bindOpenButton('btnOpenCreateModule', 'modalCreateModule');
+    InforaModals.setup('modalSyncOrder', { cancelBtnId: 'btnCancelSyncOrder' });
+    InforaModals.bindOpenButton('btnOpenSyncOrder', 'modalSyncOrder');
 
     // 2. Modal Edit Modul
     InforaModals.setup('modalEditModule', { cancelBtnId: 'btnCancelEditModule' });

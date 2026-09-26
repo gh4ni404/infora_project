@@ -30,11 +30,13 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware(['auth', 'super_admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/admin', [DashboardController::class, 'admin'])->name('dashboard.admin');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
     // Pengaturan Sistem (System Governance)
     Route::prefix('system')->name('system.')->group(function () {
         Route::get('/under-development', [UnderDevelopmentController::class, 'show'])->name('under-development');
+        Route::post('modules/sync-order', [ModuleController::class, 'syncOrder'])->name('modules.sync-order');
         Route::resource('modules', ModuleController::class)->except(['show']);
         Route::resource('menus', MenuController::class)->except(['show']);
         Route::resource('sub-menus', SubMenuController::class)->except(['show']);
@@ -52,6 +54,8 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
 
     // Master Data Administrasi
     Route::prefix('master')->name('master.')->group(function () {
+        Route::post('data-sekolah/sync-admins', [SchoolController::class, 'syncAllAdmins'])->name('data-sekolah.sync-admins');
+        Route::post('data-sekolah/{dataSekolah}/sync-admin', [SchoolController::class, 'syncSingleAdmin'])->name('data-sekolah.sync-single-admin');
         Route::resource('data-sekolah', SchoolController::class)->except(['show', 'create']);
         Route::resource('data-jurusan', JurusanController::class)->parameters([
             'data-jurusan' => 'jurusan',

@@ -20,10 +20,16 @@ class StoreTahunAjaranRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        $this->merge([
+        $merge = [
             'tahun' => trim((string) $this->input('tahun')),
             'is_active' => $this->boolean('is_active'),
-        ]);
+        ];
+
+        if ($this->user()?->school_id) {
+            $merge['school_id'] = $this->user()->school_id;
+        }
+
+        $this->merge($merge);
     }
 
     /**

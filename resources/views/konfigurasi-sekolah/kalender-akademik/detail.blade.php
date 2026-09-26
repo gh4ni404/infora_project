@@ -10,7 +10,7 @@
 
     <x-slot:footer>
         <button type="button" class="btn-secondary" id="btnDismissDateDetail">Tutup</button>
-        <button type="button" class="btn-primary" id="btnAddEventFromDateDetail">
+        <button type="button" class="btn-primary" id="btnAddEventFromDateDetail" {{ ($selectedSchool && $hasTahunAjaran) ? '' : 'disabled' }}>
             <x-icon name="add" size="18" />
             <span>Tambah Kegiatan pada Tanggal Ini</span>
         </button>

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class School extends Model
 {
@@ -133,6 +134,26 @@ class School extends Model
     public function jurusans(): HasMany
     {
         return $this->hasMany(Jurusan::class, 'school_id')->orderBy('kode');
+    }
+
+    /**
+     * Relasi ke seluruh akun pengguna yang terdaftar di sekolah ini.
+     *
+     * @return HasMany<User, $this>
+     */
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class, 'school_id');
+    }
+
+    /**
+     * Relasi ke akun administrator utama sekolah.
+     *
+     * @return HasOne<User, $this>
+     */
+    public function adminUser(): HasOne
+    {
+        return $this->hasOne(User::class, 'school_id')->where('user_type', 'admin');
     }
 
     /**

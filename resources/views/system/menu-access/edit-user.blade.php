@@ -31,28 +31,31 @@
 
     <div class="card-body">
         @if ($user->isSuperAdmin())
-            <div class="alert-info">
-                <x-icon name="info" size="36" />
-                <div>
-                    <strong>Pemberitahuan Super Admin:</strong> Akun ini memiliki status <strong>Super Administrator</strong> (Entitas Pengembang). Super Admin secara permanen memiliki akses penuh (*root bypass*) ke seluruh modul, menu, dan seluruh aksi tanpa batasan konfigurasi.
-                </div>
-            </div>
+            <x-alert type="info" :dismissible="false" title="Pemberitahuan Super Admin:">
+                <x-slot>
+                    Akun ini memiliki status <strong>Super Administrator</strong> (Entitas Pengembang). Super Admin secara permanen memiliki akses penuh (<em>root bypass</em>) ke seluruh modul, menu, dan seluruh aksi tanpa batasan konfigurasi.
+                </x-slot>
+            </x-alert>
         @endif
 
         <!-- Toolbar Pintas dan Terapkan Template -->
         <div class="matrix-action-bar">
             <!-- Form Salin Template -->
-            <form method="POST" action="{{ route('sistem.user.user.apply-template', $user) }}" class="page-actions">
+            <form method="POST" action="{{ route('sistem.user.user.apply-template', $user) }}" class="page-actions" id="applyTemplateForm">
                 @csrf
-                <select name="role_key" class="form-select" required>
-                    <option value="">Pilih Template Peran</option>
-                    @foreach ($availableTemplates as $tmpl)
-                        <option value="{{ $tmpl->role_key }}">
-                            {{ $tmpl->role_name }} ({{ strtoupper($tmpl->role_category) }})
-                        </option>
-                    @endforeach
-                </select>
-                <button type="submit" class="btn-secondary" onclick="return confirm('Terapkan template peran ini? Seluruh izin saat ini akan ditimpa dengan template yang dipilih.');">
+                @php
+                    $templateOptions = $availableTemplates->mapWithKeys(fn($tmpl) => [
+                        $tmpl->role_key => $tmpl->role_name . ' (' . strtoupper($tmpl->role_category) . ')'
+                    ]);
+                @endphp
+                <x-form-select
+                    name="role_key"
+                    id="role_key"
+                    placeholder="Pilih Template Peran"
+                    :options="$templateOptions"
+                    required
+                />
+                <button type="button" class="btn-secondary" id="btnOpenApplyTemplateModal">
                     <x-icon name="zap" size="16" />
                     <span>Terapkan Template</span>
                 </button>
@@ -61,12 +64,15 @@
             <!-- Tombol Pilih Massal -->
             <div class="page-actions">
                 <button type="button" class="btn-secondary" id="btnSelectAllView">
+                    <x-icon name="check" size="14" />
                     <span>Centang Semua Lihat</span>
                 </button>
                 <button type="button" class="btn-secondary" id="btnSelectAllCRUD">
+                    <x-icon name="check-circle" size="14" />
                     <span>Centang Semua CRUD</span>
                 </button>
                 <button type="button" class="btn-secondary" id="btnUncheckAll">
+                    <x-icon name="close" size="14" />
                     <span>Kosongkan Semua</span>
                 </button>
             </div>
@@ -79,7 +85,7 @@
 
             <div class="matrix-container">
                 @php $rowIndex = 0; @endphp
-                @foreach ($modules as $module)
+                @forelse ($modules as $module)
                     <div class="matrix-module-card">
                         <div class="matrix-module-header">
                             <div class="matrix-module-title">
@@ -87,6 +93,7 @@
                                 <span>{{ $module->name }}</span>
                             </div>
                             <button type="button" class="btn-secondary btn-check-module" data-module-id="{{ $module->id }}">
+                                <x-icon name="check" size="14" />
                                 <span>Pilih Semua Modul Ini</span>
                             </button>
                         </div>
@@ -235,13 +242,25 @@
                             </table>
                         </div>
                     </div>
-                @endforeach
+                @empty
+                    <div class="card-surface p-8 text-center text-slate-500">
+                        <x-icon name="layers" size="36" class="mx-auto mb-2 text-slate-400" />
+                        <p class="font-medium text-slate-700">Belum ada modul atau menu navigasi aktif</p>
+                        <p class="text-xs text-slate-500 mt-1">Silakan aktifkan modul dan menu terlebih dahulu pada Pengaturan Sistem.</p>
+                    </div>
+                @endforelse
             </div>
 
             <!-- Tombol Aksi Simpan -->
             <div class="form-actions">
-                <button type="button" class="btn-primary" id="btnOpenConfirmModal">Simpan</button>
-                <a href="{{ route('sistem.user', ['role' => $user->user_type]) }}" class="btn-secondary">Batal</a>
+                <button type="button" class="btn-primary" id="btnOpenConfirmModal">
+                    <x-icon name="save" size="18" />
+                    <span>Simpan</span>
+                </button>
+                <a href="{{ route('sistem.user', ['role' => $user->user_type]) }}" class="btn-secondary">
+                    <x-icon name="close" size="18" />
+                    <span>Batal</span>
+                </a>
             </div>
         </form>
     </div>
@@ -279,11 +298,60 @@
     </x-slot:footer>
 </x-modal>
 
-@section('scripts')
+{{-- Modal Konfirmasi Terapkan Template Peran --}}
+<x-modal
+    id="modalConfirmApplyTemplate"
+    title="Terapkan Template Peran"
+    subtitle="Konfirmasi penerapan template hak akses ke pengguna"
+    size="sm"
+>
+    <div class="p-3.5 bg-amber-50 border border-amber-200/90 rounded-xl text-center mb-4">
+        <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200 rounded-md mb-1.5">
+            Peringatan Timpa Izin
+        </span>
+        <div class="text-sm font-bold text-slate-900 leading-snug">
+            Hak Akses Pengguna Akan Digantikan
+        </div>
+        <div class="text-xs text-slate-500 mt-1">
+            Seluruh konfigurasi wewenang saat ini akan ditimpa dengan template peran yang dipilih.
+        </div>
+    </div>
+
+    <p class="text-sm text-gray-600 leading-relaxed text-center mb-0">
+        Apakah Anda yakin ingin menerapkan template peran ini ke akun <strong>{{ $user->name }}</strong>?
+    </p>
+
+    <x-slot:footer>
+        <button type="button" class="btn-secondary" id="btnCancelApplyTemplate">Batal</button>
+        <button type="submit" form="applyTemplateForm" class="btn-primary" id="btnSubmitApplyTemplate">
+            <x-icon name="zap" size="18" />
+            <span>Ya, Terapkan</span>
+        </button>
+    </x-slot:footer>
+</x-modal>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // 1. Inisialisasi Modal Konfirmasi Simpan
     InforaModals.setup('modalConfirmSave', { cancelBtnId: 'btnCancelConfirmSave' });
     InforaModals.bindOpenButton('btnOpenConfirmModal', 'modalConfirmSave');
+
+    // 2. Inisialisasi Modal Konfirmasi Terapkan Template
+    InforaModals.setup('modalConfirmApplyTemplate', { cancelBtnId: 'btnCancelApplyTemplate' });
+    const btnOpenApply = document.getElementById('btnOpenApplyTemplateModal');
+    if (btnOpenApply) {
+        btnOpenApply.addEventListener('click', function () {
+            const select = document.getElementById('role_key');
+            if (!select || !select.value) {
+                if (select) {
+                    select.focus();
+                    select.reportValidity();
+                }
+                return;
+            }
+            InforaModals.open('modalConfirmApplyTemplate');
+        });
+    }
 });
 </script>
 @endsection

@@ -121,8 +121,11 @@ class Menu extends Model
             return false;
         }
 
+        if (request()->routeIs($this->route_name)) {
+            return true;
+        }
+
         $patterns = [
-            $this->route_name,
             $this->route_name.'.*',
             $this->route_name.'.index',
         ];
@@ -131,7 +134,16 @@ class Menu extends Model
             $patterns[] = substr($this->route_name, 0, -6).'.*';
         }
 
-        return request()->routeIs($patterns);
+        if (request()->routeIs($patterns)) {
+            $resolved = SidebarCache::findByRoute(request());
+            if ($resolved && $resolved['type'] === 'menu') {
+                return $resolved['item']->id === $this->id;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     /**

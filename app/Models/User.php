@@ -7,11 +7,12 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'username', 'email', 'password', 'user_type', 'is_active', 'avatar_path'])]
+#[Fillable(['name', 'username', 'email', 'password', 'user_type', 'is_active', 'avatar_path', 'school_id'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -43,6 +44,16 @@ class User extends Authenticatable
     }
 
     /**
+     * Relasi ke unit sekolah tempat user terdaftar.
+     *
+     * @return BelongsTo<School, $this>
+     */
+    public function school(): BelongsTo
+    {
+        return $this->belongsTo(School::class);
+    }
+
+    /**
      * Check if the user is a Super Administrator (Platform/Developer entity).
      */
     public function isSuperAdmin(): bool
@@ -67,11 +78,19 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if the user is a Student.
+     * Check if the user is a Student (Murid).
+     */
+    public function isMurid(): bool
+    {
+        return $this->user_type === 'murid';
+    }
+
+    /**
+     * Check if the user is a Student (backward compatibility alias).
      */
     public function isSiswa(): bool
     {
-        return $this->user_type === 'siswa';
+        return $this->isMurid() || $this->user_type === 'siswa';
     }
 
     /**
@@ -101,9 +120,28 @@ class User extends Authenticatable
             default => 'can_view',
         };
 
-        return $this->menuPermissions->contains(
+        $this->loadMissing('menuPermissions');
+
+        $hasDirect = $this->menuPermissions->contains(
             fn (UserMenuPermission $perm) => $perm->menu_id === $menuId && (bool) $perm->$column
         );
+
+        if ($hasDirect) {
+            return true;
+        }
+
+        if ($action === 'view') {
+            $menuModel = $menu instanceof Menu ? $menu : Menu::with('subMenus')->find($menuId);
+            if ($menuModel && $menuModel->subMenus->isNotEmpty()) {
+                $subMenuIds = $menuModel->subMenus->pluck('id')->all();
+
+                return $this->menuPermissions->contains(
+                    fn (UserMenuPermission $perm) => in_array($perm->sub_menu_id, $subMenuIds, true) && (bool) $perm->can_view
+                );
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -122,6 +160,8 @@ class User extends Authenticatable
             'delete' => 'can_delete',
             default => 'can_view',
         };
+
+        $this->loadMissing('menuPermissions');
 
         return $this->menuPermissions->contains(
             fn (UserMenuPermission $perm) => $perm->sub_menu_id === $subMenuId && (bool) $perm->$column

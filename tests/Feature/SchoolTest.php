@@ -6,6 +6,7 @@ use App\Models\Kelurahan;
 use App\Models\Provinsi;
 use App\Models\School;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
@@ -44,6 +45,8 @@ test('super admin can view school list with empty state', function () {
     $response->assertSee('Belum ada data sekolah yang terdaftar');
     $response->assertSee('modalCreateSchool', false);
     $response->assertSee('btnOpenCreateSchool', false);
+    $response->assertSee('modalSyncAdmins', false);
+    $response->assertSee('btnOpenSyncAdmins', false);
 });
 
 test('super admin can view school list with schools data', function () {
@@ -151,6 +154,19 @@ test('super admin can create a new school', function () {
 
     $school = School::where('npsn', '40312345')->first();
     expect($school->name)->toBe('SMA Negeri 5 Makassar');
+
+    // Pastikan akun administrator sekolah otomatis diterbitkan dengan kredensial NPSN
+    $this->assertDatabaseHas('users', [
+        'username' => '40312345',
+        'user_type' => 'admin',
+        'school_id' => $school->id,
+        'is_active' => true,
+    ]);
+
+    $admin = User::where('username', '40312345')->first();
+    expect(Hash::check('40312345', $admin->password))->toBeTrue();
+    expect($admin->school->id)->toBe($school->id);
+    expect($school->adminUser->id)->toBe($admin->id);
 });
 
 test('super admin can create school with base64 logo', function () {
@@ -359,4 +375,40 @@ test('super admin can update school with new wilayah foreign keys', function () 
     $school->refresh();
     expect($school->provinsi_id)->toBe($prov2->id);
     expect($school->kabupaten_id)->toBe($kab2->id);
+});
+
+test('super admin can sync all admin accounts for schools', function () {
+    $school1 = School::factory()->create(['npsn' => '11223344']);
+    $school2 = School::factory()->create(['npsn' => '55667788']);
+
+    $response = $this->actingAs($this->superAdmin)->post(route('master.data-sekolah.sync-admins'));
+    $response->assertRedirect(route('master.data-sekolah.index'));
+    $response->assertSessionHas('success');
+
+    $this->assertDatabaseHas('users', ['username' => '11223344', 'user_type' => 'admin', 'school_id' => $school1->id]);
+    $this->assertDatabaseHas('users', ['username' => '55667788', 'user_type' => 'admin', 'school_id' => $school2->id]);
+});
+
+test('super admin can sync single admin account for a specific school', function () {
+    $school = School::factory()->create(['npsn' => '99887766']);
+
+    $response = $this->actingAs($this->superAdmin)->post(route('master.data-sekolah.sync-single-admin', $school));
+    $response->assertRedirect(route('master.data-sekolah.index'));
+    $response->assertSessionHas('success');
+
+    $this->assertDatabaseHas('users', ['username' => '99887766', 'user_type' => 'admin', 'school_id' => $school->id]);
+});
+
+test('school index view displays admin account status badge', function () {
+    $school = School::factory()->create(['npsn' => '40312345']);
+    User::factory()->create([
+        'username' => '40312345',
+        'user_type' => 'admin',
+        'school_id' => $school->id,
+    ]);
+
+    $response = $this->actingAs($this->superAdmin)->get(route('master.data-sekolah.index'));
+    $response->assertOk();
+    $response->assertSee('Akun Admin');
+    $response->assertSee('40312345');
 });

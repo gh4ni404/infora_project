@@ -1,8 +1,13 @@
 <?php
 
 use App\Models\KalenderAkademik;
+use App\Models\Menu;
+use App\Models\Module;
 use App\Models\School;
+use App\Models\Semester;
+use App\Models\TahunAjaran;
 use App\Models\User;
+use App\Models\UserMenuPermission;
 
 beforeEach(function () {
     $this->superAdmin = User::factory()->create([
@@ -24,6 +29,13 @@ beforeEach(function () {
         'npsn' => '69944581',
         'school_type' => 'SMK',
         'status' => 'Negeri',
+    ]);
+
+    $this->tahunAjaran = TahunAjaran::firstOrCreate([
+        'school_id' => $this->school->id,
+        'tahun' => '2026/2027',
+    ], [
+        'is_active' => true,
     ]);
 });
 
@@ -314,4 +326,256 @@ test('filtering agenda by category and semester works correctly', function () {
     $genapTitles = $responseGenap->viewData('agendaList')->pluck('judul_kegiatan');
     expect($genapTitles)->toContain('Penilaian Akhir Tahun (PAT)')
         ->not->toContain('KBM Semester Ganjil Pekan 1');
+});
+
+test('school admin can only view events of their assigned school and does not see school selector', function () {
+    $module = Module::firstOrCreate(['name' => 'KONFIGURASI'], ['order' => 1, 'is_active' => true]);
+    $menu = Menu::firstOrCreate(
+        ['route_name' => 'konfigurasi-sekolah.kalender-akademik'],
+        ['module_id' => $module->id, 'name' => 'Kalender Akademik', 'order' => 2, 'is_active' => true]
+    );
+
+    $schoolA = School::factory()->create(['name' => 'SMK Negeri 8 Bone', 'npsn' => '69944581', 'is_active' => true]);
+    $schoolB = School::factory()->create(['name' => 'Mas Pompanua', 'npsn' => '69944582', 'is_active' => true]);
+
+    $adminUser = User::factory()->create([
+        'username' => 'admin_kalender_a',
+        'email' => 'admin_kalender_a@infora.test',
+        'user_type' => 'admin',
+        'school_id' => $schoolA->id,
+        'is_active' => true,
+    ]);
+
+    UserMenuPermission::create([
+        'user_id' => $adminUser->id,
+        'menu_id' => $menu->id,
+        'can_view' => true,
+        'can_create' => true,
+        'can_edit' => true,
+        'can_delete' => true,
+    ]);
+
+    KalenderAkademik::create([
+        'school_id' => $schoolA->id,
+        'judul_kegiatan' => 'Kegiatan Khusus SMK 8 Bone',
+        'tanggal_mulai' => '2026-10-01',
+        'tanggal_selesai' => '2026-10-02',
+        'tahun_ajaran' => '2026/2027',
+        'semester' => 'ganjil',
+        'kategori' => 'Kegiatan Sekolah',
+        'warna' => 'emerald',
+    ]);
+
+    KalenderAkademik::create([
+        'school_id' => $schoolB->id,
+        'judul_kegiatan' => 'Kegiatan Khusus Mas Pompanua',
+        'tanggal_mulai' => '2026-10-01',
+        'tanggal_selesai' => '2026-10-02',
+        'tahun_ajaran' => '2026/2027',
+        'semester' => 'ganjil',
+        'kategori' => 'Kegiatan Sekolah',
+        'warna' => 'emerald',
+    ]);
+
+    $response = $this->actingAs($adminUser)->get(route('konfigurasi-sekolah.kalender-akademik', ['view' => 'tabel']));
+
+    $response->assertOk();
+    $response->assertSee('SMK Negeri 8 Bone');
+    $response->assertSee('Kegiatan Khusus SMK 8 Bone');
+    $response->assertDontSee('Kegiatan Khusus Mas Pompanua');
+    $response->assertDontSee('id="schoolFilterForm"', false);
+});
+
+test('school admin cannot update or delete academic calendar event belonging to another school', function () {
+    $module = Module::firstOrCreate(['name' => 'KONFIGURASI'], ['order' => 1, 'is_active' => true]);
+    $menu = Menu::firstOrCreate(
+        ['route_name' => 'konfigurasi-sekolah.kalender-akademik'],
+        ['module_id' => $module->id, 'name' => 'Kalender Akademik', 'order' => 2, 'is_active' => true]
+    );
+
+    $schoolA = School::factory()->create(['name' => 'Sekolah A', 'npsn' => '11111111', 'is_active' => true]);
+    $schoolB = School::factory()->create(['name' => 'Sekolah B', 'npsn' => '22222222', 'is_active' => true]);
+
+    $adminUser = User::factory()->create([
+        'username' => 'admin_kalender_sec',
+        'email' => 'admin_sec@infora.test',
+        'user_type' => 'admin',
+        'school_id' => $schoolA->id,
+        'is_active' => true,
+    ]);
+
+    UserMenuPermission::create([
+        'user_id' => $adminUser->id,
+        'menu_id' => $menu->id,
+        'can_view' => true,
+        'can_create' => true,
+        'can_edit' => true,
+        'can_delete' => true,
+    ]);
+
+    $eventSchoolB = KalenderAkademik::create([
+        'school_id' => $schoolB->id,
+        'judul_kegiatan' => 'Event Sekolah B',
+        'tanggal_mulai' => '2026-11-01',
+        'tanggal_selesai' => '2026-11-02',
+        'tahun_ajaran' => '2026/2027',
+        'semester' => 'ganjil',
+        'kategori' => 'Kegiatan Sekolah',
+        'warna' => 'blue',
+    ]);
+
+    // Update harus ditolak dengan 403
+    $updateResponse = $this->actingAs($adminUser)->put(
+        route('konfigurasi-sekolah.kalender-akademik.update', $eventSchoolB),
+        [
+            'school_id' => $schoolB->id,
+            'judul_kegiatan' => 'Mencoba Bajak Event',
+            'tanggal_mulai' => '2026-11-01',
+            'tanggal_selesai' => '2026-11-02',
+            'tahun_ajaran' => '2026/2027',
+            'semester' => 'ganjil',
+            'kategori' => 'Kegiatan Sekolah',
+            'warna' => 'blue',
+        ]
+    );
+    $updateResponse->assertForbidden();
+
+    // Delete harus ditolak dengan 403
+    $deleteResponse = $this->actingAs($adminUser)->delete(
+        route('konfigurasi-sekolah.kalender-akademik.destroy', $eventSchoolB)
+    );
+    $deleteResponse->assertForbidden();
+});
+
+test('school admin store event automatically binds to their assigned school', function () {
+    $module = Module::firstOrCreate(['name' => 'KONFIGURASI'], ['order' => 1, 'is_active' => true]);
+    $menu = Menu::firstOrCreate(
+        ['route_name' => 'konfigurasi-sekolah.kalender-akademik'],
+        ['module_id' => $module->id, 'name' => 'Kalender Akademik', 'order' => 2, 'is_active' => true]
+    );
+
+    $schoolA = School::factory()->create(['name' => 'Sekolah Admin A', 'npsn' => '33333333', 'is_active' => true]);
+    $schoolB = School::factory()->create(['name' => 'Sekolah Admin B', 'npsn' => '44444444', 'is_active' => true]);
+
+    TahunAjaran::create([
+        'school_id' => $schoolA->id,
+        'tahun' => '2026/2027',
+        'is_active' => true,
+    ]);
+
+    $adminUser = User::factory()->create([
+        'username' => 'admin_kalender_bind',
+        'email' => 'admin_bind@infora.test',
+        'user_type' => 'admin',
+        'school_id' => $schoolA->id,
+        'is_active' => true,
+    ]);
+
+    UserMenuPermission::create([
+        'user_id' => $adminUser->id,
+        'menu_id' => $menu->id,
+        'can_view' => true,
+        'can_create' => true,
+        'can_edit' => true,
+        'can_delete' => true,
+    ]);
+
+    $response = $this->actingAs($adminUser)->post(
+        route('konfigurasi-sekolah.kalender-akademik.store'),
+        [
+            'school_id' => $schoolB->id, // Mencoba menyuntikkan ID sekolah lain
+            'judul_kegiatan' => 'Event Resmi Sekolah A',
+            'tanggal_mulai' => '2026-12-01',
+            'tanggal_selesai' => '2026-12-05',
+            'tahun_ajaran' => '2026/2027',
+            'semester' => 'ganjil',
+            'kategori' => 'Kegiatan Sekolah',
+            'warna' => 'emerald',
+        ]
+    );
+
+    $response->assertRedirect(route('konfigurasi-sekolah.kalender-akademik', ['view' => 'kalender']));
+
+    $this->assertDatabaseHas('kalender_akademik', [
+        'school_id' => $schoolA->id, // Terverifikasi terikat ke School A, bukan School B
+        'judul_kegiatan' => 'Event Resmi Sekolah A',
+    ]);
+});
+
+test('cannot store academic calendar event when school has no academic year configured', function () {
+    $emptySchool = School::factory()->create(['name' => 'Sekolah Tanpa TA', 'npsn' => '99887766', 'is_active' => true]);
+
+    $response = $this->actingAs($this->superAdmin)->post(
+        route('konfigurasi-sekolah.kalender-akademik.store'),
+        [
+            'school_id' => $emptySchool->id,
+            'judul_kegiatan' => 'Agenda Gagal Karena Belum Ada TA',
+            'tanggal_mulai' => '2026-08-01',
+            'tanggal_selesai' => '2026-08-02',
+            'tahun_ajaran' => '2026/2027',
+            'semester' => 'ganjil',
+            'kategori' => 'Kegiatan Sekolah',
+            'warna' => 'blue',
+        ]
+    );
+
+    $response->assertSessionHasErrors(['tahun_ajaran']);
+    $errors = session('errors')->get('tahun_ajaran');
+    expect(implode(' ', $errors))->toContain('belum memiliki konfigurasi tahun ajaran');
+});
+
+test('cannot store academic calendar event with academic year not registered in school', function () {
+    $response = $this->actingAs($this->superAdmin)->post(
+        route('konfigurasi-sekolah.kalender-akademik.store'),
+        [
+            'school_id' => $this->school->id,
+            'judul_kegiatan' => 'Agenda Salah Tahun Ajaran',
+            'tanggal_mulai' => '2026-08-01',
+            'tanggal_selesai' => '2026-08-02',
+            'tahun_ajaran' => '1999/2000', // Bukan tahun ajaran yang terdaftar di sekolah ini
+            'semester' => 'ganjil',
+            'kategori' => 'Kegiatan Sekolah',
+            'warna' => 'blue',
+        ]
+    );
+
+    $response->assertSessionHasErrors(['tahun_ajaran']);
+});
+
+test('cannot store academic calendar event with semester not registered in academic year', function () {
+    // Daftarkan semester hanya 'ganjil' untuk tahun ajaran sekolah ini
+    Semester::create([
+        'tahun_ajaran_id' => $this->tahunAjaran->id,
+        'semester' => 'ganjil',
+        'is_active' => true,
+    ]);
+
+    $response = $this->actingAs($this->superAdmin)->post(
+        route('konfigurasi-sekolah.kalender-akademik.store'),
+        [
+            'school_id' => $this->school->id,
+            'judul_kegiatan' => 'Agenda Semester Genap Padahal Belum Dikonfigurasi',
+            'tanggal_mulai' => '2026-08-01',
+            'tanggal_selesai' => '2026-08-02',
+            'tahun_ajaran' => $this->tahunAjaran->tahun,
+            'semester' => 'genap', // Semester genap belum ada di tahun ajaran ini
+            'kategori' => 'Kegiatan Sekolah',
+            'warna' => 'blue',
+        ]
+    );
+
+    $response->assertSessionHasErrors(['semester']);
+});
+
+test('kalender akademik view provides hasTahunAjaran false and shows warning when school has no academic year', function () {
+    $emptySchool = School::factory()->create(['name' => 'Sekolah Belum Ada TA', 'npsn' => '77889900', 'is_active' => true]);
+
+    $response = $this->actingAs($this->superAdmin)->get(
+        route('konfigurasi-sekolah.kalender-akademik', ['school_id' => $emptySchool->id])
+    );
+
+    $response->assertOk();
+    expect($response->viewData('hasTahunAjaran'))->toBeFalse();
+    $response->assertSee('Tahun Ajaran Belum Dikonfigurasi');
+    $response->assertSee('disabled', false);
 });

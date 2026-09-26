@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\System\UpdateTemplatePermissionsRequest;
 use App\Http\Requests\System\UpdateUserPermissionsRequest;
 use App\Models\MenuAccessTemplate;
-use App\Models\Module;
 use App\Models\User;
 use App\Models\UserMenuPermission;
 use App\Support\SidebarCache;
@@ -27,8 +26,14 @@ class MenuAccessController extends Controller
 
         $usersQuery = User::query()->with('menuPermissions');
 
-        if ($roleFilter && in_array($roleFilter, ['super_admin', 'admin', 'guru', 'siswa'], true)) {
-            $usersQuery->where('user_type', $roleFilter);
+        if ($roleFilter && in_array($roleFilter, ['super_admin', 'admin', 'guru', 'murid', 'siswa'], true)) {
+            $usersQuery->where(function ($q) use ($roleFilter) {
+                if ($roleFilter === 'murid') {
+                    $q->where('user_type', 'murid')->orWhere('user_type', 'siswa');
+                } else {
+                    $q->where('user_type', $roleFilter);
+                }
+            });
         }
 
         if ($search) {
@@ -41,13 +46,8 @@ class MenuAccessController extends Controller
 
         $users = $usersQuery->orderBy('user_type')->orderBy('name')->paginate(15)->withQueryString();
 
-        // Ambil daftar template peran dinamis
-        $templates = MenuAccessTemplate::query()
-            ->select('role_key', 'role_name', 'role_category')
-            ->distinct()
-            ->orderBy('role_category')
-            ->orderBy('role_name')
-            ->get();
+        // Ambil daftar template peran dinamis dari cache
+        $templates = SidebarCache::getRoleTemplates();
 
         return view('system.menu-access.index', [
             'users' => $users,
@@ -63,33 +63,13 @@ class MenuAccessController extends Controller
      */
     public function editUser(User $user): View
     {
-        $modules = Module::query()
-            ->where('is_active', true)
-            ->orderBy('order')
-            ->with([
-                'menus' => function ($q) {
-                    $q->where('is_active', true)
-                        ->orderBy('order')
-                        ->with([
-                            'subMenus' => function ($sq) {
-                                $sq->where('is_active', true)
-                                    ->orderBy('order');
-                            },
-                        ]);
-                },
-            ])
-            ->get();
+        $modules = SidebarCache::getActiveTree();
 
         $userPermissions = $user->menuPermissions()
             ->get()
             ->keyBy(fn (UserMenuPermission $p) => $p->sub_menu_id ? 'sub_'.$p->sub_menu_id : 'menu_'.$p->menu_id);
 
-        $availableTemplates = MenuAccessTemplate::query()
-            ->select('role_key', 'role_name', 'role_category')
-            ->distinct()
-            ->orderBy('role_category')
-            ->orderBy('role_name')
-            ->get();
+        $availableTemplates = SidebarCache::getRoleTemplates();
 
         return view('system.menu-access.edit-user', [
             'user' => $user,
@@ -205,22 +185,7 @@ class MenuAccessController extends Controller
 
         $templateInfo = $templateRecords->first();
 
-        $modules = Module::query()
-            ->where('is_active', true)
-            ->orderBy('order')
-            ->with([
-                'menus' => function ($q) {
-                    $q->where('is_active', true)
-                        ->orderBy('order')
-                        ->with([
-                            'subMenus' => function ($sq) {
-                                $sq->where('is_active', true)
-                                    ->orderBy('order');
-                            },
-                        ]);
-                },
-            ])
-            ->get();
+        $modules = SidebarCache::getActiveTree();
 
         $templatePermissions = $templateRecords->keyBy(
             fn (MenuAccessTemplate $t) => $t->sub_menu_id ? 'sub_'.$t->sub_menu_id : 'menu_'.$t->menu_id

@@ -10,23 +10,51 @@
     <x-form-input type="hidden" name="view" :value="$activeView" />
 
     <div class="form-section-label">Informasi Sekolah dan Periode</div>
-    <div class="form-grid-2col">
-        <x-form-select
-            name="school_id"
-            id="create_school_id"
-            label="Unit Sekolah"
-            :selected="$selectedSchoolId"
-            :options="$schools->mapWithKeys(fn($school) => [$school->id => $school->name . ' (' . $school->school_type . ')'])"
-            required
-        />
-
+    @if ($user->isSuperAdmin())
         <div class="form-grid-2col">
-            <x-form-input
+            <x-form-select
+                name="school_id"
+                id="create_school_id"
+                label="Unit Sekolah"
+                :selected="$selectedSchoolId"
+                :options="$schools->mapWithKeys(fn($school) => [$school->id => $school->name . ' (' . $school->school_type . ')'])"
+                required
+            />
+
+            <div class="form-grid-2col">
+                <x-form-select
+                    name="tahun_ajaran"
+                    id="create_tahun_ajaran"
+                    label="Tahun Ajaran"
+                    :selected="$defaultTahunAjaran"
+                    :options="$tahunAjaranOptions"
+                    placeholder="Pilih Tahun Ajaran"
+                    required
+                />
+
+                <x-form-select
+                    name="semester"
+                    id="create_semester"
+                    label="Semester"
+                    :selected="$defaultSemester"
+                    :options="[
+                        'ganjil' => 'Ganjil',
+                        'genap' => 'Genap',
+                    ]"
+                    required
+                />
+            </div>
+        </div>
+    @else
+        <input type="hidden" name="school_id" id="create_school_id" value="{{ $selectedSchoolId }}">
+        <div class="form-grid-2col">
+            <x-form-select
                 name="tahun_ajaran"
                 id="create_tahun_ajaran"
                 label="Tahun Ajaran"
-                placeholder="Contoh: 2026/2027"
-                :value="$defaultTahunAjaran"
+                :selected="$defaultTahunAjaran"
+                :options="$tahunAjaranOptions"
+                placeholder="Pilih Tahun Ajaran"
                 required
             />
 
@@ -34,7 +62,7 @@
                 name="semester"
                 id="create_semester"
                 label="Semester"
-                selected="ganjil"
+                :selected="$defaultSemester"
                 :options="[
                     'ganjil' => 'Ganjil',
                     'genap' => 'Genap',
@@ -42,7 +70,7 @@
                 required
             />
         </div>
-    </div>
+    @endif
 
     <div class="form-section-divider"></div>
     <div class="form-section-label">Detail Agenda dan Tanggal Kegiatan</div>

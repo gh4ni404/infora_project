@@ -6,6 +6,10 @@
         Kelola registri sekolah SMA dan SMK dalam platform INFORA
     </x-slot:subtitle>
     <x-slot:actions>
+        <button type="button" class="btn-secondary" id="btnOpenSyncAdmins" title="Sinkronkan Akun Administrator Semua Sekolah">
+            <x-icon name="users" size="16" />
+            <span>Sinkronkan Akun Admin</span>
+        </button>
         <button type="button" class="btn-primary" id="btnOpenCreateSchool">
             <x-icon name="add" size="18" />
         </button>
@@ -39,6 +43,7 @@
         <tr>
             <th>Sekolah</th>
             <th>NPSN</th>
+            <th>Akun Admin</th>
             <th>Jenis</th>
             <th>Status</th>
             <th>Akreditasi</th>
@@ -66,6 +71,22 @@
             </td>
             <td>
                 <code class="text-brand">{{ $school->npsn }}</code>
+            </td>
+            <td>
+                @if ($school->adminUser)
+                    <span class="badge badge-success" title="Akun Administrator Terdaftar: {{ $school->adminUser->username }}">
+                        <x-icon name="user" size="14" />
+                        <span>{{ $school->adminUser->username }}</span>
+                    </span>
+                @else
+                    <form method="POST" action="{{ route('master.data-sekolah.sync-single-admin', $school) }}">
+                        @csrf
+                        <button type="submit" class="btn-secondary text-xs" title="Buat Akun Administrator Sekolah Ini">
+                            <x-icon name="add" size="14" />
+                            <span>Buat Akun</span>
+                        </button>
+                    </form>
+                @endif
             </td>
             <td>
                 @if ($school->school_type === 'SMA')
@@ -177,16 +198,61 @@
     item-title-id="deleteSchoolTitle"
 />
 
+{{-- Modal Konfirmasi Sinkronisasi Akun Administrator --}}
+<x-modal 
+    id="modalSyncAdmins" 
+    size="sm"
+    action="{{ route('master.data-sekolah.sync-admins') }}"
+    method="POST"
+    form-id="formSyncAdmins"
+>
+    <div class="text-center py-4">
+        <div class="w-16 h-16 rounded-full bg-blue-50 text-brand ring-8 ring-blue-50/60 flex items-center justify-center my-4 shrink-0 mx-auto">
+            <x-icon name="users" size="32" />
+        </div>
+        <h3 class="text-base font-bold text-slate-900 mb-2" id="modalSyncAdminsTitle">
+            Sinkronkan Akun Admin Sekolah?
+        </h3>
+        <p class="text-sm text-slate-600 mb-4 px-2">
+            Sistem akan menerbitkan atau menyelaraskan akun administrator (<code class="text-xs font-mono font-bold text-brand">user_type: admin</code>) untuk seluruh unit sekolah yang terdaftar.
+        </p>
+        <div class="p-3 bg-slate-50 border border-slate-200/90 rounded-xl text-left text-xs text-slate-600 space-y-1.5 mb-2">
+            <div class="flex items-center gap-1.5 font-semibold text-slate-800">
+                <x-icon name="info-circle" size="14" class="text-brand shrink-0" />
+                <span>Ketentuan Akun Otomatis:</span>
+            </div>
+            <ul class="list-disc list-inside space-y-1 text-slate-600 pl-1">
+                <li>Username & Password awal = <strong>NPSN</strong> masing-masing sekolah.</li>
+                <li>Izin menu disesuaikan dengan template peran <strong>Admin Sekolah</strong>.</li>
+            </ul>
+        </div>
+    </div>
+
+    <x-slot:footer>
+        <div class="grid grid-cols-2 gap-3 w-full">
+            <button type="button" class="btn-secondary w-full justify-center font-medium" id="btnCancelSyncAdmins">
+                <span>Batal</span>
+            </button>
+            <button type="submit" class="btn-primary w-full justify-center font-medium" id="btnConfirmSyncAdmins">
+                <x-icon name="check" size="16" />
+                <span>Ya, Sinkronkan</span>
+            </button>
+        </div>
+    </x-slot:footer>
+</x-modal>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // 1. Setup Modals via InforaModals
     InforaModals.setup('modalCreateSchool', { cancelBtnId: 'btnCancelCreateSchool' });
     InforaModals.setup('modalEditSchool', { cancelBtnId: 'btnCancelEditSchool' });
     InforaModals.setup('modalDeleteSchool', { cancelBtnId: 'btnCancelDeleteSchool' });
+    InforaModals.setup('modalSyncAdmins', { cancelBtnId: 'btnCancelSyncAdmins' });
 
-    // 2. Hubungkan tombol buka modal tambah
+    // 2. Hubungkan tombol buka modal
     InforaModals.bindOpenButton('btnOpenCreateSchool', 'modalCreateSchool');
     InforaModals.bindOpenButton('btnEmptyCreateSchool', 'modalCreateSchool');
+    InforaModals.bindOpenButton('btnOpenSyncAdmins', 'modalSyncAdmins');
 
     // Reset logo saat tombol tambah dibuka
     document.getElementById('btnOpenCreateSchool')?.addEventListener('click', function() {

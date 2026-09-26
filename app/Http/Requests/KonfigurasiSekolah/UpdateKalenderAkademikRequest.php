@@ -2,8 +2,11 @@
 
 namespace App\Http\Requests\KonfigurasiSekolah;
 
+use App\Models\KalenderAkademik;
+use App\Models\TahunAjaran;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateKalenderAkademikRequest extends FormRequest
 {
@@ -12,6 +15,26 @@ class UpdateKalenderAkademikRequest extends FormRequest
      */
     public function authorize(): bool
     {
+        $user = $this->user();
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        $kalender = $this->route('kalender_akademik');
+        if ($kalender instanceof KalenderAkademik) {
+            return (int) $kalender->school_id === (int) $user->school_id;
+        }
+
+        if (is_numeric($kalender)) {
+            $kalenderSchoolId = KalenderAkademik::where('id', $kalender)->value('school_id');
+
+            return (int) $kalenderSchoolId === (int) $user->school_id;
+        }
+
         return true;
     }
 
@@ -20,9 +43,15 @@ class UpdateKalenderAkademikRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        $this->merge([
+        $merge = [
             'libur_kbm' => $this->boolean('libur_kbm'),
-        ]);
+        ];
+
+        if ($this->user()?->school_id) {
+            $merge['school_id'] = $this->user()->school_id;
+        }
+
+        $this->merge($merge);
     }
 
     /**
@@ -32,18 +61,52 @@ class UpdateKalenderAkademikRequest extends FormRequest
      */
     public function rules(): array
     {
+        $schoolId = (int) $this->input('school_id');
+
         return [
             'school_id' => ['required', 'integer', 'exists:schools,id'],
             'judul_kegiatan' => ['required', 'string', 'max:150'],
             'tanggal_mulai' => ['required', 'date'],
             'tanggal_selesai' => ['required', 'date', 'after_or_equal:tanggal_mulai'],
-            'tahun_ajaran' => ['required', 'string', 'max:20'],
+            'tahun_ajaran' => [
+                'required',
+                'string',
+                'max:20',
+                Rule::exists('tahun_ajaran', 'tahun')->where('school_id', $schoolId),
+            ],
             'semester' => ['required', 'string', 'in:ganjil,genap'],
             'kategori' => ['required', 'string', 'max:50'],
             'warna' => ['required', 'string', 'in:blue,emerald,amber,rose,purple,indigo'],
             'libur_kbm' => ['nullable', 'boolean'],
             'keterangan' => ['nullable', 'string', 'max:1000'],
         ];
+    }
+
+    /**
+     * Validasi tambahan pasca aturan standar.
+     */
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $schoolId = (int) $this->input('school_id');
+            if ($schoolId > 0) {
+                $hasTahunAjaran = TahunAjaran::where('school_id', $schoolId)->exists();
+                if (! $hasTahunAjaran) {
+                    $validator->errors()->add('tahun_ajaran', 'Unit sekolah ini belum memiliki konfigurasi tahun ajaran. Silakan buat tahun ajaran terlebih dahulu.');
+
+                    return;
+                }
+
+                $tahun = (string) $this->input('tahun_ajaran');
+                $tahunAjaran = TahunAjaran::where('school_id', $schoolId)->where('tahun', $tahun)->first();
+                if ($tahunAjaran && $tahunAjaran->semesters()->exists()) {
+                    $validSemesters = $tahunAjaran->semesters()->pluck('semester')->all();
+                    if (! in_array($this->input('semester'), $validSemesters, true)) {
+                        $validator->errors()->add('semester', "Semester yang dipilih tidak terdaftar pada tahun ajaran {$tahun}.");
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -63,7 +126,8 @@ class UpdateKalenderAkademikRequest extends FormRequest
             'tanggal_selesai.required' => 'Tanggal selesai kegiatan wajib diisi.',
             'tanggal_selesai.date' => 'Format tanggal selesai tidak valid.',
             'tanggal_selesai.after_or_equal' => 'Tanggal selesai tidak boleh sebelum tanggal mulai.',
-            'tahun_ajaran.required' => 'Tahun ajaran wajib diisi.',
+            'tahun_ajaran.required' => 'Tahun ajaran wajib dipilih.',
+            'tahun_ajaran.exists' => 'Tahun ajaran yang dipilih tidak terdaftar pada unit sekolah ini.',
             'semester.required' => 'Semester wajib dipilih.',
             'semester.in' => 'Pilihan semester harus Ganjil atau Genap.',
             'kategori.required' => 'Kategori kegiatan wajib dipilih.',

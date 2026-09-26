@@ -6,12 +6,14 @@
             Manajemen agenda kegiatan sekolah, jadwal ujian, rentang semester, dan hari libur
             @if ($selectedSchool)
                 &ndash; <strong class="text-primary">{{ $selectedSchool->name }}</strong>
+            @else
+                &ndash; <span class="text-secondary">Belum Terhubung Unit Sekolah</span>
             @endif
         </x-slot:subtitle>
 
         <x-slot:actions>
             {{-- Selector Unit Sekolah --}}
-            @if ($schools->count() > 1)
+            @if ($user->isSuperAdmin() && $schools->count() > 1)
                 <form method="GET" action="{{ route('konfigurasi-sekolah.kalender-akademik') }}" id="schoolFilterForm">
                     <input type="hidden" name="view" value="{{ $activeView }}" id="schoolFilterView">
                     <x-form-select
@@ -38,7 +40,7 @@
             </x-tab-pills>
 
             {{-- Tombol Tambah Agenda --}}
-            <button type="button" class="btn-primary" id="btnOpenCreateKalender">
+            <button type="button" class="btn-primary" id="btnOpenCreateKalender" {{ ($selectedSchool && $hasTahunAjaran) ? '' : 'disabled' }} title="{{ ! $hasTahunAjaran ? 'Unit sekolah belum memiliki konfigurasi Tahun Ajaran' : 'Tambah Agenda' }}">
                 <x-icon name="add" size="18" />
                 <span>Tambah Agenda</span>
             </button>
@@ -48,6 +50,38 @@
     <x-alert type="success" />
     <x-alert type="error" />
     <x-alert type="validation" />
+
+    {{-- Status Banner Jika Sekolah Belum Terhubung --}}
+    @if (! $selectedSchool)
+        <div class="alert-info">
+            <div class="alert-content">
+                <x-icon name="info-circle" size="20" />
+                <div>
+                    <strong>Unit Sekolah Belum Dikonfigurasi:</strong>
+                    Akun Anda belum terhubung dengan unit sekolah manapun. Silakan hubungi Super Administrator untuk konfigurasi unit sekolah.
+                </div>
+            </div>
+            <span class="badge badge-warning">Perlu Konfigurasi</span>
+        </div>
+    @elseif (! $hasTahunAjaran)
+        <div class="alert-info">
+            <div class="alert-content">
+                <x-icon name="info-circle" size="20" />
+                <div>
+                    <strong>Tahun Ajaran Belum Dikonfigurasi:</strong>
+                    Unit sekolah <strong>{{ $selectedSchool->name }}</strong> belum memiliki Tahun Ajaran.
+                    Kalender akademik membutuhkan setidaknya satu Tahun Ajaran untuk dapat menambahkan agenda kegiatan sekolah.
+                    <div style="margin-top: var(--space-2);">
+                        <a href="{{ route('konfigurasi-sekolah.tahun-ajaran', array_filter(['school_id' => $user->isSuperAdmin() ? $selectedSchoolId : null])) }}" class="btn-secondary btn-sm">
+                            <x-icon name="settings" size="14" />
+                            <span>Konfigurasi Tahun Ajaran Sekarang</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <span class="badge badge-warning">Tahun Ajaran Diperlukan</span>
+        </div>
+    @endif
 
     {{-- ========================================================================
      TAMPILAN 1: KALENDER BULANAN INTERAKTIF
@@ -165,7 +199,9 @@
 
             <x-slot:filters>
                 <input type="hidden" name="view" value="tabel">
-                <input type="hidden" name="school_id" value="{{ $selectedSchoolId }}">
+                @if ($user->isSuperAdmin())
+                    <input type="hidden" name="school_id" value="{{ $selectedSchoolId }}">
+                @endif
 
                 <x-form-select
                     id="selectKategori"
@@ -751,17 +787,63 @@
             // ========================================================================
             InforaModals.setup('modalCreateKalender', { cancelBtnId: 'btnCancelCreateKalender' });
             InforaModals.setup('modalDateDetail', { cancelBtnId: 'btnDismissDateDetail' });
-            InforaModals.setup('modalEditKalender', { cancelBtnId: 'btnCancelEditKalender' });
-            InforaModals.setup('modalDeleteKalender', { cancelBtnId: 'btnCancelDeleteKalender' });
+            // Dataset Mapping Semester per Tahun Ajaran
+            const tahunAjaranSemestersMap = @json($tahunAjaranSemesters);
+            const hasTahunAjaranConfigured = {{ $hasTahunAjaran ? 'true' : 'false' }};
+
+            // Fungsi Sinkronisasi Opsi Semester Berdasarkan Tahun Ajaran Terpilih
+            function updateSemesterOptions(taSelectId, semSelectId, selectedSemester = null) {
+                const taSelect = document.getElementById(taSelectId);
+                const semSelect = document.getElementById(semSelectId);
+                if (!taSelect || !semSelect) return;
+
+                const selectedTa = taSelect.value;
+                const semesters = tahunAjaranSemestersMap[selectedTa] || [];
+                const currentVal = selectedSemester || semSelect.value || 'ganjil';
+
+                semSelect.innerHTML = '';
+                if (semesters.length > 0) {
+                    semesters.forEach(s => {
+                        const opt = document.createElement('option');
+                        opt.value = s.semester;
+                        opt.textContent = s.label;
+                        if (s.semester === currentVal || (s.is_active && !selectedSemester)) {
+                            opt.selected = true;
+                        }
+                        semSelect.appendChild(opt);
+                    });
+                } else {
+                    const optGanjil = new Option('Ganjil', 'ganjil', false, currentVal === 'ganjil');
+                    const optGenap = new Option('Genap', 'genap', false, currentVal === 'genap');
+                    semSelect.add(optGanjil);
+                    semSelect.add(optGenap);
+                }
+            }
+
+            const createTa = document.getElementById('create_tahun_ajaran');
+            createTa && createTa.addEventListener('change', function() {
+                updateSemesterOptions('create_tahun_ajaran', 'create_semester');
+            });
+
+            const editTa = document.getElementById('edit_tahun_ajaran');
+            editTa && editTa.addEventListener('change', function() {
+                updateSemesterOptions('edit_tahun_ajaran', 'edit_semester');
+            });
 
             // Helper membuka modal tambah dengan opsi prefill tanggal
             function openCreateModal(prefillDate = null) {
+                if (!hasTahunAjaranConfigured) {
+                    return;
+                }
+
                 if (prefillDate) {
                     const startInput = document.getElementById('create_tanggal_mulai');
                     const endInput = document.getElementById('create_tanggal_selesai');
                     if (startInput) startInput.value = prefillDate;
                     if (endInput) endInput.value = prefillDate;
                 }
+
+                updateSemesterOptions('create_tahun_ajaran', 'create_semester', '{{ $defaultSemester }}');
                 InforaModals.open('modalCreateKalender');
             }
 
@@ -880,8 +962,7 @@
                 const taEl = document.getElementById('edit_tahun_ajaran');
                 if (taEl) taEl.value = eventData.tahun_ajaran || '';
 
-                const semEl = document.getElementById('edit_semester');
-                if (semEl) semEl.value = eventData.semester || 'ganjil';
+                updateSemesterOptions('edit_tahun_ajaran', 'edit_semester', eventData.semester || 'ganjil');
 
                 const judulEl = document.getElementById('edit_judul_kegiatan');
                 if (judulEl) judulEl.value = eventData.judul_kegiatan || '';

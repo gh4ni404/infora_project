@@ -45,9 +45,10 @@
                 label="Kategori Peran"
                 :selected="$templateInfo->role_category"
                 :options="[
+                    'admin' => 'Administrator Sekolah',
                     'guru' => 'Guru dan Tenaga Pendidik',
                     'staf' => 'Staf Tata Usaha',
-                    'siswa' => 'Siswa',
+                    'murid' => 'Murid',
                 ]"
                 required
             />

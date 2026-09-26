@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Master\StoreJurusanRequest;
 use App\Http\Requests\Master\UpdateJurusanRequest;
 use App\Models\Jurusan;
-use App\Models\School;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -18,18 +17,8 @@ class JurusanController extends Controller
      */
     public function index(Request $request): View
     {
-        // 1. Ambil unit sekolah aktif untuk selector
-        $schools = School::query()
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get(['id', 'name', 'npsn', 'school_type']);
-
-        // 2. Tentukan sekolah terpilih
-        $selectedSchoolId = (int) $request->query('school_id', $schools->first()?->id ?? 0);
-        $selectedSchool = $schools->firstWhere('id', $selectedSchoolId) ?? $schools->first();
-        if ($selectedSchool && $selectedSchoolId !== $selectedSchool->id) {
-            $selectedSchoolId = $selectedSchool->id;
-        }
+        // 1 & 2. Tentukan sekolah terpilih (konsisten dengan pendekatan multi-tenancy)
+        [$selectedSchool, $selectedSchoolId, $schools] = $this->resolveSchoolContext($request);
 
         // 3. Query dasar per unit sekolah
         $baseQuery = Jurusan::query()->where('school_id', $selectedSchoolId);
@@ -131,11 +120,14 @@ class JurusanController extends Controller
     public function store(StoreJurusanRequest $request): RedirectResponse
     {
         $data = $request->validated();
+        if ($request->user()?->school_id) {
+            $data['school_id'] = $request->user()->school_id;
+        }
 
         $jurusan = Jurusan::create($data);
 
         return redirect()
-            ->route('master.data-jurusan.index', ['school_id' => $jurusan->school_id])
+            ->route('master.data-jurusan.index', $this->schoolRedirectParams($request, $jurusan->school_id))
             ->with('success', "Jurusan {$jurusan->kode} ({$jurusan->nama}) berhasil ditambahkan ke dalam sistem.");
     }
 
@@ -144,35 +136,44 @@ class JurusanController extends Controller
      */
     public function update(UpdateJurusanRequest $request, Jurusan $jurusan): RedirectResponse
     {
+        $this->authorizeSchool($request, $jurusan->school_id);
+
         $data = $request->validated();
+        if ($request->user()?->school_id) {
+            $data['school_id'] = $request->user()->school_id;
+        }
 
         $jurusan->update($data);
 
         return redirect()
-            ->route('master.data-jurusan.index', ['school_id' => $jurusan->school_id])
+            ->route('master.data-jurusan.index', $this->schoolRedirectParams($request, $jurusan->school_id))
             ->with('success', "Data jurusan {$jurusan->kode} ({$jurusan->nama}) berhasil diperbarui.");
     }
 
     /**
      * Hapus data jurusan dari basis data.
      */
-    public function destroy(Jurusan $jurusan): RedirectResponse
+    public function destroy(Request $request, Jurusan $jurusan): RedirectResponse
     {
+        $this->authorizeSchool($request, $jurusan->school_id);
+
         $schoolId = $jurusan->school_id;
         $label = "{$jurusan->kode} ({$jurusan->nama})";
 
         $jurusan->delete();
 
         return redirect()
-            ->route('master.data-jurusan.index', ['school_id' => $schoolId])
+            ->route('master.data-jurusan.index', $this->schoolRedirectParams($request, $schoolId))
             ->with('success', "Data jurusan {$label} berhasil dihapus dari sistem.");
     }
 
     /**
      * Ubah status aktif/non-aktif jurusan secara cepat.
      */
-    public function toggleStatus(Jurusan $jurusan): RedirectResponse
+    public function toggleStatus(Request $request, Jurusan $jurusan): RedirectResponse
     {
+        $this->authorizeSchool($request, $jurusan->school_id);
+
         $jurusan->update([
             'is_active' => ! $jurusan->is_active,
         ]);
@@ -180,7 +181,7 @@ class JurusanController extends Controller
         $statusText = $jurusan->is_active ? 'diaktifkan' : 'dinonaktifkan';
 
         return redirect()
-            ->route('master.data-jurusan.index', ['school_id' => $jurusan->school_id])
+            ->route('master.data-jurusan.index', $this->schoolRedirectParams($request, $jurusan->school_id))
             ->with('success', "Status jurusan {$jurusan->kode} berhasil {$statusText}.");
     }
 }

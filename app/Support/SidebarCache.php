@@ -3,10 +3,12 @@
 namespace App\Support;
 
 use App\Models\Menu;
+use App\Models\MenuAccessTemplate;
 use App\Models\Module;
 use App\Models\SubMenu;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
@@ -28,6 +30,7 @@ class SidebarCache
         Module::class,
         Menu::class,
         SubMenu::class,
+        MenuAccessTemplate::class,
     ];
 
     /**
@@ -36,7 +39,7 @@ class SidebarCache
      */
     public static function get(?User $user): Collection
     {
-        if (! Schema::hasTable('modules')) {
+        if (app()->runningInConsole() && ! Schema::hasTable('modules')) {
             return new Collection;
         }
 
@@ -68,11 +71,40 @@ class SidebarCache
     }
 
     /**
-     * Bangun struktur modul, menu, dan submenu yang telah difilter sesuai hak akses user.
+     * Dapatkan pohon hirarki modul, menu, dan submenu aktif dari cache.
+     * Digunakan bersama oleh Sidebar, MenuAccessController (editUser, editTemplate), dll.
      */
-    public static function buildSidebar(User $user): Collection
+    public static function getActiveTree(): Collection
     {
-        $sidebarModules = Module::query()
+        $version = self::version();
+        $cacheKey = "infora_active_modules_tree_v{$version}";
+
+        $serialized = Cache::remember($cacheKey, now()->addHours(self::TTL_HOURS), function () {
+            return serialize(self::fetchActiveTree());
+        });
+
+        if (! is_string($serialized)) {
+            $tree = self::fetchActiveTree();
+            Cache::put($cacheKey, serialize($tree), now()->addHours(self::TTL_HOURS));
+
+            return $tree;
+        }
+
+        $unpacked = unserialize($serialized, ['allowed_classes' => self::ALLOWED_CLASSES]);
+
+        if (! $unpacked instanceof Collection) {
+            return self::fetchActiveTree();
+        }
+
+        return $unpacked;
+    }
+
+    /**
+     * Ambil pohon hirarki modul, menu, dan submenu aktif langsung dari database.
+     */
+    protected static function fetchActiveTree(): Collection
+    {
+        return Module::query()
             ->where('is_active', true)
             ->orderBy('order')
             ->with([
@@ -88,6 +120,59 @@ class SidebarCache
                 },
             ])
             ->get();
+    }
+
+    /**
+     * Dapatkan daftar template peran yang tersedia dari cache.
+     */
+    public static function getRoleTemplates(): Collection
+    {
+        $version = self::version();
+        $cacheKey = "infora_role_templates_v{$version}";
+
+        $serialized = Cache::remember($cacheKey, now()->addHours(self::TTL_HOURS), function () {
+            return serialize(
+                MenuAccessTemplate::query()
+                    ->select('role_key', 'role_name', 'role_category')
+                    ->distinct()
+                    ->orderBy('role_category')
+                    ->orderBy('role_name')
+                    ->get()
+            );
+        });
+
+        if (! is_string($serialized)) {
+            $templates = MenuAccessTemplate::query()
+                ->select('role_key', 'role_name', 'role_category')
+                ->distinct()
+                ->orderBy('role_category')
+                ->orderBy('role_name')
+                ->get();
+            Cache::put($cacheKey, serialize($templates), now()->addHours(self::TTL_HOURS));
+
+            return $templates;
+        }
+
+        $unpacked = unserialize($serialized, ['allowed_classes' => self::ALLOWED_CLASSES]);
+
+        if (! $unpacked instanceof Collection) {
+            return MenuAccessTemplate::query()
+                ->select('role_key', 'role_name', 'role_category')
+                ->distinct()
+                ->orderBy('role_category')
+                ->orderBy('role_name')
+                ->get();
+        }
+
+        return $unpacked;
+    }
+
+    /**
+     * Bangun struktur modul, menu, dan submenu yang telah difilter sesuai hak akses user.
+     */
+    public static function buildSidebar(User $user): Collection
+    {
+        $sidebarModules = self::getActiveTree();
 
         if ($user->isSuperAdmin()) {
             return $sidebarModules;
@@ -152,5 +237,137 @@ class SidebarCache
     {
         $current = (int) Cache::get(self::VERSION_KEY, 1);
         Cache::forever(self::VERSION_KEY, $current + 1);
+    }
+
+    /**
+     * Dapatkan URL rute pertama yang diizinkan untuk diakses oleh user.
+     */
+    public static function getFirstAllowedUrl(User $user): ?string
+    {
+        $sidebarModules = self::get($user);
+        $fallbackUrl = null;
+
+        foreach ($sidebarModules as $module) {
+            foreach ($module->menus as $menu) {
+                if ($menu->subMenus && $menu->subMenus->isNotEmpty()) {
+                    foreach ($menu->subMenus as $subMenu) {
+                        $url = $subMenu->route_url;
+                        if ($url && $url !== '#') {
+                            if (! str_contains($url, 'under-development')) {
+                                return $url;
+                            }
+                            $fallbackUrl ??= $url;
+                        }
+                    }
+                } else {
+                    $url = $menu->route_url;
+                    if ($url && $url !== '#') {
+                        if (! str_contains($url, 'under-development')) {
+                            return $url;
+                        }
+                        $fallbackUrl ??= $url;
+                    }
+                }
+            }
+        }
+
+        return $fallbackUrl;
+    }
+
+    /**
+     * Cari Menu atau SubMenu yang cocok dengan rute request saat ini.
+     *
+     * @return array{type: 'menu'|'submenu', item: Menu|SubMenu}|null
+     */
+    public static function findByRoute(Request $request): ?array
+    {
+        $activeTree = self::getActiveTree();
+
+        // 1. Prioritaskan kecocokan rute persis (Exact Match) di seluruh pohon
+        foreach ($activeTree as $module) {
+            foreach ($module->menus as $menu) {
+                foreach ($menu->subMenus as $subMenu) {
+                    if ($subMenu->route_name && $request->routeIs($subMenu->route_name)) {
+                        return ['type' => 'submenu', 'item' => $subMenu];
+                    }
+                }
+
+                if ($menu->route_name && $request->routeIs($menu->route_name)) {
+                    return ['type' => 'menu', 'item' => $menu];
+                }
+            }
+        }
+
+        // 2. Jika tidak ada kecocokan persis, cari berdasarkan pola prefix/CRUD wildcard
+        foreach ($activeTree as $module) {
+            foreach ($module->menus as $menu) {
+                foreach ($menu->subMenus as $subMenu) {
+                    if (self::matchesRoute($request, $subMenu->route_name)) {
+                        return ['type' => 'submenu', 'item' => $subMenu];
+                    }
+                }
+
+                if (self::matchesRoute($request, $menu->route_name)) {
+                    return ['type' => 'menu', 'item' => $menu];
+                }
+            }
+        }
+
+        // 3. Fallback pencarian langsung jika pohon aktif belum terindeks di cache
+        if (Schema::hasTable('sub_menus')) {
+            $subMenus = SubMenu::where('is_active', true)->whereNotNull('route_name')->get();
+            foreach ($subMenus as $subMenu) {
+                if ($request->routeIs($subMenu->route_name)) {
+                    return ['type' => 'submenu', 'item' => $subMenu];
+                }
+            }
+
+            foreach ($subMenus as $subMenu) {
+                if (self::matchesRoute($request, $subMenu->route_name)) {
+                    return ['type' => 'submenu', 'item' => $subMenu];
+                }
+            }
+        }
+
+        if (Schema::hasTable('menus')) {
+            $menus = Menu::where('is_active', true)->whereNotNull('route_name')->get();
+            foreach ($menus as $menu) {
+                if ($request->routeIs($menu->route_name)) {
+                    return ['type' => 'menu', 'item' => $menu];
+                }
+            }
+
+            foreach ($menus as $menu) {
+                if (self::matchesRoute($request, $menu->route_name)) {
+                    return ['type' => 'menu', 'item' => $menu];
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Periksa apakah request saat ini cocok dengan pola rute yang diberikan.
+     */
+    public static function matchesRoute(Request $request, ?string $routeName): bool
+    {
+        if (blank($routeName)) {
+            return false;
+        }
+
+        $patterns = [
+            $routeName,
+            $routeName.'.*',
+            $routeName.'.index',
+        ];
+
+        if (str_ends_with($routeName, '.index')) {
+            $base = substr($routeName, 0, -6);
+            $patterns[] = $base;
+            $patterns[] = $base.'.*';
+        }
+
+        return $request->routeIs($patterns);
     }
 }

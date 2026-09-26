@@ -8,9 +8,9 @@ use App\Http\Requests\KonfigurasiSekolah\StoreTahunAjaranRequest;
 use App\Http\Requests\KonfigurasiSekolah\UpdateSemesterRequest;
 use App\Http\Requests\KonfigurasiSekolah\UpdateTahunAjaranRequest;
 use App\Models\KalenderAkademik;
-use App\Models\School;
 use App\Models\Semester;
 use App\Models\TahunAjaran;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,18 +23,11 @@ class TahunAjaranController extends Controller
      */
     public function index(Request $request): View
     {
-        // 1. Ambil daftar sekolah aktif untuk dropdown selector
-        $schools = School::query()
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get(['id', 'name', 'npsn', 'school_type']);
+        /** @var User $user */
+        $user = $request->user();
 
-        // 2. Tentukan sekolah terpilih (default: sekolah pertama)
-        $selectedSchoolId = (int) $request->query('school_id', $schools->first()?->id ?? 0);
-        $selectedSchool = $schools->firstWhere('id', $selectedSchoolId) ?? $schools->first();
-        if ($selectedSchool && $selectedSchoolId !== $selectedSchool->id) {
-            $selectedSchoolId = $selectedSchool->id;
-        }
+        // 1 & 2. Tentukan sekolah terpilih (konsisten dengan pendekatan multi-tenancy)
+        [$selectedSchool, $selectedSchoolId, $schools] = $this->resolveSchoolContext($request);
 
         // 3. Ambil daftar Tahun Ajaran untuk unit sekolah terpilih (Master Table)
         $tahunAjaranList = collect();
@@ -70,6 +63,7 @@ class TahunAjaranController extends Controller
         $activeSemester = $selectedSchoolId > 0 ? Semester::activeFor($selectedSchoolId) : null;
 
         return view('konfigurasi-sekolah.tahun-ajaran.index', [
+            'user' => $user,
             'schools' => $schools,
             'selectedSchool' => $selectedSchool,
             'selectedSchoolId' => $selectedSchoolId,
@@ -86,7 +80,13 @@ class TahunAjaranController extends Controller
      */
     public function store(StoreTahunAjaranRequest $request): RedirectResponse
     {
+        /** @var User $user */
+        $user = $request->user();
         $data = $request->validated();
+
+        if ($user->school_id) {
+            $data['school_id'] = $user->school_id;
+        }
 
         $tahunAjaran = DB::transaction(function () use ($data) {
             if (! empty($data['is_active'])) {
@@ -97,10 +97,9 @@ class TahunAjaranController extends Controller
         });
 
         return redirect()
-            ->route('konfigurasi-sekolah.tahun-ajaran', [
-                'school_id' => $tahunAjaran->school_id,
+            ->route('konfigurasi-sekolah.tahun-ajaran', $this->schoolRedirectParams($request, $tahunAjaran->school_id, [
                 'tahun_ajaran_id' => $tahunAjaran->id,
-            ])
+            ]))
             ->with('success', "Tahun ajaran {$tahunAjaran->tahun} berhasil ditambahkan.");
     }
 
@@ -109,7 +108,15 @@ class TahunAjaranController extends Controller
      */
     public function update(UpdateTahunAjaranRequest $request, TahunAjaran $tahunAjaran): RedirectResponse
     {
+        $this->authorizeSchool($request, $tahunAjaran->school_id);
+
+        /** @var User $user */
+        $user = $request->user();
+
         $data = $request->validated();
+        if ($user->school_id) {
+            $data['school_id'] = $user->school_id;
+        }
 
         DB::transaction(function () use ($tahunAjaran, $data) {
             if (! empty($data['is_active'])) {
@@ -122,31 +129,33 @@ class TahunAjaranController extends Controller
         });
 
         return redirect()
-            ->route('konfigurasi-sekolah.tahun-ajaran', [
-                'school_id' => $tahunAjaran->school_id,
+            ->route('konfigurasi-sekolah.tahun-ajaran', $this->schoolRedirectParams($request, $tahunAjaran->school_id, [
                 'tahun_ajaran_id' => $tahunAjaran->id,
-            ])
+            ]))
             ->with('success', "Data tahun ajaran {$tahunAjaran->tahun} berhasil diperbarui.");
     }
 
     /**
      * Menghapus Tahun Ajaran dengan proteksi keamanan.
      */
-    public function destroy(TahunAjaran $tahunAjaran): RedirectResponse
+    public function destroy(Request $request, TahunAjaran $tahunAjaran): RedirectResponse
     {
+        $this->authorizeSchool($request, $tahunAjaran->school_id);
+
         $schoolId = $tahunAjaran->school_id;
+        $redirectParams = $this->schoolRedirectParams($request, $schoolId);
 
         // Proteksi 1: Tahun ajaran aktif dilarang dihapus
         if ($tahunAjaran->is_active) {
             return redirect()
-                ->route('konfigurasi-sekolah.tahun-ajaran', ['school_id' => $schoolId])
+                ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
                 ->with('error', 'Tahun ajaran yang sedang berstatus AKTIF dilarang keras untuk dihapus.');
         }
 
         // Proteksi 2: Memiliki semester aktif
         if ($tahunAjaran->hasActiveSemester()) {
             return redirect()
-                ->route('konfigurasi-sekolah.tahun-ajaran', ['school_id' => $schoolId])
+                ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
                 ->with('error', 'Tahun ajaran ini memiliki semester yang sedang aktif sehingga tidak dapat dihapus.');
         }
 
@@ -158,7 +167,7 @@ class TahunAjaranController extends Controller
 
         if ($hasCalendarEvents) {
             return redirect()
-                ->route('konfigurasi-sekolah.tahun-ajaran', ['school_id' => $schoolId])
+                ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
                 ->with('error', 'Tahun ajaran ini sudah terikat dengan agenda kegiatan Kalender Akademik sehingga tidak dapat dihapus.');
         }
 
@@ -166,7 +175,7 @@ class TahunAjaranController extends Controller
         $tahunAjaran->delete();
 
         return redirect()
-            ->route('konfigurasi-sekolah.tahun-ajaran', ['school_id' => $schoolId])
+            ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
             ->with('success', "Tahun ajaran {$namaTahun} beserta semesternya berhasil dihapus.");
     }
 
@@ -175,7 +184,12 @@ class TahunAjaranController extends Controller
      */
     public function storeSemester(StoreSemesterRequest $request, TahunAjaran $tahunAjaran): RedirectResponse
     {
+        $this->authorizeSchool($request, $tahunAjaran->school_id);
+
         $data = $request->validated();
+        $redirectParams = $this->schoolRedirectParams($request, $tahunAjaran->school_id, [
+            'tahun_ajaran_id' => $tahunAjaran->id,
+        ]);
 
         // Validasi duplikasi semester di tahun ajaran yang sama
         $alreadyExists = $tahunAjaran->semesters()
@@ -186,10 +200,7 @@ class TahunAjaranController extends Controller
             $label = ucfirst($data['semester']);
 
             return redirect()
-                ->route('konfigurasi-sekolah.tahun-ajaran', [
-                    'school_id' => $tahunAjaran->school_id,
-                    'tahun_ajaran_id' => $tahunAjaran->id,
-                ])
+                ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
                 ->with('error', "Semester {$label} sudah terdaftar untuk tahun ajaran {$tahunAjaran->tahun}.");
         }
 
@@ -200,10 +211,7 @@ class TahunAjaranController extends Controller
         }
 
         return redirect()
-            ->route('konfigurasi-sekolah.tahun-ajaran', [
-                'school_id' => $tahunAjaran->school_id,
-                'tahun_ajaran_id' => $tahunAjaran->id,
-            ])
+            ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
             ->with('success', "Semester {$semester->label_semester} ({$tahunAjaran->tahun}) berhasil ditambahkan.");
     }
 
@@ -212,7 +220,16 @@ class TahunAjaranController extends Controller
      */
     public function updateSemester(UpdateSemesterRequest $request, TahunAjaran $tahunAjaran, Semester $semester): RedirectResponse
     {
+        $this->authorizeSchool($request, $tahunAjaran->school_id);
+
+        if ((int) $semester->tahun_ajaran_id !== (int) $tahunAjaran->id) {
+            abort(404);
+        }
+
         $data = $request->validated();
+        $redirectParams = $this->schoolRedirectParams($request, $tahunAjaran->school_id, [
+            'tahun_ajaran_id' => $tahunAjaran->id,
+        ]);
 
         // Validasi duplikasi jika tipe semester diubah
         $duplicate = $tahunAjaran->semesters()
@@ -224,10 +241,7 @@ class TahunAjaranController extends Controller
             $label = ucfirst($data['semester']);
 
             return redirect()
-                ->route('konfigurasi-sekolah.tahun-ajaran', [
-                    'school_id' => $tahunAjaran->school_id,
-                    'tahun_ajaran_id' => $tahunAjaran->id,
-                ])
+                ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
                 ->with('error', "Semester {$label} sudah terdaftar untuk tahun ajaran {$tahunAjaran->tahun}.");
         }
 
@@ -239,27 +253,30 @@ class TahunAjaranController extends Controller
         }
 
         return redirect()
-            ->route('konfigurasi-sekolah.tahun-ajaran', [
-                'school_id' => $tahunAjaran->school_id,
-                'tahun_ajaran_id' => $tahunAjaran->id,
-            ])
+            ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
             ->with('success', "Data Semester {$semester->label_semester} berhasil diperbarui.");
     }
 
     /**
      * Menghapus semester dengan proteksi keamanan.
      */
-    public function destroySemester(TahunAjaran $tahunAjaran, Semester $semester): RedirectResponse
+    public function destroySemester(Request $request, TahunAjaran $tahunAjaran, Semester $semester): RedirectResponse
     {
+        $this->authorizeSchool($request, $tahunAjaran->school_id);
+
+        if ((int) $semester->tahun_ajaran_id !== (int) $tahunAjaran->id) {
+            abort(404);
+        }
+
         $schoolId = $tahunAjaran->school_id;
+        $redirectParams = $this->schoolRedirectParams($request, $schoolId, [
+            'tahun_ajaran_id' => $tahunAjaran->id,
+        ]);
 
         // Proteksi 1: Semester aktif dilarang dihapus
         if ($semester->is_active) {
             return redirect()
-                ->route('konfigurasi-sekolah.tahun-ajaran', [
-                    'school_id' => $schoolId,
-                    'tahun_ajaran_id' => $tahunAjaran->id,
-                ])
+                ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
                 ->with('error', 'Semester yang sedang berstatus AKTIF dilarang keras untuk dihapus.');
         }
 
@@ -272,10 +289,7 @@ class TahunAjaranController extends Controller
 
         if ($hasCalendarEvents) {
             return redirect()
-                ->route('konfigurasi-sekolah.tahun-ajaran', [
-                    'school_id' => $schoolId,
-                    'tahun_ajaran_id' => $tahunAjaran->id,
-                ])
+                ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
                 ->with('error', "Semester {$semester->label_semester} sudah terikat dengan agenda kegiatan Kalender Akademik sehingga tidak dapat dihapus.");
         }
 
@@ -283,25 +297,29 @@ class TahunAjaranController extends Controller
         $semester->delete();
 
         return redirect()
-            ->route('konfigurasi-sekolah.tahun-ajaran', [
-                'school_id' => $schoolId,
-                'tahun_ajaran_id' => $tahunAjaran->id,
-            ])
+            ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
             ->with('success', "Semester {$label} berhasil dihapus.");
     }
 
     /**
      * Menetapkan suatu semester sebagai semester aktif tunggal pada sekolah tersebut.
      */
-    public function activateSemester(TahunAjaran $tahunAjaran, Semester $semester): RedirectResponse
+    public function activateSemester(Request $request, TahunAjaran $tahunAjaran, Semester $semester): RedirectResponse
     {
+        $this->authorizeSchool($request, $tahunAjaran->school_id);
+
+        if ((int) $semester->tahun_ajaran_id !== (int) $tahunAjaran->id) {
+            abort(404);
+        }
+
         $semester->activate();
 
+        $redirectParams = $this->schoolRedirectParams($request, $tahunAjaran->school_id, [
+            'tahun_ajaran_id' => $tahunAjaran->id,
+        ]);
+
         return redirect()
-            ->route('konfigurasi-sekolah.tahun-ajaran', [
-                'school_id' => $tahunAjaran->school_id,
-                'tahun_ajaran_id' => $tahunAjaran->id,
-            ])
+            ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
             ->with('success', "Semester {$semester->label_semester} ({$tahunAjaran->tahun}) berhasil ditetapkan sebagai Semester Aktif.");
     }
 }

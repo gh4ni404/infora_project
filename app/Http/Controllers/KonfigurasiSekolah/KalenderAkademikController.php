@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\KonfigurasiSekolah\StoreKalenderAkademikRequest;
 use App\Http\Requests\KonfigurasiSekolah\UpdateKalenderAkademikRequest;
 use App\Models\KalenderAkademik;
-use App\Models\School;
+use App\Models\Semester;
+use App\Models\TahunAjaran;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -44,18 +45,11 @@ class KalenderAkademikController extends Controller
      */
     public function index(Request $request): View
     {
-        // Ambil daftar sekolah aktif untuk dropdown selector
-        $schools = School::query()
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get(['id', 'name', 'npsn', 'school_type']);
+        /** @var User $user */
+        $user = $request->user();
 
-        // Tentukan sekolah terpilih (default: sekolah pertama)
-        $selectedSchoolId = (int) $request->query('school_id', $schools->first()?->id ?? 0);
-        $selectedSchool = $schools->firstWhere('id', $selectedSchoolId) ?? $schools->first();
-        if ($selectedSchool && $selectedSchoolId !== $selectedSchool->id) {
-            $selectedSchoolId = $selectedSchool->id;
-        }
+        // 1 & 2. Tentukan sekolah terpilih (konsisten dengan pendekatan multi-tenancy)
+        [$selectedSchool, $selectedSchoolId, $schools] = $this->resolveSchoolContext($request);
 
         // Filter bulan dan tahun untuk kalender visual
         $currentMonth = (int) $request->query('bulan', Carbon::now()->month);
@@ -131,16 +125,50 @@ class KalenderAkademikController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        // Opsi filter tahun ajaran unik yang sudah tersimpan
-        $availableYears = KalenderAkademik::query()
-            ->when($selectedSchoolId > 0, fn ($q) => $q->where('school_id', $selectedSchoolId))
-            ->distinct()
-            ->pluck('tahun_ajaran')
-            ->filter()
-            ->values();
+        // Ambil data Tahun Ajaran untuk unit sekolah terpilih (Master Tenancy)
+        $tahunAjaranList = $selectedSchoolId > 0
+            ? TahunAjaran::query()
+                ->where('school_id', $selectedSchoolId)
+                ->with('semesters')
+                ->orderBy('tahun', 'desc')
+                ->get()
+            : collect();
 
-        // Default tahun ajaran jika belum ada (misal 2026/2027)
-        $defaultTahunAjaran = $availableYears->first() ?? '2026/2027';
+        $hasTahunAjaran = $tahunAjaranList->isNotEmpty();
+        $activeTahunAjaran = $tahunAjaranList->firstWhere('is_active', true) ?? $tahunAjaranList->first();
+        $defaultTahunAjaran = $activeTahunAjaran?->tahun ?? '';
+
+        // Semester aktif unit sekolah
+        $activeSemester = $selectedSchoolId > 0 ? Semester::activeFor($selectedSchoolId) : null;
+        $defaultSemester = $activeSemester?->semester ?? 'ganjil';
+
+        // Opsi dropdown Tahun Ajaran
+        $tahunAjaranOptions = $tahunAjaranList->mapWithKeys(
+            fn (TahunAjaran $ta) => [$ta->tahun => $ta->tahun.($ta->is_active ? ' (Aktif)' : '')]
+        );
+
+        // Struktur semester per tahun ajaran untuk reaktivitas form
+        $tahunAjaranSemesters = $tahunAjaranList->mapWithKeys(function (TahunAjaran $ta) {
+            $semesters = $ta->semesters->map(fn (Semester $s) => [
+                'semester' => $s->semester,
+                'label' => $s->label_semester.($s->is_active ? ' (Aktif)' : ''),
+                'is_active' => (bool) $s->is_active,
+            ]);
+
+            return [$ta->tahun => $semesters];
+        });
+
+        // Opsi filter tahun ajaran unik yang sudah tersimpan / terdaftar
+        $availableYears = $tahunAjaranList->pluck('tahun')
+            ->merge(
+                KalenderAkademik::query()
+                    ->when($selectedSchoolId > 0, fn ($q) => $q->where('school_id', $selectedSchoolId))
+                    ->distinct()
+                    ->pluck('tahun_ajaran')
+            )
+            ->filter()
+            ->unique()
+            ->values();
 
         // Tampilan aktif (kalender atau tabel)
         $activeView = $request->query('view', 'kalender');
@@ -149,6 +177,7 @@ class KalenderAkademikController extends Controller
         }
 
         return view('konfigurasi-sekolah.kalender-akademik.index', [
+            'user' => $user,
             'schools' => $schools,
             'selectedSchool' => $selectedSchool,
             'selectedSchoolId' => $selectedSchoolId,
@@ -158,6 +187,11 @@ class KalenderAkademikController extends Controller
             'currentYear' => $currentYear,
             'availableYears' => $availableYears,
             'defaultTahunAjaran' => $defaultTahunAjaran,
+            'defaultSemester' => $defaultSemester,
+            'hasTahunAjaran' => $hasTahunAjaran,
+            'tahunAjaranList' => $tahunAjaranList,
+            'tahunAjaranOptions' => $tahunAjaranOptions,
+            'tahunAjaranSemesters' => $tahunAjaranSemesters,
             'activeView' => $activeView,
             'perPageInput' => $perPageInput,
             'kategoriOptions' => self::KATEGORI_OPTIONS,
@@ -212,6 +246,9 @@ class KalenderAkademikController extends Controller
     public function store(StoreKalenderAkademikRequest $request): RedirectResponse|JsonResponse
     {
         $data = $request->validated();
+        if ($request->user()?->school_id) {
+            $data['school_id'] = $request->user()->school_id;
+        }
         $event = KalenderAkademik::create($data);
 
         if ($request->expectsJson()) {
@@ -223,21 +260,20 @@ class KalenderAkademikController extends Controller
         }
 
         return redirect()
-            ->route('konfigurasi-sekolah.kalender-akademik', [
-                'school_id' => $event->school_id,
+            ->route('konfigurasi-sekolah.kalender-akademik', $this->schoolRedirectParams($request, $event->school_id, [
                 'view' => $request->input('view', 'kalender'),
-            ])
+            ]))
             ->with('success', 'Kegiatan kalender akademik berhasil ditambahkan.');
     }
 
     /**
      * Form edit dialihkan ke halaman indeks dengan modal edit.
      */
-    public function edit(KalenderAkademik $kalenderAkademik): RedirectResponse
+    public function edit(Request $request, KalenderAkademik $kalenderAkademik): RedirectResponse
     {
-        return redirect()->route('konfigurasi-sekolah.kalender-akademik', [
-            'school_id' => $kalenderAkademik->school_id,
-        ]);
+        $this->authorizeSchool($request, $kalenderAkademik->school_id);
+
+        return redirect()->route('konfigurasi-sekolah.kalender-akademik', $this->schoolRedirectParams($request, $kalenderAkademik->school_id));
     }
 
     /**
@@ -245,7 +281,12 @@ class KalenderAkademikController extends Controller
      */
     public function update(UpdateKalenderAkademikRequest $request, KalenderAkademik $kalenderAkademik): RedirectResponse|JsonResponse
     {
+        $this->authorizeSchool($request, $kalenderAkademik->school_id);
+
         $data = $request->validated();
+        if ($request->user()?->school_id) {
+            $data['school_id'] = $request->user()->school_id;
+        }
         $kalenderAkademik->update($data);
 
         if ($request->expectsJson()) {
@@ -257,10 +298,9 @@ class KalenderAkademikController extends Controller
         }
 
         return redirect()
-            ->route('konfigurasi-sekolah.kalender-akademik', [
-                'school_id' => $kalenderAkademik->school_id,
+            ->route('konfigurasi-sekolah.kalender-akademik', $this->schoolRedirectParams($request, $kalenderAkademik->school_id, [
                 'view' => $request->input('view', 'kalender'),
-            ])
+            ]))
             ->with('success', 'Kegiatan kalender akademik berhasil diperbarui.');
     }
 
@@ -269,6 +309,8 @@ class KalenderAkademikController extends Controller
      */
     public function destroy(Request $request, KalenderAkademik $kalenderAkademik): RedirectResponse|JsonResponse
     {
+        $this->authorizeSchool($request, $kalenderAkademik->school_id);
+
         $schoolId = $kalenderAkademik->school_id;
         $kalenderAkademik->delete();
 
@@ -280,10 +322,9 @@ class KalenderAkademikController extends Controller
         }
 
         return redirect()
-            ->route('konfigurasi-sekolah.kalender-akademik', [
-                'school_id' => $schoolId,
+            ->route('konfigurasi-sekolah.kalender-akademik', $this->schoolRedirectParams($request, $schoolId, [
                 'view' => $request->input('view', 'kalender'),
-            ])
+            ]))
             ->with('success', 'Kegiatan kalender akademik berhasil dihapus.');
     }
 }

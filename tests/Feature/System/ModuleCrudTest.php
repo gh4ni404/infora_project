@@ -203,3 +203,68 @@ test('module store validation fails when order is less than 1', function () {
 
     $response->assertSessionHasErrors('order');
 });
+
+test('module store automatically shifts existing modules order when target order already exists', function () {
+    $module1 = Module::create(['name' => 'Modul Satu', 'order' => 1, 'is_active' => true]);
+    $module2 = Module::create(['name' => 'Modul Dua', 'order' => 2, 'is_active' => true]);
+    $module3 = Module::create(['name' => 'Modul Tiga', 'order' => 3, 'is_active' => true]);
+
+    // Insert module with order 2
+    $response = $this->actingAs($this->superAdmin)->post(route('system.modules.store'), [
+        'name' => 'Modul Baru Posisi Dua',
+        'order' => 2,
+        'is_active' => true,
+    ]);
+
+    $response->assertRedirect(route('system.modules.index'));
+    $response->assertSessionHas('success');
+
+    expect($module1->fresh()->order)->toBe(1);
+    expect(Module::where('name', 'MODUL BARU POSISI DUA')->first()->order)->toBe(2);
+    expect($module2->fresh()->order)->toBe(3);
+    expect($module3->fresh()->order)->toBe(4);
+});
+
+test('module update automatically shifts existing modules order when order changes', function () {
+    $module1 = Module::create(['name' => 'Modul Satu', 'order' => 1, 'is_active' => true]);
+    $module2 = Module::create(['name' => 'Modul Dua', 'order' => 2, 'is_active' => true]);
+    $module3 = Module::create(['name' => 'Modul Tiga', 'order' => 3, 'is_active' => true]);
+
+    // Move module 3 to order 1
+    $response = $this->actingAs($this->superAdmin)->put(route('system.modules.update', $module3), [
+        'name' => $module3->name,
+        'order' => 1,
+        'is_active' => true,
+    ]);
+
+    $response->assertRedirect(route('system.modules.index'));
+
+    expect($module3->fresh()->order)->toBe(1);
+    expect($module1->fresh()->order)->toBe(2);
+    expect($module2->fresh()->order)->toBe(3);
+});
+
+test('super admin can sync modules order sequence', function () {
+    Module::query()->delete();
+
+    $moduleA = Module::create(['name' => 'Modul A', 'order' => 5, 'is_active' => true]);
+    $moduleB = Module::create(['name' => 'Modul B', 'order' => 5, 'is_active' => true]);
+    $moduleC = Module::create(['name' => 'Modul C', 'order' => 12, 'is_active' => true]);
+
+    $response = $this->actingAs($this->superAdmin)->post(route('system.modules.sync-order'));
+    $response->assertRedirect(route('system.modules.index'));
+    $response->assertSessionHas('success');
+
+    $allModules = Module::orderBy('order')->get();
+    $orders = $allModules->pluck('order')->all();
+
+    expect($orders)->toBe([1, 2, 3]);
+});
+
+test('modules index view renders sync order button and modal', function () {
+    $response = $this->actingAs($this->superAdmin)->get(route('system.modules.index'));
+    $response->assertOk();
+    $response->assertSee('btnOpenSyncOrder', false);
+    $response->assertSee('modalSyncOrder', false);
+    $response->assertSee('Sinkronkan Urutan');
+});

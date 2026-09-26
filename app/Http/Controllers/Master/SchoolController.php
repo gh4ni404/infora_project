@@ -7,6 +7,7 @@ use App\Http\Requests\Master\StoreSchoolRequest;
 use App\Http\Requests\Master\UpdateSchoolRequest;
 use App\Models\Provinsi;
 use App\Models\School;
+use App\Support\AdminAccountManager;
 use App\Support\ImageUploader;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ class SchoolController extends Controller
     public function index(Request $request): View
     {
         $query = School::query()
-            ->with(['provinsi', 'kabupaten', 'kecamatan', 'kelurahan'])
+            ->with(['provinsi', 'kabupaten', 'kecamatan', 'kelurahan', 'adminUser'])
             ->orderBy('name')
             ->orderBy('id');
 
@@ -72,11 +73,13 @@ class SchoolController extends Controller
         }
         unset($data['logo']);
 
-        School::create($data);
+        $school = School::create($data);
+
+        AdminAccountManager::createOrSyncAdmin($school);
 
         return redirect()
             ->route('master.data-sekolah.index')
-            ->with('success', 'Data sekolah berhasil ditambahkan ke dalam sistem.');
+            ->with('success', 'Data sekolah dan akun administrator (NPSN: '.$school->npsn.') berhasil dibuat.');
     }
 
     /**
@@ -112,9 +115,42 @@ class SchoolController extends Controller
 
         $dataSekolah->update($data);
 
+        // Selaraskan data akun administrator sekolah jika status atau npsn berubah
+        AdminAccountManager::createOrSyncAdmin($dataSekolah);
+
         return redirect()
             ->route('master.data-sekolah.index')
             ->with('success', 'Data sekolah berhasil diperbarui.');
+    }
+
+    /**
+     * Sinkronkan atau terbitkan akun administrator untuk seluruh unit sekolah yang terdaftar.
+     */
+    public function syncAllAdmins(): RedirectResponse
+    {
+        $schools = School::all();
+        $syncedCount = 0;
+
+        foreach ($schools as $school) {
+            AdminAccountManager::createOrSyncAdmin($school);
+            $syncedCount++;
+        }
+
+        return redirect()
+            ->route('master.data-sekolah.index')
+            ->with('success', "Berhasil menyinkronkan {$syncedCount} akun administrator sekolah.");
+    }
+
+    /**
+     * Terbitkan atau selaraskan akun administrator untuk satu unit sekolah tertentu.
+     */
+    public function syncSingleAdmin(School $dataSekolah): RedirectResponse
+    {
+        $admin = AdminAccountManager::createOrSyncAdmin($dataSekolah);
+
+        return redirect()
+            ->route('master.data-sekolah.index')
+            ->with('success', "Akun administrator sekolah {$dataSekolah->name} (Username: {$admin->username}) berhasil disinkronkan.");
     }
 
     /**
