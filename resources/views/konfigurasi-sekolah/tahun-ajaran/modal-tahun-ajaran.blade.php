@@ -36,15 +36,6 @@
         rows="3"
     />
 
-    <x-form-checkbox
-        name="is_active"
-        id="create_is_active_ta"
-        label="Jadikan sebagai Tahun Ajaran Aktif"
-        hint="Mengaktifkan tahun ajaran ini akan menonaktifkan status aktif tahun ajaran lain pada sekolah ini."
-        value="1"
-        :checked="(bool) old('is_active')"
-    />
-
     <x-slot:footer>
         <button type="button" class="btn-secondary" id="btnCancelCreateTahunAjaran">Batal</button>
         <button type="submit" class="btn-primary" id="btnSubmitCreateTahunAjaran">Simpan</button>
@@ -86,13 +77,6 @@
         label="Keterangan (Opsional)"
         placeholder="Catatan tambahan mengenai tahun ajaran ini..."
         rows="3"
-    />
-
-    <x-form-checkbox
-        name="is_active"
-        id="edit_ta_is_active"
-        label="Jadikan sebagai Tahun Ajaran Aktif"
-        value="1"
     />
 
     <x-slot:footer>

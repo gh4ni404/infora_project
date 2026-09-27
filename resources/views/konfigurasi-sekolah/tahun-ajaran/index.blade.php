@@ -95,9 +95,41 @@
                     </td>
                     <td>
                         @if ($ta->is_active)
-                            <span class="badge badge-success">Aktif</span>
+                            @if ($user->isSuperAdmin())
+                                <label class="form-check cursor-pointer" title="Klik untuk menonaktifkan Tahun Ajaran {{ $ta->tahun }} (Khusus Superadmin)">
+                                    <input
+                                        type="checkbox"
+                                        class="form-check-input btn-trigger-deactivate-ta"
+                                        checked
+                                        data-action="{{ route('konfigurasi-sekolah.tahun-ajaran.deactivate', $ta) }}"
+                                        data-tahun="{{ $ta->tahun }}"
+                                        aria-label="Nonaktifkan Tahun Ajaran {{ $ta->tahun }}"
+                                    >
+                                    <span class="badge badge-success">Aktif</span>
+                                </label>
+                            @else
+                                <div class="form-check" title="Tahun Ajaran ini sedang aktif">
+                                    <input
+                                        type="checkbox"
+                                        class="form-check-input"
+                                        checked
+                                        disabled
+                                        aria-label="Status Tahun Ajaran {{ $ta->tahun }} Aktif"
+                                    >
+                                    <span class="badge badge-success">Aktif</span>
+                                </div>
+                            @endif
                         @else
-                            <span class="badge badge-neutral">Nonaktif</span>
+                            <label class="form-check cursor-pointer" title="Klik untuk mengaktifkan Tahun Ajaran {{ $ta->tahun }}">
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input btn-trigger-activate-ta"
+                                    data-action="{{ route('konfigurasi-sekolah.tahun-ajaran.activate', $ta) }}"
+                                    data-tahun="{{ $ta->tahun }}"
+                                    aria-label="Aktifkan Tahun Ajaran {{ $ta->tahun }}"
+                                >
+                                <span class="badge badge-neutral">Nonaktif</span>
+                            </label>
                         @endif
                     </td>
                     <td>
@@ -123,7 +155,6 @@
                                     'id' => $ta->id,
                                     'tahun' => $ta->tahun,
                                     'keterangan' => $ta->keterangan,
-                                    'is_active' => (bool) $ta->is_active,
                                 ]) }}"
                                 data-action="{{ route('konfigurasi-sekolah.tahun-ajaran.update', $ta) }}"
                                 title="Ubah Tahun Ajaran {{ $ta->tahun }}"
@@ -213,17 +244,17 @@
                         <td>
                             {{-- Tombol Switch Jadikan Aktif --}}
                             @if (! $sem->is_active)
-                                <form
-                                    method="POST"
-                                    action="{{ route('konfigurasi-sekolah.tahun-ajaran.semester.activate', [$selectedTahunAjaran, $sem]) }}"
-                                    onsubmit="return confirm('Tetapkan Semester {{ $sem->label_semester }} ({{ $selectedTahunAjaran->tahun }}) sebagai Semester Aktif? Semester aktif lain pada sekolah ini akan dinonaktifkan.');"
+                                <button
+                                    type="button"
+                                    class="btn-activate btn-trigger-activate-sem"
+                                    data-action="{{ route('konfigurasi-sekolah.tahun-ajaran.semester.activate', [$selectedTahunAjaran, $sem]) }}"
+                                    data-semester="{{ $sem->label_semester }}"
+                                    data-tahun="{{ $selectedTahunAjaran->tahun }}"
+                                    title="Tetapkan Semester {{ $sem->label_semester }} sebagai Aktif"
                                 >
-                                    @csrf
-                                    <button type="submit" class="btn-activate" title="Aktifkan">
-                                        <x-icon name="check" size="14" />
-                                        {{-- <span>Aktifkan</span> --}}
-                                    </button>
-                                </form>
+                                    <x-icon name="check" size="14" />
+                                    {{-- <span>Aktifkan</span> --}}
+                                </button>
                             @else
                                 <span class="badge badge-success">Aktif</span>
                             @endif
@@ -281,6 +312,19 @@
 {{-- Modals Tambah dan Ubah --}}
 @include('konfigurasi-sekolah.tahun-ajaran.modal-tahun-ajaran')
 @include('konfigurasi-sekolah.tahun-ajaran.modal-semester')
+{{-- Modal Konfirmasi Aktivasi Bersama (Shared Activation Confirmation Modal) --}}
+<x-modal
+    name="confirm"
+    id="modalConfirmActivateShared"
+    form-id="formConfirmActivateShared"
+    cancel-btn-id="btnCancelConfirmActivate"
+    confirm-btn-id="btnSubmitConfirmActivate"
+    badge-id="modalConfirmActivateBadge"
+    message-id="modalConfirmActivateMessage"
+    item-title-id="modalConfirmActivateTitle"
+    hint-id="modalConfirmActivateHint"
+    />
+
 {{-- Modal Konfirmasi Hapus Bersama (Shared Delete Modal) --}}
 <x-modal
     name="delete"
@@ -300,6 +344,54 @@ document.addEventListener('DOMContentLoaded', function () {
     InforaModals.setup('modalCreateSemester', { cancelBtnId: 'btnCancelCreateSemester', });
     InforaModals.setup('modalEditSemester', { cancelBtnId: 'btnCancelEditSemester', });
     InforaModals.setup('modalDeleteShared', { cancelBtnId: 'btnCancelDeleteShared', });
+    InforaModals.setup('modalConfirmActivateShared', { cancelBtnId: 'btnCancelConfirmActivate', });
+
+    // 2. Bind Confirmation Triggers (Checkbox Tahun Ajaran & Tombol Semester)
+    InforaModals.bindConfirmButtons('.btn-trigger-activate-ta', 'modalConfirmActivateShared', {
+        formId: 'formConfirmActivateShared',
+        title: 'Aktifkan Tahun Ajaran?',
+        message: 'Apakah Anda yakin ingin menetapkan Tahun Ajaran berikut sebagai Tahun Ajaran Aktif?',
+        badge: 'Tahun Ajaran',
+        itemTitle: (el) => el.dataset.tahun || '-',
+        hint: 'Status aktif tahun ajaran lain dan semester aktif saat ini pada unit sekolah akan dinonaktifkan.',
+        confirmText: 'Lanjutkan',
+        confirmBtnClass: 'btn-primary w-full justify-center font-medium',
+        badgeId: 'modalConfirmActivateBadge',
+        messageId: 'modalConfirmActivateMessage',
+        itemTitleId: 'modalConfirmActivateTitle',
+        hintId: 'modalConfirmActivateHint',
+    });
+
+    InforaModals.bindConfirmButtons('.btn-trigger-deactivate-ta', 'modalConfirmActivateShared', {
+        mode: 'deactivate',
+        formId: 'formConfirmActivateShared',
+        title: 'Nonaktifkan Tahun Ajaran?',
+        message: 'Apakah Anda yakin ingin menonaktifkan status aktif Tahun Ajaran berikut?',
+        badge: 'Tahun Ajaran',
+        itemTitle: (el) => el.dataset.tahun || '-',
+        hint: 'Unit sekolah ini tidak akan memiliki Tahun Ajaran dan Semester aktif sampai diaktifkan kembali.',
+        confirmText: 'Nonaktifkan',
+        confirmBtnClass: 'btn-delete w-full justify-center font-medium',
+        badgeId: 'modalConfirmActivateBadge',
+        messageId: 'modalConfirmActivateMessage',
+        itemTitleId: 'modalConfirmActivateTitle',
+        hintId: 'modalConfirmActivateHint',
+    });
+
+    InforaModals.bindConfirmButtons('.btn-trigger-activate-sem', 'modalConfirmActivateShared', {
+        formId: 'formConfirmActivateShared',
+        title: 'Aktifkan Semester?',
+        message: 'Apakah Anda yakin ingin menetapkan Semester berikut sebagai Semester Aktif?',
+        badge: 'Semester',
+        itemTitle: (el) => `${el.dataset.semester || '-'} (${el.dataset.tahun || '-'})`,
+        hint: 'Semester aktif lain pada unit sekolah ini akan dinonaktifkan.',
+        confirmText: 'Lanjutkan',
+        confirmBtnClass: 'btn-primary w-full justify-center font-medium',
+        badgeId: 'modalConfirmActivateBadge',
+        messageId: 'modalConfirmActivateMessage',
+        itemTitleId: 'modalConfirmActivateTitle',
+        hintId: 'modalConfirmActivateHint',
+    });
 
     // 2. Bind Tombol Buka Modal Tambah
     InforaModals.bindOpenButton('btnOpenCreateTahunAjaran', 'modalCreateTahunAjaran');
@@ -309,11 +401,9 @@ document.addEventListener('DOMContentLoaded', function () {
     InforaModals.bindEditButtons('.btn-edit-ta', 'modalEditTahunAjaran', function (modal, data) {
         const inputTahun = document.getElementById('edit_ta_tahun');
         const inputKeterangan = document.getElementById('edit_ta_keterangan');
-        const inputIsActive = document.getElementById('edit_ta_is_active');
 
         if (inputTahun) inputTahun.value = data.tahun || '';
         if (inputKeterangan) inputKeterangan.value = data.keterangan || '';
-        if (inputIsActive) inputIsActive.checked = Boolean(data.is_active);
     });
 
     // 4. Bind Tombol Ubah Semester

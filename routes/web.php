@@ -70,6 +70,8 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
         Route::post('/tahun-ajaran', [TahunAjaranController::class, 'store'])->name('tahun-ajaran.store');
         Route::put('/tahun-ajaran/{tahunAjaran}', [TahunAjaranController::class, 'update'])->name('tahun-ajaran.update');
         Route::delete('/tahun-ajaran/{tahunAjaran}', [TahunAjaranController::class, 'destroy'])->name('tahun-ajaran.destroy');
+        Route::post('/tahun-ajaran/{tahunAjaran}/activate', [TahunAjaranController::class, 'activate'])->name('tahun-ajaran.activate');
+        Route::post('/tahun-ajaran/{tahunAjaran}/deactivate', [TahunAjaranController::class, 'deactivate'])->name('tahun-ajaran.deactivate');
 
         Route::post('/tahun-ajaran/{tahunAjaran}/semester', [TahunAjaranController::class, 'storeSemester'])->name('tahun-ajaran.semester.store');
         Route::put('/tahun-ajaran/{tahunAjaran}/semester/{semester}', [TahunAjaranController::class, 'updateSemester'])->name('tahun-ajaran.semester.update');

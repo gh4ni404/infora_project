@@ -13,7 +13,6 @@ use App\Models\TahunAjaran;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class TahunAjaranController extends Controller
@@ -88,13 +87,8 @@ class TahunAjaranController extends Controller
             $data['school_id'] = $user->school_id;
         }
 
-        $tahunAjaran = DB::transaction(function () use ($data) {
-            if (! empty($data['is_active'])) {
-                TahunAjaran::where('school_id', $data['school_id'])->update(['is_active' => false]);
-            }
-
-            return TahunAjaran::create($data);
-        });
+        $data['is_active'] = false;
+        $tahunAjaran = TahunAjaran::create($data);
 
         return redirect()
             ->route('konfigurasi-sekolah.tahun-ajaran', $this->schoolRedirectParams($request, $tahunAjaran->school_id, [
@@ -118,21 +112,57 @@ class TahunAjaranController extends Controller
             $data['school_id'] = $user->school_id;
         }
 
-        DB::transaction(function () use ($tahunAjaran, $data) {
-            if (! empty($data['is_active'])) {
-                TahunAjaran::where('school_id', $data['school_id'])
-                    ->where('id', '!=', $tahunAjaran->id)
-                    ->update(['is_active' => false]);
-            }
-
-            $tahunAjaran->update($data);
-        });
+        $tahunAjaran->update($data);
 
         return redirect()
             ->route('konfigurasi-sekolah.tahun-ajaran', $this->schoolRedirectParams($request, $tahunAjaran->school_id, [
                 'tahun_ajaran_id' => $tahunAjaran->id,
             ]))
             ->with('success', "Data tahun ajaran {$tahunAjaran->tahun} berhasil diperbarui.");
+    }
+
+    /**
+     * Menetapkan suatu Tahun Ajaran sebagai tahun ajaran aktif tunggal pada sekolah tersebut.
+     */
+    public function activate(Request $request, TahunAjaran $tahunAjaran): RedirectResponse
+    {
+        $this->authorizeSchool($request, $tahunAjaran->school_id);
+
+        $tahunAjaran->activate();
+
+        $redirectParams = $this->schoolRedirectParams($request, $tahunAjaran->school_id, [
+            'tahun_ajaran_id' => $tahunAjaran->id,
+        ]);
+
+        return redirect()
+            ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
+            ->with('success', "Tahun ajaran {$tahunAjaran->tahun} berhasil ditetapkan sebagai Tahun Ajaran Aktif.");
+    }
+
+    /**
+     * Menonaktifkan tahun ajaran aktif (Khusus hak akses Super Administrator).
+     */
+    public function deactivate(Request $request, TahunAjaran $tahunAjaran): RedirectResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        // Otorisasi: Hanya Super Administrator yang diizinkan menonaktifkan tahun ajaran aktif
+        if (! $user->isSuperAdmin()) {
+            abort(403, 'Hanya Super Administrator yang diizinkan menonaktifkan Tahun Ajaran aktif.');
+        }
+
+        $this->authorizeSchool($request, $tahunAjaran->school_id);
+
+        $tahunAjaran->deactivate();
+
+        $redirectParams = $this->schoolRedirectParams($request, $tahunAjaran->school_id, [
+            'tahun_ajaran_id' => $tahunAjaran->id,
+        ]);
+
+        return redirect()
+            ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
+            ->with('success', "Tahun ajaran {$tahunAjaran->tahun} berhasil dinonaktifkan.");
     }
 
     /**

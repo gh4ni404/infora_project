@@ -22,7 +22,6 @@ class UpdateTahunAjaranRequest extends FormRequest
     {
         $merge = [
             'tahun' => trim((string) $this->input('tahun')),
-            'is_active' => $this->boolean('is_active'),
         ];
 
         if ($this->user()?->school_id) {
@@ -42,7 +41,6 @@ class UpdateTahunAjaranRequest extends FormRequest
         return [
             'school_id' => ['required', 'integer', 'exists:schools,id'],
             'tahun' => ['required', 'string', 'regex:/^\d{4}\/\d{4}$/'],
-            'is_active' => ['nullable', 'boolean'],
             'keterangan' => ['nullable', 'string', 'max:500'],
         ];
     }

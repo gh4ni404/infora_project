@@ -54,6 +54,8 @@ test('super admin can view tahun ajaran master detail page', function () {
     $response->assertSee('modalEditTahunAjaran', false);
     $response->assertSee('modalCreateSemester', false);
     $response->assertSee('modalEditSemester', false);
+    $response->assertSee('modalConfirmActivateShared', false);
+    $response->assertSee('modalDeleteShared', false);
     $response->assertSee('InforaModals.setup', false);
     $response->assertSee('InforaModals.bindOpenButton', false);
     $response->assertSee('InforaModals.bindEditButtons', false);
@@ -69,11 +71,10 @@ test('validation fails when storing tahun ajaran with invalid format', function 
     $response->assertSessionHasErrors('tahun');
 });
 
-test('super admin can create new tahun ajaran', function () {
+test('super admin can create new tahun ajaran and it defaults to inactive', function () {
     $response = $this->actingAs($this->superAdmin)->post(route('konfigurasi-sekolah.tahun-ajaran.store'), [
         'school_id' => $this->school->id,
         'tahun' => '2026/2027',
-        'is_active' => true,
         'keterangan' => 'Tahun ajaran baru operasional',
     ]);
 
@@ -81,8 +82,56 @@ test('super admin can create new tahun ajaran', function () {
     $this->assertDatabaseHas('tahun_ajaran', [
         'school_id' => $this->school->id,
         'tahun' => '2026/2027',
+        'is_active' => false,
+    ]);
+});
+
+test('super admin can activate a tahun ajaran and atomic switch deactivates old active year and semesters', function () {
+    $ta1 = TahunAjaran::create([
+        'school_id' => $this->school->id,
+        'tahun' => '2025/2026',
         'is_active' => true,
     ]);
+    $semLama = $ta1->semesters()->create([
+        'semester' => 'genap',
+        'tanggal_mulai' => '2026-01-05',
+        'tanggal_selesai' => '2026-06-25',
+        'is_active' => true,
+    ]);
+
+    $ta2 = TahunAjaran::create([
+        'school_id' => $this->school->id,
+        'tahun' => '2026/2027',
+        'is_active' => false,
+    ]);
+    $semBaru = $ta2->semesters()->create([
+        'semester' => 'ganjil',
+        'tanggal_mulai' => '2026-07-15',
+        'tanggal_selesai' => '2026-12-20',
+        'is_active' => false,
+    ]);
+
+    $response = $this->actingAs($this->superAdmin)->post(
+        route('konfigurasi-sekolah.tahun-ajaran.activate', $ta2)
+    );
+
+    $response->assertRedirect();
+    $response->assertSessionHas('success');
+
+    // Verifikasi tahun ajaran baru aktif dan tahun ajaran lama nonaktif
+    expect($ta2->fresh()->is_active)->toBeTrue();
+    expect($ta1->fresh()->is_active)->toBeFalse();
+
+    // Verifikasi semester lama dinonaktifkan dan semester baru tetap nonaktif (menunggu pilihan manual)
+    expect($semLama->fresh()->is_active)->toBeFalse();
+    expect($semBaru->fresh()->is_active)->toBeFalse();
+
+    // Verifikasi Helper Eloquent
+    $activeTaFromHelper = TahunAjaran::activeFor($this->school->id);
+    expect($activeTaFromHelper?->id)->toBe($ta2->id);
+
+    $activeSemFromHelper = Semester::activeFor($this->school->id);
+    expect($activeSemFromHelper)->toBeNull();
 });
 
 test('super admin can update existing tahun ajaran', function () {
@@ -395,6 +444,12 @@ test('school admin cannot manipulate tahun ajaran or semester belonging to anoth
         route('konfigurasi-sekolah.tahun-ajaran.semester.destroy', [$taSchoolB, $semSchoolB])
     );
     $responseDelSem->assertForbidden();
+
+    // Aktivasi tahun ajaran sekolah lain dilarang
+    $responseActivate = $this->actingAs($adminUser)->post(
+        route('konfigurasi-sekolah.tahun-ajaran.activate', $taSchoolB)
+    );
+    $responseActivate->assertForbidden();
 });
 
 test('super admin sees school switcher when multiple active schools exist and can switch previewed school', function () {
@@ -415,4 +470,99 @@ test('super admin sees school switcher when multiple active schools exist and ca
     $responseSwitch->assertOk();
     $responseSwitch->assertSee('SMA B Watampone');
     $responseSwitch->assertSee('2024/2025');
+});
+
+test('super admin can deactivate an active tahun ajaran and deactivates its semesters', function () {
+    $ta = TahunAjaran::create([
+        'school_id' => $this->school->id,
+        'tahun' => '2025/2026',
+        'is_active' => true,
+    ]);
+    $sem = $ta->semesters()->create([
+        'semester' => 'ganjil',
+        'tanggal_mulai' => '2025-07-15',
+        'tanggal_selesai' => '2025-12-20',
+        'is_active' => true,
+    ]);
+
+    $response = $this->actingAs($this->superAdmin)->post(
+        route('konfigurasi-sekolah.tahun-ajaran.deactivate', $ta)
+    );
+
+    $response->assertRedirect();
+    $response->assertSessionHas('success');
+
+    $this->assertDatabaseHas('tahun_ajaran', [
+        'id' => $ta->id,
+        'is_active' => false,
+    ]);
+    $this->assertDatabaseHas('semester', [
+        'id' => $sem->id,
+        'is_active' => false,
+    ]);
+});
+
+test('non super admin cannot deactivate a tahun ajaran', function () {
+    $ta = TahunAjaran::create([
+        'school_id' => $this->school->id,
+        'tahun' => '2025/2026',
+        'is_active' => true,
+    ]);
+
+    $adminUser = User::factory()->create([
+        'username' => 'admin_school_tester',
+        'email' => 'admin_school@infora.test',
+        'user_type' => 'admin',
+        'school_id' => $this->school->id,
+        'is_active' => true,
+    ]);
+
+    $response = $this->actingAs($adminUser)->post(
+        route('konfigurasi-sekolah.tahun-ajaran.deactivate', $ta)
+    );
+
+    $response->assertForbidden();
+
+    $this->assertDatabaseHas('tahun_ajaran', [
+        'id' => $ta->id,
+        'is_active' => true,
+    ]);
+});
+
+test('super admin sees deactivate trigger while non super admin sees disabled active checkbox', function () {
+    $ta = TahunAjaran::create([
+        'school_id' => $this->school->id,
+        'tahun' => '2025/2026',
+        'is_active' => true,
+    ]);
+
+    $adminUser = User::factory()->create([
+        'username' => 'admin_ui_tester',
+        'email' => 'admin_ui@infora.test',
+        'user_type' => 'admin',
+        'school_id' => $this->school->id,
+        'is_active' => true,
+    ]);
+
+    // Super Admin: sees input with btn-trigger-deactivate-ta and aria-label
+    $responseSuper = $this->actingAs($this->superAdmin)->get(route('konfigurasi-sekolah.tahun-ajaran'));
+    $responseSuper->assertOk();
+    $responseSuper->assertSee('class="form-check-input btn-trigger-deactivate-ta"', false);
+    $responseSuper->assertSee('aria-label="Nonaktifkan Tahun Ajaran 2025/2026"', false);
+
+    // Non-Superadmin: input does NOT have btn-trigger-deactivate-ta, is disabled
+    $viewAdmin = $this->view('konfigurasi-sekolah.tahun-ajaran.index', [
+        'user' => $adminUser,
+        'schools' => collect([$this->school]),
+        'selectedSchool' => $this->school,
+        'selectedSchoolId' => $this->school->id,
+        'tahunAjaranList' => collect([$ta]),
+        'selectedTahunAjaran' => $ta,
+        'selectedTahunAjaranId' => $ta->id,
+        'semesters' => collect(),
+        'activeSemester' => null,
+    ]);
+    $viewAdmin->assertDontSee('class="form-check-input btn-trigger-deactivate-ta"', false);
+    $viewAdmin->assertSee('aria-label="Status Tahun Ajaran 2025/2026 Aktif"', false);
+    $viewAdmin->assertSee('disabled', false);
 });
