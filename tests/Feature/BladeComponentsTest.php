@@ -206,6 +206,84 @@ test('modal renders delete variant with preset danger, size sm, alert, and foote
     $view->assertSee('Hapus');
 });
 
+test('modal renders confirm variant with preset info halo, size sm, and action button', function () {
+    $view = $this->blade(
+        '<x-modal
+            name="confirm"
+            id="modalConfirmTest"
+            form-id="formConfirmTest"
+            cancel-btn-id="btnCancelConfirmTest"
+            confirm-btn-id="btnSubmitConfirmTest"
+            title="Konfirmasi Tindakan"
+            message-id="confirmTestMessage"
+            badge-id="confirmTestBadge"
+            item-title-id="confirmTestTitle"
+            hint-id="confirmTestHint"
+        />'
+    );
+
+    $view->assertSee('modal-backdrop', false);
+    $view->assertSee('id="modalConfirmTest"', false);
+    $view->assertSee('modal-sm', false);
+    $view->assertSee('text-slate-900', false);
+    $view->assertSee('id="formConfirmTest"', false);
+    $view->assertSee('id="btnCancelConfirmTest"', false);
+    $view->assertSee('id="btnSubmitConfirmTest"', false);
+    $view->assertSee('id="confirmTestMessage"', false);
+    $view->assertSee('id="confirmTestBadge"', false);
+    $view->assertSee('id="confirmTestTitle"', false);
+    $view->assertSee('id="confirmTestHint"', false);
+    $view->assertSee('Konfirmasi Tindakan');
+    $view->assertSee('Pastikan data dan tindakan yang Anda ambil sudah benar.');
+    $view->assertSee('btn-primary', false);
+    $view->assertSee('Batal');
+    $view->assertSee('Lanjutkan');
+});
+
+test('modal renders confirm variant with custom PUT method', function () {
+    $view = $this->blade(
+        '<x-modal
+            name="confirm"
+            id="modalConfirmPutTest"
+            method="PUT"
+            title="Konfirmasi Update"
+        />'
+    );
+
+    $view->assertSee('name="_method" value="PUT"', false);
+    $view->assertSee('Konfirmasi Update');
+    $view->assertSee('btn-primary', false);
+    $view->assertSee('Lanjutkan');
+});
+
+test('modal renders confirm variant with custom PATCH method', function () {
+    $view = $this->blade(
+        '<x-modal
+            name="confirm"
+            id="modalConfirmPatchTest"
+            method="PATCH"
+            title="Konfirmasi Patch"
+        />'
+    );
+
+    $view->assertSee('name="_method" value="PATCH"', false);
+    $view->assertSee('Konfirmasi Patch');
+    $view->assertSee('btn-primary', false);
+    $view->assertSee('Lanjutkan');
+});
+
+test('modal renders delete variant always with DELETE method', function () {
+    $view = $this->blade(
+        '<x-modal
+            name="delete"
+            id="modalDeleteAlwaysTest"
+            title="Hapus Data"
+        />'
+    );
+
+    $view->assertSee('name="_method" value="DELETE"', false);
+});
+
 test('modal renders a plain dialog when no form method is given', function () {
     $view = $this->blade(
         '<x-modal id="modalInfo" title="Informasi"><p>Konten dialog biasa.</p></x-modal>'

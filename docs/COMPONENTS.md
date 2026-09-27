@@ -724,33 +724,35 @@ Menampilkan ikon dan pesan ramah di dalam baris tabel saat data tidak ditemukan 
 ## 🪟 4. Komponen Dialog dan Modal
 
 ### `<x-modal>`
-Komponen dialog interaktif terpadu untuk formulir data (Tambah/Ubah), dialog informasi, maupun **Preset Konfirmasi Hapus** (`name="delete"`). Dilengkapi pembungkus form otomatis, proteksi `@csrf`, method spoofing (`@method`), serta integrasi penuh dengan modul JavaScript `InforaModals`.
+Komponen dialog interaktif terpadu untuk formulir data (Tambah/Ubah), dialog informasi, **Preset Konfirmasi Tindakan** (`name="confirm"`), maupun **Preset Konfirmasi Hapus** (`name="delete"`). Dilengkapi pembungkus form otomatis, proteksi `@csrf`, method spoofing (`@method`), serta integrasi penuh dengan modul JavaScript `InforaModals`.
 
 #### Variasi / Mode Tampilan
 1. **Mode Standar (`@default`)**: Digunakan untuk formulir Tambah (*Create*), Ubah (*Edit*), maupun dialog informasi/rincian data.
-2. **Mode Preset Delete (`name="delete"`)**: Tampilan khusus konfirmasi hapus (*danger theme*) dengan ambient halo icon merah, judul peringatan, kartu detail item dinamis, dan tombol aksi simetris (Batal dan Hapus).
+2. **Mode Preset Confirm (`name="confirm"`)**: Tampilan dialog konfirmasi umum (*brand theme*) dengan ambient halo icon biru, judul aksi, kartu rincian item, kotak peringatan informatif, dan tombol aksi simetris (Batal dan Lanjutkan/Aktifkan).
+3. **Mode Preset Delete (`name="delete"`)**: Tampilan khusus konfirmasi hapus (*danger theme*) dengan ambient halo icon merah, judul peringatan, kartu detail item dinamis, dan tombol aksi simetris (Batal dan Hapus).
 
 #### Props
 | Prop | Tipe | Default | Mode | Deskripsi |
 | :--- | :--- | :--- | :--- | :--- |
 | `id` | `string` | `null` | Semua | **Wajib**. ID unik elemen modal backdrop (misal: `modalCreateJurusan`). |
-| `name` | `string` | `null` | Semua | Nama varian. Gunakan `name="delete"` untuk mengaktifkan Preset Modal Hapus. |
+| `name` | `string` | `null` | Semua | Nama varian. Gunakan `name="confirm"` untuk konfirmasi tindakan umum atau `name="delete"` untuk konfirmasi hapus. |
 | `title` | `string` | `null` | Semua | Judul header modal. |
 | `subtitle` | `string` | `null` | Standar | Subjudul deskripsi di bawah judul header. |
-| `size` | `string` | `null` | Standar | Ukuran lebar dialog (`'sm'`, `'lg'`, atau default). Pada preset delete otomatis `'sm'`. |
+| `size` | `string` | `'default'` | Standar | Ukuran lebar dialog (`'sm'`, `'lg'`, atau default 560px). Pada preset confirm & delete otomatis `'modal-sm'` (440px). |
 | `action` | `string` | `null` | Semua | URL tujuan form action. Jika diisi atau memiliki `method`, modal otomatis membungkus konten dengan tag `<form>`. |
-| `method` | `string` | `null` | Semua | Method HTTP form (`'POST'`, `'PUT'`, `'PATCH'`, `'DELETE'`). Pada preset delete otomatis `'DELETE'`. |
+| `method` | `string` | `null` | Semua | Method HTTP form (`'POST'`, `'PUT'`, `'PATCH'`, `'DELETE'`). Pada preset confirm default `'POST'` (dapat ditentukan `'PUT'` atau `'PATCH'`). Pada preset delete selalu mengunci ke `'DELETE'`. |
 | `formId` | `string` | `null` | Semua | Atribut `id` untuk tag `<form>`. |
-| `messageId` | `string` | `null` | Delete | ID elemen paragraf pesan konfirmasi untuk dimanipulasi via script. |
-| `badgeId` | `string` | `null` | Delete | ID elemen badge kode/kategori untuk dimanipulasi via script. |
-| `itemTitleId` | `string` | `null` | Delete | ID elemen judul item yang akan dihapus untuk dimanipulasi via script. |
-| `cancelBtnId` | `string` | `null` | Delete | ID tombol "Batal". |
-| `confirmBtnId` | `string` | `null` | Delete | ID tombol "Hapus" (submit). |
+| `messageId` | `string` | `null` | Confirm/Delete | ID elemen paragraf pesan konfirmasi untuk dimanipulasi via script `InforaModals`. |
+| `badgeId` | `string` | `null` | Confirm/Delete | ID elemen badge kode/kategori untuk dimanipulasi via script `InforaModals`. |
+| `itemTitleId` | `string` | `null` | Confirm/Delete | ID elemen judul item yang dimanipulasi via script `InforaModals`. |
+| `hintId` | `string` | `null` | Confirm/Delete | ID elemen teks petunjuk/peringatan bawah untuk dimanipulasi via script `InforaModals`. |
+| `cancelBtnId` | `string` | `null` | Confirm/Delete | ID tombol "Batal". |
+| `confirmBtnId` | `string` | `null` | Confirm/Delete | ID tombol konfirmasi/submit ("Lanjutkan" atau "Hapus"). |
 
 #### Slots
-- **`{{ $slot }}`**: Konten utama modal (field formulir pada modal standar, atau custom body pada modal delete).
+- **`{{ $slot }}`**: Konten utama modal (field formulir pada modal standar).
 - **`<x-slot:footer>`**: Tombol aksi bagian bawah pada modal standar (Batal, Simpan, dll).
-- **`<x-slot:hiddenInputs>`**: Input hidden tambahan khusus pada modal delete.
+- **`<x-slot:hiddenInputs>`**: Input hidden tambahan khusus pada modal delete atau confirm.
 
 #### Contoh 1: Modal Tambah (Create)
 ```blade
@@ -803,6 +805,34 @@ Komponen dialog interaktif terpadu untuk formulir data (Tambah/Ubah), dialog inf
     message-id="deleteJurusanMessage"
     badge-id="deleteJurusanBadge"
     item-title-id="deleteJurusanTitle"
+/>
+```
+
+#### Contoh 4: Preset Modal Konfirmasi Tindakan (Confirm)
+```blade
+{{-- Preset konfirmasi aksi default (POST) --}}
+<x-modal
+    name="confirm"
+    id="modalConfirmActivateShared"
+    form-id="formConfirmActivateShared"
+    cancel-btn-id="btnCancelConfirmActivate"
+    confirm-btn-id="btnSubmitConfirmActivate"
+    badge-id="modalConfirmActivateBadge"
+    message-id="modalConfirmActivateMessage"
+    item-title-id="modalConfirmActivateTitle"
+    hint-id="modalConfirmActivateHint"
+/>
+
+{{-- Atau preset konfirmasi pembaruan data/status (PUT/PATCH) --}}
+<x-modal
+    name="confirm"
+    id="modalConfirmUpdateStatus"
+    method="PUT"
+    form-id="formConfirmUpdateStatus"
+    cancel-btn-id="btnCancelConfirmUpdateStatus"
+    confirm-btn-id="btnSubmitConfirmUpdateStatus"
+    title="Konfirmasi Pembaruan Status"
+    item-title-id="confirmStatusItemTitle"
 />
 ```
 
@@ -872,6 +902,15 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('deleteJurusanMessage').textContent = 'Apakah Anda yakin ingin menghapus jurusan berikut?';
         document.getElementById('deleteJurusanBadge').textContent = btn.dataset.kode || '-';
         document.getElementById('deleteJurusanTitle').textContent = btn.dataset.nama || '-';
+    });
+
+    // 5. Hubungkan tombol atau checkbox toggle konfirmasi tindakan
+    InforaModals.bindConfirmButtons('.btn-confirm-action', 'modalConfirmAction', {
+        formId: 'formConfirmAction',
+        title: 'Konfirmasi Tindakan',
+        message: 'Apakah Anda yakin ingin melanjutkan tindakan ini?',
+        badge: 'Status',
+        itemTitle: (el) => el.dataset.nama || '-',
     });
 });
 ```

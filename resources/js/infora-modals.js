@@ -17,6 +17,9 @@
  *   // Bind delete confirmation buttons
  *   InforaModals.bindDeleteButtons('.btn-open-delete', 'modalDelete', { titleId: 'deleteTitle' });
  *
+ *   // Bind action confirmation buttons or toggle checkboxes
+ *   InforaModals.bindConfirmButtons('.btn-confirm-action', 'modalConfirm', { title: 'Konfirmasi', badge: 'Status' });
+ *
  *   // Auto-reopen on validation errors
  *   InforaModals.reopenOnError({ create: 'modalCreateX', edit: 'modalEditX' });
  */
@@ -48,11 +51,22 @@ window.InforaModals = (function () {
 
         modal.classList.add('hidden');
         getBody().classList.remove('modal-open');
+
+        const state = registry.get(modalId);
+        if (state && Array.isArray(state.onCloseCallbacks)) {
+            state.onCloseCallbacks.forEach((cb) => {
+                try {
+                    cb(modal);
+                } catch (err) {
+                    console.error('Error in InforaModals onClose callback:', err);
+                }
+            });
+        }
     }
 
     function closeAll() {
         document.querySelectorAll('.modal-backdrop:not(.hidden)').forEach((modal) => {
-            modal.classList.add('hidden');
+            close(modal.id);
         });
         getBody().classList.remove('modal-open');
     }
@@ -77,12 +91,14 @@ window.InforaModals = (function () {
         const modal = document.getElementById(modalId);
         if (!modal) return;
 
+        const existingState = registry.get(modalId);
         const state = {
             id: modalId,
             element: modal,
             closeBtnId: options.closeBtnId || `btnClose${toStudly(modalId)}`,
             cancelBtnId: options.cancelBtnId || null,
             editData: null,
+            onCloseCallbacks: existingState?.onCloseCallbacks || [],
         };
 
         registry.set(modalId, state);
@@ -105,6 +121,25 @@ window.InforaModals = (function () {
 
         attachEscapeHandler();
         return state;
+    }
+
+    /**
+     * Register a callback to execute whenever a modal is closed (cancel, backdrop, or Escape).
+     * @param {string} modalId
+     * @param {function} callback — function(modalElement)
+     */
+    function onClose(modalId, callback) {
+        if (typeof callback !== 'function') return;
+
+        if (!registry.has(modalId)) {
+            setup(modalId);
+        }
+
+        const state = registry.get(modalId);
+        if (state) {
+            state.onCloseCallbacks = state.onCloseCallbacks || [];
+            state.onCloseCallbacks.push(callback);
+        }
     }
 
     /**
@@ -215,6 +250,122 @@ window.InforaModals = (function () {
     }
 
     /**
+     * Bind multiple buttons or checkboxes to configure and open an action confirmation modal.
+     * Supports both button 'click' and checkbox 'change'.
+     * Automatically reverts checkbox state if modal is cancelled, closed via backdrop, or Escape key.
+     *
+     * @param {string} selector — CSS selector for trigger buttons or checkboxes
+     * @param {string} modalId — ID of the confirm modal
+     * @param {object|function} [optionsOrCallback] — Options object or custom callback function(modal, triggerEl, form)
+     * @param {string} [optionsOrCallback.formId] — Custom form ID inside modal
+     * @param {string} [optionsOrCallback.titleId] — Element ID for modal heading title (defaults to modalId + 'Title')
+     * @param {string} [optionsOrCallback.messageId] — Element ID for confirmation message
+     * @param {string} [optionsOrCallback.badgeId] — Element ID for badge
+     * @param {string} [optionsOrCallback.itemTitleId] — Element ID for target item title
+     * @param {string} [optionsOrCallback.hintId] — Element ID for hint text
+     * @param {string|function} [optionsOrCallback.title] — Static title or callback(triggerEl)
+     * @param {string|function} [optionsOrCallback.message] — Static message or callback(triggerEl)
+     * @param {string|function} [optionsOrCallback.badge] — Static badge or callback(triggerEl)
+     * @param {string|function} [optionsOrCallback.itemTitle] — Static item title or callback(triggerEl)
+     * @param {string|function} [optionsOrCallback.hint] — Static hint or callback(triggerEl)
+     * @param {function} [optionsOrCallback.onOpen] — Callback before opening: function(modal, triggerEl, form)
+     */
+    function bindConfirmButtons(selector, modalId, optionsOrCallback = {}) {
+        const isCallback = typeof optionsOrCallback === 'function';
+        const options = isCallback ? {} : optionsOrCallback;
+        const callback = isCallback ? optionsOrCallback : options.onOpen;
+
+        let activeTrigger = null;
+        let activeTriggerPreviousChecked = false;
+
+        // Auto-revert checkbox if modal is closed without submitting
+        onClose(modalId, () => {
+            if (activeTrigger && activeTrigger.type === 'checkbox') {
+                activeTrigger.checked = activeTriggerPreviousChecked;
+            }
+            activeTrigger = null;
+        });
+
+        document.querySelectorAll(selector).forEach((el) => {
+            const isCheckbox = el.matches('input[type="checkbox"]');
+            const eventName = isCheckbox ? 'change' : 'click';
+
+            el.addEventListener(eventName, function () {
+                if (isCheckbox) {
+                    const triggerOn = options.triggerOn || (options.mode === 'deactivate' ? 'uncheck' : 'check');
+                    if (triggerOn === 'check' && !this.checked) return;
+                    if (triggerOn === 'uncheck' && this.checked) return;
+                }
+
+                const modal = document.getElementById(modalId);
+                if (!modal) return;
+
+                activeTrigger = this;
+                activeTriggerPreviousChecked = isCheckbox ? !this.checked : false;
+
+                const form = options.formId
+                    ? document.getElementById(options.formId)
+                    : modal.querySelector('form');
+
+                const actionUrl = this.dataset.action || '';
+                if (form && actionUrl) {
+                    form.action = actionUrl;
+                }
+
+                const resolveVal = (val) => {
+                    if (typeof val === 'function') return val(this);
+                    if (typeof val === 'string') return val;
+                    return null;
+                };
+
+                const titleText = resolveVal(options.title) || this.dataset.confirmTitle || this.dataset.title;
+                const messageText = resolveVal(options.message) || this.dataset.confirmMessage || this.dataset.message;
+                const badgeText = resolveVal(options.badge) || this.dataset.confirmBadge || this.dataset.badge;
+                const itemTitleText = resolveVal(options.itemTitle)
+                    || this.dataset.confirmItemTitle
+                    || this.dataset.tahun
+                    || this.dataset.nama
+                    || this.dataset.name
+                    || this.dataset.label;
+                const hintText = resolveVal(options.hint) || this.dataset.confirmHint || this.dataset.hint;
+
+                const titleEl = options.titleId
+                    ? document.getElementById(options.titleId)
+                    : document.getElementById(`${modalId}Title`);
+                const messageEl = options.messageId ? document.getElementById(options.messageId) : null;
+                const badgeEl = options.badgeId ? document.getElementById(options.badgeId) : null;
+                const itemTitleEl = options.itemTitleId ? document.getElementById(options.itemTitleId) : null;
+                const hintEl = options.hintId ? document.getElementById(options.hintId) : null;
+
+                if (titleEl && titleText !== null && titleText !== undefined) titleEl.textContent = titleText;
+                if (messageEl && messageText !== null && messageText !== undefined) messageEl.textContent = messageText;
+                if (badgeEl && badgeText !== null && badgeText !== undefined) badgeEl.textContent = badgeText;
+                if (itemTitleEl && itemTitleText !== null && itemTitleText !== undefined) itemTitleEl.textContent = itemTitleText;
+                if (hintEl && hintText !== null && hintText !== undefined) hintEl.textContent = hintText;
+
+                const confirmBtnText = resolveVal(options.confirmText) || this.dataset.confirmText;
+                const confirmBtnClass = resolveVal(options.confirmBtnClass) || this.dataset.confirmBtnClass;
+                const confirmBtn = options.confirmBtnId
+                    ? document.getElementById(options.confirmBtnId)
+                    : modal.querySelector('button[type="submit"]');
+
+                if (confirmBtn && confirmBtnText) {
+                    confirmBtn.textContent = confirmBtnText;
+                }
+                if (confirmBtn && confirmBtnClass) {
+                    confirmBtn.className = confirmBtnClass;
+                }
+
+                if (typeof callback === 'function') {
+                    callback(modal, this, form);
+                }
+
+                open(modalId);
+            });
+        });
+    }
+
+    /**
      * Auto-reopen modal on validation errors (for store/update failures).
      */
     function reopenOnError(modalIds) {
@@ -259,9 +410,11 @@ window.InforaModals = (function () {
         isOpen,
         getModal: (id) => registry.get(id),
         setup,
+        onClose,
         bindOpenButton,
         bindEditButtons,
         bindDeleteButtons,
+        bindConfirmButtons,
         reopenOnError,
     };
 })();
