@@ -55,7 +55,7 @@
                     :options="$templateOptions"
                     required
                 />
-                <button type="button" class="btn-secondary" id="btnOpenApplyTemplateModal">
+                <button type="button" class="btn-secondary btn-submit-apply-template" id="btnOpenApplyTemplateModal">
                     <x-icon name="zap" size="16" />
                     <span>Terapkan Template</span>
                 </button>
@@ -253,14 +253,8 @@
 
             <!-- Tombol Aksi Simpan -->
             <div class="form-actions">
-                <button type="button" class="btn-primary" id="btnOpenConfirmModal">
-                    <x-icon name="save" size="18" />
-                    <span>Simpan</span>
-                </button>
-                <a href="{{ route('sistem.user', ['role' => $user->user_type]) }}" class="btn-secondary">
-                    <x-icon name="close" size="18" />
-                    <span>Batal</span>
-                </a>
+                <button type="button" class="btn-primary btn-submit-access-permission" id="btnOpenConfirmModal">Simpan</button>
+                <a href="{{ route('sistem.user', ['role' => $user->user_type]) }}" class="btn-secondary">Batal</a>
             </div>
         </form>
     </div>
@@ -268,90 +262,118 @@
 
 {{-- Modal Konfirmasi Simpan Hak Akses Pengguna --}}
 <x-modal
-    id="modalConfirmSave"
+    name="confirm"
+    id="modalConfirmSaveAccess"
+    size="lg"
+    :with-form="false"
+    form-id="permissionForm"
     title="Konfirmasi Simpan Hak Akses"
-    subtitle="Pastikan konfigurasi wewenang pengguna sudah sesuai sebelum disimpan"
-    size="sm"
->
-    <div class="p-3.5 bg-slate-50 border border-slate-200/90 rounded-xl text-center mb-4">
-        <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-semibold bg-blue-50 text-brand border border-blue-100 rounded-md mb-1.5">
-            Pengguna
-        </span>
-        <div class="text-sm font-bold text-slate-900 leading-snug">
-            {{ $user->name }}
-        </div>
-        <div class="text-xs text-slate-500 mt-1">
-            {{ $user->email }} &bull; {{ strtoupper(str_replace('_', ' ', $user->user_type)) }}
-        </div>
-    </div>
-
-    <p class="text-sm text-gray-600 leading-relaxed text-center mb-0">
-        Apakah Anda yakin ingin menyimpan perubahan konfigurasi wewenang untuk pengguna ini?
-    </p>
-
-    <x-slot:footer>
-        <button type="button" class="btn-secondary" id="btnCancelConfirmSave">Batal</button>
-        <button type="submit" form="permissionForm" class="btn-primary" id="btnSubmitConfirmSave">
-            <x-icon name="save" size="18" />
-            <span>Ya, Simpan</span>
-        </button>
-    </x-slot:footer>
-</x-modal>
+    badge-id="modalConfirmSaveAccessBadge"
+    item-title-id="modalConfirmSaveAccessItemTitle"
+    message-id="modalConfirmSaveAccessMessage"
+    hint-id="modalConfirmSaveAccessHint"
+    cancel-btn-id="btnCancelConfirmSaveAccess"
+    confirm-btn-id="btnSubmitConfirmSaveAccess"
+/>
 
 {{-- Modal Konfirmasi Terapkan Template Peran --}}
 <x-modal
+    name="confirm"
     id="modalConfirmApplyTemplate"
+    :with-form="false"
+    form-id="applyTemplateForm"
     title="Terapkan Template Peran"
-    subtitle="Konfirmasi penerapan template hak akses ke pengguna"
-    size="sm"
->
-    <div class="p-3.5 bg-amber-50 border border-amber-200/90 rounded-xl text-center mb-4">
-        <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200 rounded-md mb-1.5">
-            Peringatan Timpa Izin
-        </span>
-        <div class="text-sm font-bold text-slate-900 leading-snug">
-            Hak Akses Pengguna Akan Digantikan
-        </div>
-        <div class="text-xs text-slate-500 mt-1">
-            Seluruh konfigurasi wewenang saat ini akan ditimpa dengan template peran yang dipilih.
-        </div>
-    </div>
-
-    <p class="text-sm text-gray-600 leading-relaxed text-center mb-0">
-        Apakah Anda yakin ingin menerapkan template peran ini ke akun <strong>{{ $user->name }}</strong>?
-    </p>
-
-    <x-slot:footer>
-        <button type="button" class="btn-secondary" id="btnCancelApplyTemplate">Batal</button>
-        <button type="submit" form="applyTemplateForm" class="btn-primary" id="btnSubmitApplyTemplate">
-            <x-icon name="zap" size="18" />
-            <span>Ya, Terapkan</span>
-        </button>
-    </x-slot:footer>
-</x-modal>
+    badge-id="modalConfirmApplyTemplateBadge"
+    item-title-id="modalConfirmApplyTemplateItemTitle"
+    message-id="modalConfirmApplyTemplateMessage"
+    hint-id="modalConfirmApplyTemplateHint"
+    cancel-btn-id="btnCancelConfirmApplyTemplate"
+    confirm-btn-id="btnSubmitConfirmApplyTemplate"
+/>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     // 1. Inisialisasi Modal Konfirmasi Simpan
-    InforaModals.setup('modalConfirmSave', { cancelBtnId: 'btnCancelConfirmSave' });
-    InforaModals.bindOpenButton('btnOpenConfirmModal', 'modalConfirmSave');
+    InforaModals.setup('modalConfirmSaveAccess', { cancelBtnId: 'btnCancelConfirmSaveAccess' });
+    // InforaModals.bindOpenButton('btnOpenConfirmModal', 'modalConfirmSaveAccess');
+    InforaModals.bindConfirmButtons('.btn-submit-access-permission', 'modalConfirmSaveAccess', {
+        message: 'Apakah Anda yakin ingin menyimpan perubahan konfigurasi wewenang untuk pengguna ini?',
+        badge: '{{ $user->name }}',
+        hint: 'Pastikan konfigurasi wewenang pengguna sudah sesuai sebelum disimpan',
+        badgeId: 'modalConfirmSaveAccessBadge',
+        messageId: 'modalConfirmSaveAccessMessage',
+        hintId: 'modalConfirmSaveAccessHint',
+        itemTitleId: 'modalConfirmSaveAccessItemTitle',
+        onOpen: function (modal) {
+            const itemTitleEl = document.getElementById('modalConfirmSaveAccessItemTitle');
+            if (!itemTitleEl) return;
 
-    // 2. Inisialisasi Modal Konfirmasi Terapkan Template
-    InforaModals.setup('modalConfirmApplyTemplate', { cancelBtnId: 'btnCancelApplyTemplate' });
-    const btnOpenApply = document.getElementById('btnOpenApplyTemplateModal');
-    if (btnOpenApply) {
-        btnOpenApply.addEventListener('click', function () {
-            const select = document.getElementById('role_key');
-            if (!select || !select.value) {
-                if (select) {
-                    select.focus();
-                    select.reportValidity();
-                }
+            // Kumpulkan semua baris yang memiliki minimal satu izin aktif
+            const rows = document.querySelectorAll('#permissionForm tr[data-row-id]');
+            const activeItems = [];
+            rows.forEach(row => {
+                const checked = row.querySelectorAll('input[type="checkbox"]:checked');
+                if (!checked.length) return;
+
+                const nameEl = row.querySelector('.matrix-item-name span');
+                const name   = nameEl ? nameEl.textContent.trim() : '-';
+
+                const labels = [];
+                checked.forEach(cb => {
+                    if (cb.name.includes('can_view'))   labels.push('Lihat');
+                    if (cb.name.includes('can_create')) labels.push('Tambah');
+                    if (cb.name.includes('can_edit'))   labels.push('Ubah');
+                    if (cb.name.includes('can_delete')) labels.push('Hapus');
+                });
+
+                activeItems.push({ name, labels });
+            });
+
+            if (!activeItems.length) {
+                itemTitleEl.className = 'text-sm font-bold text-slate-900 leading-snug text-center';
+                itemTitleEl.innerHTML = '<span class="text-slate-400 text-xs italic">Tidak ada wewenang yang dikonfigurasi.</span>';
                 return;
             }
-            InforaModals.open('modalConfirmApplyTemplate');
-        });
-    }
+
+            // Atur layout list dan scroll jika item lebih dari 4 menggunakan Tailwind utilities
+            itemTitleEl.className = activeItems.length > 4
+                ? 'text-left max-h-40 overflow-y-auto divide-y divide-slate-100 pr-1'
+                : 'text-left divide-y divide-slate-100';
+
+            itemTitleEl.innerHTML = activeItems.map(item => `
+                <div class="flex items-center justify-between gap-2 py-1.5">
+                    <span class="text-xs font-medium text-slate-800 truncate">${item.name}</span>
+                    <span class="flex flex-wrap gap-1 shrink-0">${item.labels.map(l => `<span class="badge badge-neutral">${l}</span>`).join('')}</span>
+                </div>
+            `).join('');
+        },
+    });
+
+
+    // 2. Inisialisasi Modal Konfirmasi Terapkan Template
+    InforaModals.setup('modalConfirmApplyTemplate', { cancelBtnId: 'btnCancelConfirmApplyTemplate' });
+    InforaModals.bindConfirmButtons('.btn-submit-apply-template', 'modalConfirmApplyTemplate', {
+        message: 'Apakah Anda yakin ingin menerapkan template peran ini ke akun {{ $user->name }}?',
+        badge: 'Peringatan Timpa Izin',
+        hint: 'Seluruh konfigurasi wewenang saat ini akan ditimpa dengan template peran yang dipilih.',
+        itemTitle: () => {
+            const select = document.getElementById('role_key');
+            return select.options[select.selectedIndex].text;
+        },
+        confirmText: 'Ya, Terapkan',
+        badgeId: 'modalConfirmApplyTemplateBadge',
+        messageId: 'modalConfirmApplyTemplateMessage',
+        hintId: 'modalConfirmApplyTemplateHint',
+        itemTitleId: 'modalConfirmApplyTemplateItemTitle',
+        onOpen: function () {
+            const select = document.getElementById('role_key');
+            if (!select.value) {
+                select.focus();
+                select.reportValidity();
+                return false;
+            }
+        },
+    });
 });
 </script>
 @endsection

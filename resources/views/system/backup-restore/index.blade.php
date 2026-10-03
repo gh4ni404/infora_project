@@ -62,7 +62,7 @@
                 <th>Tipe Cadangan</th>
                 <th>Ukuran</th>
                 <th>Waktu Pembuatan</th>
-                <th>Aksi</th>
+                <th class="col-w-actions">Aksi</th>
             </tr>
         </thead>
         <tbody>

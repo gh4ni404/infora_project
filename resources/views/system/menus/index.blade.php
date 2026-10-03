@@ -3,9 +3,10 @@
 @section('content')
 <x-page-header title="Tata Kelola Menu" subtitle="Kelola navigasi menu utama dan hierarki induk modul INFORA">
     <x-slot:actions>
-        <button type="button" class="btn-primary" id="btnOpenCreateMenu">
-            <x-icon name="plus" size="18" />
-        </button>
+        <x-crud-button 
+            action="create"
+            id="btnOpenCreateMenu"
+        />
     </x-slot:actions>
 </x-page-header>
 
@@ -42,7 +43,7 @@
             <th>Rute Navigasi</th>
             <th>Sub-Menu</th>
             <th>Status</th>
-            <th>Aksi</th>
+            <th class="col-w-actions">Aksi</th>
         </tr>
     </thead>
     <tbody>
@@ -83,28 +84,25 @@
                         <span class="badge badge-neutral">Nonaktif</span>
                     @endif
                 </td>
-                <td>
-                    <x-table-actions align="right">
-                        <button
-                            type="button"
-                            class="btn-edit btn-open-edit-menu"
+                <td class="col-w-actions">
+                    <x-table-actions>
+                        <x-crud-button
+                            action="edit"
+                            class="btn-open-edit-menu"
                             title="Edit Menu"
                             data-menu="{{ json_encode($menu) }}"
                             data-action="{{ route('system.menus.update', $menu) }}"
-                        >
-                            <x-icon name="edit" size="14" />
-                        </button>
-                        <button
-                            type="button"
-                            class="btn-delete btn-open-delete-menu"
+                        />
+
+                        <x-crud-button
+                            action="delete"
+                            class="btn-open-delete-menu"
                             title="Hapus Menu"
                             data-id="{{ $menu->id }}"
                             data-name="{{ $menu->name }}"
                             data-module="{{ $menu->module?->name ?? 'Tanpa Modul' }}"
                             data-action="{{ route('system.menus.destroy', $menu) }}"
-                        >
-                            <x-icon name="delete" size="14" />
-                        </button>
+                        />
                     </x-table-actions>
                 </td>
             </tr>

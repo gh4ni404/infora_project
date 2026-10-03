@@ -3,9 +3,10 @@
 @section('content')
 <x-page-header title="Tata Kelola Sub-Menu" subtitle="Kelola item navigasi sub-menu dan hierarki menu sistem INFORA">
     <x-slot:actions>
-        <button type="button" class="btn-primary" id="btnOpenCreateSubMenu">
-            <x-icon name="plus" size="18" />
-        </button>
+        <x-crud-button 
+            action="create"
+            id="btnOpenCreateSubMenu"
+        />
     </x-slot:actions>
 </x-page-header>
 
@@ -46,7 +47,7 @@
             <th>Nama Sub-Menu</th>
             <th>Rute Navigasi</th>
             <th>Status</th>
-            <th>Aksi</th>
+            <th class="col-w-actions">Aksi</th>
         </tr>
     </thead>
     <tbody>
@@ -87,26 +88,23 @@
                 </td>
                 <td>
                     <x-table-actions align="right">
-                        <button
-                            type="button"
-                            class="btn-edit btn-open-edit-sub-menu"
+                        <x-crud-button
+                            action="edit"
+                            class="btn-open-edit-sub-menu"
                             title="Edit Sub-Menu"
                             data-sub-menu="{{ json_encode($subMenu) }}"
                             data-action="{{ route('system.sub-menus.update', $subMenu) }}"
-                        >
-                            <x-icon name="edit" size="14" />
-                        </button>
-                        <button
-                            type="button"
-                            class="btn-delete btn-open-delete-sub-menu"
+                        />
+                        
+                        <x-crud-button
+                            action="delete"
+                            class="btn-open-delete-sub-menu"
                             title="Hapus Sub-Menu"
                             data-id="{{ $subMenu->id }}"
                             data-name="{{ $subMenu->name }}"
                             data-menu="{{ $subMenu->menu?->name ?? 'Tanpa Menu' }}"
                             data-action="{{ route('system.sub-menus.destroy', $subMenu) }}"
-                        >
-                            <x-icon name="delete" size="14" />
-                        </button>
+                        />
                     </x-table-actions>
                 </td>
             </tr>

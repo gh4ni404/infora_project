@@ -91,7 +91,7 @@
                             <th>Pengguna</th>
                             <th>Tipe Akun</th>
                             <th>Status Izin Navigasi</th>
-                            <th class="text-right">Aksi</th>
+                            <th class="text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -120,7 +120,7 @@
                                         <span class="badge badge-neutral">Belum Dikonfigurasi</span>
                                     @endif
                                 </td>
-                                <td class="text-right">
+                                <td class="text-center">
                                     <a href="{{ route('sistem.user.user', $user) }}" class="btn-secondary">
                                         <x-icon name="square-check" size="16" />
                                         <span>Kelola Hak Akses</span>

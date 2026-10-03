@@ -7,9 +7,10 @@
             <x-icon name="sort" size="16" />
             <span>Sinkronkan Urutan</span>
         </button>
-        <button type="button" class="btn-primary" id="btnOpenCreateModule">
-            <x-icon name="plus" size="18" />
-        </button>
+        <x-crud-button 
+            action="create"
+            id="btnOpenCreateModule"
+        />
     </x-slot:actions>
 </x-page-header>
 
@@ -31,7 +32,7 @@
             <th>Nama Modul</th>
             <th>Jumlah Menu</th>
             <th>Status</th>
-            <th>Aksi</th>
+            <th class="col-w-actions">Aksi</th>
         </tr>
     </thead>
     <tbody>
@@ -57,26 +58,23 @@
                 </td>
                 <td>
                     <x-table-actions align="right">
-                        <button
-                            type="button"
-                            class="btn-edit btn-open-edit-module"
+                        <x-crud-button
+                            action="edit"
+                            class="btn-open-edit-module"
                             title="Edit Modul"
                             data-module="{{ json_encode($module) }}"
                             data-action="{{ route('system.modules.update', $module) }}"
-                        >
-                            <x-icon name="edit" size="14" />
-                        </button>
-                        <button
-                            type="button"
-                            class="btn-delete btn-open-delete-module"
+                        />
+                        
+                        <x-crud-button
+                            action="delete"
+                            class="btn-open-delete-module"
                             title="Hapus Modul"
                             data-id="{{ $module->id }}"
                             data-name="{{ $module->name }}"
                             data-order="{{ $module->order }}"
                             data-action="{{ route('system.modules.destroy', $module) }}"
-                        >
-                            <x-icon name="delete" size="14" />
-                        </button>
+                        />
                     </x-table-actions>
                 </td>
             </tr>
