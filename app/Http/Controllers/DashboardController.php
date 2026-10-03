@@ -19,15 +19,15 @@ class DashboardController extends Controller
             return redirect()->route('dashboard.admin');
         }
 
-        return view('dashboard', [
-            'user' => $request->user(),
-            'systemInfo' => [
-                'laravel_version' => app()->version(),
-                'php_version' => PHP_VERSION,
-                'environment' => config('app.env'),
-                'timezone' => config('app.timezone'),
-            ],
-        ]);
+        $user = $request->user();
+        $systemInfo = [
+            'laravel_version' => app()->version(),
+            'php_version' => PHP_VERSION,
+            'environment' => config('app.env'),
+            'timezone' => config('app.timezone'),
+        ];
+
+        return view('dashboard', compact('user', 'systemInfo'));
     }
 
     /**

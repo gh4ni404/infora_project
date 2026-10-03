@@ -61,17 +61,17 @@ class TahunAjaranController extends Controller
         // 6. Dapatkan semester yang saat ini aktif di sekolah tersebut
         $activeSemester = $selectedSchoolId > 0 ? Semester::activeFor($selectedSchoolId) : null;
 
-        return view('konfigurasi-sekolah.tahun-ajaran.index', [
-            'user' => $user,
-            'schools' => $schools,
-            'selectedSchool' => $selectedSchool,
-            'selectedSchoolId' => $selectedSchoolId,
-            'tahunAjaranList' => $tahunAjaranList,
-            'selectedTahunAjaran' => $selectedTahunAjaran,
-            'selectedTahunAjaranId' => $selectedTahunAjaranId,
-            'semesters' => $semesters,
-            'activeSemester' => $activeSemester,
-        ]);
+        return view('konfigurasi-sekolah.tahun-ajaran.index', compact(
+            'user',
+            'schools',
+            'selectedSchool',
+            'selectedSchoolId',
+            'tahunAjaranList',
+            'selectedTahunAjaran',
+            'selectedTahunAjaranId',
+            'semesters',
+            'activeSemester'
+        ));
     }
 
     /**

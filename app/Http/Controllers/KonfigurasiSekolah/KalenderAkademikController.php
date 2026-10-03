@@ -176,27 +176,30 @@ class KalenderAkademikController extends Controller
             $activeView = 'kalender';
         }
 
-        return view('konfigurasi-sekolah.kalender-akademik.index', [
-            'user' => $user,
-            'schools' => $schools,
-            'selectedSchool' => $selectedSchool,
-            'selectedSchoolId' => $selectedSchoolId,
-            'calendarEvents' => $calendarEvents,
-            'agendaList' => $agendaList,
-            'currentMonth' => $currentMonth,
-            'currentYear' => $currentYear,
-            'availableYears' => $availableYears,
-            'defaultTahunAjaran' => $defaultTahunAjaran,
-            'defaultSemester' => $defaultSemester,
-            'hasTahunAjaran' => $hasTahunAjaran,
-            'tahunAjaranList' => $tahunAjaranList,
-            'tahunAjaranOptions' => $tahunAjaranOptions,
-            'tahunAjaranSemesters' => $tahunAjaranSemesters,
-            'activeView' => $activeView,
-            'perPageInput' => $perPageInput,
-            'kategoriOptions' => self::KATEGORI_OPTIONS,
-            'warnaOptions' => self::WARNA_OPTIONS,
-        ]);
+        $kategoriOptions = self::KATEGORI_OPTIONS;
+        $warnaOptions = self::WARNA_OPTIONS;
+
+        return view('konfigurasi-sekolah.kalender-akademik.index', compact(
+            'user',
+            'schools',
+            'selectedSchool',
+            'selectedSchoolId',
+            'calendarEvents',
+            'agendaList',
+            'currentMonth',
+            'currentYear',
+            'availableYears',
+            'defaultTahunAjaran',
+            'defaultSemester',
+            'hasTahunAjaran',
+            'tahunAjaranList',
+            'tahunAjaranOptions',
+            'tahunAjaranSemesters',
+            'activeView',
+            'perPageInput',
+            'kategoriOptions',
+            'warnaOptions'
+        ));
     }
 
     /**

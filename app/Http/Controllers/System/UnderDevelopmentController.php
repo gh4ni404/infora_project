@@ -50,17 +50,17 @@ class UnderDevelopmentController extends Controller
         );
         $suggestedArtisanCmd = 'php artisan make:controller '.$controllerBaseName;
 
-        return view('system.under-development', [
-            'item' => $item,
-            'itemType' => $itemType,
-            'module' => $module,
-            'menu' => $menu,
-            'editUrl' => $editUrl,
-            'rawRoute' => $rawRoute,
-            'cleanRoute' => $cleanRoute,
-            'controllerBaseName' => $controllerBaseName,
-            'suggestedRouteCode' => $suggestedRouteCode,
-            'suggestedArtisanCmd' => $suggestedArtisanCmd,
-        ]);
+        return view('system.under-development', compact(
+            'item',
+            'itemType',
+            'module',
+            'menu',
+            'editUrl',
+            'rawRoute',
+            'cleanRoute',
+            'controllerBaseName',
+            'suggestedRouteCode',
+            'suggestedArtisanCmd'
+        ));
     }
 }

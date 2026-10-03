@@ -49,13 +49,10 @@ class MenuAccessController extends Controller
         // Ambil daftar template peran dinamis dari cache
         $templates = SidebarCache::getRoleTemplates();
 
-        return view('system.menu-access.index', [
-            'users' => $users,
-            'templates' => $templates,
-            'currentRole' => $roleFilter,
-            'search' => $search,
-            'activeTab' => $request->query('tab', 'users'),
-        ]);
+        $currentRole = $roleFilter;
+        $activeTab = $request->query('tab', 'users');
+
+        return view('system.menu-access.index', compact('users', 'templates', 'currentRole', 'search', 'activeTab'));
     }
 
     /**
@@ -71,12 +68,7 @@ class MenuAccessController extends Controller
 
         $availableTemplates = SidebarCache::getRoleTemplates();
 
-        return view('system.menu-access.edit-user', [
-            'user' => $user,
-            'modules' => $modules,
-            'userPermissions' => $userPermissions,
-            'availableTemplates' => $availableTemplates,
-        ]);
+        return view('system.menu-access.edit-user', compact('user', 'modules', 'userPermissions', 'availableTemplates'));
     }
 
     /**
@@ -191,12 +183,7 @@ class MenuAccessController extends Controller
             fn (MenuAccessTemplate $t) => $t->sub_menu_id ? 'sub_'.$t->sub_menu_id : 'menu_'.$t->menu_id
         );
 
-        return view('system.menu-access.edit-template', [
-            'roleKey' => $roleKey,
-            'templateInfo' => $templateInfo,
-            'modules' => $modules,
-            'templatePermissions' => $templatePermissions,
-        ]);
+        return view('system.menu-access.edit-template', compact('roleKey', 'templateInfo', 'modules', 'templatePermissions'));
     }
 
     /**

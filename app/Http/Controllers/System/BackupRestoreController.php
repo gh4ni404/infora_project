@@ -29,10 +29,7 @@ class BackupRestoreController extends Controller
         $stats = $this->backupService->getStatistics();
         $backups = $this->backupService->listBackups();
 
-        return view('system.backup-restore.index', [
-            'stats' => $stats,
-            'backups' => $backups,
-        ]);
+        return view('system.backup-restore.index', compact('stats', 'backups'));
     }
 
     /**
