@@ -20,10 +20,18 @@ class SchoolController extends Controller
      */
     public function index(Request $request): View
     {
+        $user = $request->user();
+        [$selectedSchool, $selectedSchoolId] = $this->resolveSchoolContext($request);
+
         $query = School::query()
             ->with(['provinsi', 'kabupaten', 'kecamatan', 'kelurahan', 'adminUser'])
             ->orderBy('name')
             ->orderBy('id');
+
+        // Batasi akses: non-superadmin hanya dapat melihat sekolah miliknya sendiri
+        if (! $user?->isSuperAdmin()) {
+            $query->where('id', $selectedSchoolId);
+        }
 
         if ($request->filled('search')) {
             $search = trim($request->query('search'));
@@ -58,7 +66,7 @@ class SchoolController extends Controller
             ->orderBy('kode')
             ->get(['id', 'kode', 'nama']);
 
-        return view('master.data-sekolah.index', compact('schools', 'perPageInput', 'provinsiList'));
+        return view('master.data-sekolah.index', compact('schools', 'perPageInput', 'provinsiList', 'user'));
     }
 
     /**
@@ -95,6 +103,8 @@ class SchoolController extends Controller
      */
     public function update(UpdateSchoolRequest $request, School $dataSekolah): RedirectResponse
     {
+        $this->authorizeSchool($request, $dataSekolah);
+
         $data = $request->validated();
 
         // Handle logo removal
@@ -126,8 +136,12 @@ class SchoolController extends Controller
     /**
      * Sinkronkan atau terbitkan akun administrator untuk seluruh unit sekolah yang terdaftar.
      */
-    public function syncAllAdmins(): RedirectResponse
+    public function syncAllAdmins(Request $request): RedirectResponse
     {
+        if (! $request->user()?->isSuperAdmin()) {
+            abort(403, 'Akses ditolak. Tindakan ini memerlukan hak akses Super Administrator.');
+        }
+
         $schools = School::all();
         $syncedCount = 0;
 
@@ -144,8 +158,10 @@ class SchoolController extends Controller
     /**
      * Terbitkan atau selaraskan akun administrator untuk satu unit sekolah tertentu.
      */
-    public function syncSingleAdmin(School $dataSekolah): RedirectResponse
+    public function syncSingleAdmin(Request $request, School $dataSekolah): RedirectResponse
     {
+        $this->authorizeSchool($request, $dataSekolah);
+
         $admin = AdminAccountManager::createOrSyncAdmin($dataSekolah);
 
         return redirect()
@@ -156,8 +172,10 @@ class SchoolController extends Controller
     /**
      * Remove the specified school from storage.
      */
-    public function destroy(School $dataSekolah): RedirectResponse
+    public function destroy(Request $request, School $dataSekolah): RedirectResponse
     {
+        $this->authorizeSchool($request, $dataSekolah);
+
         // Remove logo file if exists
         if ($dataSekolah->logo_path) {
             ImageUploader::delete($dataSekolah->logo_path);

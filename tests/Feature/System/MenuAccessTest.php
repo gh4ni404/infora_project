@@ -220,6 +220,57 @@ test('admin_sekolah template is seeded and can be applied to school admin', func
     expect($admin->hasMenuAccess($menu, 'view'))->toBeTrue();
 });
 
+test('createOrSyncAdmin preserves existing permissions when syncing existing admin user', function () {
+    $module = Module::create(['name' => 'MASTER', 'order' => 1, 'is_active' => true]);
+    $menu = Menu::create(['module_id' => $module->id, 'name' => 'Menu Khusus', 'order' => 1, 'is_active' => true]);
+
+    $this->seed(MenuAccessTemplateSeeder::class);
+
+    $school = School::factory()->create(['npsn' => '99887766']);
+    $admin = AdminAccountManager::createOrSyncAdmin($school);
+
+    // Kustomisasi izin secara spesifik untuk admin ini
+    UserMenuPermission::updateOrCreate(
+        ['user_id' => $admin->id, 'menu_id' => $menu->id, 'sub_menu_id' => null],
+        ['can_view' => true, 'can_create' => true, 'can_edit' => true, 'can_delete' => true]
+    );
+
+    expect($admin->fresh()->hasMenuAccess($menu, 'edit'))->toBeTrue();
+
+    // Jalankan sync ulang tanpa reset (seperti saat sekolah diupdate)
+    $school->update(['name' => 'Nama Sekolah Baru']);
+    $syncedAdmin = AdminAccountManager::createOrSyncAdmin($school);
+
+    expect($syncedAdmin->fresh()->hasMenuAccess($menu, 'edit'))->toBeTrue();
+    expect($syncedAdmin->name)->toBe('Admin Nama Sekolah Baru');
+});
+
+test('createOrSyncAdmin resets permissions when explicitly requested', function () {
+    $module = Module::create(['name' => 'PENGATURAN SISTEM', 'order' => 1, 'is_active' => true]);
+    $menu = Menu::create(['module_id' => $module->id, 'name' => 'Menu Sistem Rahasia', 'order' => 1, 'is_active' => true]);
+
+    $this->seed(MenuAccessTemplateSeeder::class);
+
+    $school = School::factory()->create(['npsn' => '55443322']);
+    $admin = AdminAccountManager::createOrSyncAdmin($school);
+
+    // Beri izin ekstra yang bukan bagian dari template bawaan
+    UserMenuPermission::create([
+        'user_id' => $admin->id,
+        'menu_id' => $menu->id,
+        'can_view' => true,
+        'can_edit' => true,
+    ]);
+
+    expect($admin->fresh()->hasMenuAccess($menu, 'edit'))->toBeTrue();
+
+    // Jalankan sync dengan resetPermissions = true
+    $syncedAdmin = AdminAccountManager::createOrSyncAdmin($school, resetPermissions: true);
+
+    // Izin kustom di luar template bawaan harus di-reset
+    expect($syncedAdmin->fresh()->hasMenuAccess($menu, 'edit'))->toBeFalse();
+});
+
 test('sidebar composer filters visible menus based on user permissions for regular users', function () {
     $module1 = Module::create(['name' => 'MODUL RAHASIA', 'order' => 1, 'is_active' => true]);
     $menuRahasia = Menu::create(['module_id' => $module1->id, 'name' => 'Menu Rahasia', 'order' => 1, 'is_active' => true]);

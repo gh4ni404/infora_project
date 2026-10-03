@@ -13,12 +13,14 @@ class AdminAccountManager
     /**
      * Membuat atau menyinkronkan akun administrator sekolah berdasarkan data sekolah.
      */
-    public static function createOrSyncAdmin(School $school): User
+    public static function createOrSyncAdmin(School $school, bool $resetPermissions = false): User
     {
         $user = User::query()
             ->where('school_id', $school->id)
             ->where('user_type', 'admin')
             ->first();
+
+        $isNew = false;
 
         if ($user) {
             $user->update([
@@ -35,9 +37,14 @@ class AdminAccountManager
                 'school_id' => $school->id,
                 'is_active' => $school->is_active,
             ]);
+            $isNew = true;
         }
 
-        static::applyDefaultPermissions($user);
+        // Terapkan izin bawaan hanya jika user baru dibuat, diminta eksplisit (reset),
+        // atau jika akun admin tersebut belum memiliki konfigurasi izin menu sama sekali.
+        if ($isNew || $resetPermissions || $user->menuPermissions()->doesntExist()) {
+            static::applyDefaultPermissions($user);
+        }
 
         return $user;
     }
@@ -88,5 +95,7 @@ class AdminAccountManager
                 'can_delete' => (bool) $tmpl->can_delete,
             ]);
         }
+
+        SidebarCache::forgetUser($user->id);
     }
 }

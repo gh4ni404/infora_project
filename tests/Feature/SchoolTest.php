@@ -3,9 +3,14 @@
 use App\Models\Kabupaten;
 use App\Models\Kecamatan;
 use App\Models\Kelurahan;
+use App\Models\Menu;
+use App\Models\Module;
 use App\Models\Provinsi;
 use App\Models\School;
+use App\Models\SubMenu;
 use App\Models\User;
+use App\Models\UserMenuPermission;
+use Database\Seeders\MenuAccessTemplateSeeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
@@ -411,4 +416,172 @@ test('school index view displays admin account status badge', function () {
     $response->assertOk();
     $response->assertSee('Akun Admin');
     $response->assertSee('40312345');
+});
+
+test('non super admin with permission can only see their own school in school list', function () {
+    $module = Module::firstOrCreate(['name' => 'ADMINISTRASI'], ['order' => 1, 'is_active' => true]);
+    $menu = Menu::firstOrCreate(
+        ['route_name' => 'master.data-sekolah.index'],
+        ['module_id' => $module->id, 'name' => 'Data Sekolah', 'order' => 1, 'is_active' => true]
+    );
+
+    $mySchool = School::factory()->create([
+        'name' => 'Sekolah Milik Sendiri',
+        'npsn' => '11112222',
+    ]);
+
+    $otherSchool = School::factory()->create([
+        'name' => 'Sekolah Milik Orang Lain',
+        'npsn' => '33334444',
+    ]);
+
+    $schoolAdmin = User::factory()->create([
+        'username' => 'admin_sekolah_1',
+        'user_type' => 'admin',
+        'school_id' => $mySchool->id,
+        'is_active' => true,
+    ]);
+
+    UserMenuPermission::create([
+        'user_id' => $schoolAdmin->id,
+        'menu_id' => $menu->id,
+        'can_view' => true,
+    ]);
+
+    $response = $this->actingAs($schoolAdmin)->get(route('master.data-sekolah.index'));
+
+    $response->assertOk();
+    $response->assertSee('Sekolah Milik Sendiri');
+    $response->assertSee('11112222');
+    $response->assertDontSee('Sekolah Milik Orang Lain');
+    $response->assertDontSee('33334444');
+    $response->assertDontSee('id="btnOpenCreateSchool"', false);
+    $response->assertDontSee('id="btnOpenSyncAdmins"', false);
+});
+
+test('non super admin cannot delete another school even with permission', function () {
+    $module = Module::firstOrCreate(['name' => 'ADMINISTRASI'], ['order' => 1, 'is_active' => true]);
+    $menu = Menu::firstOrCreate(
+        ['route_name' => 'master.data-sekolah.index'],
+        ['module_id' => $module->id, 'name' => 'Data Sekolah', 'order' => 1, 'is_active' => true]
+    );
+
+    $mySchool = School::factory()->create(['name' => 'Sekolah Sendiri']);
+    $otherSchool = School::factory()->create(['name' => 'Sekolah Target Hapus']);
+
+    $schoolAdmin = User::factory()->create([
+        'username' => 'admin_sekolah_del',
+        'user_type' => 'admin',
+        'school_id' => $mySchool->id,
+        'is_active' => true,
+    ]);
+
+    UserMenuPermission::create([
+        'user_id' => $schoolAdmin->id,
+        'menu_id' => $menu->id,
+        'can_view' => true,
+        'can_delete' => true,
+    ]);
+
+    $response = $this->actingAs($schoolAdmin)->delete(route('master.data-sekolah.destroy', $otherSchool));
+
+    $response->assertForbidden();
+    $this->assertDatabaseHas('schools', ['id' => $otherSchool->id]);
+});
+
+test('non super admin without delete permission cannot delete school', function () {
+    $module = Module::firstOrCreate(['name' => 'ADMINISTRASI'], ['order' => 1, 'is_active' => true]);
+    $menu = Menu::firstOrCreate(
+        ['route_name' => 'master.data-sekolah.index'],
+        ['module_id' => $module->id, 'name' => 'Data Sekolah', 'order' => 1, 'is_active' => true]
+    );
+
+    $school = School::factory()->create(['name' => 'Sekolah Target Hapus']);
+
+    $schoolAdmin = User::factory()->create([
+        'username' => 'admin_sekolah_no_del',
+        'user_type' => 'admin',
+        'school_id' => $school->id,
+        'is_active' => true,
+    ]);
+
+    UserMenuPermission::create([
+        'user_id' => $schoolAdmin->id,
+        'menu_id' => $menu->id,
+        'can_view' => true,
+        'can_delete' => false,
+    ]);
+
+    $response = $this->actingAs($schoolAdmin)->deleteJson(route('master.data-sekolah.destroy', $school));
+
+    $response->assertForbidden();
+    $this->assertDatabaseHas('schools', ['id' => $school->id]);
+});
+
+test('school admin permissions are not reset when school is updated after being given permission by super admin', function () {
+    $this->seed(MenuAccessTemplateSeeder::class);
+
+    $module = Module::firstOrCreate(['name' => 'MASTER DATA'], ['order' => 1, 'is_active' => true]);
+    $menu = Menu::firstOrCreate(
+        ['name' => 'Data Master'],
+        ['module_id' => $module->id, 'order' => 1, 'is_active' => true]
+    );
+    $subMenu = SubMenu::firstOrCreate(
+        ['route_name' => 'master.data-sekolah'],
+        ['menu_id' => $menu->id, 'name' => 'Data Sekolah', 'order' => 1, 'is_active' => true]
+    );
+
+    $school = School::factory()->create([
+        'name' => 'SMA Negeri 1 Perm Test',
+        'npsn' => '77889900',
+    ]);
+
+    $schoolAdmin = User::factory()->create([
+        'username' => 'admin_perm_tester',
+        'user_type' => 'admin',
+        'school_id' => $school->id,
+        'is_active' => true,
+    ]);
+
+    // Super Admin memberikan izin kepada Admin Sekolah untuk mengedit Data Sekolah
+    UserMenuPermission::create([
+        'user_id' => $schoolAdmin->id,
+        'sub_menu_id' => $subMenu->id,
+        'can_view' => true,
+        'can_edit' => true,
+        'can_delete' => false,
+    ]);
+
+    // Admin Sekolah melakukan pembaruan data sekolah
+    $response = $this->actingAs($schoolAdmin)->put(route('master.data-sekolah.update', $school), [
+        'name' => 'SMA Negeri 1 Perm Test Updated',
+        'npsn' => '77889900',
+        'school_type' => 'SMA',
+        'status' => 'Negeri',
+        'city' => 'Makassar',
+        'is_active' => '1',
+    ]);
+
+    $response->assertRedirect(route('master.data-sekolah.index'));
+    $response->assertSessionHas('success');
+
+    // Pastikan izin granular tidak ter-reset
+    $schoolAdmin->refresh();
+    expect($schoolAdmin->hasSubMenuAccess($subMenu, 'edit'))->toBeTrue();
+
+    // Admin Sekolah dapat melakukan pembaruan kedua kalinya tanpa terhalang 403
+    $secondResponse = $this->actingAs($schoolAdmin)->put(route('master.data-sekolah.update', $school), [
+        'name' => 'SMA Negeri 1 Perm Test Second Update',
+        'npsn' => '77889900',
+        'school_type' => 'SMA',
+        'status' => 'Negeri',
+        'city' => 'Makassar',
+        'is_active' => '1',
+    ]);
+
+    $secondResponse->assertRedirect(route('master.data-sekolah.index'));
+    $secondResponse->assertSessionHas('success');
+
+    $school->refresh();
+    expect($school->name)->toBe('SMA Negeri 1 Perm Test Second Update');
 });
