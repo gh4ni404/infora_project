@@ -147,6 +147,6 @@
 
     <x-slot:footer>
         <button type="button" class="btn-secondary" id="btnCancelCreateKalender">Batal</button>
-        <button type="submit" class="btn-primary" id="btnSubmitCreateKalender">Simpan Kegiatan</button>
+        <button type="submit" class="btn-primary" id="btnSubmitCreateKalender">Simpan</button>
     </x-slot:footer>
 </x-modal>

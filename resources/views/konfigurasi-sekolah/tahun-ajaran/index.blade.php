@@ -62,10 +62,12 @@
         total-label="Data"
     >
         <x-slot:actions>
-            <button type="button" class="btn-primary" id="btnOpenCreateTahunAjaran" title="Tambah Tahun Ajaran Baru" {{ $selectedSchool ? '' : 'disabled' }}>
-                <x-icon name="add" size="16" />
-                {{-- <span>Tambah</span> --}}
-            </button>
+            <x-crud-button
+                action="create"
+                id="btnOpenCreateTahunAjaran"
+                title="Tambah Tahun Ajaran Baru"
+                :disabled="!$selectedSchool"
+            />
         </x-slot:actions>
 
         <thead>
@@ -74,7 +76,7 @@
                 <th>Tahun Ajaran</th>
                 <th>Status</th>
                 <th>Semester</th>
-                <th class="table-actions-right">Aksi</th>
+                <th class="col-w-actions">Aksi</th>
             </tr>
         </thead>
         <tbody>
@@ -148,33 +150,28 @@
                             </a>
 
                             {{-- Tombol Ubah Tahun Ajaran --}}
-                            <button
-                                type="button"
-                                class="btn-edit btn-edit-ta"
+                            <x-crud-button
+                                action="edit"
+                                title="Ubah Tahun Ajaran {{ $ta->tahun }}"
+                                class="btn-edit-ta"
                                 data-ta="{{ json_encode([
                                     'id' => $ta->id,
                                     'tahun' => $ta->tahun,
                                     'keterangan' => $ta->keterangan,
                                 ]) }}"
                                 data-action="{{ route('konfigurasi-sekolah.tahun-ajaran.update', $ta) }}"
-                                title="Ubah Tahun Ajaran {{ $ta->tahun }}"
-                            >
-                                <x-icon name="square-pen" size="14" />
-                                {{-- <span>Ubah</span> --}}
-                            </button>
+                            />
 
                             {{-- Tombol Hapus Tahun Ajaran --}}
                             @if (! $ta->is_active && ! $ta->hasActiveSemester())
-                                <button
-                                    type="button"
-                                    class="btn-delete btn-open-delete-ta"
+                                <x-crud-button
+                                    action="delete"
+                                    title="Hapus Tahun Ajaran {{ $ta->tahun }}"
+                                    class="btn-open-delete-ta"
                                     data-action="{{ route('konfigurasi-sekolah.tahun-ajaran.destroy', $ta) }}"
                                     data-tahun="{{ $ta->tahun }}"
                                     data-semesters-count="{{ $ta->semesters_count }}"
-                                    title="Hapus Tahun Ajaran {{ $ta->tahun }}"
-                                >
-                                    <x-icon name="delete" size="14" />
-                                </button>
+                                />
                             @endif
                         </x-table-actions>
                     </td>
@@ -202,16 +199,12 @@
         </x-slot:subtitle>
 
         <x-slot:actions>
-            <button
-                type="button"
-                class="btn-primary"
+            <x-crud-button 
+                action="create"
                 id="btnOpenCreateSemester"
-                {{ $selectedTahunAjaran ? '' : 'disabled' }}
+                :disabled="!$selectedTahunAjaran"
                 title="{{ $selectedTahunAjaran ? 'Tambah Semester Baru' : 'Pilih Tahun Ajaran terlebih dahulu' }}"
-            >
-                <x-icon name="add" size="16" />
-                {{-- <span>Tambah</span> --}}
-            </button>
+            />
         </x-slot:actions>
 
         <thead>
@@ -262,9 +255,9 @@
                         <td>
                             <x-table-actions align="right">
                                 {{-- Tombol Ubah Semester --}}
-                                <button
-                                    type="button"
-                                    class="btn-edit btn-edit-sem"
+                                <x-crud-button
+                                    action="edit"
+                                    class="btn-edit-sem"
                                     data-sem="{{ json_encode([
                                         'id' => $sem->id,
                                         'semester' => $sem->semester,
@@ -275,25 +268,18 @@
                                     ]) }}"
                                     data-action="{{ route('konfigurasi-sekolah.tahun-ajaran.semester.update', [$selectedTahunAjaran, $sem]) }}"
                                     title="Ubah Semester {{ $sem->label_semester }}"
-                                >
-                                    <x-icon name="square-pen" size="14" />
-                                    {{-- <span>Ubah</span> --}}
-                                </button>
+                                />
 
                                 {{-- Tombol Hapus Semester --}}
-                                @if (! $sem->is_active)
-                                    <button
-                                        type="button"
-                                        class="btn-delete btn-open-delete-sem"
-                                        data-action="{{ route('konfigurasi-sekolah.tahun-ajaran.semester.destroy', [$selectedTahunAjaran, $sem]) }}"
-                                        data-semester="{{ $sem->label_semester }}"
-                                        data-tahun="{{ $selectedTahunAjaran->tahun }}"
-                                        data-rentang="{{ $sem->rentang_tanggal_formatted }}"
-                                        title="Hapus Semester {{ $sem->label_semester }}"
-                                    >
-                                        <x-icon name="delete" size="14" />
-                                    </button>
-                                @endif
+                                <x-crud-button
+                                    action="delete"
+                                    class="btn-delete btn-open-delete-sem"
+                                    data-action="{{ route('konfigurasi-sekolah.tahun-ajaran.semester.destroy', [$selectedTahunAjaran, $sem]) }}"
+                                    data-semester="{{ $sem->label_semester }}"
+                                    data-tahun="{{ $selectedTahunAjaran->tahun }}"
+                                    data-rentang="{{ $sem->rentang_tanggal_formatted }}"
+                                    title="Hapus Semester {{ $sem->label_semester }}"
+                                />
                             </x-table-actions>
                         </td>
                     </tr>
