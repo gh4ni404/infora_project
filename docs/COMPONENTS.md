@@ -1,6 +1,6 @@
 # 🧩 Panduan Lengkap Blade Components — INFORA
 
-Dokumentasi resmi ini merangkum seluruh **23 Anonymous Blade Components** yang tersedia di aplikasi **INFORA** ([`resources/views/components/`](file:///home/gania/infora_project/resources/views/components/)). Komponen-komponen ini dirancang untuk memastikan konsistensi antarmuka pengguna (UI/UX), mereduksi pengulangan kode (*boilerplate*), dan menyatu secara native dengan sistem desain di [`resources/css/app.css`](file:///home/gania/infora_project/resources/css/app.css).
+Dokumentasi resmi ini merangkum seluruh **24 Anonymous Blade Components** yang tersedia di aplikasi **INFORA** ([`resources/views/components/`](../resources/views/components/)). Komponen-komponen ini dirancang untuk memastikan konsistensi antarmuka pengguna (UI/UX), mereduksi pengulangan kode (*boilerplate*), dan menyatu secara native dengan sistem desain di [`resources/css/app.css`](../resources/css/app.css).
 
 ---
 
@@ -24,6 +24,7 @@ Dokumentasi resmi ini merangkum seluruh **23 Anonymous Blade Components** yang t
    - [`<x-data-table>`](#x-data-table)
    - [`<x-search-toolbar>`](#x-search-toolbar)
    - [`<x-table-actions>`](#x-table-actions)
+   - [`<x-crud-button>`](#x-crud-button)
    - [`<x-empty-state>`](#x-empty-state)
    - [`<x-pagination-summary>`](#x-pagination-summary)
    - [`<x-pagination>`](#x-pagination)
@@ -38,6 +39,7 @@ Dokumentasi resmi ini merangkum seluruh **23 Anonymous Blade Components** yang t
    - [`ImageUpload`](#imageupload)
    - [`InforaProgress`](#inforaprogress)
    - [`PermissionMatrix`](#permissionmatrix)
+   - [`InforaWilayah`](#inforawilayah)
 7. [Panduan Kontribusi Bagi Pengembang Baru](#-7-panduan-kontribusi-bagi-pengembang-baru)
 
 ---
@@ -257,7 +259,7 @@ Lihat bagian [Integrasi SearchableSelect](#searchableselect) untuk manipulasi op
 ---
 
 ### `<x-icon-picker>`
-Komponen interaktif untuk memilih ikon visual dengan katalog resmi Lucide Icons yang dikonfigurasikan pada [`config/icons.php`](file:///home/gania/infora_project/config/icons.php). Dilengkapi pratinjau kartu aktif, tombol pemicu modal katalog, pencarian kata kunci, serta filter chip kategori.
+Komponen interaktif untuk memilih ikon visual dengan katalog resmi Lucide Icons yang dikonfigurasikan pada [`config/icons.php`](../config/icons.php). Dilengkapi pratinjau kartu aktif, tombol pemicu modal katalog, pencarian kata kunci, serta filter chip kategori.
 
 #### Props
 | Prop | Tipe | Default | Wajib? | Deskripsi |
@@ -695,6 +697,111 @@ Membungkus tombol-tombol aksi pada baris tabel (Detail, Edit, Hapus) dengan pera
 
 ---
 
+### `<x-crud-button>`
+Komponen tombol aksi CRUD (*Create, View, Edit, Delete*) yang **terintegrasi secara native dengan sistem otorisasi dan hak akses granular pengguna** (`SuperAdminMiddleware`, `UserMenuPermission`, dan `SidebarCache`). Komponen ini secara otomatis memeriksa izin pengguna terhadap menu/sub-menu pada rute yang sedang aktif; jika pengguna tidak memiliki izin aksi terkait, tombol otomatis disembunyikan (*fail-safe zero render*). Mendukung tombol `<button>`, tautan `<a>`, maupun formulir aksi inline `<form>`.
+
+#### Fitur Utama
+1. **Otorisasi Granular Otomatis**: Otomatis aktif (*bypass*) untuk Super Administrator, dan memeriksa izin `can_view`, `can_create`, `can_edit`, atau `can_delete` untuk pengguna lain berdasarkan rute request aktif saat ini.
+2. **Pemetaan Warna & Gaya Standar (`DESIGN.md`)**:
+   - `action="create"` -> class `.btn-primary` (warna biru brand utama)
+   - `action="edit"` -> class `.btn-edit` (warna kuning/amber)
+   - `action="delete"` -> class `.btn-delete` (warna merah bahaya)
+   - `action="view"` -> class default teks/ikon
+   - Otomatis menghormati class kustom (seperti `.btn-secondary`, `.btn-outline-primary`, `.btn-danger`, dll.) jika didefinisikan pada atribut class.
+3. **Ikon Bawaan Otomatis**:
+   - `create`: ikon `add`
+   - `edit`: ikon `square-pen`
+   - `delete`: ikon `delete`
+   - `view`: ikon `eye-on`
+   - Dapat diganti menggunakan prop `icon="..."`.
+4. **Fleksibilitas Tag HTML**: Mendukung tag `button` (default), `link` (`<a>`), dan `form` (membungkus `<button>` dengan tag `<form method="POST">` inline lengkap dengan `@csrf`).
+
+#### Props
+| Prop | Tipe | Default | Wajib? | Deskripsi |
+| :--- | :--- | :--- | :--- | :--- |
+| `action` | `string` | `'view'` | Opsional | Jenis aksi CRUD yang dievaluasi hak aksesnya: `'create'`, `'view'`, `'edit'`, atau `'delete'`. |
+| `tag` | `string` | `'button'` | Opsional | Elemen HTML pembungkus: `'button'`, `'link'`, atau `'form'`. |
+| `href` | `string` | `'#'` | Opsional | URL tujuan (atribut `href` jika `tag="link"` atau atribut `action` jika `tag="form"`). |
+| `text` | `string` | `null` | Opsional | Teks label di samping ikon. Jika dikosongkan, tombol bertindak sebagai *icon-only button*. |
+| `icon` | `string` | `null` | Opsional | Nama ikon SVG `<x-icon>`. Jika kosong, menggunakan ikon default sesuai `action`. |
+| `title` | `string` | `null` | Opsional | Teks untuk atribut `title` (tooltip) dan `aria-label` (aksesibilitas). |
+| `id` | `string` | `null` | Opsional | Atribut `id` pada elemen tombol/link. |
+| `type` | `string` | `'button'` | Opsional | Atribut `type` elemen tombol (`'button'`, `'submit'`). |
+
+#### Slots
+- **`{{ $slot }}`**: Konten tambahan di dalam elemen tombol (teks kustom, badge, dll).
+
+#### Contoh Penggunaan 1: Tombol Tambah di Header Halaman (`action="create"`)
+```blade
+{{-- Tombol Create dengan modal trigger --}}
+<x-crud-button 
+    action="create" 
+    id="btnOpenCreateSchool"
+    title="Tambah Data Sekolah"
+/>
+
+{{-- Tombol Create dengan Ikon & Style Kustom --}}
+<x-crud-button
+    action="create"
+    id="btnOpenSyncAdmins"
+    class="btn-secondary"
+    icon="sync"
+    title="Sinkronkan Akun Administrator Semua Sekolah"
+/>
+```
+
+#### Contoh Penggunaan 2: Tombol Aksi Baris Tabel (`action="edit"` & `action="delete"`)
+```blade
+<x-table-actions align="right">
+    {{-- Tombol Edit dengan data attributes untuk InforaModals --}}
+    <x-crud-button 
+        action="edit" 
+        class="btn-open-edit-school" 
+        title="Edit Data Sekolah"
+        data-school="{{ json_encode($school) }}"
+        data-action="{{ route('master.data-sekolah.update', $school) }}" 
+        :data-logo-url="$school->logo_path ? asset('storage/' . $school->logo_path) : null" 
+    />
+
+    {{-- Tombol Delete dengan data attributes untuk konfirmasi hapus --}}
+    <x-crud-button 
+        action="delete" 
+        class="btn-open-delete-school"
+        data-action="{{ route('master.data-sekolah.destroy', $school) }}"
+        data-name="{{ $school->name }}" 
+        data-npsn="{{ $school->npsn }}" 
+    />
+</x-table-actions>
+```
+
+#### Contoh Penggunaan 3: Tombol Form Inline (`tag="form"`)
+```blade
+{{-- Otomatis dibungkus form POST inline dengan @csrf --}}
+<x-crud-button
+    action="create"
+    tag="form"
+    :href="route('master.data-sekolah.sync-single-admin', $school)"
+    class="btn-secondary text-xs"
+    icon="add"
+    text="Buat Akun"
+    title="Buat Akun Administrator Sekolah Ini"
+/>
+```
+
+#### Contoh Penggunaan 4: Tombol Tautan Halaman Baru (`tag="link"`)
+```blade
+<x-crud-button
+    action="view"
+    tag="link"
+    :href="route('master.data-jurusan.show', $jurusan)"
+    class="btn-ghost"
+    text="Detail Jurusan"
+    title="Lihat Rincian Data Jurusan"
+/>
+```
+
+---
+
 ### `<x-empty-state>`
 Menampilkan ikon dan pesan ramah di dalam baris tabel saat data tidak ditemukan atau pencarian nihil.
 
@@ -712,7 +819,7 @@ Menampilkan ikon dan pesan ramah di dalam baris tabel saat data tidak ditemukan 
 
 ### `<x-pagination-summary>` dan `<x-pagination>`
 - **`<x-pagination-summary>`**: Pembungkus `table-footer` yang merender `$paginator->links()` jika data memiliki lebih dari 1 halaman atau `total > 0`.
-- **`<x-pagination>`**: Template tampilan paginasi universal yang didaftarkan secara global pada [`AppServiceProvider`](file:///home/gania/infora_project/app/Providers/AppServiceProvider.php) (`Paginator::defaultView('components.pagination')`). Menyediakan ringkasan range data (contoh: *"Menampilkan 1 sampai 15 dari 120 total data"*) dan tautan halaman interaktif.
+- **`<x-pagination>`**: Template tampilan paginasi universal yang didaftarkan secara global pada [`AppServiceProvider`](../app/Providers/AppServiceProvider.php) (`Paginator::defaultView('components.pagination')`). Menyediakan ringkasan range data (contoh: *"Menampilkan 1 sampai 15 dari 120 total data"*) dan tautan halaman interaktif.
 
 #### Contoh Penggunaan
 ```blade
@@ -741,7 +848,8 @@ Komponen dialog interaktif terpadu untuk formulir data (Tambah/Ubah), dialog inf
 | `size` | `string` | `'default'` | Standar | Ukuran lebar dialog (`'sm'`, `'lg'`, atau default 560px). Pada preset confirm & delete otomatis `'modal-sm'` (440px). |
 | `action` | `string` | `null` | Semua | URL tujuan form action. Jika diisi atau memiliki `method`, modal otomatis membungkus konten dengan tag `<form>`. |
 | `method` | `string` | `null` | Semua | Method HTTP form (`'POST'`, `'PUT'`, `'PATCH'`, `'DELETE'`). Pada preset confirm default `'POST'` (dapat ditentukan `'PUT'` atau `'PATCH'`). Pada preset delete selalu mengunci ke `'DELETE'`. |
-| `formId` | `string` | `null` | Semua | Atribut `id` untuk tag `<form>`. |
+| `withForm` | `bool` | `true` | Confirm/Delete | Tentukan `false` bila modal hanya bertindak sebagai dialog konfirmasi untuk form luar halaman via `form-id` (tanpa membungkus tag `<form>` sendiri). |
+| `formId` | `string` | `null` | Semua | Atribut `id` untuk tag `<form>` modal, atau ID form target eksternal jika `withForm="false"`. |
 | `messageId` | `string` | `null` | Confirm/Delete | ID elemen paragraf pesan konfirmasi untuk dimanipulasi via script `InforaModals`. |
 | `badgeId` | `string` | `null` | Confirm/Delete | ID elemen badge kode/kategori untuk dimanipulasi via script `InforaModals`. |
 | `itemTitleId` | `string` | `null` | Confirm/Delete | ID elemen judul item yang dimanipulasi via script `InforaModals`. |
@@ -836,13 +944,32 @@ Komponen dialog interaktif terpadu untuk formulir data (Tambah/Ubah), dialog inf
 />
 ```
 
+#### Contoh 5: Preset Konfirmasi Form Eksternal (Zero Inner Form Conflict)
+Digunakan saat modal bertindak sebagai konfirmasi untuk formulir utama halaman (misal form izin ber-method `PUT/PATCH`). Dengan `:with-form="false"` dan `form-id="..."`, tombol submit modal otomatis terhubung ke form eksternal via atribut HTML5 `form="{{ $formId }}"` tanpa konflik method HTTP.
+
+```blade
+<x-modal
+    name="confirm"
+    id="modalConfirmSaveAccess"
+    :with-form="false"
+    form-id="permissionForm"
+    title="Konfirmasi Simpan Hak Akses"
+    badge-id="modalConfirmSaveAccessBadge"
+    item-title-id="modalConfirmSaveAccessItemTitle"
+    message-id="modalConfirmSaveAccessMessage"
+    hint-id="modalConfirmSaveAccessHint"
+    cancel-btn-id="btnCancelConfirmSaveAccess"
+    confirm-btn-id="btnSubmitConfirmSaveAccess"
+/>
+```
+
 ---
 
 ### `<x-progress-modal>`
 Modal indikator proses global (*singleton*) dengan ambient status orb, bilah persentase beranimasi halus, dan pelaporan status langsung.
 
 > [!IMPORTANT]
-> Komponen ini tidak membutuhkan props dan telah terpasang secara global pada [`resources/views/layouts/app.blade.php`](file:///home/gania/infora_project/resources/views/layouts/app.blade.php) dan [`resources/views/layouts/auth.blade.php`](file:///home/gania/infora_project/resources/views/layouts/auth.blade.php). Anda cukup memanggil API JavaScript `window.InforaProgress` dari script halaman manapun.
+> Komponen ini tidak membutuhkan props dan telah terpasang secara global pada [`resources/views/layouts/app.blade.php`](../resources/views/layouts/app.blade.php) dan [`resources/views/layouts/auth.blade.php`](../resources/views/layouts/auth.blade.php). Anda cukup memanggil API JavaScript `window.InforaProgress` dari script halaman manapun.
 
 #### Contoh Pemanggilan di Layout
 ```blade
@@ -1029,6 +1156,77 @@ matrix.toggleModule(moduleId); // Toggle seluruh izin lihat pada modul terkait
 
 ---
 
+### `InforaWilayah`
+Modul JavaScript client-side terpusat (`resources/js/infora-wilayah.js` ➔ `window.InforaWilayah`) untuk mengelola integrasi *cascading dropdown* wilayah administratif Indonesia (Provinsi ➔ Kabupaten/Kota ➔ Kecamatan ➔ Kelurahan/Desa ➔ Kode Pos) secara otomatis dan bebas *boilerplate*. Dilengkapi *in-memory cache* untuk mereduksi request HTTP jaringan ke server.
+
+#### 1. Low-Level Fetchers (Dengan In-Memory Cache)
+Menyediakan antarmuka Promise asinkron untuk mengambil data wilayah secara langsung dengan cache otomatis di browser:
+```javascript
+// Mengambil data wilayah dengan caching otomatis di browser
+const provinsiList = await window.InforaWilayah.fetchProvinsi();
+const kabupatenList = await window.InforaWilayah.fetchKabupaten(provinsiId);
+const kecamatanList = await window.InforaWilayah.fetchKecamatan(kabupatenId);
+const kelurahanList = await window.InforaWilayah.fetchKelurahan(kecamatanId);
+
+// Bersihkan cache in-memory jika diperlukan
+window.InforaWilayah.clearCache();
+```
+
+#### 2. Otomasi Cascading Dropdown (`bindCascade`)
+Cukup panggil fungsi ini saat inisialisasi halaman untuk mengotomasi seluruh alur dependensi antar-dropdown:
+```javascript
+// Mengaitkan dropdown pada form Tambah
+window.InforaWilayah.bindCascade({
+    prefix: 'create',        // Mencari elemen #{prefix}_provinsi_id, #{prefix}_kabupaten_id, dst.
+    syncTextInputs: true,    // Otomatis sinkronkan input teks city, district, village jika ada
+    autoPostalCode: true,    // Otomatis isi #{prefix}_postal_code dari metadata item.kode_pos
+});
+
+// Mengaitkan dropdown pada form Ubah (Edit)
+window.InforaWilayah.bindCascade({
+    prefix: 'edit',
+    syncTextInputs: true,
+    autoPostalCode: true,
+});
+```
+
+##### Fitur Otomatis `bindCascade`:
+- **Reset & Disable Anak:** Ketika dropdown induk (misal: Provinsi) berubah atau dikosongkan, seluruh dropdown anak di bawahnya (Kabupaten, Kecamatan, Kelurahan) otomatis dikosongkan dan dinonaktifkan (`setDisabled(true)`).
+- **Indikator Loading:** Menampilkan status *loading spinner* pada dropdown yang sedang memuat data via `setLoading(true)`.
+- **Sinkronisasi Input Teks Legacy:** Otomatis mengisi atau mengosongkan nilai input teks seperti `city`, `district`, dan `village` agar kompatibel dengan skema data yang membutuhkan nama teks langsung.
+- **Auto-Fill Kode Pos:** Ketika kelurahan dipilih, input `postal_code` otomatis terisi berdasarkan atribut `kode_pos` dari data kelurahan Kemendagri.
+
+#### 3. Otomasi Populasi Berantai Modal Edit (`populateCascade`)
+Mengisi rangkaian dropdown bertingkat saat membuka modal edit secara mulus tanpa *nested callback* berantai:
+```javascript
+// Cukup berikan objek model (misal: school)
+window.InforaWilayah.populateCascade('edit', school);
+
+// Atau dengan payload dictionary ID wilayah eksplisit:
+await window.InforaWilayah.populateCascade('edit', {
+    provinsi_id: data.provinsi_id,
+    kabupaten_id: data.kabupaten_id,
+    kecamatan_id: data.kecamatan_id,
+    kelurahan_id: data.kelurahan_id,
+    province: data.province,
+});
+```
+
+#### 4. Pemulihan Error Validasi Server-Side (`restoreOnError`)
+Memulihkan kembali rangkaian dropdown bertingkat dari session `old()` ketika submit form gagal divalidasi server:
+```blade
+@if ($errors->any() && old('provinsi_id'))
+    window.InforaWilayah.restoreOnError('{{ old('_method') === 'PUT' ? 'edit' : 'create' }}', {
+        provinsi_id: '{{ old('provinsi_id') }}',
+        kabupaten_id: '{{ old('kabupaten_id') }}',
+        kecamatan_id: '{{ old('kecamatan_id') }}',
+        kelurahan_id: '{{ old('kelurahan_id') }}',
+    });
+@endif
+```
+
+---
+
 ## 🚀 7. Panduan Kontribusi Bagi Pengembang Baru
 
 Jika Anda ingin menambahkan atau memodifikasi komponen di repositori INFORA:
@@ -1052,7 +1250,7 @@ Jika Anda ingin menambahkan atau memodifikasi komponen di repositori INFORA:
 - Selalu gabungkan atribut native melalui `$attributes->merge(['class' => '...'])`.
 
 ### 3. Standar Pengujian (Testing)
-Setiap komponen Blade wajib memiliki pengujian regresi di [`tests/Feature/BladeComponentsTest.php`](file:///home/gania/infora_project/tests/Feature/BladeComponentsTest.php) menggunakan Pest:
+Setiap komponen Blade wajib memiliki pengujian regresi di [`tests/Feature/BladeComponentsTest.php`](../tests/Feature/BladeComponentsTest.php) menggunakan Pest:
 ```php
 test('tab-pills renders wrapper with tablist role and accessible label', function () {
     $view = $this->blade(

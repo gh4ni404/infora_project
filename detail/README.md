@@ -29,7 +29,8 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 20. [Konfigurasi Sekolah: Kalender Akademik Terpadu dan Agenda Kegiatan Multi-Day](#-20-konfigurasi-sekolah-kalender-akademik-terpadu--agenda-kegiatan-multi-day)
 21. [Standarisasi Layanan Unggah Gambar Base64 dan Komponen Universal](#-21-standarisasi-layanan-unggah-gambar-base64--komponen-universal-imageuploader--x-image-upload)
 22. [Pengendali Matriks Hak Akses Terprogram](#-22-pengendali-matriks-hak-akses-terprogram-permissionmatrix)
-23. [Ekosistem Komponen Blade UI dan Kematangan Pengujian](#-23-ekosistem-komponen-blade-ui--kematangan-pengujian-250-tests--1123-assertions)
+23. [Ekosistem Komponen Blade UI dan Kematangan Pengujian](#-23-ekosistem-komponen-blade-ui--kematangan-pengujian-300-tests--1342-assertions)
+24. [Modul Client-Side Wilayah Terpadu](#-24-modul-client-side-wilayah-terpadu-inforawilayah)
 
 ---
 
@@ -220,7 +221,7 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
   - Menyediakan endpoint 1-klik untuk beralih status: `POST /master/data-jurusan/{jurusan}/toggle-status`.
 - **Integrasi Modal Interaktif `InforaModals`:**
   - Modal tambah (`modalCreateJurusan`), modal edit (`modalEditJurusan`), dan modal konfirmasi hapus (`modalDeleteJurusan`) beroperasi mulus di atas tabel data tanpa reload halaman.
-- **Automated Test Suite:** Diverifikasi melalui feature test lengkap di [`tests/Feature/JurusanTest.php`](file:///home/gania/infora_project/tests/Feature/JurusanTest.php).
+- **Automated Test Suite:** Diverifikasi melalui feature test lengkap di [`tests/Feature/JurusanTest.php`](../tests/Feature/JurusanTest.php).
 
 ---
 
@@ -235,7 +236,7 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 - **Arsitektur Modal Dialog Terintegrasi:**
   - Dilengkapi komponen modal terpisah: `modal-tahun-ajaran.blade.php` dan `modal-semester.blade.php` yang dikontrol oleh `InforaModals`.
 - **Akses Rute Resmi:** Dikelola pada rute `/konfigurasi-sekolah/tahun-ajaran` (`konfigurasi-sekolah.tahun-ajaran.*`).
-- **Automated Test Suite:** Diverifikasi penuh oleh [`tests/Feature/TahunAjaranTest.php`](file:///home/gania/infora_project/tests/Feature/TahunAjaranTest.php).
+- **Automated Test Suite:** Diverifikasi penuh oleh [`tests/Feature/TahunAjaranTest.php`](../tests/Feature/TahunAjaranTest.php).
 
 ---
 
@@ -250,7 +251,7 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 - **Feed Data Asinkron dan Rute Resmi:**
   - Rute indeks: `/konfigurasi-sekolah/kalender-akademik` (`konfigurasi-sekolah.kalender-akademik.*`).
   - Endpoint JSON: `GET /konfigurasi-sekolah/kalender-akademik/events` untuk memuat acara kalender secara asinkron berdasarkan unit sekolah yang aktif.
-- **Automated Test Suite:** Diuji secara mendalam pada [`tests/Feature/KalenderAkademikTest.php`](file:///home/gania/infora_project/tests/Feature/KalenderAkademikTest.php).
+- **Automated Test Suite:** Diuji secara mendalam pada [`tests/Feature/KalenderAkademikTest.php`](../tests/Feature/KalenderAkademikTest.php).
 
 ---
 
@@ -270,7 +271,7 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
   - Penanganan flag pembersihan/penghapusan foto (`removeName`) secara otomatis.
 - **Controller JavaScript `window.ImageUpload`:**
   - Mendukung pemanggilan terprogram via `ImageUpload.getInstance(id)` untuk `setPreview(url)`, `clear()`, dan pendengar event `image-upload:change`.
-- **Unit Testing:** Diuji komprehensif di [`tests/Unit/ImageUploaderTest.php`](file:///home/gania/infora_project/tests/Unit/ImageUploaderTest.php).
+- **Unit Testing:** Diuji komprehensif di [`tests/Unit/ImageUploaderTest.php`](../tests/Unit/ImageUploaderTest.php).
 
 ---
 
@@ -286,14 +287,32 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 
 ---
 
-### 🧪 23. Ekosistem Komponen Blade UI dan Kematangan Pengujian (250 Tests dan 1.123 Assertions)
-- **22 Anonymous Blade Components Universal:**
+### 🧪 23. Ekosistem Komponen Blade UI dan Kematangan Pengujian (300 Tests dan 1.342 Assertions)
+- **24 Anonymous Blade Components Universal:**
   - Tersedia di `resources/views/components/` dan terdokumentasi lengkap di [`docs/COMPONENTS.md`](../docs/COMPONENTS.md).
-  - Meliputi: form inputs, form select dengan rendering opsi otomatis, searchable select bertingkat, tab-pills aksesibel, data table dengan search toolbar terintegrasi, modal dialog flexbox, dan indikator progres global.
+  - Meliputi: form inputs, form select dengan rendering opsi otomatis, searchable select bertingkat, tab-pills aksesibel, data table dengan search toolbar terintegrasi, tombol aksi terotorisasi `<x-crud-button>`, modal dialog flexbox, dan indikator progres global.
 - **Pembersihan Kelas Kolom Legacy dan Zero Inline Styles:**
   - Seluruh view pada modul sistem, wilayah administratif, master data, dan konfigurasi sekolah telah dibersihkan dari inline style dan class kolom legacy, menghasilkan antarmuka yang seragam dan performa render yang cepat.
-- **250 Automated Tests Lolos 100%:**
-  - Rangkaian pengujian Pest mencakup seluruh alur sistem: autentikasi, otorisasi RBAC, operasi CRUD, validasi data, mutator, format nama file, integrasi modal JavaScript, dan rendering komponen Blade, dengan total **250 tests dan 1.123 assertions lulus tanpa kendala**.
+- **300 Automated Tests Lolos 100%:**
+  - Rangkaian pengujian Pest mencakup seluruh alur sistem: autentikasi, otorisasi RBAC, operasi CRUD, validasi data, mutator, format nama file, integrasi modal JavaScript, dan rendering komponen Blade, dengan total **300 tests dan 1.342 assertions lulus tanpa kendala**.
+
+---
+
+### 🗺️ 24. Modul Client-Side Wilayah Terpadu (`InforaWilayah`)
+- **Modul Client-Side Mandiri (`resources/js/infora-wilayah.js`):**
+  - Mengelola integrasi *cascading dropdown* wilayah administratif Indonesia 4 tingkat (Provinsi ➔ Kabupaten/Kota ➔ Kecamatan ➔ Kelurahan/Desa ➔ Kode Pos) secara otomatis dan bebas boilerplate.
+- **In-Memory Caching Cerdas:**
+  - Menyimpan cache hasil request data wilayah di memory browser untuk meminimalkan beban jaringan server dan memberikan transisi instan saat beralih antar modal.
+- **Otomasi Cascading Event Binder (`bindCascade`):**
+  - Otomatis mereset dan menonaktifkan dropdown anak saat dropdown induk berubah/dikosongkan.
+  - Mengontrol animasi loading spinner (`setLoading(true)`).
+  - Menyinkronkan nilai input teks legacy (`city`, `district`, `village`) serta auto-fill kode pos saat kelurahan dipilih.
+- **Populasi Berantai Asinkron (`populateCascade`) dan Pemulihan Validasi (`restoreOnError`):**
+  - Mengisi rangkaian dropdown bertingkat pada modal edit secara asinkron tanpa *nested callback*.
+  - Memulihkan data wilayah dari session `old()` saat form gagal validasi server-side.
+  - Memangkas hingga **274 baris kode boilerplate** pada modul Master Data Sekolah.
+
+---
 
 ---
 

@@ -9,19 +9,24 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 ## [Unreleased]
 
 ### Added
+- **Modul Client-Side Wilayah Terpadu (`resources/js/infora-wilayah.js` / `window.InforaWilayah`):**
+  - Mengimplementasikan modul mandiri berkinerja tinggi untuk mengelola *cascading dropdown* wilayah administratif Indonesia 4 tingkat (Provinsi ➔ Kabupaten/Kota ➔ Kecamatan ➔ Kelurahan/Desa ➔ Kode Pos).
+  - Menyediakan *in-memory cache* untuk mereduksi request HTTP jaringan ke server pada data wilayah yang statis.
+  - Menstandarkan event binding (`bindCascade`), populasi berantai modal edit (`populateCascade`), dan pemulihan opsi error validasi (`restoreOnError`).
+  - Mengurangi 274 baris kode boilerplate di `master/data-sekolah/index.blade.php`, serta mempercepat fetch pada modul Master Wilayah Kecamatan dan Kelurahan.
 - **Master Data Jurusan / Konsentrasi Keahlian dan Peminatan (SMA, SMK, dan MA):**
   - Mengimplementasikan CRUD lengkap data jurusan dan program peminatan pada rute `/master/data-jurusan` (`master.data-jurusan.*`).
   - Mendukung struktur program keahlian lintas jenjang: Konsentrasi Keahlian (SMK), Peminatan/Fase Kurikulum Merdeka (SMA), dan Program Keagamaan/Peminatan (Madrasah Aliyah - MA).
   - Isolasi data per unit sekolah dengan filter pemilih unit (`schoolFilterForm`).
   - Tombol toggle status aktif/non-aktif cepat 1-klik: `POST /master/data-jurusan/{jurusan}/toggle-status`.
   - Integrasi dialog modal interaktif `InforaModals` (`modalCreateJurusan`, `modalEditJurusan`, `modalDeleteJurusan`) langsung di atas tabel data tanpa reload halaman.
-  - Automated Pest test suite di [`tests/Feature/JurusanTest.php`](file:///home/gania/infora_project/tests/Feature/JurusanTest.php).
+  - Automated Pest test suite di [`tests/Feature/JurusanTest.php`](tests/Feature/JurusanTest.php).
 - **Konfigurasi Sekolah: Manajemen Tahun Ajaran dan Semester:**
   - Mengimplementasikan tata kelola siklus akademik pada rute `/konfigurasi-sekolah/tahun-ajaran` (`konfigurasi-sekolah.tahun-ajaran.*`).
   - Entitas induk `TahunAjaran` dengan rentang tanggal dan status aktif, serta sub-entitas `Semester` (Ganjil dan Genap) dengan rentang tanggal pelaksanaan.
   - Fitur aktivasi 1-klik (`POST /konfigurasi-sekolah/tahun-ajaran/{tahunAjaran}/semester/{semester}/activate`) dengan proteksi semester aktif tunggal.
   - Arsitektur dialog modal modular: `modal-tahun-ajaran.blade.php` dan `modal-semester.blade.php`.
-  - Automated Pest test suite di [`tests/Feature/TahunAjaranTest.php`](file:///home/gania/infora_project/tests/Feature/TahunAjaranTest.php).
+  - Automated Pest test suite di [`tests/Feature/TahunAjaranTest.php`](tests/Feature/TahunAjaranTest.php).
 - **Konfigurasi Sekolah: Kalender Akademik Terpadu dan Agenda Kegiatan Multi-Day:**
   - Mengimplementasikan Kalender Akademik interaktif pada rute `/konfigurasi-sekolah/kalender-akademik` (`konfigurasi-sekolah.kalender-akademik.*`).
   - Tampilan ganda yang dapat dialihkan via komponen `<x-tab-pills>`:
@@ -30,12 +35,12 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
   - Dukungan rentang kegiatan multi-hari (*multi-day event spanning*) dengan kalkulasi badge durasi hari otomatis (*"3 hari"*).
   - Standarisasi pewarnaan kategori agenda (Libur Nasional/Keagamaan, Penilaian/Ujian, KBM, Ekstrakurikuler, Rapat Dinas).
   - Endpoint JSON `GET /konfigurasi-sekolah/kalender-akademik/events` untuk memuat acara kalender secara asinkron berdasarkan unit sekolah yang aktif.
-  - Automated Pest test suite di [`tests/Feature/KalenderAkademikTest.php`](file:///home/gania/infora_project/tests/Feature/KalenderAkademikTest.php).
+  - Automated Pest test suite di [`tests/Feature/KalenderAkademikTest.php`](tests/Feature/KalenderAkademikTest.php).
 - **Standarisasi Service `ImageUploader` (`App\Support\ImageUploader`) dan Komponen `<x-image-upload>`:**
   - Service mandiri murni PHP untuk validasi ketat MIME type (`png`, `jpg`, `jpeg`, `webp`, `gif`, `svg`), batasan ukuran maks. 1MB (`DEFAULT_MAX_BYTES = 1048576`), dan penamaan semantik collision-proof `{modul}_u{user_id}_{timestamp}_{random8}.{ext}`.
   - Komponen Blade `<x-image-upload>` dengan dropzone modern, live base64 conversion di browser via FileReader API, pratinjau bentuk lingkaran/membulat, flag penghapusan foto, dan modul JavaScript pendamping `window.ImageUpload`.
   - Migrasi pengolahan logo sekolah pada `Master\SchoolController` ke `ImageUploader::uploadBase64()`.
-  - Unit test suite di [`tests/Unit/ImageUploaderTest.php`](file:///home/gania/infora_project/tests/Unit/ImageUploaderTest.php).
+  - Unit test suite di [`tests/Unit/ImageUploaderTest.php`](tests/Unit/ImageUploaderTest.php).
 - **Pengendali Matriks Hak Akses Terprogram (`PermissionMatrix`):**
   - Modul client-side terpusat `resources/js/permission-matrix.js` untuk mengelola tabel matriks RBAC pada Hak Akses Pengguna dan Template Peran.
   - Otomatisasi dependensi baris (menonaktifkan *Lihat* otomatis menonaktifkan aksi CRUD; memilih aksi CRUD otomatis mengaktifkan *Lihat*).
@@ -133,8 +138,8 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
   - Mentransformasikan indikator proses menjadi mesin *Universal Progressive Loading Screen* yang dapat dipanggil dan digunakan kembali oleh seluruh modul dan fitur aplikasi INFORA (bukan hanya Backup dan Restore).
   - Menyediakan antarmuka visual minimalis, elegan, dan tenang tanpa elemen kaku: menggantikan *stepper* bertingkat dan kotak log teknis dengan kartu melayang modern berbalut *backdrop blur*, *ambient status orb* berdenyut lembut, judul dan teks aktivitas ringkas dinamis, serta bar progres ramping (*sleek pill bar*) 9px.
   - **Animasi Sangat Halus (*Buttery Smooth Motion dan Gradient Shimmer*)**: Bar progres dilengkapi sapuan gradien bercahaya Royal Blue (`#2563EB`) ke Cyan (`#06B6D4`) yang mengalir kontinu (`@keyframes progressGradientShimmer`), transisi pergerakan kurva `cubic-bezier(0.25, 1, 0.5, 1)`, serta interpolasi numerik persentase yang mengalir halus berbasis `requestAnimationFrame`.
-  - **Komponen Blade Global (`<x-progress-modal />`)**: Ditanamkan terpusat pada layout master [app.blade.php](file:///home/gania/infora_project/resources/views/layouts/app.blade.php) sehingga siap digunakan di halaman mana pun tanpa duplikasi markup.
-  - **Universal JavaScript API (`window.InforaProgress`)**: Modul mandiri [infora-progress.js](file:///home/gania/infora_project/resources/js/infora-progress.js) dengan metode `show()`, `set()`, `finish()`, `error()`, `hide()`, dan `stream(url, formData, options)` untuk otomasi konsumsi *Server-Sent Events* (SSE).
+  - **Komponen Blade Global (`<x-progress-modal />`)**: Ditanamkan terpusat pada layout master [app.blade.php](resources/views/layouts/app.blade.php) sehingga siap digunakan di halaman mana pun tanpa duplikasi markup.
+  - **Universal JavaScript API (`window.InforaProgress`)**: Modul mandiri [infora-progress.js](resources/js/infora-progress.js) dengan metode `show()`, `set()`, `finish()`, `error()`, `hide()`, dan `stream(url, formData, options)` untuk otomasi konsumsi *Server-Sent Events* (SSE).
   - **100% Kepatuhan Arsitektur Bebas Inline Styles**: Seluruh styling visual terpusat di `resources/css/app.css` tanpa satupun atribut `style="..."` maupun tag `<style>`.
   - Penyesuaian batas unggahan berkas cadangan menjadi **250 MB** pada `RestoreBackupRequest` (256.000 KB), Nginx (`client_max_body_size 250M;`), dan PHP-FPM (`upload_max_filesize = 250M`, `post_max_size = 250M`).
   - Sinkronisasi zona waktu server dan aplikasi ke **`Asia/Makassar`** (WITA, GMT+8) di `docker/php/php.ini`, `config/app.php`, `.env`, dan `.env.example`.
@@ -144,8 +149,8 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
   - Mengemas basis data (`database.sql`), seluruh berkas/gambar unggahan pengguna (`storage/app/public/`), dan berkas `manifest.json` metadata ke dalam satu arsip portabel mandiri via native PHP `ZipArchive`.
   - Pengecualian cerdas pada folder `vendor/`, `node_modules/`, `.git/`, dan `storage/framework/` agar ukuran arsip tetap ringkas dan bebas konflik binary OS antar server.
   - **Pencegahan Otomatis Gambar 404 (*Symlink Health Check dan Auto-Repair*)**: Saat pemulihan (*restore*), sistem memeriksa kesehatan symlink `public/storage`; jika sudah terhubung valid ke target lokal, sistem melanjutkan tanpa operasi berlebih; jika belum ada atau rusak (*broken link* dari server lama), sistem otomatis membuat ulang symlink (`Artisan::call('storage:link')`).
-  - **Menu Dasar Bawaan Sistem (*Baseline System Seeder*)**: Menu mandiri **Backup dan Restore** (`route: backup-restore`, `icon: folder`, `order: 2`) resmi dijadikan menu sistem dasar di [SystemMenuSeeder.php](file:///home/gania/infora_project/database/seeders/SystemMenuSeeder.php) di bawah modul PENGATURAN SISTEM, menjamin menu ini langsung aktif di sidebar saat *fresh installation* (`php artisan migrate:fresh --seed`) agar proses pemulihan data dapat langsung dieksekusi seketika.
-  - Test suite Pest diperluas dengan [SystemBaselineSeederTest.php](file:///home/gania/infora_project/tests/Feature/System/SystemBaselineSeederTest.php) (total 83 tests aplikasi lulus 100%, 377 assertions).
+  - **Menu Dasar Bawaan Sistem (*Baseline System Seeder*)**: Menu mandiri **Backup dan Restore** (`route: backup-restore`, `icon: folder`, `order: 2`) resmi dijadikan menu sistem dasar di [SystemMenuSeeder.php](database/seeders/SystemMenuSeeder.php) di bawah modul PENGATURAN SISTEM, menjamin menu ini langsung aktif di sidebar saat *fresh installation* (`php artisan migrate:fresh --seed`) agar proses pemulihan data dapat langsung dieksekusi seketika.
+  - Test suite Pest diperluas dengan [SystemBaselineSeederTest.php](tests/Feature/System/SystemBaselineSeederTest.php) (total 83 tests aplikasi lulus 100%, 377 assertions).
 - **Sistem Tata Kelola Menu Akses dan Dynamic Role Templates (User-Centric Granular Permissions):**
   - Mengimplementasikan otorisasi navigasi berbasis pengguna pada rute `/sistem/menu-akses` (`sistem.menu-akses`) lengkap dengan 4 hak aksi granular: Lihat (`can_view`), Tambah (`can_create`), Ubah (`can_edit`), dan Hapus (`can_delete`).
   - Sistem template peran dinamis (`menu_access_templates`) yang dapat dikonfigurasi penuh oleh Super Admin untuk beragam peran (Guru Pengajar, Wali Kelas, Wakasek Kurikulum, Wakasek Kesiswaan, Staf TU, Siswa Reguler, Siswa PKL) melalui antarmuka khusus.
