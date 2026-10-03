@@ -356,7 +356,9 @@
                             <span class="searchable-select-option-text">${this.escapeHtml(text)}</span>
                             ${extra ? `<span class="searchable-select-option-badge">${this.escapeHtml(extra)}</span>` : ''}
                         </div>
-                        <x-icon name="check" size="16" class="searchable-select-check-icon ${isSelected ? '' : 'hidden'}" />
+                        <svg class="searchable-select-check-icon ${isSelected ? '' : 'hidden'}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
                     `;
 
                     this.optionsList.insertBefore(optEl, emptyEl);

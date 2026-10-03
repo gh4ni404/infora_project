@@ -1998,10 +1998,10 @@ body {
     width: 70px;
 } */
 
-/* .col-w-actions {
+.col-w-actions {
     width: 160px;
     text-align: center;
-} */
+}
 
 .table-actions-right {
     justify-content: flex-end;

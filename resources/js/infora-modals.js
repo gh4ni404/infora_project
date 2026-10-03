@@ -241,7 +241,9 @@ window.InforaModals = (function () {
                 }
 
                 if (typeof callback === 'function') {
-                    callback(modal, this, formDelete);
+                    if (callback(modal, this, formDelete) === false) {
+                        return;
+                    }
                 }
 
                 open(modalId);
@@ -357,7 +359,13 @@ window.InforaModals = (function () {
                 }
 
                 if (typeof callback === 'function') {
-                    callback(modal, this, form);
+                    if (callback(modal, this, form) === false) {
+                        if (isCheckbox) {
+                            this.checked = activeTriggerPreviousChecked;
+                        }
+                        activeTrigger = null;
+                        return;
+                    }
                 }
 
                 open(modalId);
