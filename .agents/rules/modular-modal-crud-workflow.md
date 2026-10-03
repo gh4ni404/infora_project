@@ -1,17 +1,17 @@
 # Modular Modal CRUD Architecture (Zero Standalone Edit Pages)
 
-Aturan ini mengikat seluruh pengembangan modul administratif di INFORA sesuai dengan `detail/DESIGN.md` Seksi 2.4 poin 13.
+This rule governs all administrative module development in INFORA in accordance with `detail/DESIGN.md` Section 2.4 point 13.
 
 ---
 
-## 1. Arsitektur Modal CRUD Terintegrasi (Zero-Reload Workflow)
-1. **Dilarang Membuat Halaman Terpisah untuk Create & Edit:**
-   - Dilarang membuat file view mandiri yang meng-`@extends('layouts.app')` untuk aksi `create.blade.php` atau `edit.blade.php` pada entitas administratif (Data Sekolah, Modul, Menu, Sub-Menu, Wilayah Administratif, Jurusan, dll).
-   - Seluruh formulir Tambah (`create`) dan Ubah (`edit`) wajib diimplementasikan sebagai dialog modal interaktif di atas halaman `index.blade.php`.
-2. **Pemisahan Berkas Blade Modular:**
-   - Buat berkas `create.blade.php` dan `edit.blade.php` sebagai komponen Blade modular yang di-include (`@include('...create')`, `@include('...edit')`) ke dalam `index.blade.php`.
-3. **Kompatibilitas Rute `edit()`:**
-   - Metode `Controller::edit()` wajib mengalihkan (*redirect*) pengguna kembali ke route `index` guna menjaga kompatibilitas bookmark dan rute RESTful resource standard:
+## 1. Integrated Modal CRUD Architecture (Zero-Reload Workflow)
+1. **Strict Prohibition of Standalone Create & Edit Pages:**
+   - Creating standalone view files that extend `@extends('layouts.app')` for `create.blade.php` or `edit.blade.php` actions on administrative entities (School Data, Modules, Menus, Sub-Menus, Administrative Regions, Majors, etc.) is strictly prohibited.
+   - All Create (`create`) and Edit (`edit`) forms must be implemented as interactive modal dialogs on top of the `index.blade.php` page.
+2. **Modular Blade File Separation:**
+   - Create `create.blade.php` and `edit.blade.php` files as modular Blade components that are included (`@include('...create')`, `@include('...edit')`) directly inside `index.blade.php`.
+3. **Route `edit()` Compatibility:**
+   - The `Controller::edit()` method must redirect the user back to the `index` route to maintain bookmark compatibility and standard RESTful resource route conventions:
      ```php
      public function edit(Entity $entity): RedirectResponse
      {
@@ -21,12 +21,12 @@ Aturan ini mengikat seluruh pengembangan modul administratif di INFORA sesuai de
 
 ---
 
-## 2. Pengisian Data Dinamis & Auto-Reopen Validasi
-1. **Pengisian Form Edit via Data Attributes & JavaScript:**
-   - Tombol pemicu edit pada tabel data menyertakan atribut `data-*` (misal `data-school`, `data-jurusan`, `data-module`) berisi representasi JSON atau atribut model.
-   - Event listener JavaScript membaca atribut tersebut dan mengisi input form modal secara instan sebelum modal dibuka via `InforaModals.open('modalEditXxx')`.
-2. **Penanganan Validasi Server Cerdas (*Auto-Reopen Invariant*):**
-   - Ketika terjadi kegagalan validasi backend (`$errors->any()`), modal dialog terkait wajib terbuka kembali secara otomatis saat halaman dirender ulang dengan data input (`old(...)`) tetap terjaga:
+## 2. Dynamic Data Population & Smart Validation Auto-Reopen
+1. **Edit Form Population via Data Attributes & JavaScript:**
+   - The edit trigger button in data tables includes `data-*` attributes (e.g. `data-school`, `data-jurusan`, `data-module`) containing the model's attributes or JSON representation.
+   - A client-side JavaScript event listener reads these attributes and instantly populates the modal form inputs before opening the modal via `InforaModals.open('modalEditXxx')`.
+2. **Smart Server Validation Handling (Auto-Reopen Invariant):**
+   - When server-side validation fails (`$errors->any()`), the corresponding modal dialog must automatically reopen upon page re-render while preserving old input data (`old(...)`):
      ```blade
      @if ($errors->any() && old('_method') === 'PUT')
          <script>
@@ -45,9 +45,22 @@ Aturan ini mengikat seluruh pengembangan modul administratif di INFORA sesuai de
 
 ---
 
-## 3. Struktur Flexbox Dialog Modal & Zero Clipping
+## 3. Flexbox Modal Dialog Structure & Zero Clipping
 1. **Sticky Header & Sticky Footer:**
-   - Seluruh modal wajib menggunakan struktur `.modal-dialog form { display: flex; flex-direction: column; flex: 1; min-height: 0; }` dengan `.modal-header` dan `.modal-footer` terproteksi `flex-shrink: 0`.
-   - Tombol aksi simpan/batal tidak boleh terpotong (*zero clipping*) pada resolusi layar apa pun.
+   - All modals must use the structure `.modal-dialog form { display: flex; flex-direction: column; flex: 1; min-height: 0; }` with `.modal-header` and `.modal-footer` protected by `flex-shrink: 0`.
+   - Submit and cancel action buttons must never be clipped (*zero clipping*) on any viewport resolution.
 2. **Dynamic Scrollbar:**
-   - Area `.modal-body` wajib memanfaatkan overflow vertikal dengan custom slim scrollbar (6px) dan normalisasi margin input (`.modal-body .form-group { margin-bottom: 0; }`).
+   - The `.modal-body` container must utilize vertical overflow with a custom slim scrollbar (6px) and input margin normalization (`.modal-body .form-group { margin-bottom: 0; }`).
+
+---
+
+## 4. Decoupling CRUD Modal Templates from `isSuperAdmin` & Modal Header Invariant
+1. **CRUD Modal Templates Must Always Be Available in the DOM:**
+   - Standard CRUD modal template files (`create.blade.php`, `edit.blade.php`, `delete.blade.php`) **MUST NOT** be wrapped in permission directives like `@if ($user?->isSuperAdmin())` when included in `index.blade.php`.
+   - Modals must unconditionally exist in the DOM so that client-side JavaScript lookups (`document.getElementById`, form reset, event binding) never fail or encounter `null` references.
+2. **Layered Access Control (Do Not Hide Modal Markup):**
+   - Action trigger button visibility is controlled by `<x-crud-button>` or fine-grained UI permission checks.
+   - Authoritative mutation protection is strictly enforced on the backend via middleware (`SuperAdminMiddleware`, `RoleMiddleware`), Form Requests, and Model Policies.
+   - Exception: Only platform-level root maintenance operations (such as global bulk synchronization of administrator accounts or full system wipes) may conditionally gate the modal inclusion itself with `@if ($user?->isSuperAdmin())`.
+3. **Flexible Modal Header Rendering:**
+   - The `<x-modal>` component automatically hides the `.modal-header` container when `$title` and `$subtitle` are null or empty (`@if ($title || $subtitle)`). Leverage this for centered confirmation dialogs or custom card modals without leaving an unwanted empty header bar or top divider border.

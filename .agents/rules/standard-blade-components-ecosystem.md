@@ -1,45 +1,46 @@
 # Standard Anonymous Blade Components Ecosystem (22 Components)
 
-Aturan ini mengikat seluruh pembuatan dan modifikasi tampilan antarmuka (Blade views) di proyek INFORA sesuai dokumentasi resmi di `docs/COMPONENTS.md`.
+This rule governs the creation and modification of all user interfaces (Blade views) across the INFORA project in accordance with official specifications in `docs/COMPONENTS.md`.
 
 ---
 
-## 1. Kewajiban Menggunakan Komponen Blade Resmi
-1. **Dilarang Menuliskan Elemen HTML Form & UI Mentah:**
-   - Dilarang menuliskan struktur `<div class="form-group"><label>...<input class="form-control">...` secara manual berulang-ulang.
-   - Wajib memanfaatkan **22 Anonymous Blade Components** yang telah disediakan di `resources/views/components/`.
-2. **Katalog 22 Komponen Resmi:**
+## 1. Mandatory Usage of Official Blade Components
+1. **Strict Prohibition of Raw HTML Form & UI Markup:**
+   - Writing repetitive manual boilerplate structures like `<div class="form-group"><label>...<input class="form-control">...` is strictly prohibited.
+   - You must exclusively utilize the **22 Anonymous Blade Components** provided in `resources/views/components/`.
+2. **Catalog of 22 Official Components:**
    - **Form & Input:**
-     - `<x-form-input>` (input teks, angka, email, password, tanggal, hidden dengan binding `old()`, label bintang, error handling otomatis).
-     - `<x-form-select>` (dropdown standar dengan koleksi opsi dan atribut dinamis).
-     - `<x-form-textarea>` (textarea dengan autosize dan error handling).
-     - `<x-form-checkbox>` (checkbox toggle/switch ramah touch).
-     - `<x-searchable-select>` (dropdown searchable dengan filtering cepat).
-     - `<x-icon-picker>` (dialog visual pemilih ikon Lucide interaktif).
-     - `<x-image-upload>` (upload gambar modern terintegrasi live base64 preview dan service `ImageUploader`).
-   - **Halaman, Navigasi & Metrik:**
-     - `<x-page-header>` (judul halaman, breadcrumb, subtitle, action buttons).
-     - `<x-tab-pills>` & `<x-tab-pill>` (tab switcher berbasis pil interaktif).
-     - `<x-stats-grid>` & `<x-stat-card>` (kartu metrik statistik dengan tren dan aksen).
-     - `<x-alert>` (notifikasi alert kontekstual dengan icon).
-   - **Tabel & Penyajian Data:**
-     - `<x-data-table>` (tabel data responsif dengan styling INFORA).
-     - `<x-search-toolbar>` (toolbar pencarian dan filter cepat).
-     - `<x-table-actions>` (aksi baris tabel: edit modal, toggle status, hapus).
-     - `<x-empty-state>` (tampilan kosong elegan saat data belum ada atau pencarian nihil).
-     - `<x-pagination-summary>` & `<x-pagination>` (ringkasan rentang dan paginasi adaptif).
-   - **Dialog & Modal:**
-     - `<x-modal>` (modal flexbox terstandarisasi dengan auto-scroll dan zero clipping).
-     - `<x-progress-modal>` (modal indikator loading bertingkat halus).
-   - **Grafis & Ikon:**
-     - `<x-icon>` (render native Lucide SVG open source).
+     - `<x-form-input>` (Text, number, email, password, date, and hidden inputs with `old()` binding, required asterisk badge, and automatic error handling).
+     - `<x-form-select>` (Standard select dropdown with collection options and dynamic attributes).
+     - `<x-form-textarea>` (Textarea with auto-sizing and error handling).
+     - `<x-form-checkbox>` (Touch-friendly checkbox toggle/switch).
+     - `<x-searchable-select>` (Searchable dropdown with fast client-side query filtering).
+     - `<x-icon-picker>` (Visual dialog picker for interactive Lucide icons).
+     - `<x-image-upload>` (Modern image upload integrated with live base64 preview and `ImageUploader` service).
+   - **Page Header, Navigation & Metrics:**
+     - `<x-page-header>` (Page title, breadcrumbs, subtitle, action buttons).
+     - `<x-tab-pills>` & `<x-tab-pill>` (Interactive pill-based tab switcher).
+     - `<x-stats-grid>` & `<x-stat-card>` (Statistical metric cards with trend indicators and color accents).
+     - `<x-alert>` (Contextual alert notifications with Lucide icons).
+   - **Data Presentation & Tables:**
+     - `<x-data-table>` (Responsive data table styled to INFORA design tokens).
+     - `<x-search-toolbar>` (Fast search and filtering toolbar).
+     - `<x-table-actions>` (Table row actions: edit modal, status toggle, delete modal).
+     - `<x-empty-state>` (Polished empty state display for zero records or search misses).
+     - `<x-pagination-summary>` & `<x-pagination>` (Adaptive pagination and result range summary).
+   - **Dialogs & Modals:**
+     - `<x-modal>` (Standardized flexbox modal with auto-scroll and zero clipping).
+     - `<x-progress-modal>` (Multi-stage smooth loading progress modal).
+   - **Graphics & Icons:**
+     - `<x-icon>` (Native Lucide SVG open-source icon renderer).
 
 ---
 
-## 2. Integrasi Modul JavaScript Pendamping
-Komponen UI Blade bekerja selaras dengan 5 modul controller client-side native:
-1. `window.InforaModals` → Mengontrol buka/tutup modal dialog (`InforaModals.open(id)`, `InforaModals.close(id)`).
-2. `window.SearchableSelect` → Inisialisasi dropdown dengan live query search.
-3. `window.ImageUpload` → Handler FileReader base64 dan pratinjau instan.
-4. `window.InforaProgress` → Manajemen progress bar loading screen global.
-5. `window.PermissionMatrix` → Manajemen RBAC dinamis dan bulk selection.
+## 2. Integration with Companion JavaScript Modules
+Blade UI components operate seamlessly alongside 6 native client-side controller modules:
+1. `window.InforaModals` → Controls modal dialog lifecycle (`InforaModals.open(id)`, `InforaModals.close(id)`, `InforaModals.bindConfirmButtons()`).
+2. `window.SearchableSelect` → Dropdown initialization with live query search and keyboard navigation.
+3. `window.ImageUpload` → Client-side FileReader base64 handler and instant image previewing.
+4. `window.InforaProgress` → Global loading screen and multi-stage progress bar management.
+5. `window.PermissionMatrix` → Dynamic RBAC permissions matrix and bulk selection handler.
+6. `window.InforaWilayah` → Cascading administrative regional data management (Provinsi ➔ Kabupaten ➔ Kecamatan ➔ Kelurahan) with in-memory caching, edit form auto-population, and server validation recovery (`restoreOnError`).
