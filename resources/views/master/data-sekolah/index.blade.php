@@ -1,594 +1,274 @@
 @extends('layouts.app')
 
 @section('content')
-<x-page-header title="Data Sekolah">
-    <x-slot:subtitle>
-        Kelola registri sekolah SMA dan SMK dalam platform INFORA
-    </x-slot:subtitle>
-    <x-slot:actions>
-        <button type="button" class="btn-secondary" id="btnOpenSyncAdmins" title="Sinkronkan Akun Administrator Semua Sekolah">
-            <x-icon name="users" size="16" />
-            <span>Sinkronkan Akun Admin</span>
-        </button>
-        <button type="button" class="btn-primary" id="btnOpenCreateSchool">
-            <x-icon name="add" size="18" />
-        </button>
-    </x-slot:actions>
-</x-page-header>
-
-{{-- Flash Alerts --}}
-<x-alert type="success" />
-<x-alert type="error" />
-<x-alert type="validation" />
-
-<x-data-table
-    route="{{ route('master.data-sekolah.index') }}"
-    search-placeholder="Cari nama sekolah, NPSN, atau kota..."
-    :per-page="$perPageInput"
-    :total="$schools->total()"
-    total-label="Sekolah"
->
-    <x-slot:filters>
-        <x-form-select 
-            id="school_type"
-            name="school_type"
-            class="form-select-sm"
-            onchange="this.form.submit()"
-            placeholder="Semua Jenis"
-            :selected="request('school_type')"
-            :options="['SMA' => 'SMA', 'SMK' => 'SMK', 'MA' => 'MA']"
-        />
-    </x-slot:filters>
-    <thead>
-        <tr>
-            <th>Sekolah</th>
-            <th>NPSN</th>
-            <th>Akun Admin</th>
-            <th>Jenis</th>
-            <th>Status</th>
-            <th>Akreditasi</th>
-            <th>Kota</th>
-            <th>Kondisi</th>
-            <th>Aksi</th>
-        </tr>
-    </thead>
-    <tbody>
-    @forelse ($schools as $school)
-        <tr>
-            <td>
-                <div class="flex items-center gap-3">
-                    @if ($school->logo_path)
-                        <img src="{{ asset('storage/' . $school->logo_path) }}" alt="Logo" class="entity-logo-thumb">
-                    @else
-                        <span class="entity-logo-placeholder">
-                            <x-icon name="home" size="18" />
-                        </span>
-                    @endif
-                    <div>
-                        <div class="table-cell-bold">{{ $school->name }}</div>
-                    </div>
-                </div>
-            </td>
-            <td>
-                <code class="text-brand">{{ $school->npsn }}</code>
-            </td>
-            <td>
-                @if ($school->adminUser)
-                    <span class="badge badge-success" title="Akun Administrator Terdaftar: {{ $school->adminUser->username }}">
-                        <x-icon name="user" size="14" />
-                        <span>{{ $school->adminUser->username }}</span>
-                    </span>
-                @else
-                    <form method="POST" action="{{ route('master.data-sekolah.sync-single-admin', $school) }}">
-                        @csrf
-                        <button type="submit" class="btn-secondary text-xs" title="Buat Akun Administrator Sekolah Ini">
-                            <x-icon name="add" size="14" />
-                            <span>Buat Akun</span>
-                        </button>
-                    </form>
-                @endif
-            </td>
-            <td>
-                @if ($school->school_type === 'SMA')
-                    <span class="badge badge-primary">SMA</span>
-                @else
-                    <span class="badge badge-cyan">SMK</span>
-                @endif
-            </td>
-            <td>
-                @if ($school->status === 'Negeri')
-                    <span class="badge badge-success">Negeri</span>
-                @else
-                    <span class="badge badge-warning">Swasta</span>
-                @endif
-            </td>
-            <td>
-                @switch($school->accreditation)
-                    @case('A')
-                        <span class="badge badge-success">A</span>
-                        @break
-                    @case('B')
-                        <span class="badge badge-cyan">B</span>
-                        @break
-                    @case('C')
-                        <span class="badge badge-warning">C</span>
-                        @break
-                    @case('Belum')
-                        <span class="badge badge-neutral">Belum</span>
-                        @break
-                    @default
-                        <span class="table-cell-muted">-</span>
-                @endswitch
-            </td>
-            <td>
-                <span class="table-cell-muted">{{ $school->kabupaten?->nama ?? $school->city ?? '-' }}</span>
-            </td>
-            <td>
-                @if ($school->is_active)
-                    <span class="badge badge-success">Aktif</span>
-                @else
-                    <span class="badge badge-neutral">Nonaktif</span>
-                @endif
-            </td>
-            <td>
-                <x-table-actions align="right">
-                    <button
-                        type="button"
-                        class="btn-edit btn-open-edit-school"
-                        title="Edit Data Sekolah"
-                        data-school="{{ json_encode($school) }}"
-                        data-action="{{ route('master.data-sekolah.update', $school) }}"
-                        @if ($school->logo_path)
-                            data-logo-url="{{ asset('storage/' . $school->logo_path) }}"
-                        @endif
-                    >
-                        <x-icon name="edit" size="14" />
-                    </button>
-                    <button
-                        type="button"
-                        class="btn-delete btn-open-delete-school"
-                        title="Hapus Sekolah"
-                        data-action="{{ route('master.data-sekolah.destroy', $school) }}"
-                        data-name="{{ $school->name }}"
-                        data-npsn="{{ $school->npsn }}"
-                    >
-                        <x-icon name="delete" size="14" />
-                    </button>
-                </x-table-actions>
-            </td>
-        </tr>
-    @empty
-        <x-empty-state
-            icon="home"
-            iconSize="48"
-            colspan="8"
-            :text="request()->filled('search') || request()->filled('school_type') 
-                ? 'Hasil pencarian tidak ditemukan.' 
-                : 'Belum ada data sekolah yang terdaftar. Klik tombol Tambah untuk mendaftarkan sekolah pertama.'"
-        >
-            <x-slot:action>
-                <button type="button" class="btn-primary" id="btnEmptyCreateSchool">
-                    <x-icon name="add" size="18" />
-                    <span>Tambah Sekolah</span>
+    <x-page-header title="Data Sekolah">
+        <x-slot:subtitle>
+            @if ($user?->isSuperAdmin())
+                Kelola registri sekolah SMA dan SMK dalam platform INFORA
+            @else
+                Informasi profil dan identitas unit sekolah Anda
+            @endif
+        </x-slot:subtitle>
+        <x-slot:actions>
+            @if ($user?->isSuperAdmin())
+                <button type="button" class="btn-secondary" id="btnOpenSyncAdmins"
+                    title="Sinkronkan Akun Administrator Semua Sekolah"
+                    aria-label="Sinkronkan Akun Administrator Semua Sekolah">
+                    <x-icon name="sync" size="16" />
                 </button>
-            </x-slot:action>
-        </x-empty-state>
-    @endforelse
-    </tbody>
-    <x-slot:footer>
-        <x-pagination-summary :paginator="$schools" />
-    </x-slot:footer>
-</x-data-table>
+            @endif
+            <x-crud-button 
+                action="create" 
+                id="btnOpenCreateSchool"
+                title="Tambah Data Sekolah"
+            />
+        </x-slot:actions>
+    </x-page-header>
 
-<!-- Modal Tambah Sekolah Component -->
-@include('master.data-sekolah.create')
+    {{-- Flash Alerts --}}
+    <x-alert type="success" />
+    <x-alert type="error" />
+    <x-alert type="validation" />
 
-<!-- Modal Edit Sekolah Component -->
-@include('master.data-sekolah.edit')
+    <x-data-table route="{{ route('master.data-sekolah.index') }}"
+        search-placeholder="{{ $user?->isSuperAdmin() ? 'Cari nama sekolah, NPSN, atau kota...' : 'Cari...' }}"
+        :per-page="$perPageInput" :total="$schools->total()" total-label="Sekolah">
+        <x-slot:filters>
+            <x-form-select id="school_type" name="school_type" class="form-select-sm" onchange="this.form.submit()"
+                placeholder="Semua Jenis" :selected="request('school_type')" :options="['SMA' => 'SMA', 'SMK' => 'SMK', 'MA' => 'MA']" />
+        </x-slot:filters>
+        <thead>
+            <tr>
+                <th>Sekolah</th>
+                <th>NPSN</th>
+                <th>Akun Admin</th>
+                <th>Jenis</th>
+                <th>Status</th>
+                <th>Akreditasi</th>
+                <th>Kota</th>
+                <th>Kondisi</th>
+                <th class="col-w-actions">Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($schools as $school)
+                <tr>
+                    <td>
+                        <div class="flex items-center gap-3">
+                            @if ($school->logo_path)
+                                <img src="{{ asset('storage/' . $school->logo_path) }}" alt="Logo"class="entity-logo-thumb">
+                            @else
+                                <span class="entity-logo-placeholder">
+                                    <x-icon name="school" size="18" />
+                                </span>
+                            @endif
+                            <div>
+                                <div class="table-cell-bold">{{ $school->name }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <code class="text-brand">{{ $school->npsn }}</code>
+                    </td>
+                    <td>
+                        @if ($school->adminUser)
+                            <span class="badge badge-success" title="Akun Administrator Terdaftar: {{ $school->adminUser->username }}">
+                                <x-icon name="user" size="14" />
+                                <span>{{ $school->adminUser->username }}</span>
+                            </span>
+                        @else
+                            <span class="table-cell-muted">-</span>
+                        @endif
+                    </td>
+                    <td>
+                        @if ($school->school_type === 'SMA')
+                            <span class="badge badge-primary">SMA</span>
+                        @elseif ($school->school_type === 'SMK')
+                            <span class="badge badge-cyan">SMK</span>
+                        @elseif ($school->school_type === 'MA')
+                            <span class="badge badge-warning">MA</span>
+                        @endif
+                    </td>
+                    <td>
+                        @if ($school->status === 'Negeri')
+                            <span class="badge badge-success">Negeri</span>
+                        @else
+                            <span class="badge badge-warning">Swasta</span>
+                        @endif
+                    </td>
+                    <td>
+                        @switch($school->accreditation)
+                            @case('A')
+                                <span class="badge badge-success">A</span>
+                            @break
 
-{{-- Modal Konfirmasi Hapus Data Sekolah --}}
-<x-modal 
-    name="delete" 
-    id="modalDeleteSchool" 
-    form-id="formDeleteSchool" 
-    cancel-btn-id="btnCancelDeleteSchool"
-    confirm-btn-id="btnConfirmDeleteSchool"
-    message-id="deleteSchoolMessage"
-    badge-id="deleteSchoolBadge"
-    item-title-id="deleteSchoolTitle"
-/>
+                            @case('B')
+                                <span class="badge badge-cyan">B</span>
+                            @break
 
-{{-- Modal Konfirmasi Sinkronisasi Akun Administrator --}}
-<x-modal 
-    id="modalSyncAdmins" 
-    size="sm"
-    action="{{ route('master.data-sekolah.sync-admins') }}"
-    method="POST"
-    form-id="formSyncAdmins"
->
-    <div class="text-center py-4">
-        <div class="w-16 h-16 rounded-full bg-blue-50 text-brand ring-8 ring-blue-50/60 flex items-center justify-center my-4 shrink-0 mx-auto">
-            <x-icon name="users" size="32" />
-        </div>
-        <h3 class="text-base font-bold text-slate-900 mb-2" id="modalSyncAdminsTitle">
-            Sinkronkan Akun Admin Sekolah?
-        </h3>
-        <p class="text-sm text-slate-600 mb-4 px-2">
-            Sistem akan menerbitkan atau menyelaraskan akun administrator (<code class="text-xs font-mono font-bold text-brand">user_type: admin</code>) untuk seluruh unit sekolah yang terdaftar.
-        </p>
-        <div class="p-3 bg-slate-50 border border-slate-200/90 rounded-xl text-left text-xs text-slate-600 space-y-1.5 mb-2">
-            <div class="flex items-center gap-1.5 font-semibold text-slate-800">
-                <x-icon name="info-circle" size="14" class="text-brand shrink-0" />
-                <span>Ketentuan Akun Otomatis:</span>
-            </div>
-            <ul class="list-disc list-inside space-y-1 text-slate-600 pl-1">
-                <li>Username & Password awal = <strong>NPSN</strong> masing-masing sekolah.</li>
-                <li>Izin menu disesuaikan dengan template peran <strong>Admin Sekolah</strong>.</li>
-            </ul>
-        </div>
-    </div>
+                            @case('C')
+                                <span class="badge badge-warning">C</span>
+                            @break
 
-    <x-slot:footer>
-        <div class="grid grid-cols-2 gap-3 w-full">
-            <button type="button" class="btn-secondary w-full justify-center font-medium" id="btnCancelSyncAdmins">
-                <span>Batal</span>
-            </button>
-            <button type="submit" class="btn-primary w-full justify-center font-medium" id="btnConfirmSyncAdmins">
-                <x-icon name="check" size="16" />
-                <span>Ya, Sinkronkan</span>
-            </button>
-        </div>
-    </x-slot:footer>
-</x-modal>
+                            @case('Belum')
+                                <span class="badge badge-neutral">Belum</span>
+                            @break
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // 1. Setup Modals via InforaModals
-    InforaModals.setup('modalCreateSchool', { cancelBtnId: 'btnCancelCreateSchool' });
-    InforaModals.setup('modalEditSchool', { cancelBtnId: 'btnCancelEditSchool' });
-    InforaModals.setup('modalDeleteSchool', { cancelBtnId: 'btnCancelDeleteSchool' });
-    InforaModals.setup('modalSyncAdmins', { cancelBtnId: 'btnCancelSyncAdmins' });
+                            @default
+                                <span class="table-cell-muted">-</span>
+                        @endswitch
+                    </td>
+                    <td>
+                        <span class="table-cell-muted">{{ $school->kabupaten?->nama ?? ($school->city ?? '-') }}</span>
+                    </td>
+                    <td>
+                        @if ($school->is_active)
+                            <span class="badge badge-success">Aktif</span>
+                        @else
+                            <span class="badge badge-neutral">Nonaktif</span>
+                        @endif
+                    </td>
+                    <td>
+                        <x-table-actions align="right">
+                            <x-crud-button 
+                                action="edit" 
+                                class="btn-open-edit-school" 
+                                title="Edit Data Sekolah"
+                                data-school="{{ json_encode($school) }}"
+                                data-action="{{ route('master.data-sekolah.update', $school) }}" 
+                                :data-logo-url="$school->logo_path ? asset('storage/' . $school->logo_path) : null" 
+                            />
 
-    // 2. Hubungkan tombol buka modal
-    InforaModals.bindOpenButton('btnOpenCreateSchool', 'modalCreateSchool');
-    InforaModals.bindOpenButton('btnEmptyCreateSchool', 'modalCreateSchool');
-    InforaModals.bindOpenButton('btnOpenSyncAdmins', 'modalSyncAdmins');
+                            <x-crud-button 
+                                action="delete" 
+                                class="btn-open-delete-school"
+                                data-action="{{ route('master.data-sekolah.destroy', $school) }}"
+                                data-name="{{ $school->name }}" 
+                                data-npsn="{{ $school->npsn }}" 
+                            />
+                        </x-table-actions>
+                    </td>
+                </tr>
+                @empty
+                    <x-empty-state icon="home" iconSize="48" colspan="9" :text="!$user?->isSuperAdmin()
+                        ? 'Akun Anda belum terhubung dengan unit sekolah manapun. Silakan hubungi administrator platform.'
+                        : (request()->filled('search') || request()->filled('school_type')
+                            ? 'Hasil pencarian tidak ditemukan.'
+                            : 'Belum ada data sekolah yang terdaftar. Klik tombol Tambah untuk mendaftarkan sekolah pertama.')">
+                    </x-empty-state>
+                @endforelse
+            </tbody>
+            <x-slot:footer>
+                <x-pagination-summary :paginator="$schools" />
+            </x-slot:footer>
+        </x-data-table>
 
-    // Reset logo saat tombol tambah dibuka
-    document.getElementById('btnOpenCreateSchool')?.addEventListener('click', function() {
-        window.ImageUpload?.getInstance('create_logo')?.clear();
-    });
-    document.getElementById('btnEmptyCreateSchool')?.addEventListener('click', function() {
-        window.ImageUpload?.getInstance('create_logo')?.clear();
-    });
+        <!-- Modal Tambah Sekolah Component -->
+        @include('master.data-sekolah.create')
 
-    // 3. Hubungkan tombol edit modal via InforaModals
-    InforaModals.bindEditButtons('.btn-open-edit-school', 'modalEditSchool', function(modal, school, formEdit, btn) {
-        document.getElementById('edit_name').value = school.name || '';
-        document.getElementById('edit_npsn').value = school.npsn || '';
-        document.getElementById('edit_school_type').value = school.school_type || '';
-        document.getElementById('edit_status').value = school.status || '';
-        document.getElementById('edit_accreditation').value = school.accreditation || '';
-        document.getElementById('edit_nss').value = school.nss || '';
-        document.getElementById('edit_address').value = school.address || '';
-        document.getElementById('edit_village').value = school.village || '';
-        document.getElementById('edit_district').value = school.district || '';
-        document.getElementById('edit_city').value = school.city || '';
-        document.getElementById('edit_province').value = school.province || '';
-        document.getElementById('edit_postal_code').value = school.postal_code || '';
-        document.getElementById('edit_phone').value = school.phone || '';
-        document.getElementById('edit_fax').value = school.fax || '';
-        document.getElementById('edit_email').value = school.email || '';
-        document.getElementById('edit_website').value = school.website || '';
-        document.getElementById('edit_principal_name').value = school.principal_name || '';
-        document.getElementById('edit_principal_nip').value = school.principal_nip || '';
-        document.getElementById('edit_foundation_name').value = school.foundation_name || '';
-        document.getElementById('edit_is_active').checked = Boolean(school.is_active);
+        @if ($user?->isSuperAdmin())
+            @include('master.data-sekolah.sync')
+        @endif
 
-        // Preview logo sekolah via komponen ImageUpload
-        const logoUrl = btn.dataset.logoUrl;
-        const editLogo = window.ImageUpload?.getInstance('edit_logo');
-        if (logoUrl) {
-            editLogo?.setPreview(logoUrl);
-        } else {
-            editLogo?.clear();
-        }
+        {{-- Modal Konfirmasi Hapus Data Sekolah --}}
+        <x-modal 
+            name="delete" 
+            id="modalDeleteSchool" 
+            form-id="formDeleteSchool" 
+            cancel-btn-id="btnCancelDeleteSchool"
+            confirm-btn-id="btnConfirmDeleteSchool" 
+            message-id="deleteSchoolMessage" 
+            badge-id="deleteSchoolBadge"
+            item-title-id="deleteSchoolTitle" 
+        />
 
-        // Populasi nilai dropdown wilayah di modal edit
-        const editProvSelect = window.SearchableSelect ? window.SearchableSelect.getInstance('edit_provinsi_id') : null;
-        const editKabSelect = window.SearchableSelect ? window.SearchableSelect.getInstance('edit_kabupaten_id') : null;
-        const editKecSelect = window.SearchableSelect ? window.SearchableSelect.getInstance('edit_kecamatan_id') : null;
-        const editKelSelect = window.SearchableSelect ? window.SearchableSelect.getInstance('edit_kelurahan_id') : null;
+        <!-- Modal Edit Sekolah Component -->
+        @include('master.data-sekolah.edit')
 
-        if (editProvSelect) {
-            editProvSelect.setValue(
-                school.provinsi_id || '',
-                school.provinsi?.nama || school.province || '',
-                school.provinsi?.kode || '',
-                false
-            );
-        }
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // 1. Setup Modals via InforaModals
+                InforaModals.setup('modalCreateSchool', { cancelBtnId: 'btnCancelCreateSchool' });
+                InforaModals.setup('modalEditSchool', { cancelBtnId: 'btnCancelEditSchool' });
+                InforaModals.setup('modalDeleteSchool', { cancelBtnId: 'btnCancelDeleteSchool' });
 
-        if (school.provinsi_id && editKabSelect) {
-            editKabSelect.setDisabled(false);
-            editKabSelect.setLoading(true);
+                // 2. Hubungkan tombol buka modal tambah
+                InforaModals.bindOpenButton('btnOpenCreateSchool', 'modalCreateSchool');
 
-            fetch(`{{ route('wilayah.dropdown.kabupaten') }}?provinsi_id=${encodeURIComponent(school.provinsi_id)}`)
-                .then(res => res.json())
-                .then(kabData => {
-                    editKabSelect.setOptions(kabData, school.kabupaten_id);
-                    editKabSelect.setLoading(false);
-
-                    if (school.kabupaten_id && editKecSelect) {
-                        editKecSelect.setDisabled(false);
-                        editKecSelect.setLoading(true);
-                        return fetch(`{{ route('wilayah.dropdown.kecamatan') }}?kabupaten_id=${encodeURIComponent(school.kabupaten_id)}`);
-                    }
-                })
-                .then(res => res ? res.json() : null)
-                .then(kecData => {
-                    if (!kecData || !editKecSelect) return;
-                    editKecSelect.setOptions(kecData, school.kecamatan_id);
-                    editKecSelect.setLoading(false);
-
-                    if (school.kecamatan_id && editKelSelect) {
-                        editKelSelect.setDisabled(false);
-                        editKelSelect.setLoading(true);
-                        return fetch(`{{ route('wilayah.dropdown.kelurahan') }}?kecamatan_id=${encodeURIComponent(school.kecamatan_id)}`);
-                    }
-                })
-                .then(res => res ? res.json() : null)
-                .then(kelData => {
-                    if (!kelData || !editKelSelect) return;
-                    editKelSelect.setOptions(kelData, school.kelurahan_id);
-                    editKelSelect.setLoading(false);
-                })
-                .catch(err => {
-                    console.error('Gagal memuat rantai wilayah edit:', err);
-                    editKabSelect?.setLoading(false);
-                    editKecSelect?.setLoading(false);
-                    editKelSelect?.setLoading(false);
+                // Reset logo saat tombol tambah dibuka
+                document.getElementById('btnOpenCreateSchool')?.addEventListener('click', function() {
+                    window.ImageUpload?.getInstance('create_logo')?.clear();
                 });
-        } else {
-            if (editKabSelect) { editKabSelect.setOptions([], ''); editKabSelect.setDisabled(true); }
-            if (editKecSelect) { editKecSelect.setOptions([], ''); editKecSelect.setDisabled(true); }
-            if (editKelSelect) { editKelSelect.setOptions([], ''); editKelSelect.setDisabled(true); }
-        }
-    });
 
-    // 4. Hubungkan tombol konfirmasi hapus sekolah via InforaModals
-    InforaModals.bindDeleteButtons('.btn-open-delete-school', 'modalDeleteSchool', function(modal, btn) {
-        document.getElementById('modalDeleteSchoolTitle').textContent = 'Hapus Sekolah ' + btn.dataset.name + '?';
-        document.getElementById('deleteSchoolMessage').textContent = 'Apakah Anda yakin ingin menghapus data sekolah berikut dari registri?';
-        document.getElementById('deleteSchoolBadge').textContent = 'NPSN: ' + (btn.dataset.npsn || '-');
-        document.getElementById('deleteSchoolTitle').textContent = btn.dataset.name || '-';
-    });
+                @if ($user?->isSuperAdmin())
+                    InforaModals.setup('modalSyncAdmins', {
+                        cancelBtnId: 'btnCancelSyncAdmins'
+                    });
+                    InforaModals.bindOpenButton('btnOpenSyncAdmins', 'modalSyncAdmins');
+                @endif
 
-    // 5. Re-open modal saat terjadi error validasi
-    window.hasValidationErrors = {{ $errors->any() ? 'true' : 'false' }};
-    window.errorMethod = @json(old('_method'));
-    InforaModals.reopenOnError({
-        create: 'modalCreateSchool',
-        edit: 'modalEditSchool',
-    });
+                // 3. Hubungkan tombol edit modal via InforaModals
+                InforaModals.bindEditButtons('.btn-open-edit-school', 'modalEditSchool', function(modal, school, formEdit, btn) {
+                    document.getElementById('edit_name').value = school.name || '';
+                    document.getElementById('edit_npsn').value = school.npsn || '';
+                    document.getElementById('edit_school_type').value = school.school_type || '';
+                    document.getElementById('edit_status').value = school.status || '';
+                    document.getElementById('edit_accreditation').value = school.accreditation || '';
+                    document.getElementById('edit_nss').value = school.nss || '';
+                    document.getElementById('edit_address').value = school.address || '';
+                    document.getElementById('edit_village').value = school.village || '';
+                    document.getElementById('edit_district').value = school.district || '';
+                    document.getElementById('edit_city').value = school.city || '';
+                    document.getElementById('edit_province').value = school.province || '';
+                    document.getElementById('edit_postal_code').value = school.postal_code || '';
+                    document.getElementById('edit_phone').value = school.phone || '';
+                    document.getElementById('edit_fax').value = school.fax || '';
+                    document.getElementById('edit_email').value = school.email || '';
+                    document.getElementById('edit_website').value = school.website || '';
+                    document.getElementById('edit_principal_name').value = school.principal_name || '';
+                    document.getElementById('edit_principal_nip').value = school.principal_nip || '';
+                    document.getElementById('edit_foundation_name').value = school.foundation_name || '';
+                    document.getElementById('edit_is_active').checked = Boolean(school.is_active);
 
-    // Pulihkan opsi bertingkat jika terjadi error validasi
-    @if ($errors->any() && old('provinsi_id'))
-        (function() {
-            const targetPrefix = '{{ old('_method') === 'PUT' ? 'edit' : 'create' }}';
-            const oldProvId = '{{ old('provinsi_id') }}';
-            const oldKabId = '{{ old('kabupaten_id') }}';
-            const oldKecId = '{{ old('kecamatan_id') }}';
-            const oldKelId = '{{ old('kelurahan_id') }}';
+                    // Preview logo sekolah via komponen ImageUpload
+                    const logoUrl = btn.dataset.logoUrl;
+                    const editLogo = window.ImageUpload?.getInstance('edit_logo');
+                    if (logoUrl) {
+                        editLogo?.setPreview(logoUrl);
+                    } else {
+                        editLogo?.clear();
+                    }
 
-            const targetKab = window.SearchableSelect ? window.SearchableSelect.getInstance(targetPrefix + '_kabupaten_id') : null;
-            const targetKec = window.SearchableSelect ? window.SearchableSelect.getInstance(targetPrefix + '_kecamatan_id') : null;
-            const targetKel = window.SearchableSelect ? window.SearchableSelect.getInstance(targetPrefix + '_kelurahan_id') : null;
+                    // Populasi nilai dropdown wilayah di modal edit via InforaWilayah
+                    window.InforaWilayah?.populateCascade('edit', school);
+                });
 
-            if (targetKab) {
-                targetKab.setDisabled(false);
-                targetKab.setLoading(true);
-                fetch(`{{ route('wilayah.dropdown.kabupaten') }}?provinsi_id=${encodeURIComponent(oldProvId)}`)
-                    .then(res => res.json())
-                    .then(kabData => {
-                        targetKab.setOptions(kabData, oldKabId);
-                        targetKab.setLoading(false);
+                // 4. Hubungkan tombol konfirmasi hapus sekolah via InforaModals
+                InforaModals.bindDeleteButtons('.btn-open-delete-school', 'modalDeleteSchool', function(modal, btn) {
+                    document.getElementById('modalDeleteSchoolTitle').textContent = 'Hapus Sekolah ' + btn.dataset.name + '?';
+                    document.getElementById('deleteSchoolMessage').textContent = 'Apakah Anda yakin ingin menghapus data sekolah berikut dari registri?';
+                    document.getElementById('deleteSchoolBadge').textContent = 'NPSN: ' + (btn.dataset.npsn || '-');
+                    document.getElementById('deleteSchoolTitle').textContent = btn.dataset.name || '-';
+                });
 
-                        if (oldKabId && targetKec) {
-                            targetKec.setDisabled(false);
-                            targetKec.setLoading(true);
-                            return fetch(`{{ route('wilayah.dropdown.kecamatan') }}?kabupaten_id=${encodeURIComponent(oldKabId)}`);
-                        }
-                    })
-                    .then(res => res ? res.json() : null)
-                    .then(kecData => {
-                        if (!kecData || !targetKec) return;
-                        targetKec.setOptions(kecData, oldKecId);
-                        targetKec.setLoading(false);
+                // 5. Re-open modal saat terjadi error validasi
+                window.hasValidationErrors = {{ $errors->any() ? 'true' : 'false' }};
+                window.errorMethod = @json(old('_method'));
+                InforaModals.reopenOnError({ create: 'modalCreateSchool', edit: 'modalEditSchool' });
 
-                        if (oldKecId && targetKel) {
-                            targetKel.setDisabled(false);
-                            targetKel.setLoading(true);
-                            return fetch(`{{ route('wilayah.dropdown.kelurahan') }}?kecamatan_id=${encodeURIComponent(oldKecId)}`);
-                        }
-                    })
-                    .then(res => res ? res.json() : null)
-                    .then(kelData => {
-                        if (!kelData || !targetKel) return;
-                        targetKel.setOptions(kelData, oldKelId);
-                        targetKel.setLoading(false);
-                    })
-                    .catch(err => console.error('Gagal memulihkan opsi old wilayah:', err));
-            }
-        })();
-    @endif
-});
-
-// Delegasi Event Global untuk Cascading Wilayah (Modal Tambah dan Modal Edit)
-document.addEventListener('searchable-select:change', function(e) {
-    const inputId = e.target?.id || e.detail?.inputId || '';
-    if (!inputId) return;
-
-    let prefix = null;
-    if (inputId.startsWith('create_')) prefix = 'create';
-    else if (inputId.startsWith('edit_')) prefix = 'edit';
-    if (!prefix) return;
-
-    const val = e.detail?.value;
-    const text = e.detail?.text;
-    const item = e.detail?.item;
-
-    if (inputId === prefix + '_provinsi_id') {
-        const provInput = document.getElementById(prefix + '_province');
-        const kabInput = document.getElementById(prefix + '_city');
-        const kecInput = document.getElementById(prefix + '_district');
-        const kelInput = document.getElementById(prefix + '_village');
-
-        if (provInput) provInput.value = text || '';
-        if (kabInput) kabInput.value = '';
-        if (kecInput) kecInput.value = '';
-        if (kelInput) kelInput.value = '';
-
-        const kabSelect = window.SearchableSelect?.getInstance(prefix + '_kabupaten_id');
-        const kecSelect = window.SearchableSelect?.getInstance(prefix + '_kecamatan_id');
-        const kelSelect = window.SearchableSelect?.getInstance(prefix + '_kelurahan_id');
-
-        if (kabSelect) {
-            kabSelect.setOptions([]);
-            kabSelect.clear(false);
-        }
-        if (kecSelect) {
-            kecSelect.setOptions([]);
-            kecSelect.clear(false);
-            kecSelect.setDisabled(true);
-        }
-        if (kelSelect) {
-            kelSelect.setOptions([]);
-            kelSelect.clear(false);
-            kelSelect.setDisabled(true);
-        }
-
-        if (!val) {
-            if (kabSelect) kabSelect.setDisabled(true);
-            return;
-        }
-
-        if (kabSelect) {
-            kabSelect.setDisabled(false);
-            kabSelect.setLoading(true);
-        }
-
-        fetch(`{{ route('wilayah.dropdown.kabupaten') }}?provinsi_id=${encodeURIComponent(val)}`)
-            .then(res => res.json())
-            .then(data => {
-                const kab = window.SearchableSelect?.getInstance(prefix + '_kabupaten_id');
-                if (kab) {
-                    kab.setOptions(data);
-                    kab.setLoading(false);
-                    kab.setDisabled(false);
-                }
-            })
-            .catch(err => {
-                console.error('Gagal mengambil data kabupaten:', err);
-                const kab = window.SearchableSelect?.getInstance(prefix + '_kabupaten_id');
-                if (kab) kab.setLoading(false);
+                // Pulihkan opsi bertingkat jika terjadi error validasi via InforaWilayah
+                @if ($errors->any() && old('provinsi_id'))
+                    window.InforaWilayah?.restoreOnError('{{ old('_method') === 'PUT' ? 'edit' : 'create' }}', {
+                        provinsi_id: '{{ old('provinsi_id') }}',
+                        kabupaten_id: '{{ old('kabupaten_id') }}',
+                        kecamatan_id: '{{ old('kecamatan_id') }}',
+                        kelurahan_id: '{{ old('kelurahan_id') }}',
+                    });
+                @endif
             });
-    } else if (inputId === prefix + '_kabupaten_id') {
-        const kabInput = document.getElementById(prefix + '_city');
-        const kecInput = document.getElementById(prefix + '_district');
-        const kelInput = document.getElementById(prefix + '_village');
 
-        if (kabInput) kabInput.value = text || '';
-        if (kecInput) kecInput.value = '';
-        if (kelInput) kelInput.value = '';
-
-        const kecSelect = window.SearchableSelect?.getInstance(prefix + '_kecamatan_id');
-        const kelSelect = window.SearchableSelect?.getInstance(prefix + '_kelurahan_id');
-
-        if (kecSelect) {
-            kecSelect.setOptions([]);
-            kecSelect.clear(false);
-        }
-        if (kelSelect) {
-            kelSelect.setOptions([]);
-            kelSelect.clear(false);
-            kelSelect.setDisabled(true);
-        }
-
-        if (!val) {
-            if (kecSelect) kecSelect.setDisabled(true);
-            return;
-        }
-
-        if (kecSelect) {
-            kecSelect.setDisabled(false);
-            kecSelect.setLoading(true);
-        }
-
-        fetch(`{{ route('wilayah.dropdown.kecamatan') }}?kabupaten_id=${encodeURIComponent(val)}`)
-            .then(res => res.json())
-            .then(data => {
-                const kec = window.SearchableSelect?.getInstance(prefix + '_kecamatan_id');
-                if (kec) {
-                    kec.setOptions(data);
-                    kec.setLoading(false);
-                    kec.setDisabled(false);
-                }
-            })
-            .catch(err => {
-                console.error('Gagal mengambil data kecamatan:', err);
-                const kec = window.SearchableSelect?.getInstance(prefix + '_kecamatan_id');
-                if (kec) kec.setLoading(false);
-            });
-    } else if (inputId === prefix + '_kecamatan_id') {
-        const kecInput = document.getElementById(prefix + '_district');
-        const kelInput = document.getElementById(prefix + '_village');
-
-        if (kecInput) kecInput.value = text || '';
-        if (kelInput) kelInput.value = '';
-
-        const kelSelect = window.SearchableSelect?.getInstance(prefix + '_kelurahan_id');
-
-        if (kelSelect) {
-            kelSelect.setOptions([]);
-            kelSelect.clear(false);
-        }
-
-        if (!val) {
-            if (kelSelect) kelSelect.setDisabled(true);
-            return;
-        }
-
-        if (kelSelect) {
-            kelSelect.setDisabled(false);
-            kelSelect.setLoading(true);
-        }
-
-        fetch(`{{ route('wilayah.dropdown.kelurahan') }}?kecamatan_id=${encodeURIComponent(val)}`)
-            .then(res => res.json())
-            .then(data => {
-                const kel = window.SearchableSelect?.getInstance(prefix + '_kelurahan_id');
-                if (kel) {
-                    kel.setOptions(data);
-                    kel.setLoading(false);
-                    kel.setDisabled(false);
-                }
-            })
-            .catch(err => {
-                console.error('Gagal mengambil data kelurahan:', err);
-                const kel = window.SearchableSelect?.getInstance(prefix + '_kelurahan_id');
-                if (kel) kel.setLoading(false);
-            });
-    } else if (inputId === prefix + '_kelurahan_id') {
-        const kelInput = document.getElementById(prefix + '_village');
-        const postalInput = document.getElementById(prefix + '_postal_code');
-
-        if (kelInput) kelInput.value = text || '';
-
-        if (val && item && item.kode_pos) {
-            if (postalInput) postalInput.value = item.kode_pos;
-        }
-    }
-});
-</script>
-@endsection
+            // Delegasi Event Global untuk Cascading Wilayah (Modal Tambah dan Modal Edit)
+            window.InforaWilayah?.bindCascade({ prefix: 'create', syncTextInputs: true });
+            window.InforaWilayah?.bindCascade({ prefix: 'edit', syncTextInputs: true });
+        </script>
+    @endsection
