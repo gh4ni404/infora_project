@@ -3,10 +3,10 @@
 @section('content')
 <x-page-header title="Wilayah Kabupaten dan Kota" subtitle="Kelola registri wilayah administratif kabupaten dan kota se-Indonesia dalam platform INFORA">
     <x-slot:actions>
-        <button type="button" class="btn-primary" id="btnOpenCreateKabupaten">
-            <x-icon name="plus" size="18" />
-            <span>Tambah Kabupaten / Kota</span>
-        </button>
+        <x-crud-button 
+            action="create"
+            id="btnOpenCreateKabupaten"
+        />
     </x-slot:actions>
 </x-page-header>
 
@@ -79,7 +79,7 @@
             <th>Nama Wilayah</th>
             <th>Status</th>
             <th>Diperbarui</th>
-            <th>Aksi</th>
+            <th class="col-w-actions">Aksi</th>
         </tr>
     </thead>
     <tbody>
@@ -116,25 +116,22 @@
                 </td>
                 <td>
                     <x-table-actions align="right">
-                        <button
-                            type="button"
-                            class="btn-edit btn-open-edit-kabupaten"
+                        <x-crud-button
+                            action="edit"
+                            class="btn-open-edit-kabupaten"
                             title="Edit Data Kabupaten/Kota"
                             data-kabupaten="{{ json_encode($kabupaten) }}"
                             data-action="{{ route('wilayah.kabupaten.update', $kabupaten) }}"
-                        >
-                            <x-icon name="edit" size="14" />
-                        </button>
-                        <button
-                            type="button"
-                            class="btn-delete btn-open-delete-kabupaten"
+                        />
+                        
+                        <x-crud-button
+                            action="delete"
+                            class="btn-open-delete-kabupaten"
                             title="Hapus Data Kabupaten/Kota"
                             data-name="{{ $kabupaten->nama_lengkap }}"
                             data-kode="{{ $kabupaten->kode }}"
                             data-action="{{ route('wilayah.kabupaten.destroy', $kabupaten) }}"
-                        >
-                            <x-icon name="delete" size="14" />
-                        </button>
+                        />
                     </x-table-actions>
                 </td>
             </tr>
@@ -202,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 2. Modal Edit Kabupaten
     InforaModals.setup('modalEditKabupaten', { cancelBtnId: 'btnCancelEditKabupaten' });
-    InforaModals.bindEditButtons('.btn-open-edit-kabupaten', 'modalEditKabupaten', function(modal, btn, formEdit) {
+    InforaModals.bindEditButtons('.btn-open-edit-kabupaten', 'modalEditKabupaten', function(modal, formEdit, btn) {
         const data = JSON.parse(btn.dataset.kabupaten || '{}');
         const editProvInst = window.SearchableSelect ? window.SearchableSelect.getInstance('edit_provinsi_id') : null;
         if (editProvInst) {

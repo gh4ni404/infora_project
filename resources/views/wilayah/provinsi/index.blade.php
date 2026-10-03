@@ -3,10 +3,10 @@
 @section('content')
 <x-page-header title="Wilayah Provinsi" subtitle="Kelola registri wilayah administratif provinsi se-Indonesia dalam platform INFORA">
     <x-slot:actions>
-        <button type="button" class="btn-primary" id="btnOpenCreateProvinsi">
-            <x-icon name="plus" size="18" />
-            <span>Tambah Provinsi</span>
-        </button>
+        <x-crud-button 
+            action="create"
+            id="btnOpenCreateProvinsi"
+        />
     </x-slot:actions>
 </x-page-header>
 
@@ -47,7 +47,7 @@
             <th>Nama Provinsi</th>
             <th>Status</th>
             <th>Diperbarui</th>
-            <th>Aksi</th>
+            <th class="col-w-actions">Aksi</th>
         </tr>
     </thead>
     <tbody>
@@ -74,25 +74,21 @@
                 </td>
                 <td>
                     <x-table-actions align="right">
-                        <button
-                            type="button"
-                            class="btn-edit btn-open-edit-provinsi"
+                        <x-crud-button
+                            action="edit"
                             title="Edit Data Provinsi"
+                            class="btn-open-edit-provinsi"
                             data-provinsi="{{ json_encode($provinsi) }}"
                             data-action="{{ route('wilayah.provinsi.update', $provinsi) }}"
-                        >
-                            <x-icon name="edit" size="14" />
-                        </button>
-                        <button
-                            type="button"
-                            class="btn-delete btn-open-delete-provinsi"
+                        />
+                        <x-crud-button
+                            action="delete"
                             title="Hapus Data Provinsi"
+                            class="btn-open-delete-provinsi"
                             data-name="{{ $provinsi->nama }}"
                             data-kode="{{ $provinsi->kode }}"
                             data-action="{{ route('wilayah.provinsi.destroy', $provinsi) }}"
-                        >
-                            <x-icon name="delete" size="14" />
-                        </button>
+                        />
                     </x-table-actions>
                 </td>
             </tr>
@@ -138,11 +134,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 2. Modal Edit Provinsi
     InforaModals.setup('modalEditProvinsi', { cancelBtnId: 'btnCancelEditProvinsi' });
-    InforaModals.bindEditButtons('.btn-open-edit-provinsi', 'modalEditProvinsi', function(modal, btn, form) {
-        const item = JSON.parse(btn.dataset.provinsi || '{}');
-        document.getElementById('edit_kode').value = item.kode || '';
-        document.getElementById('edit_nama').value = item.nama || '';
-        document.getElementById('edit_status').checked = Boolean(item.status);
+    InforaModals.bindEditButtons('.btn-open-edit-provinsi', 'modalEditProvinsi', function(modal, data, form) {
+        document.getElementById('edit_kode').value = data.kode || '';
+        document.getElementById('edit_nama').value = data.nama || '';
+        document.getElementById('edit_status').checked = Boolean(data.status);
     });
 
     // 3. Modal Konfirmasi Hapus Provinsi

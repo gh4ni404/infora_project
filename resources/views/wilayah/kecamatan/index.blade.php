@@ -3,10 +3,10 @@
 @section('content')
 <x-page-header title="Wilayah Kecamatan" subtitle="Kelola registri wilayah administratif kecamatan se-Indonesia dalam platform INFORA">
     <x-slot:actions>
-        <button type="button" class="btn-primary" id="btnOpenCreateKecamatan">
-            <x-icon name="plus" size="18" />
-            <span>Tambah Kecamatan</span>
-        </button>
+        <x-crud-button 
+            action="create"
+            id="btnOpenCreateKecamatan"
+        />
     </x-slot:actions>
 </x-page-header>
 
@@ -71,7 +71,7 @@
             <th>Nama Kecamatan</th>
             <th>Status</th>
             <th>Diperbarui</th>
-            <th>Aksi</th>
+            <th class="col-w-actions">Aksi</th>
         </tr>
     </thead>
     <tbody>
@@ -104,25 +104,22 @@
                 </td>
                 <td>
                     <x-table-actions align="right">
-                        <button
-                            type="button"
-                            class="btn-edit btn-open-edit-kecamatan"
+                        <x-crud-button
+                            action="edit"
+                            class="btn-open-edit-kecamatan"
                             title="Edit Data Kecamatan"
                             data-kecamatan="{{ json_encode($kecamatan) }}"
                             data-action="{{ route('wilayah.kecamatan.update', $kecamatan) }}"
-                        >
-                            <x-icon name="edit" size="14" />
-                        </button>
-                        <button
-                            type="button"
-                            class="btn-delete btn-open-delete-kecamatan"
+                        />
+                        
+                        <x-crud-button
+                            action="delete"
+                            class="btn-open-delete-kecamatan"
                             title="Hapus Data Kecamatan"
                             data-name="{{ $kecamatan->nama_lengkap }}"
                             data-kode="{{ $kecamatan->kode }}"
                             data-action="{{ route('wilayah.kecamatan.destroy', $kecamatan) }}"
-                        >
-                            <x-icon name="delete" size="14" />
-                        </button>
+                        />
                     </x-table-actions>
                 </td>
             </tr>
@@ -217,8 +214,7 @@ document.addEventListener('DOMContentLoaded', function() {
         kabInstance.setDisabled(false);
         kabInstance.setLoading(true);
 
-        return fetch(`{{ route('wilayah.dropdown.kabupaten') }}?provinsi_id=${encodeURIComponent(provId)}`)
-            .then(res => res.json())
+        return (window.InforaWilayah ? window.InforaWilayah.fetchKabupaten(provId) : fetch(`{{ route('wilayah.dropdown.kabupaten') }}?provinsi_id=${encodeURIComponent(provId)}`).then(res => res.json()))
             .then(data => {
                 kabInstance.setOptions(data, selectedKabId);
                 kabInstance.setLoading(false);
@@ -276,7 +272,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 3. Modal Edit Kecamatan
     InforaModals.setup('modalEditKecamatan', { cancelBtnId: 'btnCancelEditKecamatan' });
-    InforaModals.bindEditButtons('.btn-open-edit-kecamatan', 'modalEditKecamatan', function(modal, btn, formEdit) {
+    InforaModals.bindEditButtons('.btn-open-edit-kecamatan', 'modalEditKecamatan', function(modal, formEdit, btn) {
         const data = JSON.parse(btn.dataset.kecamatan || '{}');
 
         const editProvInst = window.SearchableSelect ? window.SearchableSelect.getInstance('edit_provinsi_id') : null;

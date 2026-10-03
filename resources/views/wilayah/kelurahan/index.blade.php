@@ -3,10 +3,10 @@
 @section('content')
 <x-page-header title="Wilayah Kelurahan dan Desa" subtitle="Kelola registri wilayah administratif kelurahan dan desa se-Indonesia dalam platform INFORA">
     <x-slot:actions>
-        <button type="button" class="btn-primary" id="btnOpenCreateKelurahan">
-            <x-icon name="plus" size="18" />
-            <span>Tambah Kelurahan / Desa</span>
-        </button>
+        <x-crud-button 
+            action="create"
+            id="btnOpenCreateKelurahan"
+        />
     </x-slot:actions>
 </x-page-header>
 
@@ -87,7 +87,7 @@
             <th>Kode Pos</th>
             <th>Status</th>
             <th>Diperbarui</th>
-            <th>Aksi</th>
+            <th class="col-w-actions">Aksi</th>
         </tr>
     </thead>
     <tbody>
@@ -133,25 +133,22 @@
                 </td>
                 <td>
                     <x-table-actions align="right">
-                        <button
-                            type="button"
-                            class="btn-edit btn-open-edit-kelurahan"
+                        <x-crud-button
+                            action="edit"
+                            class="btn-open-edit-kelurahan"
                             title="Edit Data Kelurahan/Desa"
                             data-kelurahan="{{ json_encode($kelurahan) }}"
                             data-action="{{ route('wilayah.kelurahan.update', $kelurahan) }}"
-                        >
-                            <x-icon name="edit" size="14" />
-                        </button>
-                        <button
-                            type="button"
-                            class="btn-delete btn-open-delete-kelurahan"
+                        />
+
+                        <x-crud-button 
+                            action="delete"
+                            class="btn-open-delete-kelurahan"
                             title="Hapus Data Kelurahan/Desa"
                             data-name="{{ $kelurahan->nama_lengkap }}"
                             data-kode="{{ $kelurahan->kode }}"
                             data-action="{{ route('wilayah.kelurahan.destroy', $kelurahan) }}"
-                        >
-                            <x-icon name="delete" size="14" />
-                        </button>
+                        />
                     </x-table-actions>
                 </td>
             </tr>
@@ -280,8 +277,7 @@ document.addEventListener('DOMContentLoaded', function() {
         kabInstance.setDisabled(false);
         kabInstance.setLoading(true);
 
-        return fetch(`{{ route('wilayah.dropdown.kabupaten') }}?provinsi_id=${encodeURIComponent(provId)}`)
-            .then(res => res.json())
+        return (window.InforaWilayah ? window.InforaWilayah.fetchKabupaten(provId) : fetch(`{{ route('wilayah.dropdown.kabupaten') }}?provinsi_id=${encodeURIComponent(provId)}`).then(res => res.json()))
             .then(data => {
                 kabInstance.setOptions(data, selectedKabId);
                 kabInstance.setLoading(false);
@@ -304,8 +300,7 @@ document.addEventListener('DOMContentLoaded', function() {
         kecInstance.setDisabled(false);
         kecInstance.setLoading(true);
 
-        return fetch(`{{ route('wilayah.dropdown.kecamatan') }}?kabupaten_id=${encodeURIComponent(kabId)}`)
-            .then(res => res.json())
+        return (window.InforaWilayah ? window.InforaWilayah.fetchKecamatan(kabId) : fetch(`{{ route('wilayah.dropdown.kecamatan') }}?kabupaten_id=${encodeURIComponent(kabId)}`).then(res => res.json()))
             .then(data => {
                 kecInstance.setOptions(data, selectedKecId);
                 kecInstance.setLoading(false);
@@ -392,7 +387,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 3. Modal Edit Kelurahan / Desa
     InforaModals.setup('modalEditKelurahan', { cancelBtnId: 'btnCancelEditKelurahan' });
-    InforaModals.bindEditButtons('.btn-open-edit-kelurahan', 'modalEditKelurahan', function(modal, btn, formEdit) {
+    InforaModals.bindEditButtons('.btn-open-edit-kelurahan', 'modalEditKelurahan', function(modal, formEdit, btn) {
         const data = JSON.parse(btn.dataset.kelurahan || '{}');
         const provId = data.kecamatan?.kabupaten?.provinsi_id || '';
         const kabId = data.kecamatan?.kabupaten_id || '';
