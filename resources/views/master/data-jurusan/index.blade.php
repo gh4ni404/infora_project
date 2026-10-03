@@ -26,7 +26,11 @@
                 </form>
             @endif
 
-            <button type="button" class="btn-primary" id="btnOpenCreateJurusan"><x-icon name="add" size="18" /></button>
+            <x-crud-button
+                action="create"
+                id="btnOpenCreateJurusan"
+                title="Tambah Jurusan"
+            />
         </x-slot:actions>
     </x-page-header>
 
@@ -70,7 +74,7 @@
                 <th>Bidang dan Program Keahlian</th>
                 <th>Kepala Jurusan (Kaprog)</th>
                 <th>Status</th>
-                <th>Aksi</th>
+                <th class="col-w-actions">Aksi</th>
             </tr>
         </thead>
         <tbody>
@@ -130,19 +134,24 @@
                             </form>
 
                             {{-- Ubah Data (Edit Modal) --}}
-                            <button type="button" class="btn-edit btn-open-edit-jurusan" title="Ubah Data Jurusan"
+                            <x-crud-button
+                                action="edit"
+                                class="btn-open-edit-jurusan"
+                                title="Ubah Data Jurusan {{ $jurusan->nama }}"
                                 data-jurusan="{{ json_encode($jurusan) }}"
-                                data-action="{{ route('master.data-jurusan.update', $jurusan) }}">
-                                <x-icon name="pencil" size="16" />
-                            </button>
+                                data-action="{{ route('master.data-jurusan.update', $jurusan) }}"
+                            />
 
                             {{-- Hapus Data (Delete Modal) --}}
-                            <button type="button" class="btn-delete btn-open-delete-jurusan" title="Hapus Data Jurusan"
-                                data-id="{{ $jurusan->id }}" data-kode="{{ $jurusan->kode }}"
+                            <x-crud-button
+                                action="delete"
+                                class="btn-open-delete-jurusan"
+                                title="Hapus Data Jurusan {{ $jurusan->nama }}"
+                                data-id="{{ $jurusan->id }}"
+                                data-kode="{{ $jurusan->kode }}"
                                 data-nama="{{ $jurusan->nama }}"
-                                data-action="{{ route('master.data-jurusan.destroy', $jurusan) }}">
-                                <x-icon name="trash" size="16" />
-                            </button>
+                                data-action="{{ route('master.data-jurusan.destroy', $jurusan) }}"
+                            />
                         </x-table-actions>
                     </td>
                 </tr>

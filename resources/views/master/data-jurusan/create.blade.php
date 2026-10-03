@@ -2,37 +2,13 @@
 <x-modal
     id="modalCreateJurusan"
     title="Tambah Data Jurusan Baru"
-    subtitle="Tambahkan data konsentrasi keahlian (SMK) atau peminatan (SMA) untuk unit sekolah terpilih"
+    :subtitle="'Tambahkan jurusan untuk ' . ($selectedSchool?->name ?? 'unit sekolah terpilih') . ' (' . ($selectedSchool?->school_type ?? '') . ')'"
     {{-- size="lg" --}}
     action="{{ route('master.data-jurusan.store') }}"
     form-id="formCreateJurusan">
     <x-form-input type="hidden" name="school_id" :value="$selectedSchoolId" />
 
-    <div class="form-section-label">Unit Sekolah dan Jenjang</div>
-    <div class="form-grid-2col">
-        <x-form-input
-            name="school_name"
-            id="create_school_name"
-            label="Unit Sekolah"
-            :value="$selectedSchool?->name ?? '-'"
-            hint="Jurusan akan otomatis terhubung ke unit sekolah ini."
-            disabled
-        />
-
-        <x-form-select
-            name="jenjang"
-            id="create_jenjang"
-            label="Jenjang Pendidikan"
-            {{-- placeholder="Pilih Jenjang" --}}
-            :selected="$selectedSchool?->school_type"
-            :options="[
-                'SMK' => 'SMK (Konsentrasi Keahlian)',
-                'SMA' => 'SMA (Peminatan / Fase)',
-                'MA'  => 'MA (Peminatan / Fase)',
-            ]"
-            required
-        />
-    </div>
+    <input type="hidden" name="jenjang" value="{{ $selectedSchool?->school_type }}">
 
     <div class="form-section-label">Identitas Jurusan</div>
     <div class="form-grid-2col">
