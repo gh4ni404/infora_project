@@ -6,6 +6,7 @@ import './infora-progress';
 import './searchable-select';
 import './infora-modals';
 import './permission-matrix';
+import './infora-wilayah';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Password visibility toggle
