@@ -8,7 +8,80 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 
 ## [Unreleased]
 
+### Fixed dan Refactored (Audit Kepatuhan Komponen, Arsitektur Kredensial GTK & Standardisasi Wilayah)
+- **Audit Standarisasi Komponen & Kepatuhan Arsitektur UI pada Master Data GTK (`master/data-gtk`):**
+  - **Kesalahan / Gap yang Ditemukan:**
+    1. *Pelanggaran Strict No Inline Styles:* Ditemukan atribut inline `style="..."` pada elemen tombol dan form di `resources/views/master/data-gtk/index.blade.php`, yang melanggar prinsip desain global INFORA.
+    2. *Bypassing Ekosistem Komponen Form:* Penggunaan elemen `<select>` native biasa untuk filter jenis kelamin, status kepegawaian, dan status aktif alih-alih memanfaatkan komponen resmi `<x-form-select>` yang telah tersedia.
+    3. *Desinkronisasi Foreign Key Wilayah Kemendagri:* Skema tabel `gtks` telah memiliki 4 foreign key wilayah Kemendagri (`provinsi_id`, `kabupaten_id`, `kecamatan_id`, `kelurahan_id`), namun form input modal Tambah dan Edit sebelumnya hanya menyediakan sebuah `<textarea name="alamat">`, sehingga mengabaikan modul client-side `window.InforaWilayah`.
+    4. *Bespoke Modals & Pelanggaran Standar Konfirmasi:* Dialog konfirmasi aksi Reset Password dan Toggle Status Aktif dibuat secara manual (*bespoke*) dengan raw HTML `<div class="modal">` dan injeksi manipulasi `.innerHTML` manual via JavaScript, alih-alih memanfaatkan komponen reusable `<x-modal name="confirm">` dan helper universal `InforaModals.bindConfirmButtons`.
+    5. *Bypassing Otorisasi Tombol RBAC:* Tombol aksi preview profil GTK menggunakan tag `<button>` biasa alih-alih komponen otorisasi `<x-crud-button action="view">`.
+    6. *Kelas CSS Legacy Bootstrap:* Tampilan detail profil GTK (`show.blade.php`) menggunakan kelas utilitas Bootstrap (`d-flex`, `align-items-center`, `small`, dll.) yang tidak standar dengan CSS tokens INFORA / Tailwind.
+    7. *Bentrokan Rute (Route Collision):* Rute alias `Route::get('data-gtk/semua', ...)->name('data-gtk.index')` dideklarasikan setelah `Route::resource('data-gtk', ...)`, menyebabkan rute `data-gtk/semua` tertelan oleh wildcard `{gtk}` dari resource route dan menghasilkan galat 404 (ModelNotFoundException).
+  - **Bagaimana Memperbaikinya (Solusi dan Implementasi Teknis):**
+    1. *Eliminasi 100% Inline Styles:* Menghapus seluruh inline styles dan menggantinya dengan utilitas Tailwind dan class tokens pada `resources/css/app.css`.
+    2. *Migrasi ke `<x-form-select>` & Penambahan Alias `:value`:* Mengganti seluruh `<select>` biasa dengan `<x-form-select>`, serta menambahkan alias prop `:value` pada `form-select.blade.php` agar kompatibel dan konsisten dengan penulisan `<x-searchable-select>`.
+    3. *Integrasi Cascading Wilayah 4-Tingkat Kemendagri:* Memasang `<x-searchable-select>` untuk Provinsi, Kabupaten/Kota, Kecamatan, dan Kelurahan/Desa pada `create.blade.php` dan `edit.blade.php`. Mengikat alur berantai secara dinamis melalui `window.InforaWilayah.bindCascade`, mengisi otomatis data saat edit via `populateCascade`, serta memulihkan data gagal validasi via `restoreOnError`.
+    4. *Penyediaan Data Wilayah & Eager Loading Bebas N+1:* Menyediakan `$provinsiList` pada `GtkController@index` dan menerapkan eager loading relasi `['provinsi', 'kabupaten', 'kecamatan', 'kelurahan']` pada controller untuk performa query optimal.
+    5. *Accessor Alamat Lengkap (`alamat_lengkap`):* Menambahkan accessor `getAlamatLengkapAttribute()` pada Model `Gtk` yang menyusun alamat domisili lengkap dan rapi (Alamat, Desa/Kelurahan, Kecamatan, Kabupaten/Kota, Provinsi).
+    6. *Standarisasi Modal Konfirmasi Universal:* Menggantikan modal bespoke dengan komponen resmi `<x-modal name="confirm">` untuk `modalResetPasswordGtk` dan `modalToggleStatusGtk`, diikat rapi melalui `InforaModals.bindConfirmButtons`.
+    7. *Standarisasi Tombol Preview Profil:* Menggantikan tombol biasa dengan `<x-crud-button action="view">` yang terintegrasi matriks perizinan RBAC.
+    8. *Sanitasi CSS Tokens:* Membersihkan class Bootstrap legacy pada `show.blade.php` menjadi utility classes standar Tailwind/INFORA (`flex`, `items-center`, `text-sm`, dll.).
+    9. *Penataan Urutan Rute Bebas Collision:* Memindahkan deklarasi rute eksplisit `Route::get('data-gtk/semua', ...)->name('data-gtk.index')` tepat **sebelum** resource route `Route::resource('data-gtk', ...)` sehingga URL `/master/data-gtk/semua` dikenali dengan sempurna.
+
+- **Unifikasi & Perbaikan Arsitektur Kredensial Kata Sandi GTK (`App\Support\GtkAccountManager`):**
+  - **Kesalahan / Gap yang Ditemukan:**
+    1. *Pemotongan Spasi Sandi Kustom (Regex Bug):* Penggunaan regex agresif `preg_replace('/\s+/', '', $password)` secara keliru memotong karakter spasi yang sengaja dimasukkan pengguna pada kata sandi kustom (*passphrase*).
+    2. *Pemeriksaan Truthy Lemah pada String Spasi:* Penggunaan evaluasi truthy biasa (`!empty($gtk->nip)`) berisiko memperlakukan string yang hanya berisi spasi kosong sebagai data valid alih-alih melewatinya.
+    3. *Ketidakkonsistenan Fallback Password:* Adanya ketidaksinkronan nilai fallback password antara alur pembuatan akun baru (`createOrUpdateUserForGtk` menggunakan fallback `'infora123'`) dengan alur reset password (`resetPassword` menggunakan fallback `$user->username`), membingungkan pengguna jika GTK tidak memiliki NIP, NUPTK, maupun NIK.
+    4. *Ketiadaan Informasi Kata Sandi yang Ditetapkan:* Saat administrator menambahkan GTK baru dengan mengosongkan kolom kata sandi, sistem tidak memberikan informasi password awal apa yang di-generate pada notifikasi flash.
+  - **Bagaimana Memperbaikinya (Solusi dan Implementasi Teknis):**
+    1. *Metode Arsitektur Terpusat `resolveDefaultPassword()`:* Membangun method terpadu `resolveDefaultPassword(Gtk $gtk, ?string $customPassword = null): string` pada `GtkAccountManager` sebagai single source of truth penetapan kata sandi akun GTK.
+    2. *Preservasi Karakter Spasi Frasa Sandi:* Mengganti regex agresif dengan `trim()` murni pada kata sandi kustom, menjaga keutuhan karakter spasi yang sah di dalam kata sandi.
+    3. *Evaluasi Ketat dengan Helper `filled()`:* Menggunakan helper bawaan Laravel `filled($gtk->nip)`, `filled($gtk->nuptk)`, dan `filled($gtk->nik)` untuk memastikan string kosong atau whitespace tidak diproses.
+    4. *Hierarki Fallback Default Password Seragam:* Menetapkan hierarki penentuan kata sandi default secara tegas dan konsisten di seluruh alur: **NIP** ➔ **NUPTK** ➔ **NIK** ➔ `'infora123'`.
+    5. *Feedback Transparan pada Flash Message:* Menambahkan pemberitahuan kata sandi default akun secara transparan pada flash notification saat berhasil menambahkan data GTK baru melalui `GtkController@store`.
+
+- **Peningkatan Test Suite & Jaminan Kualitas:**
+  - Seluruh pengujian otomatis Pest feature dan unit tests berjalan 100% sukses: **334 tests lulus tanpa kegagalan (1.515 assertions)**.
+  - 100% kode terformat rapi sesuai panduan proyek dengan Laravel Pint (`vendor/bin/pint --dirty --format agent`).
+
 ### Added
+- **Pengaturan Profil Pengguna Mandiri & Keamanan Akun (`/profile`):**
+  - Mengimplementasikan halaman dedicated mandiri pada rute `/profile` (`profile.index`, `profile.update`, `profile.password.update`) untuk seluruh tipe pengguna (Super Admin, Admin Sekolah, Guru/GTK, Murid).
+  - **Tata Letak 2-Kolom dengan Navigasi Vertikal (`.grid-split-sidebar` & `.tab-pills-vertical`):**
+    - Sisi kiri: Mini Profile Card (avatar berukuran 72px, nama lengkap bergelar, username, badge tipe akun, dan unit sekolah) serta navigasi tab vertikal yang rapi.
+    - Sisi kanan: Panel konten formulir yang beralih secara dinamis (*Informasi Pribadi*, *Klasifikasi & Pendidikan*, *Kontak & Domisili*, dan *Status Keaktifan*).
+  - **Konsolidasi Formulir Informasi Pribadi & Kredensial:** Mengintegrasikan pengelolaan Foto Avatar profil, Identitas & Biodata Diri, Kredensial Username, serta Keamanan & Ubah Kata Sandi secara terpadu di tab *Informasi Pribadi*.
+  - **Validasi Dirty-Form & Modal Konfirmasi Pindah Tab:** Mencegah kehilangan input data formulir yang belum disimpan saat berpindah tab dengan konfirmasi simpan atau abaikan.
+  - **Single View dengan Sub-Komponen Modular (`resources/views/profile/partials/*`):** Mencegah duplikasi kode (*DRY*) dan menjaga struktur template tetap bersih (*zero bloat*).
+  - **Deteksi Akun Belum Lengkap Secara Heuristik (`User::needsProfileCompletion()`):**
+    - Mendeteksi secara otomatis apakah akun masih menggunakan kata sandi default sistem (`infora123`, `password`, `admin`, atau NIP/NUPTK/NIK pada akun GTK) atau belum melengkapi kontak dan foto profil tanpa memerlukan migrasi kolom baru.
+  - **Dashboard Onboarding Alert Banner:** Menampilkan banner peringatan ramah di atas dashboard Super Admin dan Admin Sekolah lengkap dengan tombol aksi *"Perbarui Profil Sekarang"*.
+  - **Proteksi Integritas Data & Sinkronisasi Relasional:**
+    - Pembaruan kontak dan pasfoto otomatis menyinkronkan data profil [`Gtk`](app/Models/Gtk.php) terkait secara transparan.
+  - **Alur Logout Otomatis Pasca Pembaruan Kata Sandi:** Mengakhiri sesi aktif secara aman dan mengarahkan kembali ke halaman login dengan flash message sukses setelah kata sandi berhasil diubah.
+  - **Integrasi Dropup Sidebar:** Mengaktifkan tautan *Pengaturan Profile* dan *Ubah Password* di footer sidebar [`layouts/app.blade.php`](resources/views/layouts/app.blade.php) serta menampilkan foto avatar nyata jika tersedia.
+  - **Pest Automated Feature Test Suite (`tests/Feature/ProfileTest.php`):** 18 skenario pengujian komprehensif, membawa total test suite melonjak menjadi **330 tests lulus 100% (1.493 assertions)**.
+- **Master Data Pendidik dan Tenaga Kependidikan (GTK) / Guru dan Pegawai (Multi-Role `jenis_ptk` JSON Architecture):**
+  - Mengimplementasikan CRUD lengkap data guru dan tenaga kependidikan pada rute `/master/data-gtk` (`master.data-gtk.*`).
+  - **Arsitektur Peran Majemuk (*Multi-Role Duties*):** Kolom `jenis_ptk` bertipe JSON array pada tabel `gtks` (`['Guru Mapel', 'Wali Kelas', 'Pembimbing PKL']`) untuk mengakomodasi fleksibilitas tugas majemuk pendidik di sekolah tanpa beban kompleksitas tabel pivot.
+  - **Model `Gtk` & Relasi Berjenjang:** Dilengkapi `SoftDeletes`, array casting untuk `jenis_ptk`, mutator nama bergelar otomatis (`nama_bergelar`), helper status penugasan (`is_pendidik`, `is_tendik`), scopes query (`scopeAktif`, `scopePendidik`, `scopeTendik`), serta relasi `school()` (`belongsTo`) dan `user()` (`belongsTo`).
+  - **Sinkronisasi Akun Otomatis (`App\Support\GtkAccountManager`):**
+    - Otomatisasi pembuatan dan pembaruan akun `User` yang tertaut dengan profil GTK.
+    - Resolusi username hierarkis cerdas: NIP ➔ NUPTK ➔ NIK ➔ slug nama.
+    - Pembuatan kredensial awal (default password) dan penugasan template hak akses otomatis (`MenuAccessTemplate` Peran Guru/Pegawai).
+    - Aksi cepat 1-klik: Reset Password (`POST /master/data-gtk/{gtk}/reset-password`) dan Toggle Status Aktif terpadu (`POST /master/data-gtk/{gtk}/toggle-status`).
+    - Penonaktifan akun user secara otomatis saat profil GTK dihapus (soft delete).
+  - **Antarmuka Responsif & Interaktif di `resources/views/master/data-gtk/`:**
+    - Kartu metrik KPI (Total GTK, Pendidik/Guru, Tenaga Kependidikan/Tendik, dan GTK Aktif).
+    - Toolbar filter komprehensif: pemilih unit sekolah (`schoolFilterForm`), pencarian teks bebas (nama, NIP, NUPTK, NIK), filter Jenis PTK multi-role, Status Kepegawaian, dan Status Aktif.
+    - Tabel data modern dengan badge chips peran majemuk (`+N lagi`), tombol aksi terotorisasi, dan dialog konfirmasi hapus aman.
+    - Dialog modal Create dan Edit terstruktur dengan pengelompokan penugasan (Tugas Pendidik vs Tugas Tenaga Kependidikan) dan form credentials.
+    - Dialog modal Preview Profil GTK interaktif via endpoint JSON `GET /master/data-gtk/{gtk}`.
+    - Integrasi komponen unggah pasfoto `<x-image-upload>` dan standardisasi service `ImageUploader`.
+  - **Pest Feature Test Suite (`tests/Feature/GtkTest.php`):** 12 skenario pengujian komprehensif mencakup autentikasi, isolasi tenancy unit sekolah, operasi CRUD, validasi data, mutator, toggle status, reset password, dan soft delete.
+  - **Ekspansi Test Suite: 312 Tests Lolos 100% (1.400 Assertions):** Total pengujian otomatis Pest meningkat menjadi **312 tests (1.400 assertions) lulus 100% tanpa risiko/kegagalan**.
 - **Modul Client-Side Wilayah Terpadu (`resources/js/infora-wilayah.js` / `window.InforaWilayah`):**
   - Mengimplementasikan modul mandiri berkinerja tinggi untuk mengelola *cascading dropdown* wilayah administratif Indonesia 4 tingkat (Provinsi ➔ Kabupaten/Kota ➔ Kecamatan ➔ Kelurahan/Desa ➔ Kode Pos).
   - Menyediakan *in-memory cache* untuk mereduksi request HTTP jaringan ke server pada data wilayah yang statis.

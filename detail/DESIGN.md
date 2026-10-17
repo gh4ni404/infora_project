@@ -58,6 +58,11 @@
 13. **Arsitektur Modal Dialog CRUD Modular (Create dan Edit as Components in Index, Zero Standalone Edit Pages):**
     - Seluruh formulir Tambah (`create`) dan Ubah (`edit`) pada entitas administratif (Data Sekolah, Modul, Menu, Sub-Menu, serta Wilayah Administratif) terintegrasi langsung sebagai modal dialog interaktif di atas halaman `index`, menghilangkan keharusan berpindah atau redirect ke halaman baru (*zero-reload workflow*).
     - Berkas `create.blade.php` dan `edit.blade.php` distandarisasi sebagai komponen Blade modular yang di-include (`@include('...create')`, `@include('...edit')`) ke dalam `index.blade.php`, bukan lagi berupa view terpisah yang meng-`@extends('layouts.app')`.
+14. **Pengaturan Profil Pengguna Mandiri & Keamanan Akun (`/profile`):**
+    - Arsitektur tata letak 2-kolom (`.grid-split-sidebar`): Navigasi tab vertikal di kiri (`.tab-pills-vertical`) dan panel formulir di kanan.
+    - Struktur tab dinamis adaptif: 4 tab untuk pendidik/tendik GTK (*Informasi Pribadi*, *Klasifikasi & Pendidikan*, *Kontak & Domisili*, *Status Keaktifan*) dan 2 tab untuk non-GTK (*Informasi Pribadi*, *Status Keaktifan*).
+    - Konsolidasi Informasi Pribadi: Menggabungkan pasfoto avatar circular (`<x-image-upload>`), identitas/biodata diri, input username login, dan kartu formulir ubah kata sandi terpisah.
+    - Proteksi Integritas Data & Form Dirty Tracking: Mendeteksi input yang belum disimpan saat berpindah tab via modal konfirmasi (`modalConfirmUnsavedProfile`), serta alur auto-logout pasca pembaruan kata sandi demi keamanan sesi akun.
     - Integrasi data dinamis melalui tombol aksi edit dengan atribut `data-*` (seperti `data-school`, `data-module`, `data-menu`, `data-sub-menu`, `data-provinsi`, dll.) yang dibaca oleh listener JavaScript untuk mengisi input form modal secara instan.
     - Penanganan validasi server cerdas (*auto-reopen*) dengan deteksi `old('_method') === 'PUT'` (untuk modal edit) atau `$errors->any()` (untuk modal create), memastikan modal terbuka kembali secara otomatis saat terjadi kegagalan validasi backend dengan data input (`old(...)`) tetap terjaga.
     - Kompatibilitas rute: metode `Controller::edit()` mengalihkan (*redirect*) pengguna kembali ke `index` guna menjaga kompatibilitas rute dan bookmark.
@@ -104,8 +109,8 @@ graph TD
 - **Data Response Contract:** Strict Pure JSON (`application/json`), Eloquent API Resources (Zero HTML in Data Payloads)
 - **Backend Framework:** Laravel (Versi Terbaru / Latest Version)
 - **Frontend Stack:** Blade + Alpine.js / Vue.js + Vanilla CSS dan TailwindCSS (Mobile-First Architecture dan Dedicated Layouts)
-- **Automated Testing Suite:** Pest PHP — **250 Tests Passed dan 1,123 Assertions (100% Pass Rate)**
-- **UI Components:** 22 Anonymous Blade Components ([`docs/COMPONENTS.md`](../docs/COMPONENTS.md))
+- **Automated Testing Suite:** Pest PHP — **334 Tests Passed dan 1,515 Assertions (100% Pass Rate)**
+- **UI Components:** 24 Anonymous Blade Components ([`docs/COMPONENTS.md`](../docs/COMPONENTS.md))
 - **Database:** MySQL 8.0 / MariaDB
 - **Caching dan Real-time Queue:** Redis (untuk antrian pemrosesan dokumen akreditasi dan notifikasi)
 - **Containerization:** Docker dan Docker Compose (Nginx, PHP-FPM, MySQL, Node.js)
@@ -211,11 +216,12 @@ erDiagram
 8. `kecamatan`: Master data kecamatan (`kode` CHAR(7) PK, `kabupaten_kode` CHAR(4) FK, `nama` VARCHAR(100), `status_aktif` BOOLEAN).
 9. `kelurahan`: Master data kelurahan/desa (`kode` CHAR(10) PK, `kecamatan_kode` CHAR(7) FK, `tipe` ENUM ['Kelurahan', 'Desa'], `nama` VARCHAR(100), `kode_pos` VARCHAR(5), `status_aktif` BOOLEAN).
    > *Standar Kode Wilayah Kemendagri:* Seluruh kode wilayah disimpan dalam format string numerik murni tanpa tanda titik (contoh: Kemendagri `73.08` disimpan `7308`). Dilarang keras menggunakan kode statistik BPS untuk mencegah desinkronisasi data nasional.
-10. `students` dan `teachers`: Profil lengkap, NISN/NIP, biodata, foto profil.
-11. `classes` dan `majors`: Struktur rombel dan jurusan/peminatan (TKJ, RPL, IPA, IPS, dll.).
-12. `schedules` dan `journals`: Jadwal mata pelajaran dan catatan jurnal KBM harian guru.
-13. `internships` (PKL): Data penempatan industri, guru pembimbing, nilai instruktur industri.
-14. `accreditation_evidences`: Dokumen bukti fisik terhubung ke butir standar akreditasi.
+10. `gtks`: Data profil Pendidik dan Tenaga Kependidikan (`id`, `school_id`, `user_id`, `nama_lengkap`, `gelar_depan`, `gelar_belakang`, `nip`, `nuptk`, `nik`, `tempat_lahir`, `tanggal_lahir`, `jenis_kelamin`, `agama`, `status_kepegawaian`, `jenis_ptk` [JSON array], `pendidikan_terakhir`, `jurusan_pendidikan`, `no_hp`, `email`, `provinsi_id`, `kabupaten_id`, `kecamatan_id`, `kelurahan_id`, `alamat`, `foto_path`, `is_active`). Terhubung 1-to-1 dengan akun `users` dan tersinkronisasi transparan dengan pengaturan profil pengguna mandiri (`/profile`).
+11. `students` dan `teachers`: Profil lengkap, NISN/NIP, biodata, foto profil.
+12. `classes` dan `majors`: Struktur rombel dan jurusan/peminatan (TKJ, RPL, IPA, IPS, dll.).
+13. `schedules` dan `journals`: Jadwal mata pelajaran dan catatan jurnal KBM harian guru.
+14. `internships` (PKL): Data penempatan industri, guru pembimbing, nilai instruktur industri.
+15. `accreditation_evidences`: Dokumen bukti fisik terhubung ke butir standar akreditasi.
 
 ---
 

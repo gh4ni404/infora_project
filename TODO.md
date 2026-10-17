@@ -18,9 +18,11 @@
 - [x] Master Data Wilayah Administratif Pemerintahan Berbasis Kode Kemendagri (Provinsi, Kabupaten, Kecamatan, Kelurahan dan Desa)
 - [x] Arsitektur Tata Letak 3-Tier (Docked Footer dan Scroll Internal) dan Komponen Paginasi Responsif Global
 - [x] Master Data Jurusan / Konsentrasi Keahlian dan Peminatan (SMA, SMK, dan MA)
+- [x] Master Data Pendidik dan Tenaga Kependidikan (GTK) (Multi-Role JSON, Sinkronisasi Akun Otomatis, dan Manajemen Kredensial)
+- [x] Pengaturan Profil Pengguna Mandiri & Keamanan Akun (Dedicated 2-Column Settings Layout, 4 Tab GTK & 2 Tab Non-GTK, Konsolidasi Informasi Pribadi & Kredensial, Dirty-Form Modal, Dashboard Onboarding Alert, Auto-Sync GTK)
 - [x] Konfigurasi Sekolah: Tahun Ajaran dan Manajemen Semester
 - [x] Konfigurasi Sekolah: Kalender Akademik Terpadu dan Agenda Multi-Day (Grid Bulanan dan Tabel Agenda via `<x-tab-pills>`)
-- [x] Ekosistem 22 Anonymous Blade Components dan Test Suite 250 Tests Lulus 100% (1.123 Assertions)
+- [x] Ekosistem 24 Anonymous Blade Components dan Test Suite 334 Tests Lulus 100% (1.515 Assertions)
 - [ ] Arsitektur Akun Sivitas (4 Tipe Akun: Siswa, Guru, Staff, Admin dengan profil relasional 1-to-1)
 - [ ] Dedicated Layout Separation (Desktop dan Mobile)
 - [ ] Implementasi Modul Akademik Lanjutan dan Tata Kelola Utama
@@ -54,6 +56,9 @@
   - [x] Login Controller multi-identifier (login via **Username** maupun **Email**).
   - [x] SuperAdminMiddleware untuk proteksi route dashboard.
   - [x] Dashboard Super Admin minimalis awal (1 menu tunggal: **Dashboard**).
+  - [x] Pengaturan Profil Pengguna Mandiri (`/profile`, layout 2-kolom navigasi vertikal, 4 tab GTK dan 2 tab non-GTK, integrasi avatar dan kredensial akun login ke Informasi Pribadi, dirty-form unsaved changes confirmation modal, ubah kata sandi dengan auto-logout).
+  - [x] Banner Onboarding / Alert Kelengkapan Profil di Dashboard untuk akun baru dengan kata sandi default.
+  - [x] Automated Pest test suite `ProfileTest.php` (total test suite melonjak menjadi 330 tests lulus 100%, 1.493 assertions).
   - [ ] Skema database tabel profil sivitas sekolah (`student_profiles`, `teacher_profiles`, `staff_profiles`).
   - [ ] Setup Laravel Sanctum untuk RESTful API Tokens.
   - [ ] Skema database *Single User Table + Specific Profile Relations* (1-to-1):
@@ -148,9 +153,25 @@
   - [x] CRUD Data Jurusan / Konsentrasi Keahlian (SMK), Peminatan/Fase (SMA), dan Program Keagamaan (MA) terhubung ke unit sekolah (`school_id`).
   - [x] Model `Jurusan`, mutator otomatis Title Case, standardisasi rute resource `/master/data-jurusan`, toggle status 1-klik, dan integrasi modal interaktif `InforaModals`.
   - [x] Automated Pest test suite `JurusanTest.php`.
+  - [x] Master Data Pendidik dan Tenaga Kependidikan (GTK) / Guru dan Pegawai (Multi-Role `jenis_ptk` JSON, Sinkronisasi Akun Otomatis `GtkAccountManager`, Quick Actions Toggle/Reset, Profil Modal, dan Manajemen Kredensial).
+  - [x] Automated Pest test suite `GtkTest.php` (total test suite melonjak menjadi 312 tests lulus 100%, 1.400 assertions).
+  - [x] Standardisasi UI/UX & Kepatuhan Arsitektur Data GTK:
+    - Eliminasi 100% inline style dan integrasi utility class standar Tailwind/INFORA.
+    - Standardisasi komponen form: penggantian native select dengan `<x-form-select>` (dilengkapi alias `:value`) dan `<x-searchable-select>`.
+    - Integrasi penuh 4-tier Kemendagri Wilayah Cascades (`provinsi_id`, `kabupaten_id`, `kecamatan_id`, `kelurahan_id`) pada modal Tambah & Ubah dengan `InforaWilayah.bindCascade`, `populateCascade`, dan `restoreOnError`.
+    - Eager loading relasi wilayah dan accessor `alamat_lengkap` pada model `Gtk`.
+    - Standardisasi modal konfirmasi Reset Password dan Toggle Status menggunakan `<x-modal name="confirm">` dan `InforaModals.bindConfirmButtons`.
+    - Standardisasi tombol aksi preview profil menggunakan `<x-crud-button action="view">`.
+    - Unifikasi arsitektur penetapan kata sandi `GtkAccountManager::resolveDefaultPassword()` dengan preservasi spasi sandi kustom, evaluasi `filled()`, hierarki fallback konsisten (**NIP** ➔ **NUPTK** ➔ **NIK** ➔ `'infora123'`), dan feedback password pada flash notification.
+    - Penanganan route shadowing / collision rute eksplisit `data-gtk/semua` terhadap resource wildcard `{gtk}`.
+    - Ekspansi test suite: **334 tests passed, 1.515 assertions (100% lulus)**.
+  - [ ] *(Ditangguhkan / Backlog)* Penyederhanaan Formulir Entri Data GTK:
+    - **Opsi A (Mode Cepat vs Lengkap):** Toggle switch antara mode entri ringkas (hanya nama, JK, status, NIP/NIK, peran PTK) vs mode lengkap.
+    - **Opsi B (Wizard 3 Langkah):** Stepper terstruktur (1: Identitas & Kepegawaian ➔ 2: Penugasan & Template Hak Akses ➔ 3: Kontak & Pasfoto).
+    - **Opsi C (Seksi Kolapsibel / Accordion):** Field wajib di atas selalu terbuka; seksi Biodata Tambahan, Kontak, Kredensial, dan Pasfoto terlipat rapi.
+    - **Opsi D (Impor Massal Excel):** Pengunggahan berkas template spreadsheet untuk pendaftaran banyak pendidik/tendik sekaligus.
   - [ ] CRUD Data Rombel/Kelas dan Ruangan Belajar.
   - [ ] Manajemen Data Siswa terhubung ke `student_profiles`.
-  - [ ] Manajemen Data Guru dan Pegawai terhubung ke `teacher_profiles` dan `staff_profiles`.
 - [ ] **3.4. Kalender dan Jadwal Pelajaran**
   - [x] Manajemen Tahun Ajaran dan Semester (`TahunAjaran` dan `Semester`, relasi berjenjang, tanggal pelaksanaan, aktivasi 1-klik, modal interaktif di `/konfigurasi-sekolah/tahun-ajaran`).
   - [x] Kalender Akademik Terpadu dan Agenda Multi-Day (tampilan ganda Kalender Bulanan Grid dan Tabel Agenda via `<x-tab-pills>`, rentang kegiatan multi-hari, tag kategori warna, feed JSON `/events`, modal interaktif di `/konfigurasi-sekolah/kalender-akademik`).
