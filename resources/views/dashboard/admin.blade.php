@@ -26,6 +26,18 @@
 <x-alert type="success" />
 <x-alert type="error" />
 
+{{-- Alert Kelengkapan Profil Pengguna --}}
+@if ($user->needsProfileCompletion())
+    <x-status-banner 
+        type="warning"
+        title="Lengkapi Profil dan Kata Sandi"
+        message="Akun Anda terdeteksi masih menggunakan kata sandi bawaan atau belum melengkapi kontak dan foto profil."
+        action-title="Perbarui Profil"
+        :action-href="route('profile.index')"
+        action-icon="user"
+    />
+@endif
+
 {{-- 1. Kartu Profil & Identitas Sekolah --}}
 <div class="card-surface">
     <div class="card-header">

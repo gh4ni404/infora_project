@@ -117,8 +117,12 @@
                     <!-- Reusable Universal Dropdown Menu (Upward) -->
                     <div id="userDropupMenu" class="dropdown-menu dropdown-menu-up dropdown-menu-full hidden" role="menu" aria-orientation="vertical" aria-labelledby="userProfileTrigger">
                         <div class="dropdown-header">
-                            <div class="user-avatar-circle avatar-sm">
-                                {{ strtoupper(substr(auth()->user()->name ?? 'SA', 0, 2)) }}
+                            <div class="user-avatar-circle avatar-sm {{ auth()->user()?->avatar_url ? 'has-image' : '' }}">
+                                @if (auth()->user()?->avatar_url)
+                                    <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}">
+                                @else
+                                    {{ strtoupper(substr(auth()->user()->name ?? 'SA', 0, 2)) }}
+                                @endif
                             </div>
                             <div class="user-meta-info">
                                 <span class="user-name-text">{{ auth()->user()->name }}</span>
@@ -127,11 +131,11 @@
                         </div>
                         <div class="dropdown-divider"></div>
                         <div class="dropdown-list">
-                            <a href="#pengaturan-profile" class="dropdown-item" role="menuitem" onclick="event.preventDefault(); window.showToast ? window.showToast('Fitur Pengaturan Profile segera hadir.') : null;">
+                            <a href="{{ route('profile.index') }}" class="dropdown-item" role="menuitem">
                                 <x-icon name="user" size="16" />
                                 <span>Pengaturan Profile</span>
                             </a>
-                            <a href="#ubah-password" class="dropdown-item" role="menuitem" onclick="event.preventDefault(); window.showToast ? window.showToast('Fitur Ubah Password segera hadir.') : null;">
+                            <a href="{{ route('profile.index', ['tab' => 'security']) }}" class="dropdown-item" role="menuitem">
                                 <x-icon name="lock" size="16" />
                                 <span>Ubah Password</span>
                             </a>
@@ -152,8 +156,12 @@
 
                     <!-- User Section Button Trigger -->
                     <button type="button" class="user-card-button" id="userProfileTrigger" aria-haspopup="true" aria-expanded="false" title="Menu Pengguna">
-                        <div class="user-avatar-circle">
-                            {{ strtoupper(substr(auth()->user()->name ?? 'SA', 0, 2)) }}
+                        <div class="user-avatar-circle {{ auth()->user()?->avatar_url ? 'has-image' : '' }}">
+                            @if (auth()->user()?->avatar_url)
+                                <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}">
+                            @else
+                                {{ strtoupper(substr(auth()->user()->name ?? 'SA', 0, 2)) }}
+                            @endif
                         </div>
                         <div class="user-meta-info">
                             <span class="user-name-text">{{ auth()->user()->name }}</span>

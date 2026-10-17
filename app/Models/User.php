@@ -180,4 +180,62 @@ class User extends Authenticatable
             fn (UserMenuPermission $perm) => $perm->sub_menu_id === $subMenuId && (bool) $perm->$column
         );
     }
+
+    /**
+     * Dapatkan URL publik dari foto profil / avatar pengguna jika tersedia.
+     */
+    public function getAvatarUrlAttribute(): ?string
+    {
+        $path = $this->avatar_path ?: $this->gtk?->foto_path;
+
+        if (! empty($path)) {
+            return Storage::disk('public')->url($path);
+        }
+
+        return null;
+    }
+
+    /**
+     * Evaluasi apakah akun pengguna masih perlu melengkapi profil atau mengganti kata sandi bawaan.
+     */
+    public function needsProfileCompletion(): bool
+    {
+        // Akun Super Administrator (pengembang / pemilik platform) dikecualikan dari kewajiban kelengkapan profil
+        if ($this->isSuperAdmin()) {
+            return false;
+        }
+
+        // 1. Cek kelengkapan email atau avatar profil akun
+        if (empty($this->email) || empty($this->avatar_path)) {
+            return true;
+        }
+
+        // 2. Cek kelengkapan kontak bagi akun yang terhubung ke data GTK
+        if ($this->gtk && (empty($this->gtk->no_hp) || empty($this->gtk->alamat))) {
+            return true;
+        }
+
+        // 3. Cek apakah pengguna masih menggunakan kata sandi bawaan sistem
+        $defaultPasswords = ['infora123', 'password', 'admin'];
+
+        if ($this->gtk) {
+            if (! empty($this->gtk->nip)) {
+                $defaultPasswords[] = preg_replace('/\s+/', '', (string) $this->gtk->nip);
+            }
+            if (! empty($this->gtk->nuptk)) {
+                $defaultPasswords[] = preg_replace('/\s+/', '', (string) $this->gtk->nuptk);
+            }
+            if (! empty($this->gtk->nik)) {
+                $defaultPasswords[] = preg_replace('/\s+/', '', (string) $this->gtk->nik);
+            }
+        }
+
+        foreach (array_unique($defaultPasswords) as $defaultPassword) {
+            if (! empty($defaultPassword) && Hash::check($defaultPassword, (string) $this->password)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

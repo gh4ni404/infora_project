@@ -7,6 +7,7 @@ use App\Http\Controllers\KonfigurasiSekolah\TahunAjaranController;
 use App\Http\Controllers\Master\GtkController;
 use App\Http\Controllers\Master\JurusanController;
 use App\Http\Controllers\Master\SchoolController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\System\BackupRestoreController;
 use App\Http\Controllers\System\MenuAccessController;
 use App\Http\Controllers\System\MenuController;
@@ -33,6 +34,11 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/admin', [DashboardController::class, 'admin'])->name('dashboard.admin');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+    // Pengaturan Profil Pengguna Mandiri
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 
     // Pengaturan Sistem (System Governance)
     Route::prefix('system')->name('system.')->group(function () {
