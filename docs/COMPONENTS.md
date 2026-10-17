@@ -111,6 +111,7 @@ Komponen dropdown select standar dengan dukungan array key-value, Eloquent Colle
 | `label` | `string` | `null` | Opsional | Label teks dropdown. |
 | `id` | `string` | `$name` | Opsional | ID elemen select. |
 | `selected` | `mixed` | `null` | Opsional | Nilai yang terpilih secara bawaan (prioritas kedua setelah `old($name)`). |
+| `value` | `mixed` | `null` | Opsional | Alias alternatif untuk prop `selected` (fleksibilitas penulisan). |
 | `placeholder` | `string` | `null` | Opsional | Opsi pertama kosong/pilihan awal (misal: `"Pilih Jenjang"`). |
 | `hint` | `string` | `null` | Opsional | Teks petunjuk di bawah select. |
 | `required` | `bool` | `false` | Opsional | Menandai field wajib dipilih. |
@@ -223,6 +224,7 @@ Komponen dropdown relasi dinamis dengan antarmuka pencarian instan, badge ekstra
 | `name` | `string` | - | **Ya** | Nama field hidden input yang dikirim pada payload HTTP form. |
 | `id` | `string` | `$name` | Opsional | ID unik elemen hidden input dan pemicu JavaScript. |
 | `value` | `mixed` | `null` | Opsional | Nilai ID yang terpilih (otomatis membaca `old($name)`). |
+| `selected` | `mixed` | `null` | Opsional | Alias alternatif untuk prop `value` (fleksibilitas penulisan). |
 | `placeholder` | `string` | `'Pilih Salah Satu'` | Opsional | Teks tombol trigger ketika belum ada pilihan. |
 | `searchPlaceholder` | `string` | `'Ketik untuk mencari...'` | Opsional | Placeholder di dalam kotak input filter dropdown. |
 | `options` | `iterable` | `[]` | Opsional | Kumpulan data awal (`id`/`value`, `nama`/`label`/`name`, dan opsional `kode`/`extra`/`kode_pos`). |
@@ -408,6 +410,24 @@ Komponen navigasi tab modern berformat pil (*pills*) dengan aksesibilitas ARIA b
     </x-tab-pill>
     <x-tab-pill id="btnViewList" :active="false" icon="list-bullet">
         Daftar Agenda
+    </x-tab-pill>
+</x-tab-pills>
+```
+
+#### Contoh Penggunaan 3: Navigasi Tab Vertikal Sidebar (Pengaturan Profil)
+```blade
+<x-tab-pills class="tab-pills-vertical w-full" role="tablist">
+    <x-tab-pill :active="$activeTab === 'personal'" icon="user" :icon-size="16" data-profile-tab="personal">
+        Informasi Pribadi
+    </x-tab-pill>
+    <x-tab-pill :active="$activeTab === 'employment'" icon="briefcase" :icon-size="16" data-profile-tab="employment">
+        Klasifikasi & Pendidikan
+    </x-tab-pill>
+    <x-tab-pill :active="$activeTab === 'contact'" icon="map-pin" :icon-size="16" data-profile-tab="contact">
+        Kontak & Domisili
+    </x-tab-pill>
+    <x-tab-pill :active="$activeTab === 'status'" icon="shield-check" :icon-size="16" data-profile-tab="status">
+        Status Keaktifan
     </x-tab-pill>
 </x-tab-pills>
 ```

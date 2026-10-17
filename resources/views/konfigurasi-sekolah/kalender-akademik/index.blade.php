@@ -63,14 +63,13 @@
     @elseif (! $hasTahunAjaran)
         <x-status-banner
             title="Tahun Ajaran Belum Dikonfigurasi:"
+            message="<br>Unit sekolah <strong>{{ $selectedSchool->name }}</strong>  belum memiliki Tahun Ajaran.
+            Kalender akademik membutuhkan setidaknya satu Tahun Ajaran untuk dapat menambahkan agenda kegiatan sekolah."
             badge="Tahun Ajaran Diperlukan"
             action-icon="settings"
             action-title="Konfigurasi Sekarang"
             :action-href="route('konfigurasi-sekolah.tahun-ajaran', array_filter(['school_id' => $user->isSuperAdmin() ? $selectedSchoolId : null]))"
-        >
-            <br>Unit sekolah <strong>{{ $selectedSchool->name }}</strong>  belum memiliki Tahun Ajaran.
-            Kalender akademik membutuhkan setidaknya satu Tahun Ajaran untuk dapat menambahkan agenda kegiatan sekolah.
-        </x-status-banner>
+        />
     @endif
 
     {{-- ========================================================================
