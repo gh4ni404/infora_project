@@ -33,6 +33,7 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 24. [Modul Client-Side Wilayah Terpadu](#-24-modul-client-side-wilayah-terpadu-inforawilayah)
 25. [Master Data Pendidik dan Tenaga Kependidikan (GTK)](#-25-master-data-pendidik-dan-tenaga-kependidikan-gtk-multi-role-jenis_ptk-json)
 26. [Pengaturan Profil Pengguna Mandiri dan Keamanan Akun](#-26-pengaturan-profil-pengguna-mandiri-dan-keamanan-akun)
+27. [Layanan Universal Spreadsheet dan Fitur Impor / Ekspor Excel Data GTK](#-27-layanan-universal-spreadsheet-dan-fitur-impor--ekspor-excel-data-gtk)
 
 ---
 
@@ -386,6 +387,42 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 - **Automated Test Suite:** Diuji menyeluruh pada [`tests/Feature/ProfileTest.php`](../tests/Feature/ProfileTest.php) (18 skenario feature tests lulus 100%, total test suite aplikasi mencapai 330 tests / 1.493 assertions).
 
 ---
+
+### 📊 27. Layanan Universal Spreadsheet dan Fitur Impor / Ekspor Excel Data GTK
+- **Layanan Terpusat Global Universal (`App\Services\SpreadsheetService`):**
+  - **Arsitektur Domain-Agnostic:** Dirancang sebagai mesin pengolah lembar sebar universal untuk seluruh modul platform INFORA (GTK, Siswa, Rombel, Nilai, Presensi, Pelanggaran, dll.) tanpa duplikasi logika (*DRY*).
+  - **Pembuatan Template Profesional (`template()`):**
+    - Menghasilkan berkas format `.xlsx` dengan styling elegan: Baris judul berkepala Royal Blue (`#1E3A8A`) dengan teks putih tebal (Bold).
+    - Membekukan baris header (*freeze panes* pada baris ke-2) sehingga kolom tetap terlihat saat pengguna menggulir ke bawah.
+    - Menghitung lebar kolom secara dinamis (*auto-fit column width*) dengan padding ruang baca yang proporsional.
+    - Menyertakan baris data contoh yang realistis untuk memandu pengguna mengisi data dengan benar.
+  - **Streaming Ekspor Hemat Memori (`export()`):**
+    - Mendukung format output `.xlsx` dan `.csv`.
+    - Mengalirkan (*streaming*) data secara langsung ke klien via `php://output` dengan header HTTP download resmi (`Content-Disposition: attachment; filename="..."`), mencegah akumulasi penggunaan RAM server pada dataset besar.
+  - **Proteksi Preservasi Teks Numerik Panjang (*Anti Scientific Notation*):**
+    - Menetapkan tipe data sel secara eksplisit sebagai teks murni (`DataType::TYPE_STRING`) via `setCellValueExplicit()` untuk data numerik berdigit panjang (NIK 16 digit, NIP 18 digit, NUPTK 16 digit, dan nomor telepon).
+    - Menghilangkan sepenuhnya bug umum spreadsheet di mana Excel memotong angka penting atau mengubahnya menjadi notasi ilmiah (mis. `7.308E+15`).
+  - **Universal Robust Row Reader (`readRows()`):**
+    - Membaca format `.xlsx`, `.xls`, dan `.csv` secara otomatis.
+    - Melakukan slugifikasi nama kolom header (mengubah teks header menjadi format `snake_case` yang bersih dan seragam).
+    - Mengabaikan baris kosong secara otomatis.
+    - Menerapkan sanitasi terhadap kerentanan *CSV / Spreadsheet Formula Injection* (`stripFormulaInjection`) dengan menyaring karakter awal berbahaya (`=`, `+`, `-`, `@`, `\t`, `\r`).
+- **Integrasi Fitur pada Master Data GTK (`master/data-gtk`):**
+  - **Unduh Template Resmi (`GET /master/data-gtk/template`):** Menyediakan template `template_import_gtk.xlsx` lengkap dengan contoh peran majemuk (Guru Mapel, Wali Kelas, dll).
+  - **Ekspor Data GTK Terfilter (`GET /master/data-gtk/export`):** Menyaring data yang diekspor sesuai parameter filter aktif di layar (pencarian, sekolah, jenis PTK, status kepegawaian, keaktifan).
+  - **Impor Massal GTK (`POST /master/data-gtk/import`):**
+    - Validasi berkas via Form Request `ImportGtkRequest` (.xlsx, .xls, .csv, maksimal 5MB, tenancy isolation).
+    - Logika Upsert cerdas: Memperbarui data yang ada berdasarkan kecocokan NIK atau NIP tanpa menimbulkan duplikasi.
+    - Otomasi pembuatan akun login baru via `GtkAccountManager` lengkap dengan peran hak akses dan kata sandi default hierarkis.
+    - Menampilkan ringkasan hasil impor: jumlah record baru, record diperbarui, dan catatan baris yang dilewati.
+- **Kepatuhan Komponen UI & Desain Sistem INFORA:**
+  - Tombol **Import Excel** dan **Export Excel** pada toolbar `resources/views/master/data-gtk/index.blade.php` wajib dan telah menggunakan komponen resmi `<x-crud-button action="create">` dengan atribut `icon="upload"` dan `icon="download"`.
+  - Menyediakan modal dialog impor terstandarisasi `resources/views/master/data-gtk/import.blade.php` lengkap dengan kartu unduh template, dropzone berkas interaktif, dan panduan pengisian kolom.
+- **Pencegahan Bentrokan Rute (Route Collision Fix):**
+  - Rute `data-gtk/template`, `data-gtk/export`, dan `data-gtk/import` dideklarasikan tepat sebelum `Route::resource('data-gtk', ...)` pada `routes/web.php` untuk mencegah penangkapan segmen URL oleh wildcard `{gtk}` yang memicu 404 `ModelNotFoundException`.
+- **Automated Test Suite:**
+  - Diuji secara menyeluruh pada [`tests/Feature/GtkImportExportTest.php`](../tests/Feature/GtkImportExportTest.php) (10 skenario pengujian mencakup proteksi tamu, otorisasi RBAC, download template, ekspor berfilter, valid import dengan pembuatan akun user, upsert existing record, dan validasi berkas upload).
+  - Total test suite aplikasi meningkat menjadi **344 tests lulus 100% (1.544 assertions)**.
 
 ---
 

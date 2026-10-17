@@ -47,7 +47,31 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
   - 100% kode terformat rapi sesuai panduan proyek dengan Laravel Pint (`vendor/bin/pint --dirty --format agent`).
 
 ### Added
-- **Pengaturan Profil Pengguna Mandiri & Keamanan Akun (`/profile`):**
+- **Layanan Universal Spreadsheet (`App\Services\SpreadsheetService`) & Fitur Impor / Ekspor Excel Data GTK (`master/data-gtk`):**
+  - **Latar Belakang & Kebutuhan Arsitektur Global:**
+    - Awalnya fitur impor dan ekspor direncanakan khusus untuk data GTK (`GtkSpreadsheetService`). Namun untuk menjaga efisiensi, konsistensi reusabilitas, dan kepatuhan arsitektur modular INFORA, layanan ini direkayasa menjadi layanan global universal `App\Services\SpreadsheetService`. Seluruh modul lain di masa mendatang (Data Siswa, Rombel, Nilai, Presensi, Pelanggaran, dll.) dapat langsung memanfaatkan satu mesin spreadsheet yang sama tanpa duplikasi kode (*DRY*).
+  - **Fitur Unggulan Layanan Universal `SpreadsheetService`:**
+    1. *Pembuatan Template Spreadsheet Universal (`template`):* Menghasilkan berkas `.xlsx` dengan styling profesional (Header Royal Blue `#1E3A8A` dengan teks putih tebal, *freeze panes* pada baris judul, *auto-fit column width* dengan margin kenyamanan baca, dan baris data contoh yang realistis).
+    2. *Streaming Ekspor Terproteksi (`export`):* Mendukung ekspor format `.xlsx` dan `.csv` secara streaming langsung via `php://output` dengan header HTTP download yang tepat, menghemat penggunaan RAM pada server.
+    3. *Proteksi Preservasi Teks Numerik Panjang:* Menggunakan penetapan tipe data teks eksplisit (`DataType::TYPE_STRING`) via `setCellValueExplicit()` untuk data pengenal numerik panjang seperti NIK (16 digit), NIP (18 digit), NUPTK (16 digit), dan nomor telepon. Ini mengeliminasi risiko bawaan Microsoft Excel / Google Sheets yang memotong digit atau mengonversinya menjadi format notasi ilmiah (`7.308E+15`).
+    4. *Universal Robust Row Reader (`readRows`):* Pembaca berkas spreadsheet cerdas yang mendukung format `.xlsx`, `.xls`, dan `.csv` dengan slugifikasi otomatis nama kolom (menghilangkan spasi, karakter khusus, dan konversi ke snake_case), eliminasi baris kosong otomatis, serta proteksi sanitasi terhadap serangan *CSV / Spreadsheet Formula Injection* (`stripFormulaInjection` untuk karakter `=`, `+`, `-`, `@`, `\t`, `\r`).
+  - **Fitur Impor, Ekspor, dan Unduh Template Data GTK (`master/data-gtk`):**
+    1. *Unduh Template Excel GTK (`GET /master/data-gtk/template`):* Menyediakan berkas unduhan template resmi `template_import_gtk.xlsx` lengkap dengan baris contoh data nyata pendidik dan tenaga kependidikan.
+    2. *Ekspor Data GTK Terfilter (`GET /master/data-gtk/export`):* Mendukung ekspor data GTK secara dinamis mengikuti query filter aktif (unit sekolah, kata kunci pencarian, jenis PTK, status kepegawaian, dan status keaktifan).
+    3. *Impor Data GTK Massal (`POST /master/data-gtk/import`):*
+       - Validasi form request terdedikasi `ImportGtkRequest` dengan batasan tipe berkas (`.xlsx`, `.xls`, `.csv`), ukuran maksimal 5MB, serta isolasi tenancy unit sekolah.
+       - Logika *Upsert Cerdas*: Memperbarui data profil GTK yang telah ada berdasarkan kecocokan NIK atau NIP tanpa menduplikasi record.
+       - Sinkronisasi Akun User Otomatis: Setiap data baru otomatis dibuatkan akun login via `GtkAccountManager` lengkap dengan resolusi username cerdas, template hak akses peran, dan hierarki kata sandi default terpadu.
+       - Pesan feedback terperinci yang menginformasikan jumlah baris berhasil ditambahkan, jumlah data diperbarui, dan peringatan baris yang dilewati.
+  - **Kepatuhan Komponen UI & Desain Sistem INFORA:**
+    1. *Kepatuhan Strict Komponen CRUD Button:* Tombol "Import Excel" dan "Export Excel" pada toolbar `resources/views/master/data-gtk/index.blade.php` wajib dan telah mengimplementasikan komponen resmi `<x-crud-button action="create">` dengan atribut `icon="upload"` dan `icon="download"`.
+    2. *Modal Dialog Impor Modern (`resources/views/master/data-gtk/import.blade.php`):* Komponen modal terstandarisasi dengan kartu aksi unduh template, dropzone interaktif unggah berkas, panduan pengisian kolom, dan tombol submit terotorisasi.
+  - **Pencegahan Bentrokan Rute (Route Collision Fix):**
+    - Mendeklarasikan rute eksplisit `data-gtk/template`, `data-gtk/export`, dan `data-gtk/import` tepat **sebelum** deklarasi `Route::resource('data-gtk', ...)` pada `routes/web.php`. Hal ini mencegah parameter URL `'template'` atau `'export'` terintersepsi oleh wildcard parameter `{gtk}` dari rute resource yang memicu galat 404 (`ModelNotFoundException`).
+  - **Automated Test Suite Expansion:**
+    - Membuat berkas pengujian fitur terpadu `tests/Feature/GtkImportExportTest.php` berisi 10 skenario pengujian komprehensif (29 assertions) mencakup autentikasi tamu, isolasi hak akses peran RBAC, unduh template, ekspor dengan dan tanpa filter, impor spreadsheet valid dengan pembuatan akun user otomatis, impor upsert pada NIK/NIP yang sudah ada, serta validasi berkas upload.
+    - Total test suite aplikasi meningkat menjadi **344 tests lulus 100% tanpa kegagalan (1.544 assertions)**.
+**
   - Mengimplementasikan halaman dedicated mandiri pada rute `/profile` (`profile.index`, `profile.update`, `profile.password.update`) untuk seluruh tipe pengguna (Super Admin, Admin Sekolah, Guru/GTK, Murid).
   - **Tata Letak 2-Kolom dengan Navigasi Vertikal (`.grid-split-sidebar` & `.tab-pills-vertical`):**
     - Sisi kiri: Mini Profile Card (avatar berukuran 72px, nama lengkap bergelar, username, badge tipe akun, dan unit sekolah) serta navigasi tab vertikal yang rapi.

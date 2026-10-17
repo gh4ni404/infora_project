@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
   <img src="https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
   <img src="https://img.shields.io/badge/Vite-HMR-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite">
-  <img src="https://img.shields.io/badge/Tests-334_Passed_%7C_1515_Assertions-10B981?style=for-the-badge&logo=pest&logoColor=white" alt="Pest Tests">
+  <img src="https://img.shields.io/badge/Tests-344_Passed_%7C_1544_Assertions-10B981?style=for-the-badge&logo=pest&logoColor=white" alt="Pest Tests">
   <img src="https://img.shields.io/badge/Architecture-API--First_&_Bridging-00D2FF?style=for-the-badge&logo=fastapi&logoColor=white" alt="API-First dan Bridging">
   <img src="https://img.shields.io/badge/UI--UX-Mobile--First_&_Dedicated_Layouts-10B981?style=for-the-badge&logo=pwa&logoColor=white" alt="Mobile-First dan Dedicated Layouts">
   <img src="https://img.shields.io/badge/Data_Contract-Modular_&_Pure_JSON-F59E0B?style=for-the-badge&logo=json&logoColor=white" alt="Modular dan Pure JSON">
@@ -37,6 +37,7 @@ INFORA menghadirkan ekosistem terpadu yang dirancang khusus untuk memenuhi stand
 - 👤 **Pengaturan Profil Pengguna Mandiri & Keamanan:** Halaman khusus 2-kolom dengan navigasi vertikal ramping (4 tab GTK dan 2 tab non-GTK), integrasi terpadu pasfoto avatar, identitas diri, kredensial login (username), dan ubah kata sandi pada Informasi Pribadi, dirty-form unsaved changes confirmation modal, serta auto-logout pasca ganti password.
 - 📅 **Konfigurasi Sekolah (Tahun Ajaran dan Semester):** Manajemen siklus tahun ajaran dan semester aktif dengan tanggal pelaksanaan terpadu serta aktivasi 1-klik.
 - 📆 **Kalender Akademik Terpadu dan Agenda Multi-Day:** Tampilan ganda via `<x-tab-pills>` (Grid Bulanan Interaktif dan Tabel Agenda), rentang kegiatan multi-hari, filter kategori, dan feed JSON real-time.
+- 📊 **Layanan Universal Spreadsheet & Impor Ekspor Data:** Mesin terpadu `SpreadsheetService` untuk unduh template (.xlsx) profesional bergaya Royal Blue, ekspor streaming data terfilter (.xlsx/.csv), proteksi tipe teks numerik panjang bebas scientific notation (NIK/NIP/NUPTK/No HP), dan modal dialog impor massal GTK berbasis `<x-crud-button action="create">`.
 - 🧩 **24 Anonymous Blade Components dan Client Engines:** Katalog komponen UI universal (`<x-data-table>`, `<x-searchable-select>`, `<x-image-upload>`, `<x-modal>`, `<x-tab-pills>`) berpadu dengan controller JavaScript terpadu (`InforaModals`, `SearchableSelect`, `ImageUpload`, `PermissionMatrix`).
 - 📸 **Layanan Unggah Gambar Terpusat (`ImageUploader`):** Pipeline Base64 native PHP tanpa library pihak ketiga, penamaan semantik collision-proof `{modul}_u{user_id}_{timestamp}_{random8}.{ext}`, dan validasi ketat 1MB.
 - 🏭 **Kemitraan Industri dan Magang PKL (Khusus SMK):** Database mitra DUDI, monitoring penempatan magang, plotting guru pembimbing, dan rekap Tracer Study alumni.

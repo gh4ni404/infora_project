@@ -109,7 +109,7 @@ graph TD
 - **Data Response Contract:** Strict Pure JSON (`application/json`), Eloquent API Resources (Zero HTML in Data Payloads)
 - **Backend Framework:** Laravel (Versi Terbaru / Latest Version)
 - **Frontend Stack:** Blade + Alpine.js / Vue.js + Vanilla CSS dan TailwindCSS (Mobile-First Architecture dan Dedicated Layouts)
-- **Automated Testing Suite:** Pest PHP — **334 Tests Passed dan 1,515 Assertions (100% Pass Rate)**
+- **Automated Testing Suite:** Pest PHP — **344 Tests Passed dan 1,544 Assertions (100% Pass Rate)**
 - **UI Components:** 24 Anonymous Blade Components ([`docs/COMPONENTS.md`](../docs/COMPONENTS.md))
 - **Database:** MySQL 8.0 / MariaDB
 - **Caching dan Real-time Queue:** Redis (untuk antrian pemrosesan dokumen akreditasi dan notifikasi)
@@ -239,6 +239,11 @@ erDiagram
   - Protokol pemulihan data (*restore*) dengan validasi ganda, pembatasan unggahan 250 MB (256.000 KB), dan dialog modal bahaya interaktif (*Danger Confirmation Modal*) yang mewajibkan input konfirmasi kata kunci `"PULIHKAN"` sebelum eksekusi dijalankan.
   - **Arsitektur Real-Time Progress Stream (SSE dan Native HTML5 Progress Bar):** Umpan balik kemajuan pemrosesan backup dan restore dipancarkan secara riil langsung dari siklus backend via SSE (`text/event-stream`), mencerminkan status pengeksporan tabel, penghitungan berkas, ekstraksi arsip, hingga reparasi symlink. Dirender di antarmuka menggunakan elemen native HTML5 `<progress>` dengan nol atribut inline style dan kepatuhan desain Infora (Royal Blue dan Cyan gradients).
   - **Sinkronisasi Zona Waktu Server:** Seluruh konfigurasi PHP (`docker/php/php.ini`), Nginx, dan aplikasi Laravel diselaraskan pada zona waktu **`Asia/Makassar`** (WITA / GMT+8).
+- **Arsitektur Layanan Universal Spreadsheet (`SpreadsheetService`):**
+  - Layanan terpusat modular `App\Services\SpreadsheetService` untuk standarisasi pembuatan template, streaming ekspor, dan pembacaan berkas spreadsheet (.xlsx, .xls, .csv) di seluruh modul platform (GTK, Siswa, Rombel, Nilai, dll.).
+  - Streaming ekspor via `php://output` untuk mencegah kehabisan memori RAM saat mengekspor dataset dalam jumlah besar.
+  - Preservasi tipe data teks numerik panjang (`DataType::TYPE_STRING`) via `setCellValueExplicit()` guna mencegah korupsi format, pemotongan digit, atau konversi otomatis ke notasi ilmiah (`7.308E+15`) pada data NIK (16 digit), NIP (18 digit), NUPTK (16 digit), dan nomor telepon.
+  - Proteksi sanitasi terhadap kerentanan *CSV / Spreadsheet Formula Injection* (`stripFormulaInjection`) untuk menyaring karakter berbahaya (`=`, `+`, `-`, `@`, `\t`, `\r`).
 - **Automated Daily Backup:** Pencadangan basis data dan dokumen digital secara terjadwal.
 
 ---
