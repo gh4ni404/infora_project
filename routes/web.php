@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KonfigurasiSekolah\KalenderAkademikController;
 use App\Http\Controllers\KonfigurasiSekolah\TahunAjaranController;
+use App\Http\Controllers\Master\GtkController;
 use App\Http\Controllers\Master\JurusanController;
 use App\Http\Controllers\Master\SchoolController;
 use App\Http\Controllers\System\BackupRestoreController;
@@ -61,6 +62,14 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
             'data-jurusan' => 'jurusan',
         ])->except(['show', 'create']);
         Route::post('data-jurusan/{jurusan}/toggle-status', [JurusanController::class, 'toggleStatus'])->name('data-jurusan.toggle-status');
+        Route::get('data-gtk/semua', [GtkController::class, 'index'])->name('data-gtk.index');
+        Route::resource('data-gtk', GtkController::class)->parameters([
+            'data-gtk' => 'gtk',
+        ])->names([
+            'index' => 'data-gtk',
+        ])->except(['create']);
+        Route::post('data-gtk/{gtk}/toggle-status', [GtkController::class, 'toggleStatus'])->name('data-gtk.toggle-status');
+        Route::post('data-gtk/{gtk}/reset-password', [GtkController::class, 'resetPassword'])->name('data-gtk.reset-password');
     });
 
     // Konfigurasi Sekolah

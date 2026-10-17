@@ -59,7 +59,7 @@
                 @endphp
                 <option
                     value="{{ $val }}"
-                    @selected(!blank($selectedValue) && (string) $val === (string) $selectedValue)
+                    @selected(!blank($selectedValue) && is_scalar($selectedValue) && (string) $val === (string) $selectedValue)
                     @if ($optAttrs) {{ new \Illuminate\View\ComponentAttributeBag($optAttrs) }} @endif
                 >
                     {{ $text }}
