@@ -19,8 +19,7 @@ class KabupatenFactory extends Factory
     public function definition(): array
     {
         $provinsi = Provinsi::inRandomOrder()->first() ?? Provinsi::factory()->create();
-        $subKode = str_pad((string) fake()->numberBetween(1, 99), 2, '0', STR_PAD_LEFT);
-        $kode = $provinsi->kode.$subKode;
+        $kode = (string) fake()->unique()->numberBetween(1000, 9999);
 
         return [
             'provinsi_id' => $provinsi->id,

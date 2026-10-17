@@ -9,8 +9,11 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 #[Fillable(['name', 'username', 'email', 'password', 'user_type', 'is_active', 'avatar_path', 'school_id'])]
 #[Hidden(['password', 'remember_token'])]
@@ -51,6 +54,16 @@ class User extends Authenticatable
     public function school(): BelongsTo
     {
         return $this->belongsTo(School::class);
+    }
+
+    /**
+     * Relasi ke profil data Guru dan Tenaga Kependidikan (GTK).
+     *
+     * @return HasOne<Gtk, $this>
+     */
+    public function gtk(): HasOne
+    {
+        return $this->hasOne(Gtk::class);
     }
 
     /**

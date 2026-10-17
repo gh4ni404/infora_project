@@ -147,6 +147,16 @@ class School extends Model
     }
 
     /**
+     * Relasi ke data guru dan tenaga kependidikan (GTK) di sekolah ini.
+     *
+     * @return HasMany<Gtk, $this>
+     */
+    public function gtks(): HasMany
+    {
+        return $this->hasMany(Gtk::class, 'school_id');
+    }
+
+    /**
      * Relasi ke akun administrator utama sekolah.
      *
      * @return HasOne<User, $this>
