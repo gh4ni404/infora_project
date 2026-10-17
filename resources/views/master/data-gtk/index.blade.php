@@ -29,6 +29,25 @@
 
             <x-crud-button
                 action="create"
+                id="btnOpenImportGtk"
+                class="btn-secondary"
+                icon="upload"
+                text="Import Excel"
+                title="Import data GTK dari berkas Excel atau CSV"
+            />
+
+            <x-crud-button
+                action="create"
+                tag="link"
+                :href="route('master.data-gtk.export', request()->query())"
+                class="btn-secondary"
+                icon="download"
+                text="Export Excel"
+                title="Export data GTK ke berkas Excel"
+            />
+
+            <x-crud-button
+                action="create"
                 id="btnOpenCreateGtk"
                 title="Tambah GTK"
             />
@@ -274,6 +293,7 @@
     @include('master.data-gtk.create')
     @include('master.data-gtk.edit')
     @include('master.data-gtk.show')
+    @include('master.data-gtk.import')
 
     {{-- Modal Konfirmasi Hapus Data GTK --}}
     <x-modal
@@ -317,6 +337,10 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // 0. Modal Impor Data GTK via InforaModals
+            InforaModals.setup('modalImportGtk', { cancelBtnId: 'btnCancelImportGtk' });
+            InforaModals.bindOpenButton('btnOpenImportGtk', 'modalImportGtk');
+
             // 1. Modal Tambah GTK via InforaModals
             InforaModals.setup('modalCreateGtk', { cancelBtnId: 'btnCancelCreateGtk' });
             InforaModals.bindOpenButton('btnOpenCreateGtk', 'modalCreateGtk');

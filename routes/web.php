@@ -69,6 +69,9 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
         ])->except(['show', 'create']);
         Route::post('data-jurusan/{jurusan}/toggle-status', [JurusanController::class, 'toggleStatus'])->name('data-jurusan.toggle-status');
         Route::get('data-gtk/semua', [GtkController::class, 'index'])->name('data-gtk.index');
+        Route::get('data-gtk/template', [GtkController::class, 'template'])->name('data-gtk.template');
+        Route::get('data-gtk/export', [GtkController::class, 'export'])->name('data-gtk.export');
+        Route::post('data-gtk/import', [GtkController::class, 'import'])->name('data-gtk.import');
         Route::resource('data-gtk', GtkController::class)->parameters([
             'data-gtk' => 'gtk',
         ])->names([

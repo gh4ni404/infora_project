@@ -3,17 +3,24 @@
 namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Master\ImportGtkRequest;
 use App\Http\Requests\Master\StoreGtkRequest;
 use App\Http\Requests\Master\UpdateGtkRequest;
 use App\Models\Gtk;
 use App\Models\MenuAccessTemplate;
 use App\Models\Provinsi;
+use App\Services\SpreadsheetService;
 use App\Support\GtkAccountManager;
 use App\Support\ImageUploader;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class GtkController extends Controller
 {
@@ -38,40 +45,7 @@ class GtkController extends Controller
         $inactiveCount = $totalCount - $activeCount;
 
         // 5. Query data tabel dengan filter pencarian dan kriteria
-        $query = (clone $baseQuery)->orderBy('nama_lengkap');
-
-        if ($request->filled('search')) {
-            $search = trim((string) $request->query('search'));
-            $query->where(function ($q) use ($search) {
-                $q->where('nama_lengkap', 'like', "%{$search}%")
-                    ->orWhere('nip', 'like', "%{$search}%")
-                    ->orWhere('nuptk', 'like', "%{$search}%")
-                    ->orWhere('nik', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('no_hp', 'like', "%{$search}%");
-            });
-        }
-
-        if ($request->filled('jenis_ptk')) {
-            $selectedJenis = (string) $request->query('jenis_ptk');
-            $query->where(function ($q) use ($selectedJenis) {
-                $q->whereJsonContains('jenis_ptk', $selectedJenis)
-                    ->orWhere('jenis_ptk', 'like', "%{$selectedJenis}%");
-            });
-        }
-
-        if ($request->filled('status_kepegawaian')) {
-            $query->where('status_kepegawaian', (string) $request->query('status_kepegawaian'));
-        }
-
-        if ($request->filled('status')) {
-            $status = (string) $request->query('status');
-            if ($status === 'aktif') {
-                $query->where('is_active', true);
-            } elseif ($status === 'nonaktif') {
-                $query->where('is_active', false);
-            }
-        }
+        $query = $this->buildFilteredQuery($request, $selectedSchoolId);
 
         // Paginasi (15, 30, 90, semua)
         $perPageInput = (string) $request->query('per_page', '15');
@@ -346,5 +320,349 @@ class GtkController extends Controller
         return redirect()
             ->route('master.data-gtk', $this->schoolRedirectParams($request, $gtk->school_id))
             ->with('success', "Kata sandi akun {$gtk->nama_bergelar} berhasil direset ke nilai bawaan: {$newPassword}");
+    }
+
+    /**
+     * Unduh template spreadsheet berkas Excel (.xlsx) untuk panduan impor data GTK.
+     */
+    public function template(SpreadsheetService $spreadsheet): StreamedResponse
+    {
+        $headers = [
+            'Nama Lengkap*',
+            'Gelar Depan',
+            'Gelar Belakang',
+            'Jenis Kelamin (L/P)*',
+            'Status Kepegawaian*',
+            'Jenis PTK (pisahkan koma jika jamak)*',
+            'NIK',
+            'NIP',
+            'NUPTK',
+            'Tempat Lahir',
+            'Tanggal Lahir (YYYY-MM-DD)',
+            'Agama',
+            'Pendidikan Terakhir',
+            'Jurusan Pendidikan',
+            'No HP/WhatsApp',
+            'Email',
+            'Alamat Domisili',
+        ];
+
+        $sampleRows = [
+            [
+                'Budi Santoso',
+                'Drs.',
+                'M.Pd.',
+                'L',
+                'PNS',
+                'Guru Mapel, Wali Kelas',
+                '7308011205780001',
+                '197805122005011002',
+                '1234567890123456',
+                'Watampone',
+                '1978-05-12',
+                'Islam',
+                'S2',
+                'Pendidikan Matematika',
+                '081234567890',
+                'budi.santoso@sekolah.sch.id',
+                'Jl. Merdeka No. 12',
+            ],
+            [
+                'Siti Rahmawati',
+                '',
+                'S.Kom.',
+                'P',
+                'Tenaga Honorer',
+                'Tenaga Administrasi Sekolah, Laboran',
+                '7308015508890002',
+                '',
+                '',
+                'Makassar',
+                '1989-08-15',
+                'Islam',
+                'S1',
+                'Sistem Informasi',
+                '085298765432',
+                'siti.rahma@sekolah.sch.id',
+                'Kompleks Puri Asri Blok B/5',
+            ],
+        ];
+
+        return $spreadsheet->template(
+            'Template_Import_GTK_INFORA.xlsx',
+            $headers,
+            $sampleRows,
+            [
+                'sheet_title' => 'Template GTK',
+                'text_columns' => ['NIK', 'NIP', 'NUPTK', 'No HP/WhatsApp'],
+            ]
+        );
+    }
+
+    /**
+     * Ekspor data GTK ke berkas spreadsheet Excel (.xlsx) adaptif terhadap filter aktif.
+     */
+    public function export(Request $request, SpreadsheetService $spreadsheet): StreamedResponse
+    {
+        [$selectedSchool, $selectedSchoolId] = $this->resolveSchoolContext($request);
+        $query = $this->buildFilteredQuery($request, $selectedSchoolId);
+
+        $headers = [
+            'Nama Lengkap',
+            'Gelar Depan',
+            'Gelar Belakang',
+            'Jenis Kelamin',
+            'Status Kepegawaian',
+            'Jenis PTK',
+            'NIK',
+            'NIP',
+            'NUPTK',
+            'Tempat Lahir',
+            'Tanggal Lahir',
+            'Agama',
+            'Pendidikan Terakhir',
+            'Jurusan Pendidikan',
+            'No HP/WhatsApp',
+            'Email',
+            'Alamat Domisili',
+            'Status Aktif',
+        ];
+
+        $rows = [];
+        /** @var Gtk $gtk */
+        foreach ($query->get() as $gtk) {
+            $rows[] = [
+                $gtk->nama_lengkap,
+                $gtk->gelar_depan ?? '',
+                $gtk->gelar_belakang ?? '',
+                $gtk->jenis_kelamin,
+                $gtk->status_kepegawaian,
+                is_array($gtk->jenis_ptk) ? implode(', ', $gtk->jenis_ptk) : (string) $gtk->jenis_ptk,
+                $gtk->nik ?? '',
+                $gtk->nip ?? '',
+                $gtk->nuptk ?? '',
+                $gtk->tempat_lahir ?? '',
+                $gtk->tanggal_lahir ? $gtk->tanggal_lahir->format('Y-m-d') : '',
+                $gtk->agama ?? '',
+                $gtk->pendidikan_terakhir ?? '',
+                $gtk->jurusan_pendidikan ?? '',
+                $gtk->no_hp ?? '',
+                $gtk->email ?? '',
+                $gtk->alamat_lengkap,
+                $gtk->is_active ? 'Aktif' : 'Non-Aktif',
+            ];
+        }
+
+        $schoolName = $selectedSchool ? Str::slug($selectedSchool->name, '_') : 'Sekolah';
+        $filename = "Data_GTK_{$schoolName}_".date('Ymd_His').'.xlsx';
+
+        return $spreadsheet->export(
+            $filename,
+            $headers,
+            $rows,
+            [
+                'sheet_title' => 'Data GTK',
+                'text_columns' => ['NIK', 'NIP', 'NUPTK', 'No HP/WhatsApp'],
+            ]
+        );
+    }
+
+    /**
+     * Impor massal data GTK dari berkas spreadsheet (.xlsx, .xls, .csv).
+     */
+    public function import(ImportGtkRequest $request, SpreadsheetService $spreadsheet): RedirectResponse
+    {
+        [$selectedSchool, $selectedSchoolId] = $this->resolveSchoolContext($request);
+        $this->authorizeSchool($request, $selectedSchoolId);
+
+        $uploadedFile = $request->file('file');
+        $rawRows = $spreadsheet->readRows($uploadedFile);
+
+        if (empty($rawRows)) {
+            return redirect()
+                ->route('master.data-gtk', $this->schoolRedirectParams($request, $selectedSchoolId))
+                ->with('error', 'Berkas spreadsheet kosong atau tidak berisi baris data yang dapat diproses.');
+        }
+
+        $inserted = 0;
+        $updated = 0;
+        $skipped = 0;
+
+        foreach ($rawRows as $row) {
+            $namaLengkap = trim((string) ($row['nama_lengkap'] ?? $row['nama'] ?? ''));
+
+            if (empty($namaLengkap)) {
+                $skipped++;
+
+                continue;
+            }
+
+            $nik = preg_replace('/\D/', '', (string) ($row['nik'] ?? '')) ?: null;
+            $nip = preg_replace('/\D/', '', (string) ($row['nip'] ?? '')) ?: null;
+            $nuptk = preg_replace('/\D/', '', (string) ($row['nuptk'] ?? '')) ?: null;
+
+            $jenisKelamin = $this->parseJenisKelamin($row['jenis_kelamin'] ?? $row['jk'] ?? 'L');
+            $statusKepegawaian = trim((string) ($row['status_kepegawaian'] ?? $row['status'] ?? 'GTT/PTT')) ?: 'GTT/PTT';
+            $jenisPtk = $this->parseJenisPtk($row['jenis_ptk'] ?? $row['penugasan'] ?? 'Guru Mapel');
+
+            $dataGtk = [
+                'school_id' => $selectedSchoolId,
+                'nama_lengkap' => $namaLengkap,
+                'gelar_depan' => trim((string) ($row['gelar_depan'] ?? '')) ?: null,
+                'gelar_belakang' => trim((string) ($row['gelar_belakang'] ?? '')) ?: null,
+                'jenis_kelamin' => $jenisKelamin,
+                'status_kepegawaian' => $statusKepegawaian,
+                'jenis_ptk' => $jenisPtk,
+                'nik' => $nik,
+                'nip' => $nip,
+                'nuptk' => $nuptk,
+                'tempat_lahir' => trim((string) ($row['tempat_lahir'] ?? '')) ?: null,
+                'tanggal_lahir' => $this->parseDate($row['tanggal_lahir'] ?? null),
+                'agama' => trim((string) ($row['agama'] ?? '')) ?: null,
+                'pendidikan_terakhir' => trim((string) ($row['pendidikan_terakhir'] ?? '')) ?: null,
+                'jurusan_pendidikan' => trim((string) ($row['jurusan_pendidikan'] ?? '')) ?: null,
+                'no_hp' => trim((string) ($row['no_hp'] ?? $row['no_hp_whatsapp'] ?? '')) ?: null,
+                'email' => trim((string) ($row['email'] ?? '')) ?: null,
+                'alamat' => trim((string) ($row['alamat_domisili'] ?? $row['alamat'] ?? '')) ?: null,
+                'is_active' => true,
+            ];
+
+            // Strategi Upsert Cerdas: cari berdasarkan NIK atau NIP di sekolah ini
+            $existingGtk = null;
+            if ($nik) {
+                $existingGtk = Gtk::where('school_id', $selectedSchoolId)->where('nik', $nik)->first();
+            }
+            if (! $existingGtk && $nip) {
+                $existingGtk = Gtk::where('school_id', $selectedSchoolId)->where('nip', $nip)->first();
+            }
+
+            if ($existingGtk) {
+                // Perbarui field yang terisi
+                $existingGtk->update(array_filter($dataGtk, fn ($v) => $v !== null));
+                GtkAccountManager::createOrUpdateUserForGtk($existingGtk);
+                $updated++;
+            } else {
+                // Tambahkan sebagai data baru
+                $newGtk = Gtk::create($dataGtk);
+                GtkAccountManager::createOrUpdateUserForGtk($newGtk);
+                $inserted++;
+            }
+        }
+
+        $summaryMessage = "Impor data GTK selesai: {$inserted} data baru ditambahkan, {$updated} data diperbarui";
+        if ($skipped > 0) {
+            $summaryMessage .= ", {$skipped} baris dilewati karena data tidak lengkap.";
+        } else {
+            $summaryMessage .= '.';
+        }
+
+        return redirect()
+            ->route('master.data-gtk', $this->schoolRedirectParams($request, $selectedSchoolId))
+            ->with('success', $summaryMessage);
+    }
+
+    /**
+     * Bangun query data GTK berdasarkan filter request yang aktif.
+     */
+    protected function buildFilteredQuery(Request $request, int $selectedSchoolId): Builder
+    {
+        $query = Gtk::query()
+            ->with(['user', 'school', 'provinsi', 'kabupaten', 'kecamatan', 'kelurahan'])
+            ->where('school_id', $selectedSchoolId)
+            ->orderBy('nama_lengkap');
+
+        if ($request->filled('search')) {
+            $search = trim((string) $request->query('search'));
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_lengkap', 'like', "%{$search}%")
+                    ->orWhere('nip', 'like', "%{$search}%")
+                    ->orWhere('nuptk', 'like', "%{$search}%")
+                    ->orWhere('nik', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('no_hp', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('jenis_ptk')) {
+            $selectedJenis = (string) $request->query('jenis_ptk');
+            $query->where(function ($q) use ($selectedJenis) {
+                $q->whereJsonContains('jenis_ptk', $selectedJenis)
+                    ->orWhere('jenis_ptk', 'like', "%{$selectedJenis}%");
+            });
+        }
+
+        if ($request->filled('status_kepegawaian')) {
+            $query->where('status_kepegawaian', (string) $request->query('status_kepegawaian'));
+        }
+
+        if ($request->filled('status')) {
+            $status = (string) $request->query('status');
+            if ($status === 'aktif') {
+                $query->where('is_active', true);
+            } elseif ($status === 'nonaktif') {
+                $query->where('is_active', false);
+            }
+        }
+
+        return $query;
+    }
+
+    /**
+     * Parsing tanggal lahir dari berbagai format masukan spreadsheet.
+     */
+    protected function parseDate(mixed $value): ?string
+    {
+        if (blank($value)) {
+            return null;
+        }
+
+        if (is_numeric($value) && (float) $value > 1000) {
+            try {
+                return Date::excelToDateTimeObject((float) $value)->format('Y-m-d');
+            } catch (\Throwable) {
+                // Lanjut ke parser string standar
+            }
+        }
+
+        try {
+            return Carbon::parse($value)->format('Y-m-d');
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
+     * Parsing teks penugasan PTK majemuk menjadi array.
+     *
+     * @return array<int, string>
+     */
+    protected function parseJenisPtk(mixed $value): array
+    {
+        if (blank($value)) {
+            return ['Guru Mapel'];
+        }
+
+        if (is_array($value)) {
+            return array_values(array_filter($value));
+        }
+
+        $items = preg_split('/[,;]+/', (string) $value);
+        $cleanItems = array_values(array_filter(array_map('trim', (array) $items)));
+
+        return ! empty($cleanItems) ? $cleanItems : ['Guru Mapel'];
+    }
+
+    /**
+     * Normalisasi nilai jenis kelamin menjadi L atau P.
+     */
+    protected function parseJenisKelamin(mixed $value): string
+    {
+        $val = strtoupper(trim((string) $value));
+
+        if (str_starts_with($val, 'P') || str_starts_with($val, 'W')) {
+            return 'P';
+        }
+
+        return 'L';
     }
 }
