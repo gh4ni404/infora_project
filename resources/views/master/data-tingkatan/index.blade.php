@@ -51,7 +51,7 @@
     <x-data-table route="{{ route('master.data-tingkatan.index') }}"
         search-placeholder="Cari kode, nama, angka, atau fase tingkatan..." :per-page="$perPageInput">
         <x-slot:filters>
-            <input type="hidden" name="school_id" value="{{ $selectedSchoolId }}">
+            <x-form-input type="hidden" name="school_id" :value="$selectedSchoolId" />
             <x-form-select 
                 name="status" 
                 id="filterStatus"

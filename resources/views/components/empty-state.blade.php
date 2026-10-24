@@ -13,13 +13,13 @@
 @endif
         <div class="empty-state">
             <div class="empty-state-icon">
-                <x-icon :name="$icon" :size="$iconSize" class="empty-state-icon" />
+                <x-icon :name="$icon" :size="$iconSize" />
             </div>
             @if ($title)
                 <h3 class="empty-state-title">{{ $title }}</h3>
             @endif
             <span class="empty-state-text">{{ $text }}</span>
-            @if ($action ?? (isset($slot) && $slot->isNotEmpty()))
+            @if ($action || (isset($slot) && $slot->isNotEmpty()))
                 <div class="empty-state-action">
                     {{ $action ?? $slot }}
                 </div>

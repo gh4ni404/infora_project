@@ -11,7 +11,7 @@
         <form method="POST" action="{{ route('profile.update') }}">
             @csrf
             @method('PUT')
-            <input type="hidden" name="tab" value="personal">
+            <x-form-input type="hidden" name="tab" value="personal" />
 
             {{-- Seksi Foto Avatar Profil --}}
             <div class="form-section-label mb-2">Foto Avatar Profil</div>

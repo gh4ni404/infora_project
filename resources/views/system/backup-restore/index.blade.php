@@ -8,7 +8,7 @@
         <!-- Cadangan Lengkap ZIP (Primary) -->
         <form method="POST" action="{{ route('backup-restore.create') }}" class="form-inline-action form-backup-trigger" data-progress-stream>
             @csrf
-            <input type="hidden" name="type" value="full">
+            <x-form-input type="hidden" name="type" value="full" />
             <button type="submit" class="btn-primary" id="btnCreateFullBackup" title="Buat Cadangan Lengkap (ZIP) - Buat arsip ZIP terpadu berisi basis data dan seluruh berkas aset pengguna">
                 <x-icon name="download" size="16" />
                 {{-- <span>Buat Cadangan Lengkap (ZIP)</span> --}}
@@ -18,7 +18,7 @@
         <!-- Cadangan Database SQL (Secondary Outline) -->
         <form method="POST" action="{{ route('backup-restore.create') }}" class="form-inline-action form-backup-trigger" data-progress-stream>
             @csrf
-            <input type="hidden" name="type" value="database">
+            <x-form-input type="hidden" name="type" value="database" />
             <button type="submit" class="btn-outline-primary" id="btnCreateDbBackup" title="Cadangan Database (SQL) - Ekspor dump skema dan data basis data saja">
                 <x-icon name="database" size="16" />
                 {{-- <span>Cadangan Database (SQL)</span> --}}

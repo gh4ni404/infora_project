@@ -38,12 +38,14 @@ class UpdateTingkatanRequest extends FormRequest
      */
     public function rules(): array
     {
-        /** @var Tingkatan|int|string|null $tingkatanParam */
-        $tingkatanParam = $this->route('tingkatan') ?? $this->route('data_tingkatan');
-        $tingkatan = $tingkatanParam instanceof Tingkatan ? $tingkatanParam : Tingkatan::find($tingkatanParam);
+        /** @var Tingkatan|int|string $tingkatan */
+        $tingkatan = $this->route('tingkatan');
+        if (! $tingkatan instanceof Tingkatan) {
+            $tingkatan = Tingkatan::findOrFail($tingkatan);
+        }
 
-        $schoolId = $tingkatan?->school_id ?? (int) ($this->input('school_id') ?? $this->user()?->school_id);
-        $tingkatanId = $tingkatan?->id ?? (int) $tingkatanParam;
+        $schoolId = $tingkatan->school_id;
+        $tingkatanId = $tingkatan->id;
 
         return [
             'kode' => [

@@ -10,7 +10,7 @@
         <form method="POST" action="{{ route('profile.update') }}">
             @csrf
             @method('PUT')
-            <input type="hidden" name="tab" value="contact">
+            <x-form-input type="hidden" name="tab" value="contact" />
 
             <div class="form-section-label mb-2">Saluran Komunikasi</div>
 

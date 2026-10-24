@@ -72,7 +72,7 @@
         :per-page="$perPageInput">
 
         <x-slot:filters>
-            <input type="hidden" name="school_id" value="{{ $selectedSchoolId }}">
+            <x-form-input type="hidden" name="school_id" :value="$selectedSchoolId" />
 
             <x-form-select
                 name="jenis_ptk"

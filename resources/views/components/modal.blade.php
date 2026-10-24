@@ -131,7 +131,7 @@
                     @csrf
                     <div class="modal-body">
                         @if ($schoolId)
-                            <input type="hidden" name="school_id" value="{{ $schoolId }}">
+                            <x-form-input type="hidden" name="school_id" :value="$schoolId" />
                         @endif
 
                         @if ($templateUrl)

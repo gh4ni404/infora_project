@@ -7,7 +7,7 @@
     method="PUT"
     form-id="formEditGtk">
 
-    <input type="hidden" name="school_id" id="edit_school_id" value="{{ $selectedSchoolId }}">
+    <x-form-input type="hidden" name="school_id" id="edit_school_id" :value="$selectedSchoolId" />
 
     {{-- Seksi 1: Identitas Pokok & Klasifikasi Kepegawaian --}}
     <div class="form-section-label">Identitas Pokok & Klasifikasi Kepegawaian</div>
@@ -90,7 +90,7 @@
     <div class="form-hint mb-3">Centang seluruh tugas atau peranan yang diemban oleh GTK ini di satuan pendidikan.</div>
 
     @error('jenis_ptk')
-        <div class="alert alert-danger mb-3">{{ $message }}</div>
+        <x-alert type="danger" class="mb-3">{{ $message }}</x-alert>
     @enderror
 
     <div class="form-grid-2col">

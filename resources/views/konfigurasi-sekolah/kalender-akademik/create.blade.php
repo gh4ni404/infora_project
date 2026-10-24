@@ -46,7 +46,7 @@
             </div>
         </div>
     @else
-        <input type="hidden" name="school_id" id="create_school_id" value="{{ $selectedSchoolId }}">
+        <x-form-input type="hidden" name="school_id" id="create_school_id" :value="$selectedSchoolId" />
         <div class="form-grid-2col">
             <x-form-select
                 name="tahun_ajaran"

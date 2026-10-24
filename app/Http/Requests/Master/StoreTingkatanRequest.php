@@ -43,7 +43,7 @@ class StoreTingkatanRequest extends FormRequest
      */
     public function rules(): array
     {
-        $schoolId = (int) ($this->input('school_id') ?? $this->user()?->school_id);
+        $schoolId = (int) $this->input('school_id');
 
         return [
             'school_id' => ['required', 'integer', 'exists:schools,id'],

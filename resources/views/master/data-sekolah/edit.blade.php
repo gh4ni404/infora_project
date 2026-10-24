@@ -72,10 +72,10 @@
     <div class="form-section-label">Wilayah dan Alamat</div>
 
     <!-- Hidden inputs untuk sinkronisasi nama teks wilayah demi kompatibilitas cadangan -->
-    <input type="hidden" name="province" id="edit_province" value="{{ old('province') }}">
-    <input type="hidden" name="city" id="edit_city" value="{{ old('city') }}">
-    <input type="hidden" name="district" id="edit_district" value="{{ old('district') }}">
-    <input type="hidden" name="village" id="edit_village" value="{{ old('village') }}">
+    <x-form-input type="hidden" name="province" id="edit_province" :value="old('province')" />
+    <x-form-input type="hidden" name="city" id="edit_city" :value="old('city')" />
+    <x-form-input type="hidden" name="district" id="edit_district" :value="old('district')" />
+    <x-form-input type="hidden" name="village" id="edit_village" :value="old('village')" />
 
     <div class="form-grid-2col">
         <div class="form-group">

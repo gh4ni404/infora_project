@@ -72,7 +72,7 @@
                 <!-- Search Input -->
                 <form method="GET" action="{{ route('sistem.user') }}">
                     @if ($currentRole)
-                        <input type="hidden" name="role" value="{{ $currentRole }}">
+                        <x-form-input type="hidden" name="role" :value="$currentRole" />
                     @endif
                     <div class="search-box toolbar-search-box">
                         <x-icon name="search" class="search-icon" size="16" />

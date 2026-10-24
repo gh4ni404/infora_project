@@ -8,7 +8,7 @@
     form-id="formCreateJurusan">
     <x-form-input type="hidden" name="school_id" :value="$selectedSchoolId" />
 
-    <input type="hidden" name="jenjang" value="{{ $selectedSchool?->school_type }}">
+    <x-form-input type="hidden" name="jenjang" :value="$selectedSchool?->school_type" />
 
     <div class="form-section-label">Identitas Jurusan</div>
     <div class="form-grid-2col">

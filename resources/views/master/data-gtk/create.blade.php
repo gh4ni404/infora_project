@@ -7,7 +7,7 @@
     size="lg"
     form-id="formCreateGtk">
 
-    <input type="hidden" name="school_id" id="create_school_id" value="{{ $selectedSchoolId }}">
+    <x-form-input type="hidden" name="school_id" id="create_school_id" :value="$selectedSchoolId" />
 
 
     {{-- Seksi 1: Identitas Pokok & Kepegawaian --}}

@@ -10,7 +10,7 @@
         <form method="POST" action="{{ route('profile.update') }}">
             @csrf
             @method('PUT')
-            <input type="hidden" name="tab" value="employment">
+            <x-form-input type="hidden" name="tab" value="employment" />
 
             <div class="form-section-label mb-2">Klasifikasi Kepegawaian & Pendidikan</div>
 

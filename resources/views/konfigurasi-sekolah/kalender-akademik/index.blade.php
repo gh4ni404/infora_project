@@ -15,7 +15,7 @@
             {{-- Selector Unit Sekolah --}}
             @if ($user->isSuperAdmin() && $schools->count() > 1)
                 <form method="GET" action="{{ route('konfigurasi-sekolah.kalender-akademik') }}" id="schoolFilterForm">
-                    <input type="hidden" name="view" value="{{ $activeView }}" id="schoolFilterView">
+                    <x-form-input type="hidden" name="view" :value="$activeView" id="schoolFilterView" />
                     <x-form-select
                         name="school_id"
                         id="school_id"
@@ -187,9 +187,9 @@
             :per-page="$perPageInput">
 
             <x-slot:filters>
-                <input type="hidden" name="view" value="tabel">
+                <x-form-input type="hidden" name="view" value="tabel" />
                 @if ($user->isSuperAdmin())
-                    <input type="hidden" name="school_id" value="{{ $selectedSchoolId }}">
+                    <x-form-input type="hidden" name="school_id" :value="$selectedSchoolId" />
                 @endif
 
                 <x-form-select
@@ -343,7 +343,7 @@
         item-title-id="deleteKalenderTitle"
         >        
         <x-slot:hiddenInputs>
-            <input type="hidden" name="view" value="{{ $activeView }}">
+            <x-form-input type="hidden" name="view" :value="$activeView" />
         </x-slot:hiddenInputs>
     </x-modal>
 
