@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
   <img src="https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
   <img src="https://img.shields.io/badge/Vite-HMR-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite">
-  <img src="https://img.shields.io/badge/Tests-355_Passed_%7C_1668_Assertions-10B981?style=for-the-badge&logo=pest&logoColor=white" alt="Pest Tests">
+  <img src="https://img.shields.io/badge/Tests-371_Passed_%7C_1728_Assertions-10B981?style=for-the-badge&logo=pest&logoColor=white" alt="Pest Tests">
   <img src="https://img.shields.io/badge/Architecture-API--First_&_Bridging-00D2FF?style=for-the-badge&logo=fastapi&logoColor=white" alt="API-First dan Bridging">
   <img src="https://img.shields.io/badge/UI--UX-Mobile--First_&_Dedicated_Layouts-10B981?style=for-the-badge&logo=pwa&logoColor=white" alt="Mobile-First dan Dedicated Layouts">
   <img src="https://img.shields.io/badge/Data_Contract-Modular_&_Pure_JSON-F59E0B?style=for-the-badge&logo=json&logoColor=white" alt="Modular dan Pure JSON">
@@ -33,6 +33,7 @@ INFORA menghadirkan ekosistem terpadu yang dirancang khusus untuk memenuhi stand
 
 - 🏫 **Manajemen Terpadu SMA, SMK, dan MA:** Registri multi-sekolah, struktur akademik fleksibel (Konsentrasi Keahlian SMK, Peminatan/Fase SMA, dan Program Peminatan/Keagamaan MA), Jurnal Digital KBM Guru harian, dan modul BK.
 - 🎓 **Master Data Jurusan dan Peminatan:** Tata kelola program keahlian/peminatan berbasis unit sekolah, toggle status aktif 1-klik, dan dialog modal CRUD interaktif.
+- 📚 **Master Data Tingkatan Kelas:** Penjenjangan tingkatan kelas (X, XI, XII / 1-13) terhubung unit sekolah, pemetaan Fase Kurikulum Merdeka (Fase E & F), toggle status aktif 1-klik, kartu metrik ringkasan KPI, dan modal dialog CRUD modular.
 - 👨‍🏫 **Master Data Pendidik dan Tenaga Kependidikan (GTK):** Pengelolaan sivitas pendidik & tendik dengan dukungan tugas majemuk (*multi-role* JSON), sinkronisasi akun otomatis, reset password, dan profil modal interaktif.
 - 👤 **Pengaturan Profil Pengguna Mandiri & Keamanan:** Halaman khusus 2-kolom dengan navigasi vertikal ramping (4 tab GTK dan 2 tab non-GTK), integrasi terpadu pasfoto avatar, identitas diri, kredensial login (username), dan ubah kata sandi pada Informasi Pribadi, dirty-form unsaved changes confirmation modal, serta auto-logout pasca ganti password.
 - 📅 **Konfigurasi Sekolah (Tahun Ajaran dan Semester):** Manajemen siklus tahun ajaran dan semester aktif dengan tanggal pelaksanaan terpadu serta aktivasi 1-klik.
@@ -59,11 +60,11 @@ INFORA menghadirkan ekosistem terpadu yang dirancang khusus untuk memenuhi stand
 ## 💻 Tech Stack dan Arsitektur
 
 - **Backend:** Laravel (Versi Terbaru) — *Modular Monolith, RESTful API dan Bridging Core*
-- **Automated Testing:** Pest PHP — **346 Tests Passed dan 1,578 Assertions (100% Pass Rate)**
+- **Automated Testing:** Pest PHP — **371 Tests Passed dan 1.728 Assertions (100% Pass Rate)**
 - **UI Components:** 25 Anonymous Blade Components ([`docs/COMPONENTS.md`](docs/COMPONENTS.md)) dan Reusable Global CSS Tokens (`resources/css/app.css`, Zero Inline Styles)
 - **JavaScript Client Engines:** `InforaModals` (CRUD modals), `SearchableSelect` (cascading dynamic dropdowns), `ImageUpload` (Base64 file pipeline), `PermissionMatrix` (RBAC access matrix), `InforaProgress` (global smooth loading indicator)
 - **Navigation dan Hierarchy:** System-Driven Dynamic Navigation (Modul ➔ Menu ➔ Sub-Menu), 3 Baseline Bootstrap Menus, User-Centric Menu Access Control, Configurable Role Templates, Dynamic Under-Development Fallback (Zero Dead Links), Non-Unique Entity Convention, Automatic Order dan Dual-Field Routing
-- **School Master dan Academic:** Multi-Record School Management (SMA, SMK, dan MA, Public dan Private), Unit School Filter, Jurusan/Konsentrasi Keahlian/Peminatan Registry, GTK / Educator Multi-Role Management, Tahun Ajaran dan Semester Management, Academic Calendar with Multi-Day Event Spanning
+- **School Master dan Academic:** Multi-Record School Management (SMA, SMK, dan MA, Public dan Private), Unit School Filter, Jurusan/Konsentrasi Keahlian/Peminatan Registry, Tingkatan / Grade Levels Registry, GTK / Educator Multi-Role Management, Tahun Ajaran dan Semester Management, Academic Calendar with Multi-Day Event Spanning
 - **Regional Administrative Master:** Kemendagri 4-Tier Standard (Provinsi, Kabupaten/Kota, Kecamatan, Kelurahan/Desa), Pure Numeric Codes (Non-BPS), 3-Tier Cascading Filter, School Relation Integrity Guard
 - **Layout dan Pagination Architecture:** 3-Tier Docked Layout (Fixed Topbar, Docked Bottom Footer, Independent Internal Scrolling), Universal Responsive Pagination Component (`<x-pagination>`, Registered Global via `Paginator::defaultView`)
 - **Global Indicator Engine:** Universal Smooth Real-Time Progressive Indicator (`window.InforaProgress`, `<x-progress-modal />`, SSE Stream Reader, Zero Inline Styles)

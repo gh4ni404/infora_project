@@ -29,11 +29,12 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 20. [Konfigurasi Sekolah: Kalender Akademik Terpadu dan Agenda Kegiatan Multi-Day](#-20-konfigurasi-sekolah-kalender-akademik-terpadu--agenda-kegiatan-multi-day)
 21. [Standarisasi Layanan Unggah Gambar Base64 dan Komponen Universal](#-21-standarisasi-layanan-unggah-gambar-base64--komponen-universal-imageuploader--x-image-upload)
 22. [Pengendali Matriks Hak Akses Terprogram](#-22-pengendali-matriks-hak-akses-terprogram-permissionmatrix)
-23. [Ekosistem Komponen Blade UI dan Kematangan Pengujian](#-23-ekosistem-komponen-blade-ui--kematangan-pengujian-323-tests--1440-assertions)
+23. [Ekosistem Komponen Blade UI dan Kematangan Pengujian](#-23-ekosistem-komponen-blade-ui--kematangan-pengujian-371-tests--1728-assertions)
 24. [Modul Client-Side Wilayah Terpadu](#-24-modul-client-side-wilayah-terpadu-inforawilayah)
 25. [Master Data Pendidik dan Tenaga Kependidikan (GTK)](#-25-master-data-pendidik-dan-tenaga-kependidikan-gtk-multi-role-jenis_ptk-json)
 26. [Pengaturan Profil Pengguna Mandiri dan Keamanan Akun](#-26-pengaturan-profil-pengguna-mandiri-dan-keamanan-akun)
 27. [Layanan Universal Spreadsheet dan Fitur Impor / Ekspor Excel Data GTK](#-27-layanan-universal-spreadsheet-dan-fitur-impor--ekspor-excel-data-gtk)
+28. [Master Data Tingkatan Kelas](#-28-master-data-tingkatan-kelas-tingkat-x-xi-xii-dan-fase-kurikulum-merdeka)
 
 ---
 
@@ -292,14 +293,14 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 
 ---
 
-### 🧪 23. Ekosistem Komponen Blade UI dan Kematangan Pengujian (323 Tests dan 1.440 Assertions)
+### 🧪 23. Ekosistem Komponen Blade UI dan Kematangan Pengujian (371 Tests dan 1.728 Assertions)
 - **25 Anonymous Blade Components Universal:**
   - Tersedia di `resources/views/components/` dan terdokumentasi lengkap di [`docs/COMPONENTS.md`](../docs/COMPONENTS.md).
   - Meliputi: form inputs, form select dengan rendering opsi otomatis, searchable select bertingkat, drag-and-drop document upload `<x-file-upload>`, tab-pills aksesibel, data table dengan search toolbar terintegrasi, tombol aksi terotorisasi `<x-crud-button>`, modal dialog flexbox, dan indikator progres global.
 - **Pembersihan Kelas Kolom Legacy dan Zero Inline Styles:**
   - Seluruh view pada modul sistem, wilayah administratif, master data, dan konfigurasi sekolah telah dibersihkan dari inline style dan class kolom legacy, menghasilkan antarmuka yang seragam dan performa render yang cepat.
-- **323 Automated Tests Lolos 100%:**
-  - Rangkaian pengujian Pest mencakup seluruh alur sistem: autentikasi, otorisasi RBAC, operasi CRUD, validasi data, mutator, format nama file, integrasi modal JavaScript, dan rendering komponen Blade, dengan total **323 tests dan 1.440 assertions lulus tanpa kendala**.
+- **371 Automated Tests Lolos 100%:**
+  - Rangkaian pengujian Pest mencakup seluruh alur sistem: autentikasi, otorisasi RBAC, operasi CRUD, validasi data, mutator, format nama file, integrasi modal JavaScript, dan rendering komponen Blade, dengan total **371 tests dan 1.728 assertions lulus tanpa kendala**.
 
 ---
 
@@ -430,7 +431,23 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
   - Rute `data-gtk/template`, `data-gtk/export`, dan `data-gtk/import` dideklarasikan tepat sebelum `Route::resource('data-gtk', ...)` pada `routes/web.php` untuk mencegah penangkapan segmen URL oleh wildcard `{gtk}` yang memicu 404 `ModelNotFoundException`.
 - **Automated Test Suite:**
   - Diuji secara menyeluruh pada [`tests/Feature/GtkImportExportTest.php`](../tests/Feature/GtkImportExportTest.php) dan [`tests/Feature/GtkTest.php`](../tests/Feature/GtkTest.php) (mencakup proteksi tamu, otorisasi RBAC, download template 6-kolom + sheet referensi, ekspor berfilter, import berkas esensial, import berkas legacy 17-kolom, struktur onboarding modal create, upsert existing record, dan validasi berkas upload).
-  - Total test suite aplikasi meningkat menjadi **355 tests lulus 100% (1.668 assertions)**.
+  - Rangkaian pengujian fitur GTK berkontribusi pada total test suite aplikasi yang solid.
+
+---
+
+### 📚 28. Master Data Tingkatan Kelas (Tingkat X, XI, XII dan Fase Kurikulum Merdeka)
+- **Rasionalisasi & Peran Arsitektural:**
+  - Penjenjangan tingkatan kelas merupakan fondasi utama pengelompokan Rombongan Belajar (Rombel), pemetaan kurikulum (K13 vs Kurikulum Merdeka), dan jadwal KBM di satuan pendidikan (SMA, SMK, maupun MA).
+  - Setiap sekolah memiliki struktur tingkatan spesifik (contoh: SMA/SMK dengan Tingkat X, XI, XII / 10-12, atau program SMK 4 tahun hingga tingkat 13), sehingga data penjenjangan dikelola per unit sekolah (`school_id`) dengan isolasi tenancy ketat.
+- **Fitur Pokok & Antarmuka Pengguna (`master/data-tingkatan`):**
+  - **Identitas Tingkatan & Urutan Alami:** Menyimpan notasi kode tingkatan (`kode`), nama lengkap (`nama`), dan angka urutan kelas alami (`tingkat_angka`, 1-13) yang diurutkan otomatis via query scope `scopeOrdered`.
+  - **Dukungan Fase Kurikulum Merdeka:** Menyediakan atribut opsional `fase` yang terhubung ke datalist referensi resmi Kemendikbudristek (Fase E untuk kelas 10, Fase F untuk kelas 11-12).
+  - **Kartu Metrik KPI:** 4 kartu ringkasan berbasis `<x-stats-grid>` dan `<x-stat-card>`: Total Tingkatan, Tingkatan Aktif, Non-Aktif, dan Fase Kurikulum.
+  - **Aksi Cepat & Modal Modular:** Toggle status aktif 1-klik via HTTP POST, serta dialog modal Tambah (`create.blade.php`) dan Ubah (`edit.blade.php`) terintegrasi `InforaModals` dan Form Requests.
+  - **Formatting Otomatis:** Kode diformat UPPERCASE otomatis dan nama/fase diformat Title Case melalui Eloquent Mutator dan helper `TextFormatter`.
+- **Automated Test Suite:**
+  - Diuji secara menyeluruh melalui [`tests/Feature/TingkatanTest.php`](../tests/Feature/TingkatanTest.php) (16 feature tests mencakup otentikasi, otorisasi RBAC, isolasi sekolah, validasi keunikan berjenjang, toggle status, dan operasi CRUD).
+  - Total test suite aplikasi meningkat menjadi **371 tests lulus 100% (1.728 assertions)**.
 
 ---
 

@@ -162,6 +162,11 @@ Untuk mengakomodasi realitas sivitas sekolah di mana guru dan siswa sering memil
 - **Cascading Filter dan Relasi Berjenjang:** Dropdown dinamis 3 tingkat yang saling berantai secara instan pada tabel indeks dan form dialog modal, didukung relasi *has-many-through* dan proteksi penghapusan data wilayah yang telah dirujuk oleh sekolah.
 - **Arsitektur Modal CRUD Modular:** Standarisasi berkas `index.blade.php`, `create.blade.php`, dan `edit.blade.php` pada setiap tingkat wilayah tanpa reload halaman.
 
+### 5.0.2. Modul Master Data Tingkatan Kelas (Penjenjangan & Fase Kurikulum Merdeka)
+- **Struktur Tingkatan Terpadu SMA, SMK, dan MA:** Pengelolaan penjenjangan tingkatan kelas (X, XI, XII / 1-13) berbasis unit sekolah (`school_id`), urutan alami (`tingkat_angka`), dan pemetaan Fase Kurikulum Merdeka (Fase E dan Fase F).
+- **Mutator Teks Otomatis:** Preservasi UPPERCASE untuk notasi kode dan Title Case untuk nama serta fase via Eloquent Attribute casts dan helper `TextFormatter`.
+- **Integrasi Modal CRUD Modular:** Antarmuka `index.blade.php`, `create.blade.php`, dan `edit.blade.php` berbasis `<x-modal>` dan controller client-side `InforaModals` tanpa reload halaman.
+
 ### 5.1. Modul 1: Manajemen Akademik dan Kesiswaan (SMA dan SMK)
 - Manajemen Tahun Ajaran, Semester, Rombel/Kelas, dan Mata Pelajaran.
 - Pembagian Konsentrasi Keahlian (SMK) dan Peminatan/Fase (SMA).
@@ -217,11 +222,12 @@ erDiagram
 9. `kelurahan`: Master data kelurahan/desa (`kode` CHAR(10) PK, `kecamatan_kode` CHAR(7) FK, `tipe` ENUM ['Kelurahan', 'Desa'], `nama` VARCHAR(100), `kode_pos` VARCHAR(5), `status_aktif` BOOLEAN).
    > *Standar Kode Wilayah Kemendagri:* Seluruh kode wilayah disimpan dalam format string numerik murni tanpa tanda titik (contoh: Kemendagri `73.08` disimpan `7308`). Dilarang keras menggunakan kode statistik BPS untuk mencegah desinkronisasi data nasional.
 10. `gtks`: Data profil Pendidik dan Tenaga Kependidikan (`id`, `school_id`, `user_id`, `nama_lengkap`, `gelar_depan`, `gelar_belakang`, `nip`, `nuptk`, `nik`, `tempat_lahir`, `tanggal_lahir`, `jenis_kelamin`, `agama`, `status_kepegawaian`, `jenis_ptk` [JSON array], `pendidikan_terakhir`, `jurusan_pendidikan`, `no_hp`, `email`, `provinsi_id`, `kabupaten_id`, `kecamatan_id`, `kelurahan_id`, `alamat`, `foto_path`, `is_active`). Terhubung 1-to-1 dengan akun `users` dan tersinkronisasi transparan dengan pengaturan profil pengguna mandiri (`/profile`).
-11. `students` dan `teachers`: Profil lengkap, NISN/NIP, biodata, foto profil.
-12. `classes` dan `majors`: Struktur rombel dan jurusan/peminatan (TKJ, RPL, IPA, IPS, dll.).
-13. `schedules` dan `journals`: Jadwal mata pelajaran dan catatan jurnal KBM harian guru.
-14. `internships` (PKL): Data penempatan industri, guru pembimbing, nilai instruktur industri.
-15. `accreditation_evidences`: Dokumen bukti fisik terhubung ke butir standar akreditasi.
+11. `tingkatan`: Data penjenjangan tingkatan kelas (`id`, `school_id`, `kode`, `nama`, `tingkat_angka`, `fase`, `is_active`, `keterangan`). Terhubung ke `schools`.
+12. `students` dan `teachers`: Profil lengkap, NISN/NIP, biodata, foto profil.
+13. `classes` dan `majors`: Struktur rombel dan jurusan/peminatan (TKJ, RPL, IPA, IPS, dll.).
+14. `schedules` dan `journals`: Jadwal mata pelajaran dan catatan jurnal KBM harian guru.
+15. `internships` (PKL): Data penempatan industri, guru pembimbing, nilai instruktur industri.
+16. `accreditation_evidences`: Dokumen bukti fisik terhubung ke butir standar akreditasi.
 
 ---
 

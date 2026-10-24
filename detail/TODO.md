@@ -18,12 +18,13 @@
 - [x] Master Data Wilayah Administratif Pemerintahan Berbasis Kode Kemendagri (Provinsi, Kabupaten, Kecamatan, Kelurahan dan Desa)
 - [x] Arsitektur Tata Letak 3-Tier (Docked Footer dan Scroll Internal) dan Komponen Paginasi Responsif Global
 - [x] Master Data Jurusan / Konsentrasi Keahlian dan Peminatan (SMA, SMK, dan MA)
+- [x] Master Data Tingkatan Kelas (X, XI, XII, Fase Kurikulum Merdeka, dan Urutan Alami)
 - [x] Master Data Pendidik dan Tenaga Kependidikan (GTK) (Multi-Role JSON, Sinkronisasi Akun Otomatis, dan Manajemen Kredensial)
 - [x] Pengaturan Profil Pengguna Mandiri & Keamanan Akun (Dedicated 2-Column Settings Layout, 4 Tab GTK & 2 Tab Non-GTK, Konsolidasi Informasi Pribadi & Kredensial, Dirty-Form Modal, Dashboard Onboarding Alert, Auto-Sync GTK)
 - [x] Konfigurasi Sekolah: Tahun Ajaran dan Manajemen Semester
 - [x] Konfigurasi Sekolah: Kalender Akademik Terpadu dan Agenda Multi-Day (Grid Bulanan dan Tabel Agenda via `<x-tab-pills>`)
 - [x] Layanan Universal Spreadsheet (`SpreadsheetService`) & Impor / Ekspor Excel Data GTK via `<x-crud-button>`
-- [x] Ekosistem 25 Anonymous Blade Components dan Test Suite 355 Tests Lulus 100% (1.668 Assertions)
+- [x] Ekosistem 25 Anonymous Blade Components dan Test Suite 371 Tests Lulus 100% (1.728 Assertions)
 - [ ] Arsitektur Akun Sivitas (4 Tipe Akun: Siswa, Guru, Staff, Admin dengan profil relasional 1-to-1)
 - [ ] Dedicated Layout Separation (Desktop dan Mobile)
 - [ ] Implementasi Modul Akademik Lanjutan dan Tata Kelola Utama

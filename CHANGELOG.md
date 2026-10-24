@@ -8,6 +8,24 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 
 ## [Unreleased]
 
+### Added dan Improved (Master Data Tingkatan Sekolah, Desain Empty-State Terpusat & Standardisasi Komponen UI)
+- **Master Data Tingkatan Kelas (`master/data-tingkatan`):**
+  - *CRUD Penjenjangan Kelas Multi-Tenancy:* Mengimplementasikan pengelolaan penjenjangan tingkatan kelas (X, XI, XII / 1-13) berbasis unit sekolah (`school_id`), pemetaan Fase Kurikulum Merdeka (Fase E, Fase F, dll.), serta integrasi mutator teks otomatis (`UPPERCASE` untuk notasi kode dan `Title Case` untuk nama serta fase).
+  - *Skema Basis Data & Integritas Tenancy:* Membuat migrasi `tingkatan` dengan indeks unik majemuk per unit sekolah (`['school_id', 'kode']` dan `['school_id', 'tingkat_angka']`) serta scope query bawaan `ordered()` (`tingkat_angka ASC`).
+  - *Kartu Metrik Ringkasan (KPI Cards):* Menghadirkan 4 kartu indikator metrik berbasis `<x-stats-grid>` dan `<x-stat-card>`: Total Tingkatan, Tingkatan Aktif, Non-Aktif, dan Total Fase Kurikulum.
+  - *Aksi Cepat & Modal Modular:* Toggle status keaktifan 1-klik (`POST /master/data-tingkatan/{tingkatan}/toggle-status`), antarmuka modal modular (`create.blade.php`, `edit.blade.php`) berbasis `<x-modal>`, dan dialog konfirmasi hapus universal.
+  - *Pengujian Otomatis Komprehensif:* Menambahkan 16 skenario feature test di `tests/Feature/TingkatanTest.php` (mencakup proteksi otentikasi tamu, otorisasi RBAC, isolasi multi-sekolah, validasi keunikan berjenjang, toggle status, dan operasi CRUD).
+
+### Fixed dan Refactored (Audit Kepatuhan Blade Components, Eliminasi Raw HTML Input & Overengineering)
+- **Standardisasi Ekosistem Komponen Blade UI & Eliminasi Raw HTML Input:**
+  - *Pemusatan Vertikal dan Horizontal Empty State Tabel:* Memperbarui styling CSS pada `resources/css/app.css` (`.table-card:has(.empty-state) .table-responsive`, `.data-table:has(.empty-state)`, dan `.data-table .empty-state`) untuk memastikan pesan kosong beserta ikonnya berada tepat di tengah area tabel baik secara vertikal maupun horizontal.
+  - *Perapian Komponen `<x-empty-state>`:* Membersihkan redundansi kelas `empty-state-icon` pada SVG internal dan menyederhanakan evaluasi slot aksi menjadi `@if ($action || (isset($slot) && $slot->isNotEmpty()))`.
+  - *Eliminasi Raw HTML `<input type="hidden">`:* Mengganti seluruh raw input tersembunyi manual pada modal Tambah/Ubah Data GTK (`create.blade.php`, `edit.blade.php`), Data Tingkatan (`index.blade.php`), Data Jurusan (`create.blade.php`, `index.blade.php`), Data Sekolah (`create.blade.php`, `edit.blade.php`), Tab Pengaturan Profil Pengguna (`personal`, `employment`, `contact`), Cadangan & Pemulihan Sistem, Kalender Akademik, Filter Navigasi Akses Menu, dan Komponen Modal Universal (`components/modal.blade.php`) ke komponen resmi `<x-form-input type="hidden">`.
+  - *Standardisasi Komponen `<x-alert>` pada Validasi PTK:* Mengganti raw alert manual pada `master/data-gtk/edit.blade.php` dengan komponen resmi `<x-alert type="danger">`.
+  - *Refactoring `UpdateTingkatanRequest`:* Mengeliminasi kode overengineering, parameter guessing (`?? $this->route('data_tingkatan')`), dan defensive programming berlebih pada pengambilan model instance tingkatan dari route parameter.
+  - *Sinkronisasi Aturan Katalog Komponen:* Memperbarui aturan `.agents/rules/standard-blade-components-ecosystem.md` dari 22 menjadi 25 komponen resmi dengan mencantumkan `<x-file-upload>`, `<x-status-banner>`, dan `<x-crud-button>`.
+  - *Ekspansi Test Suite Keseluruhan:* Total test suite aplikasi terverifikasi 100% lulus dengan **371 tests passed, 1.728 assertions**.
+
 ### Added dan Improved (Tata Kelola Menu Akses, Onboarding Cepat GTK & Pengisian Mandiri Profil)
 - **Pembaruan Tata Kelola Menu Akses & Otorisasi Pengguna (`system/menu-access`):**
   - *Dukungan Filter Peran Staf (Tendik):* Menambahkan tab filter peran `staf` pada daftar pengguna tata kelola menu akses, memungkinkan Super Admin memfilter khusus akun tenaga kependidikan (TU, laboran, pustakawan, dll).
