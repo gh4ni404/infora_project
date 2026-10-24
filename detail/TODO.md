@@ -153,7 +153,9 @@
   - [x] Seeder resmi Kemendagri: 38 Provinsi se-Indonesia, 24 Kabupaten/Kota se-Sulawesi Selatan, 27 Kecamatan se-Kabupaten Bone, 372 Kelurahan dan Desa se-Kabupaten Bone.
   - [x] Automated Pest test suite (66 skenario feature tests di `ProvinsiTest.php`, `KabupatenTest.php`, `KecamatanTest.php`, dan `KelurahanTest.php`).
 - [ ] **3.3. Master Data Akademik dan Sivitas**
+  - [x] CRUD Data Tingkatan Kelas (`Tingkatan`) terhubung ke unit sekolah (`school_id`), model dengan mutator TextFormatter, rute resource `/master/data-tingkatan` (`master.data-tingkatan.*`), Form Requests validasi tenancy, kartu metrik KPI, 1-klik toggle status, antarmuka modal modular (`index.blade.php`, `create.blade.php`, `edit.blade.php`), dan automated test suite `TingkatanTest.php` (16 feature tests, 100% lulus).
   - [x] CRUD Data Jurusan / Konsentrasi Keahlian (SMK), Peminatan/Fase (SMA), dan Program Keagamaan (MA) terhubung ke unit sekolah (`school_id`).
+
   - [x] Model `Jurusan`, mutator otomatis Title Case, standardisasi rute resource `/master/data-jurusan`, toggle status 1-klik, dan integrasi modal interaktif `InforaModals`.
   - [x] Automated Pest test suite `JurusanTest.php`.
   - [x] Master Data Pendidik dan Tenaga Kependidikan (GTK) / Guru dan Pegawai (Multi-Role `jenis_ptk` JSON, Sinkronisasi Akun Otomatis `GtkAccountManager`, Quick Actions Toggle/Reset, Profil Modal, dan Manajemen Kredensial).
