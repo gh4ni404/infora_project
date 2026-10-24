@@ -14,6 +14,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 #[Fillable(['name', 'username', 'email', 'password', 'user_type', 'is_active', 'avatar_path', 'school_id'])]
 #[Hidden(['password', 'remember_token'])]
@@ -88,6 +89,14 @@ class User extends Authenticatable
     public function isGuru(): bool
     {
         return $this->user_type === 'guru';
+    }
+
+    /**
+     * Check if the user is a Staff / Tendik (Tenaga Kependidikan).
+     */
+    public function isStaf(): bool
+    {
+        return $this->user_type === 'staf';
     }
 
     /**
@@ -228,6 +237,11 @@ class User extends Authenticatable
             if (! empty($this->gtk->nik)) {
                 $defaultPasswords[] = preg_replace('/\s+/', '', (string) $this->gtk->nik);
             }
+            $nameSlug = Str::slug($this->gtk->nama_lengkap, '');
+            if (! empty($nameSlug)) {
+                $defaultPasswords[] = $nameSlug;
+            }
+            $defaultPasswords[] = $this->username;
         }
 
         foreach (array_unique($defaultPasswords) as $defaultPassword) {

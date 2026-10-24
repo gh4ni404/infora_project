@@ -34,8 +34,9 @@ abstract class Controller
             $school = $user->school;
             $schoolId = (int) $user->school_id;
         } elseif ($user?->isSuperAdmin()) {
-            $selectedId = (int) $request->query('school_id', $schools->first()?->id ?? 0);
-            $school = $schools->firstWhere('id', $selectedId) ?? $schools->first();
+            $defaultSchool = $schools->first();
+            $selectedId = $request->integer('school_id', $defaultSchool?->id ?? 0);
+            $school = $schools->firstWhere('id', $selectedId) ?? $defaultSchool;
             $schoolId = (int) ($school?->id ?? 0);
         }
 

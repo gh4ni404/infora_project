@@ -7,6 +7,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -149,13 +150,116 @@ class SpreadsheetService
             $currentRow++;
         }
 
-        // 3. Auto-fit Lebar Kolom
+        // 3. Tambahkan Data Validation (Dropdown) jika didefinisikan
+        $validations = (array) ($options['validations'] ?? []);
+        if (! empty($validations) && $format === 'xlsx') {
+            foreach ($validations as $headerTarget => $validationConfig) {
+                $targetCol = null;
+                for ($col = 1; $col <= $colCount; $col++) {
+                    if (($headers[$col - 1] ?? '') === $headerTarget) {
+                        $targetCol = $col;
+                        break;
+                    }
+                }
+
+                if (! $targetCol) {
+                    continue;
+                }
+
+                $colLetter = Coordinate::stringFromColumnIndex($targetCol);
+                $optionsList = is_array($validationConfig) && isset($validationConfig['options'])
+                    ? (array) $validationConfig['options']
+                    : (array) $validationConfig;
+
+                if (empty($optionsList)) {
+                    continue;
+                }
+
+                $validation = new DataValidation;
+                $validation->setType(DataValidation::TYPE_LIST);
+                $validation->setErrorStyle(DataValidation::STYLE_STOP);
+                $validation->setAllowBlank(true);
+                $validation->setShowDropDown(true);
+                $validation->setShowErrorMessage(true);
+                $validation->setShowInputMessage(true);
+
+                $title = is_array($validationConfig) ? ($validationConfig['title'] ?? 'Pilihan Valid') : 'Pilihan Valid';
+                $prompt = is_array($validationConfig) ? ($validationConfig['prompt'] ?? 'Pilih salah satu opsi dari daftar') : 'Pilih salah satu opsi dari daftar';
+
+                $validation->setPromptTitle($title);
+                $validation->setPrompt($prompt);
+                $validation->setErrorTitle('Pilihan Tidak Valid');
+                $validation->setError('Nilai harus dipilih dari daftar yang tersedia.');
+                $validation->setFormula1('"'.implode(',', $optionsList).'"');
+
+                $maxValidationRow = (int) ($options['max_validation_row'] ?? 500);
+                $sheet->setDataValidation("{$colLetter}2:{$colLetter}{$maxValidationRow}", $validation);
+            }
+        }
+
+        // 4. Tambahkan Sheet Referensi jika didefinisikan
+        $referenceSheetData = (array) ($options['reference_sheet'] ?? []);
+        if (! empty($referenceSheetData) && $format === 'xlsx') {
+            $refSheet = $spreadsheet->createSheet();
+            $refSheetTitle = (string) ($referenceSheetData['title'] ?? 'Panduan & Referensi');
+            $refSheet->setTitle(substr(preg_replace('/[:\\\\\\/?*\\[\\]]/', '', $refSheetTitle) ?: 'Panduan', 0, 31));
+
+            $refColumns = (array) ($referenceSheetData['columns'] ?? []);
+            $refColIndex = 1;
+
+            foreach ($refColumns as $refHeader => $refValues) {
+                $refColLetter = Coordinate::stringFromColumnIndex($refColIndex);
+
+                // Tulis header kolom referensi
+                $refSheet->setCellValueExplicit("{$refColLetter}1", (string) $refHeader, DataType::TYPE_STRING);
+                $refSheet->getStyle("{$refColLetter}1")->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'color' => ['argb' => 'FFFFFFFF'],
+                        'size' => 10.5,
+                        'name' => 'Segoe UI',
+                    ],
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['argb' => 'FF059669'], // Emerald Green
+                    ],
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_LEFT,
+                        'vertical' => Alignment::VERTICAL_CENTER,
+                    ],
+                ]);
+
+                // Tulis baris nilai referensi
+                $refRowIndex = 2;
+                foreach ((array) $refValues as $val) {
+                    $refSheet->setCellValueExplicit("{$refColLetter}{$refRowIndex}", (string) $val, DataType::TYPE_STRING);
+                    $refSheet->getStyle("{$refColLetter}{$refRowIndex}")->applyFromArray([
+                        'font' => ['size' => 10, 'name' => 'Segoe UI'],
+                        'borders' => [
+                            'bottom' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['argb' => 'FFE2E8F0']],
+                        ],
+                    ]);
+                    $refRowIndex++;
+                }
+
+                $refSheet->getColumnDimension($refColLetter)->setAutoSize(true);
+                $refColIndex++;
+            }
+
+            $refSheet->getRowDimension(1)->setRowHeight(26);
+            $refSheet->freezePane('A2');
+
+            // Kembalikan lembar kerja aktif ke Sheet 1
+            $spreadsheet->setActiveSheetIndex(0);
+        }
+
+        // 5. Auto-fit Lebar Kolom Lembar Kerja Utama
         for ($col = 1; $col <= $colCount; $col++) {
             $colLetter = Coordinate::stringFromColumnIndex($col);
             $sheet->getColumnDimension($colLetter)->setAutoSize(true);
         }
 
-        // 4. Siapkan Streamed Response
+        // 6. Siapkan Streamed Response
         $cleanFilename = str_ends_with(strtolower($filename), ".{$format}") ? $filename : "{$filename}.{$format}";
 
         $contentType = $format === 'csv'
@@ -207,7 +311,7 @@ class SpreadsheetService
         $reader->setReadDataOnly(true);
 
         $spreadsheet = $reader->load($filePath);
-        $sheet = $spreadsheet->getActiveSheet();
+        $sheet = $spreadsheet->getSheet(0);
 
         $highestRow = $sheet->getHighestDataRow();
         $highestColumn = $sheet->getHighestDataColumn();

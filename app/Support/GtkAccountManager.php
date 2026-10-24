@@ -27,11 +27,14 @@ class GtkAccountManager
         // 2. Tentukan user_type
         $userType = $gtk->is_pendidik ? 'guru' : 'staf';
 
+        $user = $gtk->user;
+        $uniqueUsername = $user
+            ? (! empty($credentials['username']) ? trim((string) $credentials['username']) : $user->username)
+            : static::ensureUniqueUsername($username);
+
         // 3. Tentukan password
         $customPassword = $credentials['password'] ?? null;
-        $cleanPassword = static::resolveDefaultPassword($gtk, $customPassword);
-
-        $user = $gtk->user;
+        $cleanPassword = static::resolveDefaultPassword($gtk, $customPassword, $uniqueUsername);
 
         if ($user) {
             $userData = [
@@ -51,9 +54,6 @@ class GtkAccountManager
 
             $user->update($userData);
         } else {
-            // Pastikan username unik di basis data
-            $uniqueUsername = static::ensureUniqueUsername($username);
-
             $user = User::create([
                 'school_id' => $gtk->school_id,
                 'name' => $gtk->nama_bergelar,
@@ -104,6 +104,12 @@ class GtkAccountManager
      */
     public static function ensureUniqueUsername(string $username, ?int $ignoreUserId = null): string
     {
+        // Bersihkan akun non-aktif yang sudah tidak memiliki relasi GTK aktif (bekas data yang sudah dihapus)
+        User::where('username', $username)
+            ->where('is_active', false)
+            ->whereDoesntHave('gtk')
+            ->delete();
+
         $base = $username;
         $counter = 1;
 
@@ -161,7 +167,7 @@ class GtkAccountManager
     /**
      * Resolusi kata sandi pengguna GTK (kustom jika diisi, atau hierarkis NIP -> NUPTK -> NIK -> 'infora123').
      */
-    public static function resolveDefaultPassword(Gtk $gtk, ?string $customPassword = null): string
+    public static function resolveDefaultPassword(Gtk $gtk, ?string $customPassword = null, ?string $fallbackUsername = null): string
     {
         if (filled($customPassword)) {
             return trim((string) $customPassword);
@@ -179,7 +185,17 @@ class GtkAccountManager
             return preg_replace('/\s+/', '', (string) $gtk->nik);
         }
 
-        return 'infora123';
+        if (filled($fallbackUsername)) {
+            return $fallbackUsername;
+        }
+
+        if ($gtk->user?->username) {
+            return $gtk->user->username;
+        }
+
+        $nameSlug = Str::slug($gtk->nama_lengkap, '');
+
+        return filled($nameSlug) ? $nameSlug : 'infora123';
     }
 
     /**
@@ -192,7 +208,7 @@ class GtkAccountManager
             return null;
         }
 
-        $cleanPassword = static::resolveDefaultPassword($gtk);
+        $cleanPassword = static::resolveDefaultPassword($gtk, null, $user->username);
 
         $user->update([
             'password' => Hash::make($cleanPassword),
