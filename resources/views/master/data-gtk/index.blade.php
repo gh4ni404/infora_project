@@ -30,9 +30,7 @@
             <x-crud-button
                 action="create"
                 id="btnOpenImportGtk"
-                class="btn-secondary"
                 icon="upload"
-                text="Import Excel"
                 title="Import data GTK dari berkas Excel atau CSV"
             />
 
@@ -40,10 +38,10 @@
                 action="create"
                 tag="link"
                 :href="route('master.data-gtk.export', request()->query())"
-                class="btn-secondary"
                 icon="download"
-                text="Export Excel"
                 title="Export data GTK ke berkas Excel"
+                data-no-progress
+                download
             />
 
             <x-crud-button
@@ -154,9 +152,12 @@
                     </td>
                     <td>
                         <div class="d-flex align-items-center gap-1 mb-1">
-                            <span class="badge {{ $gtk->is_pendidik ? 'badge-primary' : 'badge-purple' }}">
-                                {{ $gtk->is_pendidik ? 'Pendidik' : 'Tendik' }}
-                            </span>
+                            @if ($gtk->is_pendidik)
+                                <span class="badge badge-primary">Pendidik</span>
+                            @endif
+                            @if ($gtk->is_tendik)
+                                <span class="badge badge-purple">Tendik</span>
+                            @endif
                         </div>
                         <div class="d-flex flex-wrap gap-1">
                             @php
@@ -344,9 +345,6 @@
             // 1. Modal Tambah GTK via InforaModals
             InforaModals.setup('modalCreateGtk', { cancelBtnId: 'btnCancelCreateGtk' });
             InforaModals.bindOpenButton('btnOpenCreateGtk', 'modalCreateGtk');
-            document.getElementById('btnOpenCreateGtk')?.addEventListener('click', function() {
-                window.ImageUpload?.getInstance('create_foto')?.clear();
-            });
 
             // 2. Modal Ubah GTK via InforaModals
             InforaModals.setup('modalEditGtk', { cancelBtnId: 'btnCancelEditGtk' });
@@ -355,21 +353,44 @@
                 document.getElementById('edit_gelar_depan').value = data.gelar_depan || '';
                 document.getElementById('edit_gelar_belakang').value = data.gelar_belakang || '';
                 document.getElementById('edit_jenis_kelamin').value = data.jenis_kelamin || 'L';
-                document.getElementById('edit_nik').value = data.nik || '';
+                document.getElementById('edit_status_kepegawaian').value = data.status_kepegawaian || '';
                 document.getElementById('edit_nip').value = data.nip || '';
                 document.getElementById('edit_nuptk').value = data.nuptk || '';
-                document.getElementById('edit_tempat_lahir').value = data.tempat_lahir || '';
-                document.getElementById('edit_tanggal_lahir').value = data.tanggal_lahir ? data.tanggal_lahir.substring(0, 10) : '';
-                document.getElementById('edit_agama').value = data.agama || '';
-                document.getElementById('edit_status_kepegawaian').value = data.status_kepegawaian || '';
-                document.getElementById('edit_pendidikan_terakhir').value = data.pendidikan_terakhir || '';
-                document.getElementById('edit_jurusan_pendidikan').value = data.jurusan_pendidikan || '';
-                document.getElementById('edit_no_hp').value = data.no_hp || '';
-                document.getElementById('edit_email').value = data.email || '';
-                document.getElementById('edit_alamat').value = data.alamat || '';
-                document.getElementById('edit_username').value = data.username || (data.user ? data.user.username : '');
+                document.getElementById('edit_nik').value = data.nik || '';
+
+                // Kredensial & Status Info Akun
+                const user = data.user || null;
+                const username = data.username || (user ? user.username : '');
+                const userType = user ? user.user_type : (data.user_type || 'guru');
+                const userId = data.user_id || (user ? user.id : null);
+
+                document.getElementById('edit_username').value = username;
                 document.getElementById('edit_password').value = '';
                 document.getElementById('edit_is_active').checked = Boolean(data.is_active);
+
+                const usernameText = document.getElementById('edit_account_username_text');
+                const roleText = document.getElementById('edit_account_role_text');
+                const statusText = document.getElementById('edit_account_status_text');
+                const statusBadge = document.getElementById('edit_account_status_badge');
+                const menuAccessBtn = document.getElementById('edit_account_menu_access_btn');
+
+                if (usernameText) usernameText.textContent = username || 'Tanpa Akun';
+                if (roleText) {
+                    const roleLabel = userType === 'guru' ? 'Guru (Pendidik)' : (userType === 'staf' ? 'Staf (Tendik)' : userType);
+                    roleText.textContent = roleLabel;
+                }
+                if (statusText) statusText.textContent = data.is_active ? 'Aktif' : 'Nonaktif';
+                if (statusBadge) {
+                    statusBadge.className = data.is_active ? 'badge badge-success' : 'badge badge-neutral';
+                }
+                if (menuAccessBtn) {
+                    if (userId) {
+                        menuAccessBtn.href = '/sistem/user/user/' + userId;
+                        menuAccessBtn.style.display = 'inline-flex';
+                    } else {
+                        menuAccessBtn.style.display = 'none';
+                    }
+                }
 
                 // Reset dan centang checkbox jenis_ptk
                 document.querySelectorAll('.edit-jenis-ptk-cb').forEach(cb => cb.checked = false);
@@ -389,17 +410,11 @@
                     }
                 });
 
-                // Integrasi preview foto profil via modul JavaScript ImageUpload
-                const fotoUrl = btn.dataset.fotoUrl || formEdit.getAttribute('data-foto-url');
-                const editFoto = window.ImageUpload?.getInstance('edit_foto');
-                if (fotoUrl) {
-                    editFoto?.setPreview(fotoUrl);
-                } else {
-                    editFoto?.clear();
+                // Reset pilihan role template dropdown
+                const roleTemplateSelect = document.getElementById('edit_role_template');
+                if (roleTemplateSelect) {
+                    roleTemplateSelect.value = '';
                 }
-
-                // Populasi cascading wilayah administratif di modal edit via InforaWilayah
-                window.InforaWilayah?.populateCascade('edit', data);
             });
 
             // 3. Modal Pratinjau Detail Profil GTK
@@ -492,7 +507,7 @@
             InforaModals.bindDeleteButtons('.btn-open-delete-gtk', 'modalDeleteGtk', function(modal, btn) {
                 const nama = btn.dataset.nama || 'GTK';
                 document.getElementById('modalDeleteGtkTitle').textContent = 'Hapus Data ' + nama + '?';
-                document.getElementById('deleteGtkMessage').textContent = 'Apakah Anda yakin ingin menghapus data GTK berikut? Akun login pengguna terkait juga akan dinonaktifkan.';
+                document.getElementById('deleteGtkMessage').textContent = 'Apakah Anda yakin ingin menghapus data GTK berikut? Akun login pengguna terkait juga akan dihapus dari sistem.';
                 document.getElementById('deleteGtkBadge').textContent = 'GTK';
                 document.getElementById('deleteGtkTitle').textContent = nama;
             });
@@ -538,20 +553,6 @@
                 create: 'modalCreateGtk',
                 edit: 'modalEditGtk'
             });
-
-            // Pulihkan opsi bertingkat jika terjadi error validasi via InforaWilayah
-            @if ($errors->any() && old('provinsi_id'))
-                window.InforaWilayah?.restoreOnError('{{ old('_method') === 'PUT' ? 'edit' : 'create' }}', {
-                    provinsi_id: '{{ old('provinsi_id') }}',
-                    kabupaten_id: '{{ old('kabupaten_id') }}',
-                    kecamatan_id: '{{ old('kecamatan_id') }}',
-                    kelurahan_id: '{{ old('kelurahan_id') }}',
-                });
-            @endif
         });
-
-        // Delegasi Event Global untuk Cascading Wilayah (Modal Tambah dan Modal Edit)
-        window.InforaWilayah?.bindCascade({ prefix: 'create', syncTextInputs: false });
-        window.InforaWilayah?.bindCascade({ prefix: 'edit', syncTextInputs: false });
     </script>
 @endsection

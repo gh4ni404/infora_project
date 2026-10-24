@@ -31,6 +31,17 @@ class UpdateGtkRequest extends FormRequest
         $this->merge([
             'is_active' => $this->boolean('is_active'),
         ]);
+
+        if (is_string($this->jenis_ptk)) {
+            $val = trim($this->jenis_ptk);
+            if (strcasecmp($val, 'guru') === 0 || strcasecmp($val, 'pendidik') === 0) {
+                $this->merge(['jenis_ptk' => ['Guru Mata Pelajaran']]);
+            } elseif (in_array(strtolower($val), ['staf', 'staff', 'tendik', 'tu', 'pegawai'], true)) {
+                $this->merge(['jenis_ptk' => ['Tenaga Administrasi Sekolah (Staf TU)']]);
+            } elseif (filled($val)) {
+                $this->merge(['jenis_ptk' => [$val]]);
+            }
+        }
     }
 
     /**

@@ -8,10 +8,10 @@ use App\Http\Requests\Master\StoreGtkRequest;
 use App\Http\Requests\Master\UpdateGtkRequest;
 use App\Models\Gtk;
 use App\Models\MenuAccessTemplate;
-use App\Models\Provinsi;
 use App\Services\SpreadsheetService;
 use App\Support\GtkAccountManager;
 use App\Support\ImageUploader;
+use App\Support\TextFormatter;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -96,24 +96,11 @@ class GtkController extends Controller
             'Honorer Sekolah',
         ];
 
-        $pendidikanList = [
-            'SMA / SMK',
-            'Diploma (D3)',
-            'Sarjana / Diploma IV (S1/D4)',
-            'Magister (S2)',
-            'Doktor (S3)',
-        ];
-
         $roleTemplates = MenuAccessTemplate::query()
             ->select('role_key', 'role_name', 'role_category')
             ->distinct()
             ->whereIn('role_category', ['guru', 'staf'])
             ->get();
-
-        $provinsiList = Provinsi::query()
-            ->aktif()
-            ->orderBy('kode')
-            ->get(['id', 'kode', 'nama']);
 
         return view('master.data-gtk.index', compact(
             'schools',
@@ -130,9 +117,7 @@ class GtkController extends Controller
             'jenisPtkTendik',
             'jenisPtkList',
             'statusKepegawaianList',
-            'pendidikanList',
-            'roleTemplates',
-            'provinsiList'
+            'roleTemplates'
         ));
     }
 
@@ -215,8 +200,10 @@ class GtkController extends Controller
             'jurusan_pendidikan' => $gtk->jurusan_pendidikan ?: '-',
             'foto_url' => $gtk->foto_path ? asset('storage/'.$gtk->foto_path) : null,
             'is_active' => (bool) $gtk->is_active,
+            'user_id' => $gtk->user_id,
             'username' => $gtk->user?->username ?: '-',
             'user_type' => $gtk->user?->user_type ?: '-',
+            'menu_access_url' => $gtk->user_id ? route('sistem.user.user', $gtk->user_id) : null,
         ]);
     }
 
@@ -259,7 +246,7 @@ class GtkController extends Controller
     }
 
     /**
-     * Hapus data GTK (Soft Delete) dan nonaktifkan akun pengguna terkait.
+     * Hapus data GTK (Soft Delete) dan bersihkan akun pengguna terkait.
      */
     public function destroy(Request $request, Gtk $gtk): RedirectResponse
     {
@@ -268,16 +255,16 @@ class GtkController extends Controller
         $schoolId = $gtk->school_id;
         $label = $gtk->nama_bergelar;
 
-        // Nonaktifkan akun user login terkait
+        // Hapus akun pengguna terkait jika ada agar tidak meninggalkan akun zombie
         if ($gtk->user) {
-            $gtk->user->update(['is_active' => false]);
+            $gtk->user->delete();
         }
 
         $gtk->delete();
 
         return redirect()
             ->route('master.data-gtk', $this->schoolRedirectParams($request, $schoolId))
-            ->with('success', "Data GTK {$label} berhasil dihapus dari sistem (akun pengguna telah dinonaktifkan).");
+            ->with('success', "Data GTK {$label} beserta akun penggunanya berhasil dihapus dari sistem.");
     }
 
     /**
@@ -329,63 +316,57 @@ class GtkController extends Controller
     {
         $headers = [
             'Nama Lengkap*',
-            'Gelar Depan',
-            'Gelar Belakang',
             'Jenis Kelamin (L/P)*',
             'Status Kepegawaian*',
-            'Jenis PTK (pisahkan koma jika jamak)*',
-            'NIK',
-            'NIP',
-            'NUPTK',
-            'Tempat Lahir',
-            'Tanggal Lahir (YYYY-MM-DD)',
-            'Agama',
-            'Pendidikan Terakhir',
-            'Jurusan Pendidikan',
-            'No HP/WhatsApp',
-            'Email',
-            'Alamat Domisili',
+            'Peran / Jenis PTK*',
         ];
 
         $sampleRows = [
             [
                 'Budi Santoso',
-                'Drs.',
-                'M.Pd.',
                 'L',
                 'PNS',
-                'Guru Mapel, Wali Kelas',
-                '7308011205780001',
-                '197805122005011002',
-                '1234567890123456',
-                'Watampone',
-                '1978-05-12',
-                'Islam',
-                'S2',
-                'Pendidikan Matematika',
-                '081234567890',
-                'budi.santoso@sekolah.sch.id',
-                'Jl. Merdeka No. 12',
+                'Guru',
             ],
             [
                 'Siti Rahmawati',
-                '',
-                'S.Kom.',
                 'P',
-                'Tenaga Honorer',
-                'Tenaga Administrasi Sekolah, Laboran',
-                '7308015508890002',
-                '',
-                '',
-                'Makassar',
-                '1989-08-15',
-                'Islam',
-                'S1',
-                'Sistem Informasi',
-                '085298765432',
-                'siti.rahma@sekolah.sch.id',
-                'Kompleks Puri Asri Blok B/5',
+                'Honorer Sekolah',
+                'Staf',
             ],
+        ];
+
+        $jenisPtkPendidik = [
+            'Guru Mata Pelajaran',
+            'Wali Kelas',
+            'Pembimbing PKL / Magang',
+            'Guru BK / Konselor',
+            'Guru Kelas',
+            'Guru Pendamping Khusus',
+            'Kepala Program Keahlian (Kaprog)',
+            'Kepala Laboratorium / Bengkel',
+            'Pembina OSIS / Ekstrakurikuler',
+            'Tim Penjamin Mutu / Akreditasi',
+            'Kepala Sekolah',
+        ];
+
+        $jenisPtkTendik = [
+            'Tenaga Administrasi Sekolah (Staf TU)',
+            'Kepala Tata Usaha (KTU)',
+            'Bendahara Sekolah',
+            'Laboran / Teknisi Lab',
+            'Pustakawan',
+            'Teknisi IT / Operator Dapodik',
+            'Petugas Keamanan',
+            'Petugas Kebersihan',
+        ];
+
+        $statusKepegawaianList = [
+            'PNS',
+            'PPPK',
+            'GTY/PTY (Tetap Yayasan)',
+            'GTT/PTT (Tidak Tetap)',
+            'Honorer Sekolah',
         ];
 
         return $spreadsheet->template(
@@ -394,7 +375,34 @@ class GtkController extends Controller
             $sampleRows,
             [
                 'sheet_title' => 'Template GTK',
-                'text_columns' => ['NIK', 'NIP', 'NUPTK', 'No HP/WhatsApp'],
+                'text_columns' => [],
+                'validations' => [
+                    'Jenis Kelamin (L/P)*' => [
+                        'options' => ['L', 'P'],
+                        'title' => 'Pilih Jenis Kelamin',
+                        'prompt' => 'Pilih L (Laki-laki) atau P (Perempuan)',
+                    ],
+                    'Status Kepegawaian*' => [
+                        'options' => $statusKepegawaianList,
+                        'title' => 'Pilih Status Kepegawaian',
+                        'prompt' => 'Pilih salah satu status kepegawaian resmi',
+                    ],
+                    'Peran / Jenis PTK*' => [
+                        'options' => ['Guru', 'Staf'],
+                        'title' => 'Pilih Peran GTK',
+                        'prompt' => 'Pilih Guru (Tenaga Pendidik) atau Staf (Tenaga Kependidikan/TU). Dapat juga diisi penugasan spesifik.',
+                    ],
+                ],
+                'reference_sheet' => [
+                    'title' => 'Panduan & Referensi',
+                    'columns' => [
+                        'Pilihan Peran Pokok' => ['Guru', 'Staf'],
+                        'Jenis PTK (Pendidik)' => $jenisPtkPendidik,
+                        'Jenis PTK (Tendik)' => $jenisPtkTendik,
+                        'Status Kepegawaian' => $statusKepegawaianList,
+                        'Jenis Kelamin' => ['L', 'P'],
+                    ],
+                ],
             ]
         );
     }
@@ -502,8 +510,15 @@ class GtkController extends Controller
             $nuptk = preg_replace('/\D/', '', (string) ($row['nuptk'] ?? '')) ?: null;
 
             $jenisKelamin = $this->parseJenisKelamin($row['jenis_kelamin'] ?? $row['jk'] ?? 'L');
-            $statusKepegawaian = trim((string) ($row['status_kepegawaian'] ?? $row['status'] ?? 'GTT/PTT')) ?: 'GTT/PTT';
-            $jenisPtk = $this->parseJenisPtk($row['jenis_ptk'] ?? $row['penugasan'] ?? 'Guru Mapel');
+            $statusKepegawaian = $this->parseStatusKepegawaian($row['status_kepegawaian'] ?? $row['status'] ?? null);
+            $jenisPtk = $this->parseJenisPtk(
+                $row['peran_jenis_ptk']
+                ?? $row['jenis_ptk']
+                ?? $row['peran']
+                ?? $row['kategori']
+                ?? $row['penugasan']
+                ?? 'Guru Mata Pelajaran'
+            );
 
             $dataGtk = [
                 'school_id' => $selectedSchoolId,
@@ -527,13 +542,18 @@ class GtkController extends Controller
                 'is_active' => true,
             ];
 
-            // Strategi Upsert Cerdas: cari berdasarkan NIK atau NIP di sekolah ini
+            // Strategi Upsert Cerdas: cari berdasarkan NIK, NIP, atau Nama Lengkap di sekolah ini
             $existingGtk = null;
             if ($nik) {
                 $existingGtk = Gtk::where('school_id', $selectedSchoolId)->where('nik', $nik)->first();
             }
             if (! $existingGtk && $nip) {
                 $existingGtk = Gtk::where('school_id', $selectedSchoolId)->where('nip', $nip)->first();
+            }
+            if (! $existingGtk && ! $nik && ! $nip) {
+                $existingGtk = Gtk::where('school_id', $selectedSchoolId)
+                    ->whereRaw('LOWER(TRIM(nama_lengkap)) = ?', [strtolower($namaLengkap)])
+                    ->first();
             }
 
             if ($existingGtk) {
@@ -632,24 +652,110 @@ class GtkController extends Controller
     }
 
     /**
-     * Parsing teks penugasan PTK majemuk menjadi array.
+     * Parsing teks penugasan PTK majemuk menjadi array dengan normalisasi sinonim.
      *
      * @return array<int, string>
      */
     protected function parseJenisPtk(mixed $value): array
     {
         if (blank($value)) {
-            return ['Guru Mapel'];
+            return ['Guru Mata Pelajaran'];
         }
 
-        if (is_array($value)) {
-            return array_values(array_filter($value));
-        }
-
-        $items = preg_split('/[,;]+/', (string) $value);
+        $items = is_array($value) ? $value : preg_split('/[,;]+/', (string) $value);
         $cleanItems = array_values(array_filter(array_map('trim', (array) $items)));
 
-        return ! empty($cleanItems) ? $cleanItems : ['Guru Mapel'];
+        if (empty($cleanItems)) {
+            return ['Guru Mata Pelajaran'];
+        }
+
+        $synonyms = [
+            'guru' => 'Guru Mata Pelajaran',
+            'pendidik' => 'Guru Mata Pelajaran',
+            'guru mapel' => 'Guru Mata Pelajaran',
+            'guru mata pelajaran' => 'Guru Mata Pelajaran',
+            'wali' => 'Wali Kelas',
+            'wali kelas' => 'Wali Kelas',
+            'walikelas' => 'Wali Kelas',
+            'bk' => 'Guru BK / Konselor',
+            'guru bk' => 'Guru BK / Konselor',
+            'konselor' => 'Guru BK / Konselor',
+            'staf' => 'Tenaga Administrasi Sekolah (Staf TU)',
+            'staff' => 'Tenaga Administrasi Sekolah (Staf TU)',
+            'tendik' => 'Tenaga Administrasi Sekolah (Staf TU)',
+            'pegawai' => 'Tenaga Administrasi Sekolah (Staf TU)',
+            'tu' => 'Tenaga Administrasi Sekolah (Staf TU)',
+            'staf tu' => 'Tenaga Administrasi Sekolah (Staf TU)',
+            'staff tu' => 'Tenaga Administrasi Sekolah (Staf TU)',
+            'tata usaha' => 'Tenaga Administrasi Sekolah (Staf TU)',
+            'administrasi' => 'Tenaga Administrasi Sekolah (Staf TU)',
+            'kepala tata usaha' => 'Kepala Tata Usaha (KTU)',
+            'ktu' => 'Kepala Tata Usaha (KTU)',
+            'operator' => 'Teknisi IT / Operator Dapodik',
+            'operator dapodik' => 'Teknisi IT / Operator Dapodik',
+            'dapodik' => 'Teknisi IT / Operator Dapodik',
+            'it' => 'Teknisi IT / Operator Dapodik',
+            'teknisi it' => 'Teknisi IT / Operator Dapodik',
+            'kepsek' => 'Kepala Sekolah',
+            'kepala sekolah' => 'Kepala Sekolah',
+            'laboran' => 'Laboran / Teknisi Lab',
+            'pustakawan' => 'Pustakawan',
+            'perpustakaan' => 'Pustakawan',
+            'satpam' => 'Petugas Keamanan',
+            'keamanan' => 'Petugas Keamanan',
+            'security' => 'Petugas Keamanan',
+            'kebersihan' => 'Petugas Kebersihan',
+            'cleaning service' => 'Petugas Kebersihan',
+            'bendahara' => 'Bendahara Sekolah',
+        ];
+
+        $normalized = [];
+        foreach ($cleanItems as $item) {
+            $key = strtolower($item);
+            if (isset($synonyms[$key])) {
+                $normalized[] = $synonyms[$key];
+            } else {
+                $normalized[] = TextFormatter::titleCase($item);
+            }
+        }
+
+        return array_values(array_unique($normalized));
+    }
+
+    /**
+     * Normalisasi status kepegawaian dengan pemetaan sinonim umum.
+     */
+    protected function parseStatusKepegawaian(mixed $value): string
+    {
+        $val = strtolower(trim((string) $value));
+
+        if (blank($val)) {
+            return 'GTT/PTT (Tidak Tetap)';
+        }
+
+        $map = [
+            'pns' => 'PNS',
+            'asn' => 'PNS',
+            'pegawai negeri' => 'PNS',
+            'pppk' => 'PPPK',
+            'p3k' => 'PPPK',
+            'gty' => 'GTY/PTY (Tetap Yayasan)',
+            'pty' => 'GTY/PTY (Tetap Yayasan)',
+            'tetap yayasan' => 'GTY/PTY (Tetap Yayasan)',
+            'gtt' => 'GTT/PTT (Tidak Tetap)',
+            'ptt' => 'GTT/PTT (Tidak Tetap)',
+            'tidak tetap' => 'GTT/PTT (Tidak Tetap)',
+            'honorer' => 'Honorer Sekolah',
+            'honorer sekolah' => 'Honorer Sekolah',
+            'tenaga honorer' => 'Honorer Sekolah',
+            'guru honorer' => 'Honorer Sekolah',
+        ];
+
+        if (isset($map[$val])) {
+            return $map[$val];
+        }
+
+        return TextFormatter::titleCase((string) $value);
     }
 
     /**
