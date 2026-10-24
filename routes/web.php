@@ -7,6 +7,7 @@ use App\Http\Controllers\KonfigurasiSekolah\TahunAjaranController;
 use App\Http\Controllers\Master\GtkController;
 use App\Http\Controllers\Master\JurusanController;
 use App\Http\Controllers\Master\SchoolController;
+use App\Http\Controllers\Master\TingkatanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\System\BackupRestoreController;
 use App\Http\Controllers\System\MenuAccessController;
@@ -65,9 +66,17 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
         Route::post('data-sekolah/sync-admins', [SchoolController::class, 'syncAllAdmins'])->name('data-sekolah.sync-admins');
         Route::post('data-sekolah/{dataSekolah}/sync-admin', [SchoolController::class, 'syncSingleAdmin'])->name('data-sekolah.sync-single-admin');
         Route::resource('data-sekolah', SchoolController::class)->except(['show', 'create']);
+        Route::get('data-tingkatan/semua', [TingkatanController::class, 'index'])->name('data-tingkatan.index');
+        Route::resource('data-tingkatan', TingkatanController::class)->parameters([
+            'data-tingkatan' => 'tingkatan',
+        ])->names([
+            'index' => 'data-tingkatan',
+        ])->except(['show', 'create']);
+        Route::post('data-tingkatan/{tingkatan}/toggle-status', [TingkatanController::class, 'toggleStatus'])->name('data-tingkatan.toggle-status');
         Route::resource('data-jurusan', JurusanController::class)->parameters([
             'data-jurusan' => 'jurusan',
         ])->except(['show', 'create']);
+
         Route::post('data-jurusan/{jurusan}/toggle-status', [JurusanController::class, 'toggleStatus'])->name('data-jurusan.toggle-status');
         Route::get('data-gtk/semua', [GtkController::class, 'index'])->name('data-gtk.index');
         Route::get('data-gtk/template', [GtkController::class, 'template'])->name('data-gtk.template');

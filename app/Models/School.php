@@ -167,6 +167,16 @@ class School extends Model
     }
 
     /**
+     * Relasi ke data tingkatan kelas di sekolah ini.
+     *
+     * @return HasMany<Tingkatan, $this>
+     */
+    public function tingkatan(): HasMany
+    {
+        return $this->hasMany(Tingkatan::class, 'school_id');
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
