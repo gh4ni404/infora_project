@@ -740,6 +740,44 @@ body {
     font-weight: 500;
 }
 
+/* Table Empty State Centering */
+.table-card:has(.empty-state) .table-responsive,
+.table-card:has(.empty-state) .table-responsive-scroll {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.data-table:has(.empty-state) {
+    display: table;
+    flex: 1;
+    height: 100%;
+    min-height: 100%;
+}
+
+.data-table:has(.empty-state) tbody,
+.data-table:has(.empty-state) tbody tr,
+.data-table:has(.empty-state) tbody td {
+    height: 100%;
+}
+
+.data-table tbody tr:has(.empty-state):hover {
+    background-color: transparent;
+}
+
+.data-table td:has(.empty-state) {
+    vertical-align: middle;
+    text-align: center;
+    border-bottom: none;
+    padding: 3rem 1.5rem;
+}
+
+.data-table .empty-state {
+    min-height: 240px;
+}
+
+
+
 /* Sidebar Section Helper */
 .sidebar-search {
     padding: 0.875rem 16px 0.25rem;
