@@ -8,6 +8,25 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 
 ## [Unreleased]
 
+### Added dan Improved (Tata Kelola Menu Akses, Onboarding Cepat GTK & Pengisian Mandiri Profil)
+- **Pembaruan Tata Kelola Menu Akses & Otorisasi Pengguna (`system/menu-access`):**
+  - *Dukungan Filter Peran Staf (Tendik):* Menambahkan tab filter peran `staf` pada daftar pengguna tata kelola menu akses, memungkinkan Super Admin memfilter khusus akun tenaga kependidikan (TU, laboran, pustakawan, dll).
+  - *Aktivasi Cepat Akun Nonaktif:* Menambahkan tombol aksi aktifkan akun langsung dari baris tabel (`PATCH /sistem/user/{user}/activate`) untuk akun nonaktif, mempermudah onboarding pengguna baru.
+  - *Indikator Status Akun:* Menambahkan kolom Status Akun dengan badge semantik (`badge-success` untuk Aktif, `badge-neutral` untuk Nonaktif).
+  - *Standardisasi Ekosistem Komponen UI Blade:* Merefaktor seluruh antarmuka `resources/views/system/menu-access/index.blade.php` ke komponen resmi sistem: `<x-page-header>`, `<x-tab-pills>`, `<x-tab-pill>`, `<x-data-table>`, dan `<x-pagination-summary>`, mengeliminasi raw markup tabel bespoke.
+- **Penyederhanaan Onboarding GTK Cepat & Pengisian Mandiri Profil (*Quick Onboarding & Self-Service Completion*):**
+  - **Latar Belakang & Identifikasi Kebutuhan:**
+    - Sebelumnya, berkas template impor Excel memuat 17 kolom mendalam (gelar, tempat/tanggal lahir, agama, riwayat pendidikan, alamat domisili teks, dll.). Hal ini membebani administrator sekolah sebagai "juru ketik" massal dan rentan galat format (misal format tanggal Excel serial vs string, serta alamat teks yang tidak terhubung dengan foreign key 4-tingkat wilayah Kemendagri `provinsi_id`, `kabupaten_id`, `kecamatan_id`, `kelurahan_id`).
+  - **Solusi & Implementasi Teknis:**
+    1. *Template Esensial 6 Kolom (`GtkController@template`):* Memangkas kolom pendaftaran template impor menjadi 6 kolom pokok: **Nama Lengkap\***, **Jenis Kelamin (L/P)\***, **Status Kepegawaian\***, **Jenis PTK (pisahkan koma jika jamak)\***, **NIP**, **NIK**, **No HP / WhatsApp**, dan **Email**.
+    2. *Preservasi Validasi Dropdown & Multi-Sheet:* Mempertahankan validasi Excel Data Validation dropdown untuk `Jenis Kelamin` (`L,P`) dan `Status Kepegawaian` resmi, serta lembar kerja Sheet 2 `[Panduan & Referensi]` yang memuat kamus penugasan pendidik dan tendik.
+    3. *Pengisian Mandiri via Pengaturan Profil:* Membagi tanggung jawab secara optimal: Admin mendaftarkan identitas pokok dan hak akses, sementara biodata mendalam (pasfoto, riwayat pendidikan/gelar, tanggal lahir, dan domisili terhubung wilayah Kemendagri) dilengkapi secara mandiri oleh masing-masing guru melalui menu **Pengaturan Profil**.
+    4. *Preservasi Kompatibilitas Mundur (Backward Compatibility):* Parser `GtkController@import` tetap mendukung pengunggahan berkas 17-kolom lama secara transparan tanpa galat atau *undefined index warning*.
+    5. *Pembaruan Antarmuka Modal Dialog Impor:* Memperbarui panduan `:guidelines` pada `resources/views/master/data-gtk/import.blade.php` berbasis `<x-modal name="import">` dan dropzone universal `<x-file-upload>`.
+    6. *Perampingan Modal Tambah GTK & Otomasi Kredensial dari Nama Lengkap (`resources/views/master/data-gtk/create.blade.php`):* Menyederhanakan formulir modal penambahan GTK baru menjadi hanya memuat 4 data pokok: **Nama Lengkap**, **Jenis Kelamin**, **Status Kepegawaian**, dan **Jenis PTK (Penugasan)**. Menghapus input manual username dan password; sistem otomatis meng-generate username dan kata sandi awal dari nama lengkap (`Str::slug($nama_lengkap, '')`, e.g. `budisantoso`), serta mengintegrasikannya ke `User::needsProfileCompletion()` untuk mewajibkan guru memperbarui kata sandi dan melengkapi biodata (NIP, NIK, kontak, gelar, dan domisili Kemendagri) via menu **Pengaturan Profil**.
+    7. *Eliminasi Inline Styles & Kode Spekulatif:* Menghapus seluruh inline styles pada kartu peran `edit.blade.php` dialihkan ke utilitas token CSS terpusat `.ptk-role-card` dan `.ptk-role-scroll` di `app.css`, memangkas event listener dead code wilayah pada `index.blade.php`, membersihkan query tidak terpakai (`Provinsi::query()`) pada `GtkController@index`, serta memangkas varian modal export spekulatif pada `<x-modal>`.
+    8. *Ekspansi Test Suite:* Memperbarui `tests/Feature/GtkImportExportTest.php`, `tests/Feature/GtkTest.php`, `tests/Feature/ProfileTest.php`, dan `tests/Feature/System/MenuAccessTest.php`. Total test suite aplikasi meningkat menjadi **355 tests passed, 1.668 assertions (100% lulus)**.
+
 ### Fixed dan Refactored (Audit Kepatuhan Komponen, Arsitektur Kredensial GTK & Standardisasi Wilayah)
 - **Audit Standarisasi Komponen & Kepatuhan Arsitektur UI pada Master Data GTK (`master/data-gtk`):**
   - **Kesalahan / Gap yang Ditemukan:**
@@ -47,6 +66,15 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
   - 100% kode terformat rapi sesuai panduan proyek dengan Laravel Pint (`vendor/bin/pint --dirty --format agent`).
 
 ### Added
+- **Komponen Universal Pengunggahan Berkas (`<x-file-upload>`) & Elevasi UI/UX Modal Impor (`<x-modal name="import">`):**
+  - **Latar Belakang & Identifikasi Masalah UI/UX:**
+    - Sebelumnya, modal impor masih menggunakan elemen native browser `<input type="file">` standar yang kaku, memiliki tampilan tidak konsisten lintas peramban (*"Choose File No file chosen"*), serta tata letak panduan yang belum rapi.
+  - **Solusi & Implementasi Teknis:**
+    1. *Komponen Reusable `<x-file-upload>` (Komponen Blade ke-25):* Menyediakan area *drag-and-drop* berkas dokumen dan spreadsheet interaktif dengan deteksi event `dragover`/`dragleave`/`drop`, kartu pratinjau berkas terpilih (nama berkas, ukuran MB otomatis, badge status siap impor, dan tombol bersihkan berkas), serta arsitektur JavaScript *event delegation* yang sangat ringan, efisien, dan bebas overengineering.
+    2. *Varian Modal Mandiri Bebas Slot (`<x-modal name="import">`):* Mengintegrasikan secara otomatis kartu unduh template resmi `.template-download-card`, komponen `<x-file-upload>`, injeksi input hidden unit sekolah (`:school-id`), dan kotak panduan berformat modern `.guideline-box` dengan bullet point terstandarisasi tanpa memerlukan slot tambahan (*slotless*).
+    3. *Varian Modal Ekspor Terstandarisasi (`<x-modal name="export">`):* Menyediakan modal pemilih format (.xlsx atau .csv) dan catatan filter aktif secara deklaratif.
+    4. *Kepatuhan Strict No Inline Styles:* Seluruh komponen menggunakan class CSS global terpusat pada `resources/css/app.css` (`.file-dropzone`, `.template-download-card`, `.guideline-box`) tanpa tag `<style>` maupun inline styles `style="..."`.
+    5. *Pencegahan Freeze InforaProgress pada Unduh Berkas & Ekspor (Fix Stuck 70%):* Menambahkan atribut `data-no-progress` dan `download` pada tautan unduh template serta memperbarui interceptor global pada `resources/js/app.js` agar secara otomatis mengabaikan URL berkas (`/download`, `/template`, `/export`). Tindakan ini mencegah overlay progres memblokir layar karena respons unduhan binary attachment tidak memicu *unload* halaman oleh browser.
 - **Layanan Universal Spreadsheet (`App\Services\SpreadsheetService`) & Fitur Impor / Ekspor Excel Data GTK (`master/data-gtk`):**
   - **Latar Belakang & Kebutuhan Arsitektur Global:**
     - Awalnya fitur impor dan ekspor direncanakan khusus untuk data GTK (`GtkSpreadsheetService`). Namun untuk menjaga efisiensi, konsistensi reusabilitas, dan kepatuhan arsitektur modular INFORA, layanan ini direkayasa menjadi layanan global universal `App\Services\SpreadsheetService`. Seluruh modul lain di masa mendatang (Data Siswa, Rombel, Nilai, Presensi, Pelanggaran, dll.) dapat langsung memanfaatkan satu mesin spreadsheet yang sama tanpa duplikasi kode (*DRY*).
@@ -176,7 +204,7 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
   - Komponen Blade reusable `<x-pagination>` di `resources/views/components/pagination.blade.php` dengan badge informasi jumlah data yang adaptif, tombol navigasi sebelumnya/selanjutnya yang mobile-friendly, dan link nomor halaman yang ringkas.
   - Terdaftar secara terpusat sebagai default pagination view pada `AppServiceProvider` via `Paginator::defaultView('components.pagination')`.
   - Komponen `.table-toolbar-responsive` untuk tata letak toolbar pencarian, filter dropdown, dan tombol aksi yang membungkus (*wrap*) secara proporsional di layar ponsel dan tablet.
-  - Modifier `.table-responsive-scroll` dengan batas ketinggian 440px dan sticky header untuk kenyamanan navigasi tabel bervolume besar.
+  - Modifier `.table-responsive-scroll` dengan adaptasi ketinggian responsif terhadap tinggi layar (`calc(100vh - 360px)` / flex container) dan sticky header untuk kenyamanan navigasi tabel bervolume besar.
 - **Otomatisasi Urutan Tampil Mulai 1 dan Dual Field Nama Rute Sub-Menu:**
   - Mengubah nilai default order migrasi tabel `modules`, `menus`, dan `sub_menus` menjadi 1 (menggantikan default 0).
   - Menambahkan method pembantu `nextOrder()` pada model `Module`, `Menu`, dan `SubMenu` untuk mengisi nomor urut otomatis berikutnya pada formulir tambah data.

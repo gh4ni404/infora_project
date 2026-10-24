@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
   <img src="https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
   <img src="https://img.shields.io/badge/Vite-HMR-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite">
-  <img src="https://img.shields.io/badge/Tests-344_Passed_%7C_1544_Assertions-10B981?style=for-the-badge&logo=pest&logoColor=white" alt="Pest Tests">
+  <img src="https://img.shields.io/badge/Tests-355_Passed_%7C_1668_Assertions-10B981?style=for-the-badge&logo=pest&logoColor=white" alt="Pest Tests">
   <img src="https://img.shields.io/badge/Architecture-API--First_&_Bridging-00D2FF?style=for-the-badge&logo=fastapi&logoColor=white" alt="API-First dan Bridging">
   <img src="https://img.shields.io/badge/UI--UX-Mobile--First_&_Dedicated_Layouts-10B981?style=for-the-badge&logo=pwa&logoColor=white" alt="Mobile-First dan Dedicated Layouts">
   <img src="https://img.shields.io/badge/Data_Contract-Modular_&_Pure_JSON-F59E0B?style=for-the-badge&logo=json&logoColor=white" alt="Modular dan Pure JSON">
@@ -38,7 +38,7 @@ INFORA menghadirkan ekosistem terpadu yang dirancang khusus untuk memenuhi stand
 - 📅 **Konfigurasi Sekolah (Tahun Ajaran dan Semester):** Manajemen siklus tahun ajaran dan semester aktif dengan tanggal pelaksanaan terpadu serta aktivasi 1-klik.
 - 📆 **Kalender Akademik Terpadu dan Agenda Multi-Day:** Tampilan ganda via `<x-tab-pills>` (Grid Bulanan Interaktif dan Tabel Agenda), rentang kegiatan multi-hari, filter kategori, dan feed JSON real-time.
 - 📊 **Layanan Universal Spreadsheet & Impor Ekspor Data:** Mesin terpadu `SpreadsheetService` untuk unduh template (.xlsx) profesional bergaya Royal Blue, ekspor streaming data terfilter (.xlsx/.csv), proteksi tipe teks numerik panjang bebas scientific notation (NIK/NIP/NUPTK/No HP), dan modal dialog impor massal GTK berbasis `<x-crud-button action="create">`.
-- 🧩 **24 Anonymous Blade Components dan Client Engines:** Katalog komponen UI universal (`<x-data-table>`, `<x-searchable-select>`, `<x-image-upload>`, `<x-modal>`, `<x-tab-pills>`) berpadu dengan controller JavaScript terpadu (`InforaModals`, `SearchableSelect`, `ImageUpload`, `PermissionMatrix`).
+- 🧩 **25 Anonymous Blade Components dan Client Engines:** Katalog komponen UI universal (`<x-data-table>`, `<x-searchable-select>`, `<x-image-upload>`, `<x-file-upload>`, `<x-modal>`, `<x-tab-pills>`) berpadu dengan controller JavaScript terpadu (`InforaModals`, `SearchableSelect`, `ImageUpload`, `PermissionMatrix`).
 - 📸 **Layanan Unggah Gambar Terpusat (`ImageUploader`):** Pipeline Base64 native PHP tanpa library pihak ketiga, penamaan semantik collision-proof `{modul}_u{user_id}_{timestamp}_{random8}.{ext}`, dan validasi ketat 1MB.
 - 🏭 **Kemitraan Industri dan Magang PKL (Khusus SMK):** Database mitra DUDI, monitoring penempatan magang, plotting guru pembimbing, dan rekap Tracer Study alumni.
 - 🏆 **Automasi Instrumen Akreditasi (BAN-SM / IASP):** Dashboard kesiapan 4 komponen mutu, penyimpanan terstruktur bank dokumen digital, serta portal audit khusus asesor.
@@ -59,8 +59,8 @@ INFORA menghadirkan ekosistem terpadu yang dirancang khusus untuk memenuhi stand
 ## 💻 Tech Stack dan Arsitektur
 
 - **Backend:** Laravel (Versi Terbaru) — *Modular Monolith, RESTful API dan Bridging Core*
-- **Automated Testing:** Pest PHP — **334 Tests Passed dan 1,515 Assertions (100% Pass Rate)**
-- **UI Components:** 24 Anonymous Blade Components ([`docs/COMPONENTS.md`](docs/COMPONENTS.md)) dan Reusable Global CSS Tokens (`resources/css/app.css`, Zero Inline Styles)
+- **Automated Testing:** Pest PHP — **346 Tests Passed dan 1,578 Assertions (100% Pass Rate)**
+- **UI Components:** 25 Anonymous Blade Components ([`docs/COMPONENTS.md`](docs/COMPONENTS.md)) dan Reusable Global CSS Tokens (`resources/css/app.css`, Zero Inline Styles)
 - **JavaScript Client Engines:** `InforaModals` (CRUD modals), `SearchableSelect` (cascading dynamic dropdowns), `ImageUpload` (Base64 file pipeline), `PermissionMatrix` (RBAC access matrix), `InforaProgress` (global smooth loading indicator)
 - **Navigation dan Hierarchy:** System-Driven Dynamic Navigation (Modul ➔ Menu ➔ Sub-Menu), 3 Baseline Bootstrap Menus, User-Centric Menu Access Control, Configurable Role Templates, Dynamic Under-Development Fallback (Zero Dead Links), Non-Unique Entity Convention, Automatic Order dan Dual-Field Routing
 - **School Master dan Academic:** Multi-Record School Management (SMA, SMK, dan MA, Public dan Private), Unit School Filter, Jurusan/Konsentrasi Keahlian/Peminatan Registry, GTK / Educator Multi-Role Management, Tahun Ajaran dan Semester Management, Academic Calendar with Multi-Day Event Spanning

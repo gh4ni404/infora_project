@@ -72,7 +72,7 @@
 15. **Komponen Paginasi Responsif Universal (`<x-pagination>`):**
     - Komponen paginasi global terstandarisasi di `resources/views/components/pagination.blade.php` dengan badge informasi rentang data adaptif, tombol navigasi sebelumnya/selanjutnya yang mobile-friendly, dan link nomor halaman ringkas.
     - Terdaftar secara global pada `AppServiceProvider` via `Paginator::defaultView('components.pagination')`.
-    - Dipadukan dengan `.table-toolbar-responsive` untuk wrapping kontrol pencarian dan filter yang rapi, serta modifier `.table-responsive-scroll` dengan sticky header dan batas tinggi 440px.
+    - Dipadukan dengan `.table-toolbar-responsive` untuk wrapping kontrol pencarian dan filter yang rapi, serta modifier `.table-responsive-scroll` dengan sticky header dan adaptasi tinggi responsif terhadap tinggi layar (`calc(100vh - 360px)` / flex container).
 16. **Ekosistem 22 Komponen Blade UI dan Modul Client Terpadu (`InforaModals`, `SearchableSelect`, `ImageUpload`, `PermissionMatrix`, `InforaProgress`):**
     - Seluruh antarmuka mengadopsi Anonymous Blade Components yang terisolasi dan terdokumentasi lengkap di `docs/COMPONENTS.md`.
     - Menjamin pemisahan tampilan murni dari dependensi inline styles, mendukung formulir interaktif tanpa reload (*zero-reload workflow*), serta kontrol dinamis via controller JavaScript native.
@@ -109,8 +109,8 @@ graph TD
 - **Data Response Contract:** Strict Pure JSON (`application/json`), Eloquent API Resources (Zero HTML in Data Payloads)
 - **Backend Framework:** Laravel (Versi Terbaru / Latest Version)
 - **Frontend Stack:** Blade + Alpine.js / Vue.js + Vanilla CSS dan TailwindCSS (Mobile-First Architecture dan Dedicated Layouts)
-- **Automated Testing Suite:** Pest PHP — **344 Tests Passed dan 1,544 Assertions (100% Pass Rate)**
-- **UI Components:** 24 Anonymous Blade Components ([`docs/COMPONENTS.md`](../docs/COMPONENTS.md))
+- **Automated Testing Suite:** Pest PHP — **355 Tests Passed dan 1,668 Assertions (100% Pass Rate)**
+- **UI Components:** 25 Anonymous Blade Components ([`docs/COMPONENTS.md`](../docs/COMPONENTS.md))
 - **Database:** MySQL 8.0 / MariaDB
 - **Caching dan Real-time Queue:** Redis (untuk antrian pemrosesan dokumen akreditasi dan notifikasi)
 - **Containerization:** Docker dan Docker Compose (Nginx, PHP-FPM, MySQL, Node.js)

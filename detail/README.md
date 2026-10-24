@@ -142,6 +142,8 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 - **Wewenang Aksi Granular (Lihat, Tambah, Ubah, Hapus):** Hak akses diatur mendalam per-menu dan sub-menu dengan 4 pilar izin: **Lihat** (tampil di sidebar dan buka halaman), **Tambah** (buat data), **Ubah** (edit data), dan **Hapus** (delete data).
 - **Template Peran Dinamis (Dikelola Super Admin):** Menyediakan sistem template peran bawaan (Guru Pengajar, Wali Kelas, Wakasek Kurikulum, Wakasek Kesiswaan, Staf TU, Siswa Reguler, Siswa PKL) yang menu standarnya dapat diubah dan disesuaikan oleh Super Admin kapan saja di tab *Template Peran Sistem*.
 - **Penerapan Template Cepat (1-Click Preset):** Saat mengatur akun guru atau siswa, Super Admin cukup memilih template peran untuk mengisi seluruh centang izin secara instan dalam 1 detik, lalu dapat menambah/mengurangi izin secara personal.
+- **Dukungan Filter Peran Staf & Aktivasi Cepat Akun Nonaktif:** Tab filter peran dilengkapi opsi `staf` (Tendik), kolom status akun (`badge-success` / `badge-neutral`), serta tombol aktivasi akun nonaktif langsung dari baris tabel (`PATCH /sistem/user/{user}/activate`).
+- **Standardisasi Ekosistem Komponen UI Blade:** Antarmuka tabel dan tab navigasi dimigrasikan sepenuhnya menggunakan komponen resmi `<x-page-header>`, `<x-tab-pills>`, `<x-tab-pill>`, `<x-data-table>`, dan `<x-pagination-summary>` bebas raw markup bespoke table.
 - **Filtering Dinamis pada Sidebar (`SidebarComposer`):** Sidebar hanya menampilkan modul, menu, dan sub-menu yang diizinkan (`can_view = true`) untuk pengguna yang sedang login. Akun `super_admin` secara permanen mempertahankan akses penuh (*root bypass*).
 - **Akses Rute Resmi:** Tersedia di URL `/sistem/user` dengan nama rute `sistem.user`.
 
@@ -209,7 +211,7 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
   - Menyajikan badge informasi rentang data, tautan nomor halaman yang rapi, dan tombol navigasi mobile-friendly yang tidak rusak pada resolusi sempit.
 - **Toolbar Tabel Responsif dan Sticky Header Scroll:**
   - Penataan toolbar tabel (`.table-toolbar-responsive`) yang fleksibel membungkus search box, filter dropdown, dan tombol tambah data di berbagai ukuran layar.
-  - Wadah tabel data dengan modifier `.table-responsive-scroll` dengan batas ketinggian maksimal 440px dan sticky header `th`, menjaga label kolom tetap terlihat saat pengguna menelusuri data tabel panjang.
+  - Wadah tabel data dengan modifier `.table-responsive-scroll` dengan adaptasi ketinggian responsif terhadap tinggi layar (`calc(100vh - 360px)` / flex container) dan sticky header `th`, menjaga label kolom tetap terlihat saat pengguna menelusuri data tabel panjang.
 
 ---
 
@@ -291,9 +293,9 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 ---
 
 ### 🧪 23. Ekosistem Komponen Blade UI dan Kematangan Pengujian (323 Tests dan 1.440 Assertions)
-- **24 Anonymous Blade Components Universal:**
+- **25 Anonymous Blade Components Universal:**
   - Tersedia di `resources/views/components/` dan terdokumentasi lengkap di [`docs/COMPONENTS.md`](../docs/COMPONENTS.md).
-  - Meliputi: form inputs, form select dengan rendering opsi otomatis, searchable select bertingkat, tab-pills aksesibel, data table dengan search toolbar terintegrasi, tombol aksi terotorisasi `<x-crud-button>`, modal dialog flexbox, dan indikator progres global.
+  - Meliputi: form inputs, form select dengan rendering opsi otomatis, searchable select bertingkat, drag-and-drop document upload `<x-file-upload>`, tab-pills aksesibel, data table dengan search toolbar terintegrasi, tombol aksi terotorisasi `<x-crud-button>`, modal dialog flexbox, dan indikator progres global.
 - **Pembersihan Kelas Kolom Legacy dan Zero Inline Styles:**
   - Seluruh view pada modul sistem, wilayah administratif, master data, dan konfigurasi sekolah telah dibersihkan dari inline style dan class kolom legacy, menghasilkan antarmuka yang seragam dan performa render yang cepat.
 - **323 Automated Tests Lolos 100%:**
@@ -408,21 +410,27 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
     - Mengabaikan baris kosong secara otomatis.
     - Menerapkan sanitasi terhadap kerentanan *CSV / Spreadsheet Formula Injection* (`stripFormulaInjection`) dengan menyaring karakter awal berbahaya (`=`, `+`, `-`, `@`, `\t`, `\r`).
 - **Integrasi Fitur pada Master Data GTK (`master/data-gtk`):**
-  - **Unduh Template Resmi (`GET /master/data-gtk/template`):** Menyediakan template `template_import_gtk.xlsx` lengkap dengan contoh peran majemuk (Guru Mapel, Wali Kelas, dll).
-  - **Ekspor Data GTK Terfilter (`GET /master/data-gtk/export`):** Menyaring data yang diekspor sesuai parameter filter aktif di layar (pencarian, sekolah, jenis PTK, status kepegawaian, keaktifan).
+  - **Onboarding Cepat GTK & Pengisian Mandiri Profil (*Quick Onboarding & Self-Service Completion*):**
+    - Berkas template impor Excel dirampingkan secara presisi menjadi 6 kolom esensial pokok: `Nama Lengkap*`, `Jenis Kelamin (L/P)*`, `Status Kepegawaian*`, `Jenis PTK (pisahkan koma jika jamak)*`, `NIP`, `NIK`, `No HP / WhatsApp`, dan `Email`.
+    - Modal dialog Tambah GTK (`resources/views/master/data-gtk/create.blade.php`) dirampingkan menjadi formulir cepat yang hanya memuat field esensial (identitas pokok, status kepegawaian, penugasan majemuk, kontak awal, kredensial akun, status keaktifan, dan banner pengisian mandiri).
+    - Mengeliminasi beban entri manual data detail (biodata, gelar, tanggal lahir, dan alamat teks bebas) dari admin sekolah, dan mengalihkannya menjadi pengisian mandiri oleh masing-masing guru setelah login melalui menu **Pengaturan Profil** yang terintegrasi dengan validasi wilayah Kemendagri 4-tingkat.
+  - **Unduh Template Resmi (`GET /master/data-gtk/template`):** Menyediakan template `Template_Import_GTK_INFORA.xlsx` lengkap dengan validasi dropdown Excel (`Jenis Kelamin` dan `Status Kepegawaian`) serta Sheet 2 `[Panduan & Referensi]` untuk kamus penugasan pendidik dan tendik.
+  - **Ekspor Data GTK Terfilter (`GET /master/data-gtk/export`):** Menyaring data yang diekspor sesuai parameter filter aktif di layar (pencarian, sekolah, jenis PTK, status kepegawaian, keaktifan) tetap mempertahankan format lengkap komprehensif (18 kolom).
   - **Impor Massal GTK (`POST /master/data-gtk/import`):**
     - Validasi berkas via Form Request `ImportGtkRequest` (.xlsx, .xls, .csv, maksimal 5MB, tenancy isolation).
+    - Preservasi kompatibilitas mundur (*backward compatibility*): berkas template lama (17 kolom) tetap diproses dengan aman tanpa galat.
     - Logika Upsert cerdas: Memperbarui data yang ada berdasarkan kecocokan NIK atau NIP tanpa menimbulkan duplikasi.
     - Otomasi pembuatan akun login baru via `GtkAccountManager` lengkap dengan peran hak akses dan kata sandi default hierarkis.
     - Menampilkan ringkasan hasil impor: jumlah record baru, record diperbarui, dan catatan baris yang dilewati.
 - **Kepatuhan Komponen UI & Desain Sistem INFORA:**
   - Tombol **Import Excel** dan **Export Excel** pada toolbar `resources/views/master/data-gtk/index.blade.php` wajib dan telah menggunakan komponen resmi `<x-crud-button action="create">` dengan atribut `icon="upload"` dan `icon="download"`.
-  - Menyediakan modal dialog impor terstandarisasi `resources/views/master/data-gtk/import.blade.php` lengkap dengan kartu unduh template, dropzone berkas interaktif, dan panduan pengisian kolom.
+  - Menyediakan modal dialog impor terstandarisasi `resources/views/master/data-gtk/import.blade.php` berbasis `<x-modal name="import">` lengkap dengan kartu unduh template `.template-download-card`, komponen pengunggahan berkas drag-and-drop universal `<x-file-upload>`, dan kotak panduan berformat modern `.guideline-box` tanpa inline styles.
+  - Modal tambah GTK `create.blade.php` menggunakan komponen resmi `<x-status-banner>`, `<x-form-input>`, `<x-form-select>`, `<x-form-checkbox>` tanpa tag style maupun inline styles.
 - **Pencegahan Bentrokan Rute (Route Collision Fix):**
   - Rute `data-gtk/template`, `data-gtk/export`, dan `data-gtk/import` dideklarasikan tepat sebelum `Route::resource('data-gtk', ...)` pada `routes/web.php` untuk mencegah penangkapan segmen URL oleh wildcard `{gtk}` yang memicu 404 `ModelNotFoundException`.
 - **Automated Test Suite:**
-  - Diuji secara menyeluruh pada [`tests/Feature/GtkImportExportTest.php`](../tests/Feature/GtkImportExportTest.php) (10 skenario pengujian mencakup proteksi tamu, otorisasi RBAC, download template, ekspor berfilter, valid import dengan pembuatan akun user, upsert existing record, dan validasi berkas upload).
-  - Total test suite aplikasi meningkat menjadi **344 tests lulus 100% (1.544 assertions)**.
+  - Diuji secara menyeluruh pada [`tests/Feature/GtkImportExportTest.php`](../tests/Feature/GtkImportExportTest.php) dan [`tests/Feature/GtkTest.php`](../tests/Feature/GtkTest.php) (mencakup proteksi tamu, otorisasi RBAC, download template 6-kolom + sheet referensi, ekspor berfilter, import berkas esensial, import berkas legacy 17-kolom, struktur onboarding modal create, upsert existing record, dan validasi berkas upload).
+  - Total test suite aplikasi meningkat menjadi **355 tests lulus 100% (1.668 assertions)**.
 
 ---
 

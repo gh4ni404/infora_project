@@ -23,7 +23,7 @@
 - [x] Konfigurasi Sekolah: Tahun Ajaran dan Manajemen Semester
 - [x] Konfigurasi Sekolah: Kalender Akademik Terpadu dan Agenda Multi-Day (Grid Bulanan dan Tabel Agenda via `<x-tab-pills>`)
 - [x] Layanan Universal Spreadsheet (`SpreadsheetService`) & Impor / Ekspor Excel Data GTK via `<x-crud-button>`
-- [x] Ekosistem 24 Anonymous Blade Components dan Test Suite 344 Tests Lulus 100% (1.544 Assertions)
+- [x] Ekosistem 25 Anonymous Blade Components dan Test Suite 355 Tests Lulus 100% (1.668 Assertions)
 - [ ] Arsitektur Akun Sivitas (4 Tipe Akun: Siswa, Guru, Staff, Admin dengan profil relasional 1-to-1)
 - [ ] Dedicated Layout Separation (Desktop dan Mobile)
 - [ ] Implementasi Modul Akademik Lanjutan dan Tata Kelola Utama
@@ -114,6 +114,8 @@
   - [x] Seeder awal `MenuAccessTemplateSeeder` untuk preset beragam peran guru (Pengajar, Wali Kelas, Wakasek) dan siswa (Reguler, PKL).
   - [x] Form Requests dan Controller: `MenuAccessController`, `UpdateUserPermissionsRequest`, `UpdateTemplatePermissionsRequest`.
   - [x] Antarmuka manajemen lengkap di `resources/views/system/menu-access/` (Tab Hak Akses per Pengguna, Tab Template Peran Sistem, Form Matriks Izin User, Form Matriks Template Peran).
+  - [x] Dukungan tab filter peran Staf (Tendik) dan tombol aktivasi instan akun nonaktif langsung dari baris tabel (`PATCH /sistem/user/{user}/activate`).
+  - [x] Standardisasi antarmuka tabel menu akses menggunakan komponen resmi `<x-page-header>`, `<x-tab-pills>`, `<x-tab-pill>`, `<x-data-table>`, dan `<x-pagination-summary>`.
   - [x] Fitur 1-Klik Salin Template Peran ke Akun Pengguna (*Apply Preset*).
   - [x] Integrasi filtering dinamis pada `SidebarComposer` (non-super admin hanya melihat menu yang diizinkan, super admin root bypass).
   - [x] Automated Pest test suite `MenuAccessTest.php` (total 67 tests lulus 100%, 299 assertions).
@@ -168,16 +170,19 @@
     - Ekspansi test suite: **334 tests passed, 1.515 assertions (100% lulus)**.
     - [x] **Impor Massal Excel, Ekspor Terfilter & Unduh Template GTK (Layanan Universal `SpreadsheetService`):**
       - Layanan terpusat universal `App\Services\SpreadsheetService` dengan styling template Royal Blue `#1E3A8A`, auto-width, freeze panes, streaming export `.xlsx`/`.csv` via `php://output`, proteksi string data-type eksplisit (`DataType::TYPE_STRING`) untuk NIK/NIP/NUPTK/telepon bebas notasi ilmiah, dan sanitasi formula injection.
-      - Form Request validasi `ImportGtkRequest` (.xlsx, .xls, .csv, maks 5MB, tenancy isolation).
+      - **Penyederhanaan Onboarding Cepat & Pengisian Mandiri Profil (*Quick Onboarding & Self-Service Completion*):**
+        - Rampingkan berkas template impor menjadi 6 kolom esensial pokok (`Nama Lengkap*`, `Jenis Kelamin*`, `Status Kepegawaian*`, `Jenis PTK*`, `NIP`, `NIK`, `No HP / WhatsApp`, `Email`) dengan Excel Data Validation dropdown dan lembar referensi kamus penugasan, membebaskan admin dari beban entri manual biodata detail.
+        - Rampingkan modal tambah GTK (`resources/views/master/data-gtk/create.blade.php`) berfokus pada data pokok dan penugasan serta banner panduan mandiri via **Pengaturan Profil**.
+      - Form Request validasi `ImportGtkRequest` (.xlsx, .xls, .csv, maks 5MB, tenancy isolation) dengan preservasi kompatibilitas mundur terhadap berkas lama (17 kolom).
       - Logika Upsert data GTK cerdas berbasis NIK atau NIP dengan auto-create/sync akun user via `GtkAccountManager`.
-      - Antarmuka terintegrasi pada `resources/views/master/data-gtk/`: tombol Import dan Export menggunakan komponen resmi `<x-crud-button action="create">`, serta modal dialog `import.blade.php`.
+      - Antarmuka terintegrasi pada `resources/views/master/data-gtk/`: tombol Import dan Export menggunakan komponen resmi `<x-crud-button action="create">`, serta modal dialog `import.blade.php` dan `create.blade.php`.
       - Penataan urutan route sebelum `Route::resource('data-gtk', ...)` untuk mencegah route collision.
-      - Automated test suite `tests/Feature/GtkImportExportTest.php` (10 tests, 29 assertions), membawa total test suite aplikasi ke **344 tests passed, 1.544 assertions (100% lulus)**.
+      - Automated test suite `tests/Feature/GtkImportExportTest.php`, `tests/Feature/GtkTest.php`, `tests/Feature/ProfileTest.php`, dan `tests/Feature/System/MenuAccessTest.php` (total test suite aplikasi mencapai **355 tests passed, 1.668 assertions, 100% lulus**).
   - [ ] *(Ditangguhkan / Backlog)* Penyederhanaan Formulir Entri Data GTK:
     - **Opsi A (Mode Cepat vs Lengkap):** Toggle switch antara mode entri ringkas (hanya nama, JK, status, NIP/NIK, peran PTK) vs mode lengkap.
     - **Opsi B (Wizard 3 Langkah):** Stepper terstruktur (1: Identitas & Kepegawaian ➔ 2: Penugasan & Template Hak Akses ➔ 3: Kontak & Pasfoto).
     - **Opsi C (Seksi Kolapsibel / Accordion):** Field wajib di atas selalu terbuka; seksi Biodata Tambahan, Kontak, Kredensial, dan Pasfoto terlipat rapi.
-    - [x] **Opsi D (Impor Massal Excel & Ekspor Terfilter):** *(Selesai diimplementasikan via `SpreadsheetService`)* Pengunggahan berkas template spreadsheet untuk pendaftaran banyak pendidik/tendik sekaligus dan ekspor terfilter.
+    - [x] **Opsi D (Impor Massal Excel & Ekspor Terfilter serta Modal Tambah Ringkas):** *(Selesai diimplementasikan via `SpreadsheetService` dan `create.blade.php` dengan filosofi Quick Onboarding 6-Kolom Esensial & Self-Service Completion)* Pengunggahan berkas template spreadsheet dan modal tambah ringkas untuk pendaftaran GTK cepat.
   - [ ] CRUD Data Rombel/Kelas dan Ruangan Belajar.
   - [ ] Manajemen Data Siswa terhubung ke `student_profiles`.
 - [ ] **3.4. Kalender dan Jadwal Pelajaran**

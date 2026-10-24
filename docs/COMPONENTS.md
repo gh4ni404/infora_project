@@ -1,6 +1,6 @@
 # 🧩 Panduan Lengkap Blade Components — INFORA
 
-Dokumentasi resmi ini merangkum seluruh **24 Anonymous Blade Components** yang tersedia di aplikasi **INFORA** ([`resources/views/components/`](../resources/views/components/)). Komponen-komponen ini dirancang untuk memastikan konsistensi antarmuka pengguna (UI/UX), mereduksi pengulangan kode (*boilerplate*), dan menyatu secara native dengan sistem desain di [`resources/css/app.css`](../resources/css/app.css).
+Dokumentasi resmi ini merangkum seluruh **25 Anonymous Blade Components** yang tersedia di aplikasi **INFORA** ([`resources/views/components/`](../resources/views/components/)). Komponen-komponen ini dirancang untuk memastikan konsistensi antarmuka pengguna (UI/UX), mereduksi pengulangan kode (*boilerplate*), dan menyatu secara native dengan sistem desain di [`resources/css/app.css`](../resources/css/app.css).
 
 ---
 
@@ -14,6 +14,7 @@ Dokumentasi resmi ini merangkum seluruh **24 Anonymous Blade Components** yang t
    - [`<x-searchable-select>`](#x-searchable-select)
    - [`<x-icon-picker>`](#x-icon-picker)
    - [`<x-image-upload>`](#x-image-upload)
+   - [`<x-file-upload>`](#x-file-upload)
 2. [Komponen Halaman, Navigasi dan Metrik](#-2-komponen-halaman-navigasi--metrik)
    - [`<x-page-header>`](#x-page-header)
    - [`<x-tab-pills>` dan `<x-tab-pill>`](#x-tab-pills--x-tab-pill)
@@ -338,6 +339,35 @@ Komponen dropzone unggah foto dan logo sekolah terintegrasi dengan pratinjau ins
 
 #### Integrasi JavaScript
 Lihat bagian [Integrasi ImageUpload](#imageupload) untuk memanipulasi pratinjau secara terprogram.
+
+---
+
+### `<x-file-upload>`
+Komponen dropzone modern terintegrasi untuk pengunggahan berkas dokumen dan spreadsheet (.xlsx, .xls, .csv, .pdf, .zip). Dilengkapi area interaktif tarik & letakkan (*drag-and-drop*), indikator status dragover, validasi ukuran berkas otomatis client-side, visualisasi kartu berkas terpilih (nama, ukuran rapi, status badge), dan tombol bersihkan berkas.
+
+#### Props
+| Prop | Tipe | Default | Wajib? | Deskripsi |
+| :--- | :--- | :--- | :--- | :--- |
+| `name` | `string` | `'file'` | Opsional | Nama field input HTML untuk berkas binary multipart. |
+| `id` | `string` | `$name` | Opsional | ID elemen input file. |
+| `label` | `string` | `null` | Opsional | Label teks di atas dropzone. |
+| `required` | `bool` | `false` | Opsional | Menandai field berkas wajib dipilih. |
+| `accept` | `string` | `'.xlsx,.xls,.csv'` | Opsional | Ekstensi atau MIME type berkas yang diizinkan. |
+| `hint` | `string` | `null` | Opsional | Teks petunjuk kecil di bawah dropzone. |
+
+#### Contoh Penggunaan: Dropzone Spreadsheet Standar
+```blade
+<x-file-upload
+    name="file"
+    id="import_file"
+    label="Pilih Berkas Excel / CSV"
+    hint="Mendukung format .xlsx, .xls, atau .csv (Maksimal 5 MB)"
+    required
+/>
+```
+
+#### Arsitektur JavaScript
+Komponen menggunakan **Event Delegation** langsung pada level dokumen. Seluruh interaksi drag-and-drop, pemilihan berkas, pembaruan label kartu terpilih, serta tombol bersihkan berkas ditangani secara otomatis dan efisien tanpa registri runtime terpisah maupun alokasi memori berlebih.
 
 ---
 
@@ -857,15 +887,16 @@ Komponen dialog interaktif terpadu untuk formulir data (Tambah/Ubah), dialog inf
 1. **Mode Standar (`@default`)**: Digunakan untuk formulir Tambah (*Create*), Ubah (*Edit*), maupun dialog informasi/rincian data.
 2. **Mode Preset Confirm (`name="confirm"`)**: Tampilan dialog konfirmasi umum (*brand theme*) dengan ambient halo icon biru, judul aksi, kartu rincian item, kotak peringatan informatif, dan tombol aksi simetris (Batal dan Lanjutkan/Aktifkan).
 3. **Mode Preset Delete (`name="delete"`)**: Tampilan khusus konfirmasi hapus (*danger theme*) dengan ambient halo icon merah, judul peringatan, kartu detail item dinamis, dan tombol aksi simetris (Batal dan Hapus).
+4. **Mode Preset Import (`name="import"`)**: Tampilan dialog impor berkas spreadsheet (.xlsx, .xls, .csv) serbaguna (*slotless*) dengan kartu unduh format template, dropzone berkas input terintegrasi (`<x-file-upload>`), daftar panduan pengisian kolom, dan tombol aksi terpadu.
 
 #### Props
 | Prop | Tipe | Default | Mode | Deskripsi |
 | :--- | :--- | :--- | :--- | :--- |
 | `id` | `string` | `null` | Semua | **Wajib**. ID unik elemen modal backdrop (misal: `modalCreateJurusan`). |
-| `name` | `string` | `null` | Semua | Nama varian. Gunakan `name="confirm"` untuk konfirmasi tindakan umum atau `name="delete"` untuk konfirmasi hapus. |
+| `name` | `string` | `null` | Semua | Nama varian (`'confirm'`, `'delete'`, `'import'`, atau standar). |
 | `title` | `string` | `null` | Semua | Judul header modal. |
-| `subtitle` | `string` | `null` | Standar | Subjudul deskripsi di bawah judul header. |
-| `size` | `string` | `'default'` | Standar | Ukuran lebar dialog (`'sm'`, `'lg'`, atau default 560px). Pada preset confirm & delete otomatis `'modal-sm'` (440px). |
+| `subtitle` | `string` | `null` | Standar/Import | Subjudul deskripsi di bawah judul header. |
+| `size` | `string` | `'default'` | Standar/Import | Ukuran lebar dialog (`'sm'`, `'lg'`, atau default 560px). Pada preset confirm & delete otomatis `'modal-sm'` (440px). |
 | `action` | `string` | `null` | Semua | URL tujuan form action. Jika diisi atau memiliki `method`, modal otomatis membungkus konten dengan tag `<form>`. |
 | `method` | `string` | `null` | Semua | Method HTTP form (`'POST'`, `'PUT'`, `'PATCH'`, `'DELETE'`). Pada preset confirm default `'POST'` (dapat ditentukan `'PUT'` atau `'PATCH'`). Pada preset delete selalu mengunci ke `'DELETE'`. |
 | `withForm` | `bool` | `true` | Confirm/Delete | Tentukan `false` bila modal hanya bertindak sebagai dialog konfirmasi untuk form luar halaman via `form-id` (tanpa membungkus tag `<form>` sendiri). |
@@ -874,8 +905,12 @@ Komponen dialog interaktif terpadu untuk formulir data (Tambah/Ubah), dialog inf
 | `badgeId` | `string` | `null` | Confirm/Delete | ID elemen badge kode/kategori untuk dimanipulasi via script `InforaModals`. |
 | `itemTitleId` | `string` | `null` | Confirm/Delete | ID elemen judul item yang dimanipulasi via script `InforaModals`. |
 | `hintId` | `string` | `null` | Confirm/Delete | ID elemen teks petunjuk/peringatan bawah untuk dimanipulasi via script `InforaModals`. |
-| `cancelBtnId` | `string` | `null` | Confirm/Delete | ID tombol "Batal". |
-| `confirmBtnId` | `string` | `null` | Confirm/Delete | ID tombol konfirmasi/submit ("Lanjutkan" atau "Hapus"). |
+| `cancelBtnId` | `string` | `null` | Semua | ID tombol "Batal". |
+| `confirmBtnId` | `string` | `null` | Semua | ID tombol konfirmasi/submit ("Lanjutkan", "Hapus", atau "Unggah & Impor"). |
+| `templateUrl` | `string` | `null` | Import | URL unduh berkas template spreadsheet. |
+| `guidelines` | `array` | `[]` | Import | Daftar instruksi/panduan format kolom yang dirender otomatis dalam list berbutir. |
+| `schoolId` | `mixed` | `null` | Import | ID unit sekolah untuk injeksi input hidden otomatis tanpa memerlukan slot. |
+| `enctype` | `string` | `null` | Standar | Atribut encoding form multipart (`enctype="multipart/form-data"`). |
 
 #### Slots
 - **`{{ $slot }}`**: Konten utama modal (field formulir pada modal standar).
@@ -980,6 +1015,29 @@ Digunakan saat modal bertindak sebagai konfirmasi untuk formulir utama halaman (
     hint-id="modalConfirmSaveAccessHint"
     cancel-btn-id="btnCancelConfirmSaveAccess"
     confirm-btn-id="btnSubmitConfirmSaveAccess"
+/>
+```
+
+#### Contoh 6: Preset Modal Impor Spreadsheet (`name="import"`)
+Modal serbaguna mandiri (*slotless*) untuk mengunggah berkas Excel/CSV massal:
+
+```blade
+<x-modal
+    name="import"
+    id="modalImportGtk"
+    title="Import Data GTK dari Excel"
+    subtitle="Unggah berkas spreadsheet untuk pendaftaran atau pembaruan massal data guru dan pegawai"
+    action="{{ route('master.data-gtk.import') }}"
+    form-id="formImportGtk"
+    cancel-btn-id="btnCancelImportGtk"
+    confirm-btn-id="btnSubmitImportGtk"
+    template-url="{{ route('master.data-gtk.template') }}"
+    :school-id="$selectedSchoolId"
+    :guidelines="[
+        'Kolom <strong>Nama Lengkap</strong>, <strong>Jenis Kelamin (L/P)</strong>, dan <strong>Jenis PTK</strong> wajib diisi.',
+        'Format tanggal lahir harus menggunakan standar <code>YYYY-MM-DD</code>.',
+        'Data dengan NIK atau NIP yang cocok akan diperbarui otomatis (<em>Upsert</em>).',
+    ]"
 />
 ```
 
