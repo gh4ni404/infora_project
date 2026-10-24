@@ -26,10 +26,12 @@ class MenuAccessController extends Controller
 
         $usersQuery = User::query()->with('menuPermissions');
 
-        if ($roleFilter && in_array($roleFilter, ['super_admin', 'admin', 'guru', 'murid', 'siswa'], true)) {
+        if ($roleFilter && in_array($roleFilter, ['super_admin', 'admin', 'guru', 'staf', 'tendik', 'murid', 'siswa'], true)) {
             $usersQuery->where(function ($q) use ($roleFilter) {
                 if ($roleFilter === 'murid') {
                     $q->where('user_type', 'murid')->orWhere('user_type', 'siswa');
+                } elseif ($roleFilter === 'staf' || $roleFilter === 'tendik') {
+                    $q->where('user_type', 'staf');
                 } else {
                     $q->where('user_type', $roleFilter);
                 }
@@ -49,7 +51,7 @@ class MenuAccessController extends Controller
         // Ambil daftar template peran dinamis dari cache
         $templates = SidebarCache::getRoleTemplates();
 
-        $currentRole = $roleFilter;
+        $currentRole = in_array($roleFilter, ['staf', 'tendik'], true) ? 'staf' : $roleFilter;
         $activeTab = $request->query('tab', 'users');
 
         return view('system.menu-access.index', compact('users', 'templates', 'currentRole', 'search', 'activeTab'));
@@ -250,5 +252,21 @@ class MenuAccessController extends Controller
         return redirect()
             ->route('sistem.user', ['tab' => 'templates'])
             ->with('success', "Konfigurasi menu bawaan untuk template peran '{$roleName}' berhasil disimpan.");
+    }
+
+    /**
+     * Aktifkan kembali akun pengguna yang berstatus nonaktif.
+     */
+    public function activate(User $user): RedirectResponse
+    {
+        $user->update(['is_active' => true]);
+
+        if ($user->gtk) {
+            $user->gtk->update(['is_active' => true]);
+        }
+
+        SidebarCache::forgetUser($user->id);
+
+        return back()->with('success', "Akun pengguna {$user->name} ({$user->username}) berhasil diaktifkan kembali.");
     }
 }

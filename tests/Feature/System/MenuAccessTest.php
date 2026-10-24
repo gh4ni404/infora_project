@@ -34,6 +34,14 @@ beforeEach(function () {
         'user_type' => 'murid',
         'is_active' => true,
     ]);
+
+    $this->stafUser = User::factory()->create([
+        'username' => 'staf_siti',
+        'email' => 'siti@sekolah.test',
+        'name' => 'Siti Rahmawati',
+        'user_type' => 'staf',
+        'is_active' => true,
+    ]);
 });
 
 test('guest cannot access menu access routes', function () {
@@ -54,6 +62,9 @@ test('super admin can view menu access index with user list and template tab', f
     $response->assertSee('Tata Kelola Menu Akses');
     $response->assertSee('Budi Sudarsono');
     $response->assertSee('Ani Lestari');
+    $response->assertSee('Siti Rahmawati');
+    $response->assertSee('Staf (Tendik)');
+    $response->assertSee('badge-role-staf');
 
     // Cek tab templates
     $responseTemplates = $this->actingAs($this->superAdmin)->get('/sistem/user?tab=templates');
@@ -69,16 +80,29 @@ test('super admin can filter users by role and search query', function () {
     $responseFilterGuru->assertOk();
     $responseFilterGuru->assertSee('Budi Sudarsono');
     $responseFilterGuru->assertDontSee('Ani Lestari');
+    $responseFilterGuru->assertDontSee('Siti Rahmawati');
 
     $responseFilterMurid = $this->actingAs($this->superAdmin)->get('/sistem/user?role=murid');
     $responseFilterMurid->assertOk();
     $responseFilterMurid->assertSee('Ani Lestari');
     $responseFilterMurid->assertDontSee('Budi Sudarsono');
+    $responseFilterMurid->assertDontSee('Siti Rahmawati');
+
+    $responseFilterStaf = $this->actingAs($this->superAdmin)->get('/sistem/user?role=staf');
+    $responseFilterStaf->assertOk();
+    $responseFilterStaf->assertSee('Siti Rahmawati');
+    $responseFilterStaf->assertDontSee('Budi Sudarsono');
+    $responseFilterStaf->assertDontSee('Ani Lestari');
+
+    $responseFilterTendik = $this->actingAs($this->superAdmin)->get('/sistem/user?role=tendik');
+    $responseFilterTendik->assertOk();
+    $responseFilterTendik->assertSee('Siti Rahmawati');
 
     $responseSearch = $this->actingAs($this->superAdmin)->get('/sistem/user?search=Ani');
     $responseSearch->assertOk();
     $responseSearch->assertSee('Ani Lestari');
     $responseSearch->assertDontSee('Budi Sudarsono');
+    $responseSearch->assertDontSee('Siti Rahmawati');
 });
 
 test('super admin can view and update granular permissions for a user', function () {
@@ -407,4 +431,21 @@ test('login rejects user with no active menu permissions', function () {
 
     $response->assertSessionHasErrors('login');
     $this->assertGuest();
+});
+
+test('super admin can activate inactive user from menu access page', function () {
+    $inactiveUser = User::factory()->create([
+        'username' => 'guru_nonaktif',
+        'name' => 'Guru Nonaktif',
+        'user_type' => 'guru',
+        'is_active' => false,
+    ]);
+
+    $response = $this->actingAs($this->superAdmin)
+        ->patch(route('sistem.user.activate', $inactiveUser));
+
+    $response->assertRedirect();
+    $response->assertSessionHas('success');
+
+    expect($inactiveUser->fresh()->is_active)->toBeTrue();
 });

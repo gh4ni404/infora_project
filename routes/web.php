@@ -55,6 +55,7 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
         Route::get('/user/user/{user}', [MenuAccessController::class, 'editUser'])->name('user.user');
         Route::put('/user/user/{user}', [MenuAccessController::class, 'updateUser'])->name('user.user.update');
         Route::post('/user/user/{user}/apply-template', [MenuAccessController::class, 'applyTemplateToUser'])->name('user.user.apply-template');
+        Route::patch('/user/user/{user}/activate', [MenuAccessController::class, 'activate'])->name('user.activate');
         Route::get('/user/template/{roleKey}', [MenuAccessController::class, 'editTemplate'])->name('user.template');
         Route::put('/user/template/{roleKey}', [MenuAccessController::class, 'updateTemplate'])->name('user.template.update');
     });
