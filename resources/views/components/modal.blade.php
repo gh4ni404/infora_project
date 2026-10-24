@@ -14,6 +14,10 @@
     'cancelBtnId' => null,
     'confirmBtnId' => null,
     'hintId' => null,
+    'templateUrl' => null, // dipakai di case import
+    'guidelines' => [], // dipakai di case import
+    'schoolId' => null, // dipakai di case import
+    'enctype' => null, // dipakai di case standar
 ])
 
 @php
@@ -106,6 +110,87 @@
         </div>
     @break
 
+    @case('import')
+        {{-- ============================================================
+             TAMPILAN MODAL IMPORT SPREADSHEET (EXCEL/CSV)
+             ============================================================ --}}
+        <div class="modal-backdrop hidden" id="{{ $id }}" role="dialog" aria-modal="true" aria-labelledby="{{ $id }}Title">
+            <div class="modal-dialog {{ $sizeClass }}">
+                @if ($title || $subtitle)
+                    <div class="modal-header">
+                        <div>
+                            <h3 class="modal-title" id="{{ $id }}Title">{{ $title }}</h3>
+                            @if ($subtitle)
+                                <p class="modal-subtitle" id="{{ $id }}Subtitle">{{ $subtitle }}</p>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+
+                <form method="POST" action="{{ $action }}" @if ($formId) id="{{ $formId }}" @endif enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                        @if ($schoolId)
+                            <input type="hidden" name="school_id" value="{{ $schoolId }}">
+                        @endif
+
+                        @if ($templateUrl)
+                            <div class="template-download-card">
+                                <div class="flex items-center gap-3">
+                                    <div class="template-download-icon">
+                                        <x-icon name="table" size="20" />
+                                    </div>
+                                    <div>
+                                        <div class="font-semibold text-sm">Unduh Template Berkas</div>
+                                        <div class="text-xs text-muted">Format standar berkas Excel dilengkapi baris contoh data dan panduan.</div>
+                                    </div>
+                                </div>
+                                <a href="{{ $templateUrl }}" class="btn-secondary whitespace-nowrap" data-no-progress download>
+                                    <x-icon name="download" size="14" />
+                                    <span>Format Template</span>
+                                </a>
+                            </div>
+                        @endif
+
+                        <x-file-upload
+                            name="file"
+                            id="{{ $id }}_file"
+                            label="Pilih Berkas Excel / CSV"
+                            hint="Mendukung berkas berekstensi .xlsx, .xls, atau .csv (Maksimal 5 MB)"
+                            required
+                        />
+
+                        @if (!empty($guidelines))
+                            <div class="form-section-divider my-3"></div>
+                            <div class="guideline-box">
+                                <div class="guideline-header">
+                                    <x-icon name="alert-circle" size="15" class="text-brand shrink-0" />
+                                    <span>Panduan Pengisian:</span>
+                                </div>
+                                <ul class="guideline-list">
+                                    @foreach ($guidelines as $guideline)
+                                        <li class="guideline-item">
+                                            <span class="guideline-bullet"></span>
+                                            <div>{!! $guideline !!}</div>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secondary" id="{{ $cancelBtnId }}">Batal</button>
+                        <button type="submit" class="btn-primary" id="{{ $confirmBtnId }}">
+                            <x-icon name="upload" size="16" />
+                            <span>Unggah & Impor</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @break
+
     @default
         {{-- ============================================================
              TAMPILAN MODAL STANDAR (Formulir, Tambah, Ubah, Detail, dll)
@@ -125,7 +210,7 @@
                 @endif
 
                 @if ($action !== null || $method)
-                    <form method="POST" action="{{ $action }}" @if ($formId) id="{{ $formId }}" @endif>
+                    <form method="POST" action="{{ $action }}" @if ($formId) id="{{ $formId }}" @endif @if ($enctype) enctype="{{ $enctype }}" @endif>
                         @csrf
                         @if (in_array($method, ['PUT', 'PATCH', 'DELETE'], true))
                             @method($method)

@@ -568,6 +568,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (form.hasAttribute('data-no-progress')) return;
         if (form.hasAttribute('data-progress-stream')) return; // managed by InforaProgress.stream()
 
+        const action = form.getAttribute('action') || '';
+        if (action.includes('/download') || action.includes('/template') || action.includes('/export')) return;
+
         triggerFormProgress(form);
     }, true); // capture phase so it fires before other handlers
 
@@ -578,7 +581,9 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     const originalFormSubmit = HTMLFormElement.prototype.submit;
     HTMLFormElement.prototype.submit = function () {
-        if (!this.hasAttribute('data-no-progress') && !this.hasAttribute('data-progress-stream')) {
+        const action = this.getAttribute('action') || '';
+        const isDownload = action.includes('/download') || action.includes('/template') || action.includes('/export');
+        if (!this.hasAttribute('data-no-progress') && !this.hasAttribute('data-progress-stream') && !isDownload) {
             triggerFormProgress(this);
         }
         return originalFormSubmit.apply(this, arguments);
@@ -604,8 +609,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!href || href === '#' || href.startsWith('#') || href.startsWith('javascript:') ||
             href.startsWith('mailto:') || href.startsWith('tel:')) return;
 
-        // Skip new tab / external links / downloads
-        if (link.target === '_blank' || link.hasAttribute('download') || link.classList.contains('btn-download') || href.includes('/download/')) return;
+        // Skip new tab / external links / downloads / template files / exports
+        if (
+            link.target === '_blank' ||
+            link.hasAttribute('download') ||
+            link.classList.contains('btn-download') ||
+            href.includes('/download') ||
+            href.includes('/template') ||
+            href.includes('/export')
+        ) return;
 
         // Skip external URLs
         try {
