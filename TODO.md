@@ -19,12 +19,13 @@
 - [x] Arsitektur Tata Letak 3-Tier (Docked Footer dan Scroll Internal) dan Komponen Paginasi Responsif Global
 - [x] Master Data Jurusan / Konsentrasi Keahlian dan Peminatan (SMA, SMK, dan MA)
 - [x] Master Data Tingkatan Kelas (X, XI, XII, Fase Kurikulum Merdeka, dan Urutan Alami)
+- [x] Master Data Mata Pelajaran (Kelompok Kurikulum, Beban Jam/JP, Relasi Jurusan Opsional, KPI Metrik, dan Multi-Tenancy)
 - [x] Master Data Pendidik dan Tenaga Kependidikan (GTK) (Multi-Role JSON, Sinkronisasi Akun Otomatis, dan Manajemen Kredensial)
 - [x] Pengaturan Profil Pengguna Mandiri & Keamanan Akun (Dedicated 2-Column Settings Layout, 4 Tab GTK & 2 Tab Non-GTK, Konsolidasi Informasi Pribadi & Kredensial, Dirty-Form Modal, Dashboard Onboarding Alert, Auto-Sync GTK)
 - [x] Konfigurasi Sekolah: Tahun Ajaran dan Manajemen Semester
 - [x] Konfigurasi Sekolah: Kalender Akademik Terpadu dan Agenda Multi-Day (Grid Bulanan dan Tabel Agenda via `<x-tab-pills>`)
 - [x] Layanan Universal Spreadsheet (`SpreadsheetService`) & Impor / Ekspor Excel Data GTK via `<x-crud-button>`
-- [x] Ekosistem 25 Anonymous Blade Components dan Test Suite 371 Tests Lulus 100% (1.728 Assertions)
+- [x] Ekosistem 25 Anonymous Blade Components dan Test Suite 389 Tests Lulus 100% (1.799 Assertions)
 - [ ] Arsitektur Akun Sivitas (4 Tipe Akun: Siswa, Guru, Staff, Admin dengan profil relasional 1-to-1)
 - [ ] Dedicated Layout Separation (Desktop dan Mobile)
 - [ ] Implementasi Modul Akademik Lanjutan dan Tata Kelola Utama
@@ -155,6 +156,7 @@
   - [x] Automated Pest test suite (66 skenario feature tests di `ProvinsiTest.php`, `KabupatenTest.php`, `KecamatanTest.php`, dan `KelurahanTest.php`).
 - [ ] **3.3. Master Data Akademik dan Sivitas**
   - [x] CRUD Data Tingkatan Kelas (`Tingkatan`) terhubung ke unit sekolah (`school_id`), model dengan mutator TextFormatter, rute resource `/master/data-tingkatan` (`master.data-tingkatan.*`), Form Requests validasi tenancy, kartu metrik KPI, 1-klik toggle status, antarmuka modal modular (`index.blade.php`, `create.blade.php`, `edit.blade.php`), dan automated test suite `TingkatanTest.php` (16 feature tests, 100% lulus).
+  - [x] CRUD Data Mata Pelajaran (`Mapel`) terhubung ke unit sekolah (`school_id`), relasi opsional jurusan (`jurusan_id`), model dengan mutator TextFormatter, rute resource `/master/data-mapel` (`master.data-mapel.*`), Form Requests validasi tenancy, kartu metrik KPI, 1-klik toggle status, antarmuka modal modular (`index.blade.php`, `create.blade.php`, `edit.blade.php`), dan automated test suite `MapelTest.php` (18 feature tests, 100% lulus).
   - [x] CRUD Data Jurusan / Konsentrasi Keahlian (SMK), Peminatan/Fase (SMA), dan Program Keagamaan (MA) terhubung ke unit sekolah (`school_id`).
 
   - [x] Model `Jurusan`, mutator otomatis Title Case, standardisasi rute resource `/master/data-jurusan`, toggle status 1-klik, dan integrasi modal interaktif `InforaModals`.
