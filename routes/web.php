@@ -6,6 +6,7 @@ use App\Http\Controllers\KonfigurasiSekolah\KalenderAkademikController;
 use App\Http\Controllers\KonfigurasiSekolah\TahunAjaranController;
 use App\Http\Controllers\Master\GtkController;
 use App\Http\Controllers\Master\JurusanController;
+use App\Http\Controllers\Master\MapelController;
 use App\Http\Controllers\Master\SchoolController;
 use App\Http\Controllers\Master\TingkatanController;
 use App\Http\Controllers\ProfileController;
@@ -78,6 +79,13 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
         ])->except(['show', 'create']);
 
         Route::post('data-jurusan/{jurusan}/toggle-status', [JurusanController::class, 'toggleStatus'])->name('data-jurusan.toggle-status');
+        Route::get('data-mapel/semua', [MapelController::class, 'index'])->name('data-mapel.index');
+        Route::resource('data-mapel', MapelController::class)->parameters([
+            'data-mapel' => 'mapel',
+        ])->names([
+            'index' => 'data-mapel',
+        ])->except(['show', 'create']);
+        Route::post('data-mapel/{mapel}/toggle-status', [MapelController::class, 'toggleStatus'])->name('data-mapel.toggle-status');
         Route::get('data-gtk/semua', [GtkController::class, 'index'])->name('data-gtk.index');
         Route::get('data-gtk/template', [GtkController::class, 'template'])->name('data-gtk.template');
         Route::get('data-gtk/export', [GtkController::class, 'export'])->name('data-gtk.export');
