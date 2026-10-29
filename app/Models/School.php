@@ -157,6 +157,16 @@ class School extends Model
     }
 
     /**
+     * Relasi ke data murid / peserta didik di sekolah ini.
+     *
+     * @return HasMany<Murid, $this>
+     */
+    public function murids(): HasMany
+    {
+        return $this->hasMany(Murid::class, 'school_id');
+    }
+
+    /**
      * Relasi ke akun administrator utama sekolah.
      *
      * @return HasOne<User, $this>

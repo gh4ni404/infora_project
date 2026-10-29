@@ -7,6 +7,7 @@ use App\Http\Controllers\KonfigurasiSekolah\TahunAjaranController;
 use App\Http\Controllers\Master\GtkController;
 use App\Http\Controllers\Master\JurusanController;
 use App\Http\Controllers\Master\MapelController;
+use App\Http\Controllers\Master\MuridController;
 use App\Http\Controllers\Master\SchoolController;
 use App\Http\Controllers\Master\TingkatanController;
 use App\Http\Controllers\ProfileController;
@@ -98,6 +99,17 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
         ])->except(['create']);
         Route::post('data-gtk/{gtk}/toggle-status', [GtkController::class, 'toggleStatus'])->name('data-gtk.toggle-status');
         Route::post('data-gtk/{gtk}/reset-password', [GtkController::class, 'resetPassword'])->name('data-gtk.reset-password');
+        Route::get('data-murid/semua', [MuridController::class, 'index'])->name('data-murid.index');
+        Route::get('data-murid/template', [MuridController::class, 'template'])->name('data-murid.template');
+        Route::get('data-murid/export', [MuridController::class, 'export'])->name('data-murid.export');
+        Route::post('data-murid/import', [MuridController::class, 'import'])->name('data-murid.import');
+        Route::resource('data-murid', MuridController::class)->parameters([
+            'data-murid' => 'murid',
+        ])->names([
+            'index' => 'data-murid',
+        ])->except(['create']);
+        Route::post('data-murid/{murid}/toggle-status', [MuridController::class, 'toggleStatus'])->name('data-murid.toggle-status');
+        Route::post('data-murid/{murid}/reset-password', [MuridController::class, 'resetPassword'])->name('data-murid.reset-password');
     });
 
     // Rombongan Belajar dan Bimbingan (Data Kelas)

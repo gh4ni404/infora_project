@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Kelas extends Model
 {
@@ -137,6 +138,16 @@ class Kelas extends Model
     public function waliKelas(): BelongsTo
     {
         return $this->belongsTo(Gtk::class, 'wali_kelas_id');
+    }
+
+    /**
+     * Relasi ke data murid yang terdaftar di kelas ini.
+     *
+     * @return HasMany<Murid, $this>
+     */
+    public function murids(): HasMany
+    {
+        return $this->hasMany(Murid::class, 'kelas_id');
     }
 
     /**

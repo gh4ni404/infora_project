@@ -68,6 +68,16 @@ class User extends Authenticatable
     }
 
     /**
+     * Relasi ke profil data Murid / Peserta Didik.
+     *
+     * @return HasOne<Murid, $this>
+     */
+    public function murid(): HasOne
+    {
+        return $this->hasOne(Murid::class);
+    }
+
+    /**
      * Check if the user is a Super Administrator (Platform/Developer entity).
      */
     public function isSuperAdmin(): bool
@@ -195,7 +205,7 @@ class User extends Authenticatable
      */
     public function getAvatarUrlAttribute(): ?string
     {
-        $path = $this->avatar_path ?: $this->gtk?->foto_path;
+        $path = $this->avatar_path ?: ($this->gtk?->foto_path ?: $this->murid?->foto_path);
 
         if (! empty($path)) {
             return Storage::disk('public')->url($path);
