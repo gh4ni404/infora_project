@@ -10,6 +10,7 @@ use App\Http\Controllers\Master\MapelController;
 use App\Http\Controllers\Master\SchoolController;
 use App\Http\Controllers\Master\TingkatanController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Rombel\KelasController;
 use App\Http\Controllers\System\BackupRestoreController;
 use App\Http\Controllers\System\MenuAccessController;
 use App\Http\Controllers\System\MenuController;
@@ -97,6 +98,17 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
         ])->except(['create']);
         Route::post('data-gtk/{gtk}/toggle-status', [GtkController::class, 'toggleStatus'])->name('data-gtk.toggle-status');
         Route::post('data-gtk/{gtk}/reset-password', [GtkController::class, 'resetPassword'])->name('data-gtk.reset-password');
+    });
+
+    // Rombongan Belajar dan Bimbingan (Data Kelas)
+    Route::prefix('rombel')->name('rombel.')->group(function () {
+        Route::get('kelas/semua', [KelasController::class, 'index'])->name('kelas.index');
+        Route::resource('kelas', KelasController::class)->parameters([
+            'kelas' => 'kelas',
+        ])->names([
+            'index' => 'kelas',
+        ])->except(['show', 'create']);
+        Route::post('kelas/{kelas}/toggle-status', [KelasController::class, 'toggleStatus'])->name('kelas.toggle-status');
     });
 
     // Konfigurasi Sekolah
