@@ -20,12 +20,13 @@
 - [x] Master Data Jurusan / Konsentrasi Keahlian dan Peminatan (SMA, SMK, dan MA)
 - [x] Master Data Tingkatan Kelas (X, XI, XII, Fase Kurikulum Merdeka, dan Urutan Alami)
 - [x] Master Data Mata Pelajaran (Kelompok Kurikulum, Beban Jam/JP, Relasi Jurusan Opsional, KPI Metrik, dan Multi-Tenancy)
+- [x] Master Data Kelas dan Rombongan Belajar (Terikat Tahun Ajaran, Penugasan Wali Kelas, Ruangan, Kapasitas Siswa, dan Asisten Penamaan)
 - [x] Master Data Pendidik dan Tenaga Kependidikan (GTK) (Multi-Role JSON, Sinkronisasi Akun Otomatis, dan Manajemen Kredensial)
 - [x] Pengaturan Profil Pengguna Mandiri & Keamanan Akun (Dedicated 2-Column Settings Layout, 4 Tab GTK & 2 Tab Non-GTK, Konsolidasi Informasi Pribadi & Kredensial, Dirty-Form Modal, Dashboard Onboarding Alert, Auto-Sync GTK)
 - [x] Konfigurasi Sekolah: Tahun Ajaran dan Manajemen Semester
 - [x] Konfigurasi Sekolah: Kalender Akademik Terpadu dan Agenda Multi-Day (Grid Bulanan dan Tabel Agenda via `<x-tab-pills>`)
 - [x] Layanan Universal Spreadsheet (`SpreadsheetService`) & Impor / Ekspor Excel Data GTK via `<x-crud-button>`
-- [x] Ekosistem 25 Anonymous Blade Components dan Test Suite 389 Tests Lulus 100% (1.799 Assertions)
+- [x] Ekosistem 25 Anonymous Blade Components dan Test Suite 404 Tests Lulus 100% (1.863 Assertions)
 - [ ] Arsitektur Akun Sivitas (4 Tipe Akun: Siswa, Guru, Staff, Admin dengan profil relasional 1-to-1)
 - [ ] Dedicated Layout Separation (Desktop dan Mobile)
 - [ ] Implementasi Modul Akademik Lanjutan dan Tata Kelola Utama
@@ -187,8 +188,7 @@
     - **Opsi A (Mode Cepat vs Lengkap):** Toggle switch antara mode entri ringkas (hanya nama, JK, status, NIP/NIK, peran PTK) vs mode lengkap.
     - **Opsi B (Wizard 3 Langkah):** Stepper terstruktur (1: Identitas & Kepegawaian ➔ 2: Penugasan & Template Hak Akses ➔ 3: Kontak & Pasfoto).
     - **Opsi C (Seksi Kolapsibel / Accordion):** Field wajib di atas selalu terbuka; seksi Biodata Tambahan, Kontak, Kredensial, dan Pasfoto terlipat rapi.
-    - [x] **Opsi D (Impor Massal Excel & Ekspor Terfilter serta Modal Tambah Ringkas):** *(Selesai diimplementasikan via `SpreadsheetService` dan `create.blade.php` dengan filosofi Quick Onboarding 6-Kolom Esensial & Self-Service Completion)* Pengunggahan berkas template spreadsheet dan modal tambah ringkas untuk pendaftaran GTK cepat.
-  - [ ] CRUD Data Rombel/Kelas dan Ruangan Belajar.
+  - [x] CRUD Data Rombel/Kelas dan Ruangan Belajar (`Kelas`) terhubung ke unit sekolah (`school_id`), tahun ajaran (`tahun_ajaran_id`), jenjang tingkatan (`tingkatan_id`), jurusan opsional (`jurusan_id`), dan wali kelas (`gtks`), rute resource `/rombel/kelas` (`rombel.kelas.*`), Form Requests validasi tenancy, kartu metrik KPI, 1-klik toggle status, antarmuka modal modular (`index.blade.php`, `create.blade.php`, `edit.blade.php`) dengan asisten saran nama & kode, dan automated test suite `KelasTest.php` (15 feature tests, 100% lulus).
   - [ ] Manajemen Data Siswa terhubung ke `student_profiles`.
 - [ ] **3.4. Kalender dan Jadwal Pelajaran**
   - [x] Manajemen Tahun Ajaran dan Semester (`TahunAjaran` dan `Semester`, relasi berjenjang, tanggal pelaksanaan, aktivasi 1-klik, modal interaktif di `/konfigurasi-sekolah/tahun-ajaran`).

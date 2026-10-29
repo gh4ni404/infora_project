@@ -186,7 +186,7 @@
     - **Opsi B (Wizard 3 Langkah):** Stepper terstruktur (1: Identitas & Kepegawaian ➔ 2: Penugasan & Template Hak Akses ➔ 3: Kontak & Pasfoto).
     - **Opsi C (Seksi Kolapsibel / Accordion):** Field wajib di atas selalu terbuka; seksi Biodata Tambahan, Kontak, Kredensial, dan Pasfoto terlipat rapi.
     - [x] **Opsi D (Impor Massal Excel & Ekspor Terfilter serta Modal Tambah Ringkas):** *(Selesai diimplementasikan via `SpreadsheetService` dan `create.blade.php` dengan filosofi Quick Onboarding 6-Kolom Esensial & Self-Service Completion)* Pengunggahan berkas template spreadsheet dan modal tambah ringkas untuk pendaftaran GTK cepat.
-  - [ ] CRUD Data Rombel/Kelas dan Ruangan Belajar.
+  - [x] CRUD Data Rombel/Kelas dan Ruangan Belajar (`Kelas`) terhubung ke unit sekolah (`school_id`), tahun ajaran (`tahun_ajaran_id`), jenjang tingkatan (`tingkatan_id`), jurusan opsional (`jurusan_id`), dan wali kelas (`gtks`), rute resource `/rombel/kelas` (`rombel.kelas.*`), Form Requests validasi tenancy, kartu metrik KPI, 1-klik toggle status, antarmuka modal modular (`index.blade.php`, `create.blade.php`, `edit.blade.php`) dengan asisten saran nama & kode, dan automated test suite `KelasTest.php` (15 feature tests, 100% lulus).
   - [ ] Manajemen Data Siswa terhubung ke `student_profiles`.
 - [ ] **3.4. Kalender dan Jadwal Pelajaran**
   - [x] Manajemen Tahun Ajaran dan Semester (`TahunAjaran` dan `Semester`, relasi berjenjang, tanggal pelaksanaan, aktivasi 1-klik, modal interaktif di `/konfigurasi-sekolah/tahun-ajaran`).
