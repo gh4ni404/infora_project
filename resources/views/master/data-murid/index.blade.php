@@ -475,13 +475,7 @@
                 }
 
                 // Populate Cascading Wilayah Kemendagri
-                window.InforaWilayah?.populateCascade(
-                    'edit',
-                    data.provinsi_id,
-                    data.kabupaten_id,
-                    data.kecamatan_id,
-                    data.kelurahan_id
-                );
+                window.InforaWilayah?.populateCascade('edit', data);
             });
 
             // 3. Modal Pratinjau Detail Profil Murid

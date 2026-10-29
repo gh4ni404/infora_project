@@ -128,40 +128,73 @@
             maxlength="100"
         />
 
-        <x-form-select
-            name="provinsi_id"
-            id="edit_provinsi_id"
-            label="Provinsi Domisili"
-            placeholder="Pilih Provinsi..."
-        />
+        <div class="form-group">
+            <label for="edit_provinsi_id" class="form-label">Provinsi Domisili</label>
+            <x-searchable-select
+                name="provinsi_id"
+                id="edit_provinsi_id"
+                placeholder="Pilih Provinsi..."
+                search-placeholder="Cari provinsi..."
+                :options="$provinsiList ?? []"
+                :value="old('provinsi_id')"
+            />
+            @error('provinsi_id')
+                <div class="form-error">{{ $message }}</div>
+            @enderror
+        </div>
 
-        <x-form-select
-            name="kabupaten_id"
-            id="edit_kabupaten_id"
-            label="Kabupaten / Kota"
-            placeholder="Pilih Kabupaten/Kota..."
-        />
+        <div class="form-group">
+            <label for="edit_kabupaten_id" class="form-label">Kabupaten / Kota</label>
+            <x-searchable-select
+                name="kabupaten_id"
+                id="edit_kabupaten_id"
+                placeholder="Pilih Kabupaten/Kota..."
+                search-placeholder="Cari kabupaten/kota..."
+                :disabled="!old('provinsi_id')"
+                :value="old('kabupaten_id')"
+            />
+            @error('kabupaten_id')
+                <div class="form-error">{{ $message }}</div>
+            @enderror
+        </div>
 
-        <x-form-select
-            name="kecamatan_id"
-            id="edit_kecamatan_id"
-            label="Kecamatan"
-            placeholder="Pilih Kecamatan..."
-        />
+        <div class="form-group">
+            <label for="edit_kecamatan_id" class="form-label">Kecamatan</label>
+            <x-searchable-select
+                name="kecamatan_id"
+                id="edit_kecamatan_id"
+                placeholder="Pilih Kecamatan..."
+                search-placeholder="Cari kecamatan..."
+                :disabled="!old('kabupaten_id')"
+                :value="old('kecamatan_id')"
+            />
+            @error('kecamatan_id')
+                <div class="form-error">{{ $message }}</div>
+            @enderror
+        </div>
 
-        <x-form-select
-            name="kelurahan_id"
-            id="edit_kelurahan_id"
-            label="Kelurahan / Desa"
-            placeholder="Pilih Kelurahan/Desa..."
-        />
+        <div class="form-group">
+            <label for="edit_kelurahan_id" class="form-label">Kelurahan / Desa</label>
+            <x-searchable-select
+                name="kelurahan_id"
+                id="edit_kelurahan_id"
+                placeholder="Pilih Kelurahan/Desa..."
+                search-placeholder="Cari kelurahan/desa..."
+                :disabled="!old('kecamatan_id')"
+                :value="old('kelurahan_id')"
+            />
+            @error('kelurahan_id')
+                <div class="form-error">{{ $message }}</div>
+            @enderror
+        </div>
 
         <div class="col-span-full">
-            <x-form-input
+            <x-form-textarea
                 name="alamat"
                 id="edit_alamat"
                 label="Alamat Jalan / Dusun / RT & RW"
                 placeholder="Nama jalan, nomor rumah, RT/RW, atau nama dusun"
+                rows="2"
                 maxlength="1000"
             />
         </div>

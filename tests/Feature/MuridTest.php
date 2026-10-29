@@ -82,6 +82,7 @@ test('super admin can view data murid page with kpi cards and modals', function 
     ]));
 
     $response->assertOk();
+    $response->assertViewHas('provinsiList');
     $response->assertSee('Data Murid (Peserta Didik)');
     $response->assertSee('SMK Negeri 1 Makassar');
     $response->assertSee('Muhammad Raditya');

@@ -9,6 +9,7 @@ use App\Http\Requests\Master\UpdateMuridRequest;
 use App\Models\Kelas;
 use App\Models\MenuAccessTemplate;
 use App\Models\Murid;
+use App\Models\Provinsi;
 use App\Models\Tingkatan;
 use App\Services\SpreadsheetService;
 use App\Support\ImageUploader;
@@ -77,6 +78,12 @@ class MuridController extends Controller
             ->distinct()
             ->get();
 
+        // Data referensi provinsi untuk inisialisasi dropdown wilayah Kemendagri
+        $provinsiList = Provinsi::query()
+            ->aktif()
+            ->orderBy('kode')
+            ->get(['id', 'kode', 'nama']);
+
         return view('master.data-murid.index', compact(
             'murids',
             'totalCount',
@@ -90,6 +97,7 @@ class MuridController extends Controller
             'kelasList',
             'tingkatanList',
             'roleTemplates',
+            'provinsiList',
             'perPageInput'
         ));
     }
