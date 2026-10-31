@@ -1,7 +1,7 @@
 <div class="card-surface">
     <div class="card-header">
         <div>
-            <h3 class="font-weight-bold font-size-base mb-1">Data Orang Tua / Wali Siswa</h3>
+            <h3 class="font-weight-bold font-size-base mb-1">Data Orang Tua / Wali Murid</h3>
             <p class="brand-subtitle font-size-xs mb-0">Informasi identitas ayah, ibu kandung, atau wali serta kontak darurat peserta didik</p>
         </div>
     </div>

@@ -16,7 +16,7 @@ Gunakan **Conventional Commits**:
 ```
 
 - `<type>` — jenis perubahan (lihat daftar di bawah)
-- `<scope>` — bagian yang diubah (opsional, tapi disarankan). Contoh scope: `guru`, `kelas`, `siswa`, `mata-pelajaran`, `jadwal-pelajaran`, `sidebar`, `migration`, `route`, `seed`.
+- `<scope>` — bagian yang diubah (opsional, tapi disarankan). Contoh scope: `guru`, `kelas`, `murid`, `mata-pelajaran`, `jadwal-pelajaran`, `sidebar`, `migration`, `route`, `seed`.
 - `<ringkasan>` — kalimat pendek, verdikatif, tidak berakhiran titik.
 - Baris subjek maksimal **±72 karakter**.
 
@@ -119,8 +119,8 @@ build: tambah script composer lint dan format
 Commit yang menyentuh `resources/js` mengikuti aturan yang sama (type + scope), mis.:
 
 ```
-feat(js): tambah initWilayahCascade untuk form siswa
-fix(select): ganti pencarian siswa ke Select2 statis
+feat(js): tambah initWilayahCascade untuk form murid
+fix(select): ganti pencarian murid ke Select2 statis
 ```
 
 ## Catatan tambahan

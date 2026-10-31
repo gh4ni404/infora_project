@@ -110,12 +110,12 @@ test('super admin can filter users by role and search query', function () {
 test('super admin can view and update granular permissions for a user', function () {
     $module = Module::create(['name' => 'AKADEMIK', 'order' => 1, 'is_active' => true]);
     $menu = Menu::create(['module_id' => $module->id, 'name' => 'Kesiswaan', 'order' => 1, 'is_active' => true]);
-    $subMenu = SubMenu::create(['menu_id' => $menu->id, 'name' => 'Data Siswa', 'order' => 1, 'is_active' => true]);
+    $subMenu = SubMenu::create(['menu_id' => $menu->id, 'name' => 'Data Murid', 'order' => 1, 'is_active' => true]);
 
     $responseEdit = $this->actingAs($this->superAdmin)->get(route('sistem.user.user', $this->guruUser));
     $responseEdit->assertOk();
     $responseEdit->assertSee('Budi Sudarsono');
-    $responseEdit->assertSee('Data Siswa');
+    $responseEdit->assertSee('Data Murid');
 
     // Simpan izin granular
     $responseUpdate = $this->actingAs($this->superAdmin)->put(route('sistem.user.user.update', $this->guruUser), [

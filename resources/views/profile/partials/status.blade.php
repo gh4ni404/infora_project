@@ -29,7 +29,7 @@
                                     'super_admin' => 'Super Administrator',
                                     'admin' => 'Administrator Sekolah',
                                     'guru' => 'Pendidik / Tenaga Pengajar',
-                                    'murid', 'siswa' => 'Peserta Didik',
+                                    'murid' => 'Peserta Didik',
                                     default => ucfirst($user->user_type)
                                 } }}
                             </span>

@@ -96,12 +96,12 @@
             type="number"
             name="kapasitas"
             id="create_kapasitas"
-            label="Kapasitas Siswa (Daya Tampung)"
+            label="Kapasitas Murid (Daya Tampung)"
             placeholder="Contoh: 36"
             min="1"
             max="100"
             :value="old('kapasitas', '36')"
-            hint="Jumlah maksimum kursi siswa per rombongan belajar."
+            hint="Jumlah maksimum kursi murid per rombongan belajar."
             required
         />
     </div>
@@ -110,7 +110,7 @@
         <x-form-checkbox
             name="is_active"
             id="create_is_active"
-            label="Status Rombel Aktif (Dapat digunakan untuk penempatan siswa dan jadwal KBM)"
+            label="Status Rombel Aktif (Dapat digunakan untuk penempatan murid dan jadwal KBM)"
             value="1"
             :checked="old('is_active', true)"
         />

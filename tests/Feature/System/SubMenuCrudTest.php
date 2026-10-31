@@ -266,17 +266,17 @@ test('menu route_prefix accessor generates expected prefix slug from menu name',
 test('sub-menu store combines route_prefix and route_suffix into single route_name', function () {
     $response = $this->actingAs($this->superAdmin)->post(route('system.sub-menus.store'), [
         'menu_id' => $this->menu->id,
-        'name' => 'Data Siswa',
+        'name' => 'Data Murid',
         'route_prefix' => 'master',
-        'route_suffix' => 'data-siswa',
+        'route_suffix' => 'data-murid',
         'is_active' => true,
     ]);
 
     $response->assertRedirect(route('system.sub-menus.index'));
     $this->assertDatabaseHas('sub_menus', [
         'menu_id' => $this->menu->id,
-        'name' => 'Data Siswa',
-        'route_name' => 'master.data-siswa',
+        'name' => 'Data Murid',
+        'route_name' => 'master.data-murid',
     ]);
 });
 

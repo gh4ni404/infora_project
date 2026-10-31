@@ -49,7 +49,7 @@ class DashboardController extends Controller
         // 3. Ringkasan Metrik
         $totalJurusan = $school ? $school->jurusans()->count() : 0;
         $totalGuru = $school ? $school->users()->where('user_type', 'guru')->count() : 0;
-        $totalMurid = $school ? ($school->murids()->exists() ? $school->murids()->count() : $school->users()->whereIn('user_type', ['murid', 'siswa'])->count()) : 0;
+        $totalMurid = $school ? ($school->murids()->exists() ? $school->murids()->count() : $school->users()->where('user_type', 'murid')->count()) : 0;
         $activeTahunAjaran = $school?->activeTahunAjaran();
         $activeSemester = $school?->activeSemester();
 

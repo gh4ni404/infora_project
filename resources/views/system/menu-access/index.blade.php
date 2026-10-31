@@ -37,8 +37,8 @@
                         <div>
                             <div class="template-card-header">
                                 <h4 class="template-card-title">{{ $tmpl->role_name }}</h4>
-                                <span class="badge badge-role-{{ $tmpl->role_category === 'siswa' ? 'murid' : $tmpl->role_category }}">
-                                    {{ strtoupper($tmpl->role_category === 'siswa' ? 'murid' : $tmpl->role_category) }}
+                                <span class="badge badge-role-{{ $tmpl->role_category }}">
+                                    {{ strtoupper($tmpl->role_category) }}
                                 </span>
                             </div>
                             <div class="template-card-body">
@@ -110,7 +110,7 @@
                         </td>
                         <td>
                             <span class="badge badge-role-{{ $user->user_type }}">
-                                {{ strtoupper(str_replace('_', ' ', $user->user_type === 'siswa' ? 'murid' : $user->user_type)) }}
+                                {{ strtoupper(str_replace('_', ' ', $user->user_type)) }}
                             </span>
                         </td>
                         <td>
@@ -148,7 +148,7 @@
                                         data-name="{{ $user->name }}"
                                         data-username="{{ $user->username }}"
                                         data-status="{{ $user->is_active ? 'menonaktifkan' : 'mengaktifkan' }}"
-                                        data-user-type="{{ strtoupper($user->user_type === 'siswa' ? 'murid' : $user->user_type) }}"
+                                        data-user-type="{{ strtoupper($user->user_type) }}"
                                     >
                                         <x-icon name="{{ $user->is_active ? 'power' : 'check-circle' }}" class="{{ $user->is_active ? 'text-danger' : 'text-success' }}" size="16" />
                                     </button>
@@ -161,7 +161,7 @@
                                         data-action="{{ route('sistem.user.destroy', $user) }}"
                                         data-name="{{ $user->name }}"
                                         data-username="{{ $user->username }}"
-                                        data-user-type="{{ strtoupper($user->user_type === 'siswa' ? 'murid' : $user->user_type) }}"
+                                        data-user-type="{{ strtoupper($user->user_type) }}"
                                     />
                                 @endif
                             </x-table-actions>

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreignId('kelas_id')->nullable()->constrained('kelas')->nullOnDelete();
             $table->string('angkatan', 20)->nullable()->index();
 
-            // Nomor Registrasi & Identitas Pokok Siswa
+            // Nomor Registrasi & Identitas Pokok Murid
             $table->string('nisn', 20)->nullable()->index();
             $table->string('nis', 30)->nullable()->index();
             $table->string('nik', 20)->nullable()->index();
@@ -41,7 +41,7 @@ return new class extends Migration
             $table->foreignId('kelurahan_id')->nullable()->constrained('kelurahan')->nullOnDelete();
             $table->text('alamat')->nullable();
 
-            // Data Orang Tua / Wali Siswa
+            // Data Orang Tua / Wali Murid
             $table->string('nama_ayah', 150)->nullable();
             $table->string('nama_ibu', 150)->nullable();
             $table->string('nama_wali', 150)->nullable();

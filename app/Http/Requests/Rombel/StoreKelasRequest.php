@@ -112,9 +112,9 @@ class StoreKelasRequest extends FormRequest
             'nama.unique' => 'Nama kelas sudah terdaftar pada tahun ajaran ini di unit sekolah yang sama.',
             'kode.max' => 'Kode kelas maksimal terdiri atas 50 karakter.',
             'ruangan.max' => 'Nama ruangan maksimal terdiri atas 100 karakter.',
-            'kapasitas.required' => 'Daya tampung kapasitas siswa wajib diisi.',
-            'kapasitas.integer' => 'Kapasitas siswa harus berupa angka bulat positif.',
-            'kapasitas.between' => 'Kapasitas siswa harus berada di antara rentang 1 sampai 100 siswa per rombel.',
+            'kapasitas.required' => 'Daya tampung kapasitas murid wajib diisi.',
+            'kapasitas.integer' => 'Kapasitas murid harus berupa angka bulat positif.',
+            'kapasitas.between' => 'Kapasitas murid harus berada di antara rentang 1 sampai 100 murid per rombel.',
             'keterangan.max' => 'Keterangan tambahan maksimal terdiri atas 1000 karakter.',
         ];
     }

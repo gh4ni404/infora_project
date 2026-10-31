@@ -3,7 +3,7 @@
 @section('content')
     <x-page-header title="Data Kelas (Rombongan Belajar)">
         <x-slot:subtitle>
-            Kelola rombongan belajar, alokasi wali kelas, ruangan, dan kapasitas siswa per unit sekolah
+            Kelola rombongan belajar, alokasi wali kelas, ruangan, dan kapasitas murid per unit sekolah
             @if ($selectedSchool)
                 &ndash; <strong class="text-brand">{{ $selectedSchool->name }}</strong>
                 <span class="badge {{ $selectedSchool->school_type === 'SMK' ? 'badge-primary' : 'badge-cyan' }}">
@@ -44,7 +44,7 @@
     <x-stats-grid>
         <x-stat-card icon="users" color="primary" label="Total Rombel" :value="number_format($totalCount, 0, ',', '.')" />
         <x-stat-card icon="check-circle" color="success" label="Kelas Aktif" :value="number_format($activeCount, 0, ',', '.')" />
-        <x-stat-card icon="building" color="cyan" label="Total Kapasitas" :value="number_format($totalKapasitas, 0, ',', '.') . ' Siswa'" />
+        <x-stat-card icon="building" color="cyan" label="Total Kapasitas" :value="number_format($totalKapasitas, 0, ',', '.') . ' Murid'" />
         <x-stat-card icon="award" color="amber" label="Wali Kelas Ditugaskan" :value="number_format($assignedWaliCount, 0, ',', '.') . ' / ' . $totalCount" />
     </x-stats-grid>
 
@@ -175,7 +175,7 @@
                             {{ $kelas->ruangan ?: 'Ruangan -' }}
                         </div>
                         <div class="text-xs text-muted mt-0.5">
-                            Daya tampung: <strong>{{ $kelas->kapasitas }}</strong> siswa
+                            Daya tampung: <strong>{{ $kelas->kapasitas }}</strong> murid
                         </div>
                     </td>
                     <td class="text-center">

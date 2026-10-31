@@ -33,8 +33,8 @@ class ImageUploader
      * Contoh: kbm_u7_20260905_143022_a7b9c1d2.webp
      *
      * @param  string  $base64String  String Data URI Base64 (data:image/...;base64,...)
-     * @param  string  $directory  Direktori penyimpanan relatif (contoh: 'logos', 'photos/siswa')
-     * @param  string  $module  Pengenal modul (contoh: 'sekolah', 'kbm', 'siswa', 'guru')
+     * @param  string  $directory  Direktori penyimpanan relatif (contoh: 'logos', 'photos/murid')
+     * @param  string  $module  Pengenal modul (contoh: 'sekolah', 'kbm', 'murid', 'guru')
      * @param  int|null  $userId  ID pengguna pengunggah (opsional, bawaan: auth()->id() ?? 0)
      * @param  int  $maxBytes  Batas ukuran biner gambar dalam bytes (bawaan: 1MB)
      * @param  string  $disk  Nama disk storage Laravel (bawaan: 'public')
@@ -84,7 +84,7 @@ class ImageUploader
      * Menghasilkan nama berkas semantik standar INFORA:
      * {modul}_u{user_id}_{YYYYMMDD_His}_{random_8char}.{ekstensi}
      *
-     * @param  string  $module  Nama modul (contoh: 'kbm', 'sekolah', 'siswa')
+     * @param  string  $module  Nama modul (contoh: 'kbm', 'sekolah', 'murid')
      * @param  string  $extension  Ekstensi berkas (contoh: 'webp', 'png', 'jpg')
      * @param  int|null  $userId  ID pengguna (bawaan: auth()->id() ?? 0)
      */

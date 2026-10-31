@@ -43,12 +43,12 @@ test('module, menu, and sub_menu relationships function properly', function () {
     $module = Module::factory()->create(['name' => 'Akademik', 'order' => 1]);
     $menu = Menu::factory()->create([
         'module_id' => $module->id,
-        'name' => 'Data Siswa',
+        'name' => 'Data Murid',
         'order' => 1,
     ]);
     $subMenu = SubMenu::factory()->create([
         'menu_id' => $menu->id,
-        'name' => 'Siswa Aktif',
+        'name' => 'Murid Aktif',
         'order' => 1,
     ]);
 

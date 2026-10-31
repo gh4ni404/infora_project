@@ -25,7 +25,7 @@
         name="name"
         id="edit_menu_name"
         label="Nama Menu"
-        placeholder="Contoh: Dashboard, Sistem, Jurnal KBM, Data Siswa"
+        placeholder="Contoh: Dashboard, Sistem, Jurnal KBM, Data Murid"
         data-transform="title-case"
         hint="Nama item menu otomatis diformat Capitalize Each Word (Title Case)."
         required

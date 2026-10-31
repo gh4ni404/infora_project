@@ -55,7 +55,7 @@
                         type="text"
                         class="icon-picker-search-input"
                         id="searchInput_{{ $inputId }}"
-                        placeholder="Cari ikon atau kata kunci (contoh: sekolah, siswa, data, laporan)..."
+                        placeholder="Cari ikon atau kata kunci (contoh: sekolah, murid, data, laporan)..."
                         autocomplete="off"
                     >
                 </div>

@@ -215,9 +215,9 @@ return [
         // Pengguna dan SDM
         [
             'name' => 'users',
-            'label' => 'Grup Siswa / Pengguna',
+            'label' => 'Grup Murid / Pengguna',
             'category' => 'pengguna',
-            'keywords' => 'pengguna siswa rombel santri murid kelompok orang tim',
+            'keywords' => 'pengguna murid rombel santri murid kelompok orang tim',
         ],
         [
             'name' => 'user',
@@ -233,9 +233,9 @@ return [
         ],
         [
             'name' => 'user-plus',
-            'label' => 'Registrasi / Siswa Baru',
+            'label' => 'Registrasi / Murid Baru',
             'category' => 'pengguna',
-            'keywords' => 'ppdb registrasi daftar tambah siswa baru pendaftaran calon',
+            'keywords' => 'ppdb registrasi daftar tambah murid baru pendaftaran calon',
         ],
         [
             'name' => 'briefcase',

@@ -2,7 +2,7 @@
 <x-modal
     id="modalEditKelas"
     title="Ubah Data Rombongan Belajar (Kelas)"
-    subtitle="Perbarui konfigurasi data kelas, wali kelas, atau kapasitas siswa"
+    subtitle="Perbarui konfigurasi data kelas, wali kelas, atau kapasitas murid"
     method="PUT"
     form-id="formEditKelas">
     <x-form-input type="hidden" name="school_id" id="edit_school_id" :value="$selectedSchoolId" />
@@ -89,11 +89,11 @@
             type="number"
             name="kapasitas"
             id="edit_kapasitas"
-            label="Kapasitas Siswa (Daya Tampung)"
+            label="Kapasitas Murid (Daya Tampung)"
             placeholder="Contoh: 36"
             min="1"
             max="100"
-            hint="Jumlah maksimum kursi siswa per rombongan belajar."
+            hint="Jumlah maksimum kursi murid per rombongan belajar."
             required
         />
     </div>
@@ -102,7 +102,7 @@
         <x-form-checkbox
             name="is_active"
             id="edit_is_active"
-            label="Status Rombel Aktif (Dapat digunakan untuk penempatan siswa dan jadwal KBM)"
+            label="Status Rombel Aktif (Dapat digunakan untuk penempatan murid dan jadwal KBM)"
             value="1"
         />
     </div>

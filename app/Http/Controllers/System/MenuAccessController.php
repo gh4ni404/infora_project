@@ -27,11 +27,9 @@ class MenuAccessController extends Controller
 
         $usersQuery = User::query()->with('menuPermissions');
 
-        if ($roleFilter && in_array($roleFilter, ['super_admin', 'admin', 'guru', 'staf', 'tendik', 'murid', 'siswa'], true)) {
+        if ($roleFilter && in_array($roleFilter, ['super_admin', 'admin', 'guru', 'staf', 'tendik', 'murid'], true)) {
             $usersQuery->where(function ($q) use ($roleFilter) {
-                if ($roleFilter === 'murid') {
-                    $q->where('user_type', 'murid')->orWhere('user_type', 'siswa');
-                } elseif ($roleFilter === 'staf' || $roleFilter === 'tendik') {
+                if ($roleFilter === 'staf' || $roleFilter === 'tendik') {
                     $q->where('user_type', 'staf');
                 } else {
                     $q->where('user_type', $roleFilter);
