@@ -31,7 +31,9 @@ Aturan ini mengikat penulisan pengujian otomatis di direktori `tests/` dalam pro
      $school = School::factory()->smk()->create();
      $admin = User::factory()->create(['user_type' => 'super_admin']);
      ```
-2. **Pengecekan Integritas Basis Data:**
+2. **Factory Execution Isolation:**
+   - `Model::factory()->create()` must only be executed within automated test files under `tests/`. It is strictly prohibited to execute factories via Tinker or CLI scripts directly against the development database.
+3. **Pengecekan Integritas Basis Data:**
    - Pastikan setiap operasi create, update, dan delete diuji efek sampingnya pada database menggunakan `assertDatabaseHas('table_name', [...])` dan `assertDatabaseMissing('table_name', [...])`.
-3. **Eksekusi Pengujian:**
+4. **Eksekusi Pengujian:**
    - Jalankan pengujian selalu menggunakan helper `./dev test` atau `.\dev.ps1 test`.

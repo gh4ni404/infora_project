@@ -1,4 +1,4 @@
-# Standard Anonymous Blade Components Ecosystem (25 Components)
+# Standard Anonymous Blade Components Ecosystem (27 Components)
 
 This rule governs the creation and modification of all user interfaces (Blade views) across the INFORA project in accordance with official specifications in `docs/COMPONENTS.md`.
 
@@ -7,8 +7,8 @@ This rule governs the creation and modification of all user interfaces (Blade vi
 ## 1. Mandatory Usage of Official Blade Components
 1. **Strict Prohibition of Raw HTML Form & UI Markup:**
    - Writing repetitive manual boilerplate structures like `<div class="form-group"><label>...<input class="form-control">...` is strictly prohibited.
-   - You must exclusively utilize the **25 Anonymous Blade Components** provided in `resources/views/components/`.
-2. **Catalog of 25 Official Components:**
+   - You must exclusively utilize the **27 Anonymous Blade Components** provided in `resources/views/components/`.
+2. **Catalog of 27 Official Components:**
    - **Form & Input:**
      - `<x-form-input>` (Text, number, email, password, date, and hidden inputs with `old()` binding, required asterisk badge, and automatic error handling).
      - `<x-form-select>` (Standard select dropdown with collection options and dynamic attributes).
@@ -18,6 +18,7 @@ This rule governs the creation and modification of all user interfaces (Blade vi
      - `<x-icon-picker>` (Visual dialog picker for interactive Lucide icons).
      - `<x-image-upload>` (Modern image upload integrated with live base64 preview and `ImageUploader` service).
      - `<x-file-upload>` (Universal drag-and-drop file upload with preview, file icon, format validation, and clear button).
+     - `<x-form-error>` (Unified validation error display with Lucide alert-circle icon and accessible message rendering).
    - **Page Header, Navigation & Metrics:**
      - `<x-page-header>` (Page title, breadcrumbs, subtitle, action buttons).
      - `<x-tab-pills>` & `<x-tab-pill>` (Interactive pill-based tab switcher).
@@ -34,7 +35,8 @@ This rule governs the creation and modification of all user interfaces (Blade vi
    - **Dialogs & Modals:**
      - `<x-modal>` (Standardized flexbox modal with auto-scroll and zero clipping).
      - `<x-progress-modal>` (Multi-stage smooth loading progress modal).
-   - **Graphics & Icons:**
+   - **Graphics, Avatar & Icons:**
+     - `<x-avatar>` (Universal avatar renderer for users, murids, and GTKs with auto initials fallback and responsive sizing).
      - `<x-icon>` (Native Lucide SVG open-source icon renderer).
 
 ---
