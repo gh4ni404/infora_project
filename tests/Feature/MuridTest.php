@@ -5,7 +5,10 @@ use App\Models\Murid;
 use App\Models\School;
 use App\Models\Tingkatan;
 use App\Models\User;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\MessageBag;
+use Illuminate\Support\ViewErrorBag;
 
 beforeEach(function () {
     $this->superAdmin = User::factory()->create([
@@ -98,12 +101,12 @@ test('super admin can view data murid page with kpi cards and modals', function 
 test('tenancy isolation strictly filters murid per school', function () {
     $muridA = Murid::factory()->create([
         'school_id' => $this->schoolA->id,
-        'nama_lengkap' => 'Siswa Sekolah A',
+        'nama_lengkap' => 'Murid Sekolah A',
     ]);
 
     $muridB = Murid::factory()->create([
         'school_id' => $this->schoolB->id,
-        'nama_lengkap' => 'Siswa Sekolah B',
+        'nama_lengkap' => 'Murid Sekolah B',
     ]);
 
     $responseA = $this->actingAs($this->superAdmin)->get(route('master.data-murid', [
@@ -111,16 +114,16 @@ test('tenancy isolation strictly filters murid per school', function () {
     ]));
 
     $responseA->assertOk();
-    $responseA->assertSee('Siswa Sekolah A');
-    $responseA->assertDontSee('Siswa Sekolah B');
+    $responseA->assertSee('Murid Sekolah A');
+    $responseA->assertDontSee('Murid Sekolah B');
 
     $responseB = $this->actingAs($this->superAdmin)->get(route('master.data-murid', [
         'school_id' => $this->schoolB->id,
     ]));
 
     $responseB->assertOk();
-    $responseB->assertSee('Siswa Sekolah B');
-    $responseB->assertDontSee('Siswa Sekolah A');
+    $responseB->assertSee('Murid Sekolah B');
+    $responseB->assertDontSee('Murid Sekolah A');
 });
 
 test('search filter matches nama, nisn, or nis', function () {
@@ -353,7 +356,7 @@ test('reset password resets user account password to default', function () {
 test('destroy soft deletes murid and deactivates user account', function () {
     $murid = Murid::factory()->denganUser()->create([
         'school_id' => $this->schoolA->id,
-        'nama_lengkap' => 'Siswa Yang Dihapus',
+        'nama_lengkap' => 'Murid Yang Dihapus',
     ]);
 
     $response = $this->actingAs($this->superAdmin)->delete(route('master.data-murid.destroy', $murid));
@@ -363,4 +366,153 @@ test('destroy soft deletes murid and deactivates user account', function () {
 
     $this->assertSoftDeleted('murids', ['id' => $murid->id]);
     expect($murid->user->fresh()->is_active)->toBeFalse();
+});
+
+test('murid in kemenag madrasah requires 18 digit nism in nis field', function () {
+    $madrasah = School::factory()->ma()->create([
+        'name' => 'MAN 1 Makassar',
+        'is_active' => true,
+    ]);
+
+    // Percobaan 1: Gagal tanpa NIS (NISM) di sekolah Kemenag
+    $responseFail = $this->actingAs($this->superAdmin)->post(route('master.data-murid.store'), [
+        'school_id' => $madrasah->id,
+        'nama_lengkap' => 'Ahmad Fauzi',
+        'jenis_kelamin' => 'L',
+        'nisn' => '0081234567',
+        'angkatan' => '2026',
+    ]);
+
+    $responseFail->assertSessionHasErrors(['nis']);
+    expect(session('errors')->first('nis'))->toContain('NISM (Nomor Induk Murid Madrasah) wajib diisi');
+
+    // Percobaan 2: Gagal bila panjang digit NIS bukan 18
+    $responseInvalidLength = $this->actingAs($this->superAdmin)->post(route('master.data-murid.store'), [
+        'school_id' => $madrasah->id,
+        'nama_lengkap' => 'Ahmad Fauzi',
+        'jenis_kelamin' => 'L',
+        'nis' => '12345', // Kurang dari 18 digit
+    ]);
+
+    $responseInvalidLength->assertSessionHasErrors(['nis']);
+    expect(session('errors')->first('nis'))->toContain('18 digit');
+
+    // Percobaan 3: Berhasil bila NIS valid 18 digit (NISM)
+    $validNism = '131273710001260001'; // 12 digit NSM + 2 digit tahun (26) + 4 digit urut (0001)
+    $responseSuccess = $this->actingAs($this->superAdmin)->post(route('master.data-murid.store'), [
+        'school_id' => $madrasah->id,
+        'nama_lengkap' => 'Ahmad Fauzi',
+        'jenis_kelamin' => 'L',
+        'nis' => $validNism,
+        'nisn' => '0081234567',
+        'angkatan' => '2026',
+    ]);
+
+    $responseSuccess->assertRedirect();
+    $this->assertDatabaseHas('murids', [
+        'school_id' => $madrasah->id,
+        'nama_lengkap' => 'Ahmad Fauzi',
+        'nis' => $validNism,
+    ]);
+});
+
+test('murid in non kemenag school can omit nis or use standard nis', function () {
+    // Sekolah SMA (bukan Kemenag) tidak wajib mengisi NIS (bisa nullable)
+    $response = $this->actingAs($this->superAdmin)->post(route('master.data-murid.store'), [
+        'school_id' => $this->schoolB->id, // SMA
+        'nama_lengkap' => 'Murid Reguler SMA',
+        'jenis_kelamin' => 'P',
+        'nisn' => '0098765432',
+        'angkatan' => '2026',
+    ]);
+
+    $response->assertRedirect();
+    $this->assertDatabaseHas('murids', [
+        'school_id' => $this->schoolB->id,
+        'nama_lengkap' => 'Murid Reguler SMA',
+        'nis' => null,
+    ]);
+});
+
+test('nisn validation enforces max 10 numeric digits', function () {
+    // 1. Lebih dari 10 digit (11 digit) harus gagal validasi
+    $responseOverflow = $this->actingAs($this->superAdmin)->post(route('master.data-murid.store'), [
+        'school_id' => $this->schoolA->id,
+        'nama_lengkap' => 'Budi Santoso',
+        'jenis_kelamin' => 'L',
+        'nisn' => '00812345678', // 11 digit
+    ]);
+
+    $responseOverflow->assertSessionHasErrors(['nisn']);
+    expect(session('errors')->first('nisn'))->toContain('10 digit');
+
+    // 2. Berisi karakter selain angka harus gagal
+    $responseAlphabet = $this->actingAs($this->superAdmin)->post(route('master.data-murid.store'), [
+        'school_id' => $this->schoolA->id,
+        'nama_lengkap' => 'Budi Santoso',
+        'jenis_kelamin' => 'L',
+        'nisn' => '008123ABCD',
+    ]);
+
+    $responseAlphabet->assertSessionHasErrors(['nisn']);
+
+    // 3. Tepat 10 digit angka berhasil
+    $responseValid = $this->actingAs($this->superAdmin)->post(route('master.data-murid.store'), [
+        'school_id' => $this->schoolA->id,
+        'nama_lengkap' => 'Budi Santoso',
+        'jenis_kelamin' => 'L',
+        'nisn' => '0081234567', // 10 digit
+    ]);
+
+    $responseValid->assertRedirect();
+    $this->assertDatabaseHas('murids', [
+        'school_id' => $this->schoolA->id,
+        'nama_lengkap' => 'Budi Santoso',
+        'nisn' => '0081234567',
+    ]);
+});
+
+test('form error component renders alert icon and message without hex colors', function () {
+    $errors = new ViewErrorBag;
+    $errors->put('default', new MessageBag([
+        'nisn' => ['NISN maksimal terdiri dari 10 digit angka.'],
+    ]));
+    view()->share('errors', $errors);
+
+    $rendered = Blade::render('<x-form-error name="nisn" />');
+
+    expect($rendered)->toContain('form-error')
+        ->and($rendered)->toContain('text-danger')
+        ->and($rendered)->toContain('NISN maksimal terdiri dari 10 digit angka.')
+        ->and($rendered)->not->toContain('#');
+});
+
+test('css contains inputShake animation and border danger token without hex color', function () {
+    $css = file_get_contents(resource_path('css/app.css'));
+
+    expect($css)->toContain('@keyframes inputShake')
+        ->and($css)->toContain('.border-danger')
+        ->and($css)->toContain('var(--infora-danger)')
+        ->and($css)->toContain('var(--infora-danger-border)');
+});
+
+test('murid photo displays in index table and show modal response when uploaded', function () {
+    $murid = Murid::factory()->create([
+        'school_id' => $this->schoolA->id,
+        'nama_lengkap' => 'Nurul Fajrin',
+        'foto_path' => 'photos/avatar/test_avatar.jpg',
+    ]);
+
+    // 1. Tampil di tabel data-murid
+    $response = $this->actingAs($this->superAdmin)->get(route('master.data-murid', [
+        'school_id' => $this->schoolA->id,
+    ]));
+
+    $response->assertOk();
+    $response->assertSee($murid->foto_url);
+
+    // 2. Terkirim di payload show modal JSON
+    $responseShow = $this->actingAs($this->superAdmin)->get(route('master.data-murid.show', $murid));
+    $responseShow->assertOk();
+    $responseShow->assertJsonPath('foto_url', $murid->foto_url);
 });
