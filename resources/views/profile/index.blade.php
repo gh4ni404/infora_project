@@ -78,6 +78,26 @@
                         </x-tab-pill>
                     @endif
 
+                    @if ($murid)
+                        <x-tab-pill
+                            :active="$activeTab === 'contact'"
+                            icon="map-pin"
+                            :icon-size="16"
+                            data-profile-tab="contact"
+                        >
+                            Kontak & Domisili
+                        </x-tab-pill>
+
+                        <x-tab-pill
+                            :active="$activeTab === 'parent'"
+                            icon="users"
+                            :icon-size="16"
+                            data-profile-tab="parent"
+                        >
+                            Data Orang Tua / Wali
+                        </x-tab-pill>
+                    @endif
+
                     <x-tab-pill
                         :active="$activeTab === 'status' || $activeTab === 'photo'"
                         icon="shield-check"
@@ -100,9 +120,17 @@
                 <div id="panel-employment" class="tab-panel {{ $activeTab === 'employment' ? '' : 'hidden' }}" role="tabpanel">
                     @include('profile.partials.employment')
                 </div>
+            @endif
 
+            @if ($gtk || $murid)
                 <div id="panel-contact" class="tab-panel {{ $activeTab === 'contact' ? '' : 'hidden' }}" role="tabpanel">
                     @include('profile.partials.contact')
+                </div>
+            @endif
+
+            @if ($murid)
+                <div id="panel-parent" class="tab-panel {{ $activeTab === 'parent' ? '' : 'hidden' }}" role="tabpanel">
+                    @include('profile.partials.parent')
                 </div>
             @endif
 
@@ -358,10 +386,13 @@
         });
     </script>
 
-    @if ($gtk)
+    @php
+        $wilayahEntity = $gtk ?: $murid;
+    @endphp
+    @if ($wilayahEntity)
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                // Inisialisasi cascading dropdown wilayah domisili GTK
+                // Inisialisasi cascading dropdown wilayah domisili
                 window.InforaWilayah?.bindCascade({
                     provinsiId: 'profile_provinsi_id',
                     kabupatenId: 'profile_kabupaten_id',
@@ -385,7 +416,7 @@
                     }).then(() => {
                         window.__profileSnapshotForms?.();
                     });
-                @elseif ($gtk->provinsi_id)
+                @elseif ($wilayahEntity->provinsi_id)
                     window.InforaWilayah?.populateCascade({
                         provinsiId: 'profile_provinsi_id',
                         kabupatenId: 'profile_kabupaten_id',
@@ -393,10 +424,10 @@
                         kelurahanId: 'profile_kelurahan_id',
                         syncTextInputs: false,
                     }, {
-                        provinsi_id: '{{ $gtk->provinsi_id }}',
-                        kabupaten_id: '{{ $gtk->kabupaten_id }}',
-                        kecamatan_id: '{{ $gtk->kecamatan_id }}',
-                        kelurahan_id: '{{ $gtk->kelurahan_id }}',
+                        provinsi_id: '{{ $wilayahEntity->provinsi_id }}',
+                        kabupaten_id: '{{ $wilayahEntity->kabupaten_id }}',
+                        kecamatan_id: '{{ $wilayahEntity->kecamatan_id }}',
+                        kelurahan_id: '{{ $wilayahEntity->kelurahan_id }}',
                     }).then(() => {
                         window.__profileSnapshotForms?.();
                     });

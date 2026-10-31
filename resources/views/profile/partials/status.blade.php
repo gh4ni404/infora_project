@@ -46,7 +46,7 @@
                         </tr>
                         <tr class="border-b border-gray-100">
                             <td class="text-muted py-2">Status Kepegawaian</td>
-                            <td class="font-semibold text-main py-2">{{ $gtk->status_kepegawaian ?? '-' }}</td>
+                            <td class="font-semibold text-main py-2">{{ $gtk->status_kepegawaian ?: '-' }}</td>
                         </tr>
                         @if ($gtk->nip)
                             <tr class="border-b border-gray-100">
@@ -61,6 +61,34 @@
                             </tr>
                         @endif
                     @endif
+                    @if ($murid)
+                        <tr class="border-b border-gray-100">
+                            <td class="text-muted py-2">Status Peserta Didik</td>
+                            <td class="py-2">
+                                <span class="badge {{ $murid->is_active ? 'badge-success' : 'badge-danger' }}">
+                                    {{ ucfirst($murid->status) }} ({{ $murid->is_active ? 'Aktif' : 'Non-Aktif' }})
+                                </span>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-gray-100">
+                            <td class="text-muted py-2">NISN</td>
+                            <td class="font-semibold font-mono text-main py-2">{{ $murid->nisn ?: '-' }}</td>
+                        </tr>
+                        <tr class="border-b border-gray-100">
+                            <td class="text-muted py-2">NIS</td>
+                            <td class="font-semibold font-mono text-main py-2">{{ $murid->nis ?: '-' }}</td>
+                        </tr>
+                        <tr class="border-b border-gray-100">
+                            <td class="text-muted py-2">Rombongan Belajar / Kelas</td>
+                            <td class="font-semibold text-main py-2">{{ $murid->kelas ? $murid->kelas->nama : 'Belum Masuk Rombel' }}</td>
+                        </tr>
+                        @if ($murid->angkatan)
+                            <tr class="border-b border-gray-100">
+                                <td class="text-muted py-2">Tahun Angkatan / Masuk</td>
+                                <td class="font-semibold text-main py-2">{{ $murid->angkatan }}</td>
+                            </tr>
+                        @endif
+                    @endif
                     @if ($school)
                         <tr class="border-b border-gray-100">
                             <td class="text-muted py-2">Satuan Pendidikan</td>
@@ -69,7 +97,7 @@
                     @endif
                     <tr>
                         <td class="text-muted py-2">Terdaftar Sejak</td>
-                        <td class="text-main py-2">{{ $user->created_at?->translatedFormat('d F Y H:i') ?? '-' }}</td>
+                        <td class="text-main py-2">{{ $user->created_at ? $user->created_at->translatedFormat('d F Y H:i') : '-' }}</td>
                     </tr>
                 </tbody>
             </table>

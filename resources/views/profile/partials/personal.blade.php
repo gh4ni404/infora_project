@@ -35,25 +35,29 @@
             <div class="form-section-label mb-2">Identitas & Biodata Pribadi</div>
 
             <div class="form-grid-2col">
+                @php
+                    $entity = $gtk ?: $murid;
+                    $defaultNamaLengkap = $entity ? $entity->nama_lengkap : $user->name;
+                @endphp
                 <x-form-input
                     name="nama_lengkap"
                     id="profile_nama_lengkap"
                     label="Nama Lengkap"
-                    :value="old('nama_lengkap', $gtk?->nama_lengkap ?? $user->name)"
+                    :value="old('nama_lengkap', $defaultNamaLengkap)"
                     required
                     data-transform="title-case"
-                    placeholder="Nama lengkap tanpa gelar"
-                    hint="Nama resmi sesuai kartu identitas / dokumen kependudukan."
+                    placeholder="Nama lengkap resmi"
+                    hint="Nama resmi sesuai dokumen kependudukan."
                 />
 
-                @if (! $gtk)
+                @if (! $entity)
                     <x-form-input
                         type="email"
                         name="email"
                         id="profile_email"
                         label="Alamat Email"
                         :value="old('email', $user->email)"
-                        placeholder="Contoh: admin@sekolah.sch.id"
+                        placeholder="Contoh: user@sekolah.sch.id"
                         maxlength="100"
                         hint="Digunakan untuk notifikasi sistem dan proses pemulihan akses."
                     />
@@ -78,14 +82,16 @@
                             maxlength="50"
                         />
                     </div>
+                @endif
 
+                @if ($entity)
                     <x-form-select
                         name="jenis_kelamin"
                         id="profile_jenis_kelamin"
                         label="Jenis Kelamin"
                         placeholder="Pilih Jenis Kelamin"
                         :options="['L' => 'Laki-laki', 'P' => 'Perempuan']"
-                        :selected="old('jenis_kelamin', $gtk->jenis_kelamin)"
+                        :selected="old('jenis_kelamin', $entity->jenis_kelamin)"
                         required
                     />
 
@@ -93,8 +99,8 @@
                         name="nik"
                         id="profile_nik"
                         label="NIK (Nomor Induk Kependudukan)"
-                        :value="old('nik', $gtk->nik)"
-                        placeholder="16 digit angka sesuai KTP"
+                        :value="old('nik', $entity->nik)"
+                        placeholder="16 digit angka sesuai KK / KTP"
                         maxlength="20"
                     />
 
@@ -102,9 +108,9 @@
                         name="tempat_lahir"
                         id="profile_tempat_lahir"
                         label="Tempat Lahir"
-                        :value="old('tempat_lahir', $gtk->tempat_lahir)"
+                        :value="old('tempat_lahir', $entity->tempat_lahir)"
                         data-transform="title-case"
-                        placeholder="Contoh: Watampone"
+                        placeholder="Kota / Kabupaten Lahir"
                         maxlength="100"
                     />
 
@@ -113,7 +119,7 @@
                         name="tanggal_lahir"
                         id="profile_tanggal_lahir"
                         label="Tanggal Lahir"
-                        :value="old('tanggal_lahir', $gtk->tanggal_lahir?->format('Y-m-d'))"
+                        :value="old('tanggal_lahir', $entity->tanggal_lahir?->format('Y-m-d'))"
                     />
 
                     <x-form-select
@@ -129,7 +135,7 @@
                             'Buddha' => 'Buddha',
                             'Khonghucu' => 'Khonghucu',
                         ]"
-                        :selected="old('agama', $gtk->agama)"
+                        :selected="old('agama', $entity->agama)"
                     />
                 @endif
             </div>

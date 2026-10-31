@@ -37,7 +37,7 @@ class UpdateProfileRequest extends FormRequest
         $userId = $this->user()?->id;
 
         return [
-            'tab' => ['nullable', 'string', 'in:personal,employment,contact,account,status,photo'],
+            'tab' => ['nullable', 'string', 'in:personal,employment,contact,parent,account,status,photo'],
 
             // 1. Informasi Pribadi
             'nama_lengkap' => ['sometimes', 'required', 'string', 'max:255'],
@@ -66,10 +66,16 @@ class UpdateProfileRequest extends FormRequest
             'kelurahan_id' => ['nullable', 'integer', 'exists:kelurahan,id'],
             'alamat' => ['nullable', 'string', 'max:1000'],
 
-            // 4. Kredensial Akun
+            // 4. Data Orang Tua / Wali (Khusus Murid)
+            'nama_ayah' => ['nullable', 'string', 'max:150'],
+            'nama_ibu' => ['nullable', 'string', 'max:150'],
+            'nama_wali' => ['nullable', 'string', 'max:150'],
+            'no_hp_ortu' => ['nullable', 'string', 'max:30'],
+
+            // 5. Kredensial Akun
             'username' => ['sometimes', 'required', 'string', 'min:3', 'max:50', 'alpha_dash', 'unique:users,username,'.$userId],
 
-            // 5. Foto Profil
+            // 6. Foto Profil
             'foto' => ['nullable', 'string'],
             'remove_foto' => ['nullable', 'boolean'],
         ];

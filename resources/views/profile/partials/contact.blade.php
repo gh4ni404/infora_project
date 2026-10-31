@@ -14,22 +14,26 @@
 
             <div class="form-section-label mb-2">Saluran Komunikasi</div>
 
+            @php
+                $entity = $gtk ?: $murid;
+            @endphp
+
             <div class="form-grid-2col">
                 <x-form-input
                     name="no_hp"
                     id="profile_no_hp"
                     label="Nomor WhatsApp / HP"
-                    :value="old('no_hp', $gtk?->no_hp)"
+                    :value="old('no_hp', $entity ? $entity->no_hp : null)"
                     placeholder="Contoh: 081234567890"
                     maxlength="30"
-                    hint="Nomor aktif untuk koordinasi kedinasan."
+                    hint="Nomor aktif untuk koordinasi dan komunikasi resmi."
                 />
 
                 <x-form-input
                     type="email"
                     name="email"
                     id="profile_email"
-                    label="Alamat Email Pribadi / Dinas"
+                    label="Alamat Email Pribadi / Akun"
                     :value="old('email', $user->email)"
                     placeholder="Contoh: user@sekolah.sch.id"
                     maxlength="100"
@@ -37,7 +41,7 @@
                 />
             </div>
 
-            @if ($gtk)
+            @if ($entity)
                 <div class="form-section-label mt-4 mb-2">Wilayah Domisili Tempat Tinggal</div>
 
                 <div class="form-grid-2col">
@@ -49,7 +53,7 @@
                             placeholder="Pilih Provinsi"
                             search-placeholder="Cari provinsi..."
                             :options="$provinsiList ?? []"
-                            :value="old('provinsi_id', $gtk->provinsi_id)"
+                            :value="old('provinsi_id', $entity->provinsi_id)"
                         />
                         @error('provinsi_id')
                             <div class="form-error">{{ $message }}</div>
@@ -63,8 +67,8 @@
                             id="profile_kabupaten_id"
                             placeholder="Pilih Kabupaten/Kota"
                             search-placeholder="Cari kabupaten/kota..."
-                            :disabled="!old('provinsi_id', $gtk->provinsi_id)"
-                            :value="old('kabupaten_id', $gtk->kabupaten_id)"
+                            :disabled="!old('provinsi_id', $entity->provinsi_id)"
+                            :value="old('kabupaten_id', $entity->kabupaten_id)"
                         />
                         @error('kabupaten_id')
                             <div class="form-error">{{ $message }}</div>
@@ -78,8 +82,8 @@
                             id="profile_kecamatan_id"
                             placeholder="Pilih Kecamatan"
                             search-placeholder="Cari kecamatan..."
-                            :disabled="!old('kabupaten_id', $gtk->kabupaten_id)"
-                            :value="old('kecamatan_id', $gtk->kecamatan_id)"
+                            :disabled="!old('kabupaten_id', $entity->kabupaten_id)"
+                            :value="old('kecamatan_id', $entity->kecamatan_id)"
                         />
                         @error('kecamatan_id')
                             <div class="form-error">{{ $message }}</div>
@@ -93,8 +97,8 @@
                             id="profile_kelurahan_id"
                             placeholder="Pilih Kelurahan/Desa"
                             search-placeholder="Cari kelurahan/desa..."
-                            :disabled="!old('kecamatan_id', $gtk->kecamatan_id)"
-                            :value="old('kelurahan_id', $gtk->kelurahan_id)"
+                            :disabled="!old('kecamatan_id', $entity->kecamatan_id)"
+                            :value="old('kelurahan_id', $entity->kelurahan_id)"
                         />
                         @error('kelurahan_id')
                             <div class="form-error">{{ $message }}</div>
@@ -107,7 +111,7 @@
                         name="alamat"
                         id="profile_alamat"
                         label="Alamat Tempat Tinggal Lengkap"
-                        :value="old('alamat', $gtk->alamat)"
+                        :value="old('alamat', $entity->alamat)"
                         placeholder="Alamat jalan, RT/RW, nomor rumah, dan detail tempat tinggal..."
                         rows="3"
                     />

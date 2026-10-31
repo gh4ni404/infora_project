@@ -3,7 +3,9 @@
 use App\Models\Gtk;
 use App\Models\Kabupaten;
 use App\Models\Kecamatan;
+use App\Models\Kelas;
 use App\Models\Kelurahan;
+use App\Models\Murid;
 use App\Models\Provinsi;
 use App\Models\School;
 use App\Models\User;
@@ -336,4 +338,180 @@ test('admin dashboard hides profile completion alert for superadmin preview', fu
 
     $response->assertOk()
         ->assertDontSee('Lengkapi Profil & Kata Sandi:');
+});
+
+test('authenticated murid user can view profile page with murid specific tabs and academic info', function () {
+    $kelas = Kelas::factory()->create([
+        'school_id' => $this->school->id,
+        'nama' => 'XII RPL 1',
+    ]);
+
+    $muridUser = User::factory()->create([
+        'school_id' => $this->school->id,
+        'name' => 'Fadhil Pratama',
+        'username' => '0091234567',
+        'email' => 'fadhil@infora.test',
+        'user_type' => 'murid',
+        'is_active' => true,
+    ]);
+
+    $murid = Murid::factory()->create([
+        'school_id' => $this->school->id,
+        'user_id' => $muridUser->id,
+        'kelas_id' => $kelas->id,
+        'nama_lengkap' => 'Fadhil Pratama',
+        'nisn' => '0091234567',
+        'nis' => '24012',
+        'angkatan' => '2026',
+        'status' => 'aktif',
+        'is_active' => true,
+    ]);
+
+    $response = $this->actingAs($muridUser)->get(route('profile.index'));
+
+    $response->assertOk()
+        ->assertViewIs('profile.index')
+        ->assertSee('Informasi Pribadi')
+        ->assertSee('Kontak & Domisili', false)
+        ->assertSee('Data Orang Tua / Wali', false)
+        ->assertSee('Status Keaktifan')
+        ->assertDontSee('Klasifikasi & Pendidikan', false)
+        ->assertSee('0091234567')
+        ->assertSee('24012')
+        ->assertSee('XII RPL 1')
+        ->assertSee('Fadhil Pratama');
+});
+
+test('authenticated murid user can update personal, contact, and parent data', function () {
+    $provinsi = Provinsi::factory()->create(['nama' => 'Sulawesi Selatan']);
+    $kabupaten = Kabupaten::factory()->create(['provinsi_id' => $provinsi->id, 'nama' => 'Kabupaten Bone']);
+    $kecamatan = Kecamatan::factory()->create(['kabupaten_id' => $kabupaten->id, 'nama' => 'Tanete Riattang']);
+    $kelurahan = Kelurahan::factory()->create(['kecamatan_id' => $kecamatan->id, 'nama' => 'Biru']);
+
+    $muridUser = User::factory()->create([
+        'school_id' => $this->school->id,
+        'name' => 'Siti Rahma',
+        'username' => '0099887766',
+        'email' => 'siti@infora.test',
+        'user_type' => 'murid',
+        'is_active' => true,
+    ]);
+
+    $murid = Murid::factory()->create([
+        'school_id' => $this->school->id,
+        'user_id' => $muridUser->id,
+        'nama_lengkap' => 'Siti Rahma',
+        'nisn' => '0099887766',
+        'nis' => '24099',
+    ]);
+
+    // Update Personal Biodata
+    $responsePersonal = $this->actingAs($muridUser)->put(route('profile.update'), [
+        'tab' => 'personal',
+        'nama_lengkap' => 'Siti Rahmawati',
+        'username' => '0099887766',
+        'jenis_kelamin' => 'P',
+        'nik' => '7308112233440001',
+        'tempat_lahir' => 'Watampone',
+        'tanggal_lahir' => '2008-05-12',
+        'agama' => 'Islam',
+    ]);
+
+    $responsePersonal->assertRedirect(route('profile.index', ['tab' => 'personal']));
+    $responsePersonal->assertSessionHas('success');
+
+    $this->assertDatabaseHas('murids', [
+        'id' => $murid->id,
+        'nama_lengkap' => 'Siti Rahmawati',
+        'jenis_kelamin' => 'P',
+        'nik' => '7308112233440001',
+        'tempat_lahir' => 'Watampone',
+        'agama' => 'Islam',
+    ]);
+    expect($murid->fresh()->tanggal_lahir?->format('Y-m-d'))->toBe('2008-05-12');
+
+    // Update Contact & Domisili
+    $responseContact = $this->actingAs($muridUser)->put(route('profile.update'), [
+        'tab' => 'contact',
+        'email' => 'siti.new@infora.test',
+        'no_hp' => '082199887766',
+        'provinsi_id' => $provinsi->id,
+        'kabupaten_id' => $kabupaten->id,
+        'kecamatan_id' => $kecamatan->id,
+        'kelurahan_id' => $kelurahan->id,
+        'alamat' => 'Jl. Merdeka No. 45',
+    ]);
+
+    $responseContact->assertRedirect(route('profile.index', ['tab' => 'contact']));
+
+    $this->assertDatabaseHas('murids', [
+        'id' => $murid->id,
+        'no_hp' => '082199887766',
+        'email' => 'siti.new@infora.test',
+        'provinsi_id' => $provinsi->id,
+        'kabupaten_id' => $kabupaten->id,
+        'kecamatan_id' => $kecamatan->id,
+        'kelurahan_id' => $kelurahan->id,
+        'alamat' => 'Jl. Merdeka No. 45',
+    ]);
+
+    // Update Data Orang Tua / Wali
+    $responseParent = $this->actingAs($muridUser)->put(route('profile.update'), [
+        'tab' => 'parent',
+        'nama_ayah' => 'Baharuddin',
+        'nama_ibu' => 'Maryam',
+        'nama_wali' => 'H. Basri',
+        'no_hp_ortu' => '081233445566',
+    ]);
+
+    $responseParent->assertRedirect(route('profile.index', ['tab' => 'parent']));
+
+    $this->assertDatabaseHas('murids', [
+        'id' => $murid->id,
+        'nama_ayah' => 'Baharuddin',
+        'nama_ibu' => 'Maryam',
+        'nama_wali' => 'H. Basri',
+        'no_hp_ortu' => '081233445566',
+    ]);
+});
+
+test('murid user cannot alter protected fields like nis, nisn, kelas_id, or is_active via profile update', function () {
+    $kelas = Kelas::factory()->create(['school_id' => $this->school->id]);
+
+    $muridUser = User::factory()->create([
+        'school_id' => $this->school->id,
+        'name' => 'Akbar Kurniawan',
+        'username' => '0087771122',
+        'user_type' => 'murid',
+        'is_active' => true,
+    ]);
+
+    $murid = Murid::factory()->create([
+        'school_id' => $this->school->id,
+        'user_id' => $muridUser->id,
+        'kelas_id' => $kelas->id,
+        'nisn' => '0087771122',
+        'nis' => '24077',
+        'is_active' => true,
+    ]);
+
+    // Upaya manipulasi field terproteksi
+    $response = $this->actingAs($muridUser)->put(route('profile.update'), [
+        'tab' => 'personal',
+        'nama_lengkap' => 'Akbar Kurniawan',
+        'nisn' => '9999999999',
+        'nis' => '99999',
+        'kelas_id' => null,
+        'is_active' => 0,
+    ]);
+
+    $response->assertRedirect(route('profile.index', ['tab' => 'personal']));
+
+    $this->assertDatabaseHas('murids', [
+        'id' => $murid->id,
+        'nisn' => '0087771122',
+        'nis' => '24077',
+        'kelas_id' => $kelas->id,
+        'is_active' => true,
+    ]);
 });

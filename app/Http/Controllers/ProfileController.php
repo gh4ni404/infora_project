@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Profile\UpdatePasswordRequest;
 use App\Http\Requests\Profile\UpdateProfileRequest;
 use App\Models\Gtk;
+use App\Models\Murid;
 use App\Models\Provinsi;
 use App\Support\ImageUploader;
 use Illuminate\Http\RedirectResponse;
@@ -27,10 +28,16 @@ class ProfileController extends Controller
             'gtk.kabupaten',
             'gtk.kecamatan',
             'gtk.kelurahan',
+            'murid.kelas.tingkatan',
+            'murid.kelas.jurusan',
+            'murid.provinsi',
+            'murid.kabupaten',
+            'murid.kecamatan',
+            'murid.kelurahan',
         ]);
 
         // Hubungkan otomatis jika ada data GTK di sekolah yang cocok tetapi belum ditautkan
-        if (! $user->gtk) {
+        if (! $user->gtk && $user->user_type !== 'murid') {
             $matchingGtk = Gtk::whereNull('user_id')
                 ->where(function ($q) use ($user) {
                     if (filled($user->email)) {
@@ -56,8 +63,36 @@ class ProfileController extends Controller
             }
         }
 
+        // Hubungkan otomatis jika ada data Murid di sekolah yang cocok tetapi belum ditautkan
+        if (! $user->murid && $user->user_type === 'murid') {
+            $matchingMurid = Murid::whereNull('user_id')
+                ->where(function ($q) use ($user) {
+                    if (filled($user->email)) {
+                        $q->where('email', $user->email);
+                    }
+                    if (filled($user->username)) {
+                        $q->orWhere('nisn', $user->username)
+                            ->orWhere('nis', $user->username);
+                    }
+                })
+                ->when($user->school_id, fn ($q) => $q->where('school_id', $user->school_id))
+                ->first();
+
+            if ($matchingMurid) {
+                $matchingMurid->update(['user_id' => $user->id]);
+                $user->load([
+                    'murid.kelas.tingkatan',
+                    'murid.kelas.jurusan',
+                    'murid.provinsi',
+                    'murid.kabupaten',
+                    'murid.kecamatan',
+                    'murid.kelurahan',
+                ]);
+            }
+        }
+
         $activeTab = $request->query('tab', 'personal');
-        $validTabs = ['personal', 'employment', 'contact', 'account', 'status', 'photo', 'security', 'official'];
+        $validTabs = ['personal', 'employment', 'contact', 'parent', 'account', 'status', 'photo', 'security', 'official'];
         if (! in_array($activeTab, $validTabs, true)) {
             $activeTab = 'personal';
         }
@@ -95,6 +130,7 @@ class ProfileController extends Controller
         return view('profile.index', [
             'user' => $user,
             'gtk' => $user->gtk,
+            'murid' => $user->murid,
             'school' => $user->school,
             'activeTab' => $activeTab,
             'provinsiList' => $provinsiList,
@@ -109,9 +145,9 @@ class ProfileController extends Controller
     public function update(UpdateProfileRequest $request): RedirectResponse
     {
         $user = $request->user();
-        $user->loadMissing(['gtk', 'school']);
+        $user->loadMissing(['gtk', 'murid', 'school']);
 
-        if (! $user->gtk) {
+        if (! $user->gtk && $user->user_type !== 'murid') {
             $matchingGtk = Gtk::whereNull('user_id')
                 ->where(function ($q) use ($user) {
                     if (filled($user->email)) {
@@ -132,8 +168,29 @@ class ProfileController extends Controller
             }
         }
 
+        if (! $user->murid && $user->user_type === 'murid') {
+            $matchingMurid = Murid::whereNull('user_id')
+                ->where(function ($q) use ($user) {
+                    if (filled($user->email)) {
+                        $q->where('email', $user->email);
+                    }
+                    if (filled($user->username)) {
+                        $q->orWhere('nisn', $user->username)
+                            ->orWhere('nis', $user->username);
+                    }
+                })
+                ->when($user->school_id, fn ($q) => $q->where('school_id', $user->school_id))
+                ->first();
+
+            if ($matchingMurid) {
+                $matchingMurid->update(['user_id' => $user->id]);
+                $user->load('murid');
+            }
+        }
+
         $validated = $request->validated();
         $gtk = $user->gtk;
+        $murid = $user->murid;
 
         // 1. Update nama lengkap pada User
         $namaLengkap = $validated['nama_lengkap'] ?? $validated['name'] ?? null;
@@ -162,6 +219,11 @@ class ProfileController extends Controller
                 ImageUploader::delete($gtk->foto_path);
                 $gtk->foto_path = null;
             }
+
+            if ($murid && $murid->foto_path) {
+                ImageUploader::delete($murid->foto_path);
+                $murid->foto_path = null;
+            }
         } elseif (! empty($validated['foto'])) {
             $newAvatarPath = ImageUploader::uploadBase64(
                 base64String: $validated['foto'],
@@ -178,6 +240,10 @@ class ProfileController extends Controller
 
                 if ($gtk) {
                     $gtk->foto_path = $newAvatarPath;
+                }
+
+                if ($murid) {
+                    $murid->foto_path = $newAvatarPath;
                 }
             }
         }
@@ -223,6 +289,48 @@ class ProfileController extends Controller
 
             if (! empty($gtkData)) {
                 $gtk->update($gtkData);
+            }
+        }
+
+        // 6. Perbarui data Murid jika akun terhubung ke profil Murid
+        if ($murid) {
+            $muridData = [];
+
+            if ($namaLengkap !== null) {
+                $muridData['nama_lengkap'] = $namaLengkap;
+            }
+
+            // Informasi Pribadi
+            foreach (['jenis_kelamin', 'nik', 'tempat_lahir', 'tanggal_lahir', 'agama'] as $field) {
+                if (array_key_exists($field, $validated)) {
+                    $muridData[$field] = $validated[$field] ?: null;
+                }
+            }
+
+            // Kontak & Wilayah Domisili
+            foreach (['no_hp', 'provinsi_id', 'kabupaten_id', 'kecamatan_id', 'kelurahan_id', 'alamat'] as $field) {
+                if (array_key_exists($field, $validated)) {
+                    $muridData[$field] = $validated[$field] ?: null;
+                }
+            }
+
+            // Data Orang Tua / Wali
+            foreach (['nama_ayah', 'nama_ibu', 'nama_wali', 'no_hp_ortu'] as $field) {
+                if (array_key_exists($field, $validated)) {
+                    $muridData[$field] = $validated[$field] ?: null;
+                }
+            }
+
+            if (array_key_exists('email', $validated)) {
+                $muridData['email'] = $user->email;
+            }
+
+            if ($murid->isDirty('foto_path')) {
+                $muridData['foto_path'] = $murid->foto_path;
+            }
+
+            if (! empty($muridData)) {
+                $murid->update($muridData);
             }
         }
 
