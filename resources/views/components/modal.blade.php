@@ -68,7 +68,7 @@
         <div class="modal-backdrop hidden" id="{{ $id }}" role="dialog" aria-modal="true" aria-labelledby="{{ $id }}Title">
             <div class="modal-dialog {{ $confirmSizeClass }} relative overflow-hidden text-center">
                 @if ($withForm)
-                    <form method="POST" action="{{ $action }}" @if ($formId) id="{{ $formId }}" @endif class="m-0 flex flex-col">
+                    <form method="POST" action="{{ $action }}" @if ($formId) id="{{ $formId }}" @endif class="m-0 flex flex-col" novalidate>
                         @csrf
                         @if (in_array($defaultMethod, ['PUT', 'PATCH', 'DELETE'], true))
                             @method($defaultMethod)
@@ -127,7 +127,7 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ $action }}" @if ($formId) id="{{ $formId }}" @endif enctype="multipart/form-data">
+                <form method="POST" action="{{ $action }}" @if ($formId) id="{{ $formId }}" @endif enctype="multipart/form-data" novalidate>
                     @csrf
                     <div class="modal-body">
                         @if ($schoolId)
@@ -210,7 +210,7 @@
                 @endif
 
                 @if ($action !== null || $method)
-                    <form method="POST" action="{{ $action }}" @if ($formId) id="{{ $formId }}" @endif @if ($enctype) enctype="{{ $enctype }}" @endif>
+                    <form method="POST" action="{{ $action }}" @if ($formId) id="{{ $formId }}" @endif @if ($enctype) enctype="{{ $enctype }}" @endif novalidate>
                         @csrf
                         @if (in_array($method, ['PUT', 'PATCH', 'DELETE'], true))
                             @method($method)

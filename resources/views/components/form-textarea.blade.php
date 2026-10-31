@@ -38,7 +38,5 @@
         <div class="form-hint">{{ $hint }}</div>
     @endif
 
-    @error($name)
-        <div class="form-error">{{ $message }}</div>
-    @enderror
+    <x-form-error :name="$name" />
 </div>
