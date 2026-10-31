@@ -57,6 +57,16 @@ class Gtk extends Model
     ];
 
     /**
+     * Daftar atribut tambahan yang otomatis disertakan dalam serialisasi model.
+     *
+     * @var list<string>
+     */
+    protected $appends = [
+        'foto_url',
+        'avatar_url',
+    ];
+
+    /**
      * Tipe casting atribut model.
      *
      * @return array<string, string>
@@ -199,6 +209,24 @@ class Gtk extends Model
         }
 
         return ! $this->is_pendidik;
+    }
+
+    /**
+     * Dapatkan URL publik dari foto profil / pasfoto GTK jika tersedia.
+     */
+    public function getFotoUrlAttribute(): ?string
+    {
+        $path = $this->foto_path ?: $this->user?->avatar_path;
+
+        return ! empty($path) ? asset('storage/'.$path) : null;
+    }
+
+    /**
+     * Alias avatar_url untuk kompatibilitas universal.
+     */
+    public function getAvatarUrlAttribute(): ?string
+    {
+        return $this->foto_url;
     }
 
     /**

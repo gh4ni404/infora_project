@@ -166,7 +166,7 @@ class MuridController extends Controller
             'nama_ibu' => $murid->nama_ibu ?: '-',
             'nama_wali' => $murid->nama_wali ?: '-',
             'no_hp_ortu' => $murid->no_hp_ortu ?: '-',
-            'foto_url' => $murid->foto_path ? asset('storage/'.$murid->foto_path) : null,
+            'foto_url' => $murid->foto_url,
             'status' => $murid->status,
             'is_active' => (bool) $murid->is_active,
             'user_id' => $murid->user_id,
@@ -365,7 +365,7 @@ class MuridController extends Controller
                     'Agama' => [
                         'options' => $agamaList,
                         'title' => 'Pilih Agama',
-                        'prompt' => 'Pilih agama resmi siswa',
+                        'prompt' => 'Pilih agama resmi murid',
                     ],
                 ],
                 'reference_sheet' => [
@@ -408,7 +408,7 @@ class MuridController extends Controller
             'Nama Wali',
             'No HP Ortu / WA',
             'Alamat Lengkap',
-            'Status Siswa',
+            'Status Murid',
             'Status Akun',
             'Username Akun',
         ];

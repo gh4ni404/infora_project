@@ -489,7 +489,7 @@ body {
 
 /* ==========================================================================
    Badges, Status Pills and Legend Indicators System (Universal)
-   Dapat digunakan oleh seluruh modul: Sekolah, Kalender, Siswa, Guru, dll.
+   Dapat digunakan oleh seluruh modul: Sekolah, Kalender, Murid, Guru, dll.
    ========================================================================== */
 .badge {
     display: inline-flex;
@@ -1335,6 +1335,13 @@ body {
     border-color: var(--infora-border);
 }
 
+.user-avatar-circle.avatar-xs {
+    width: 24px;
+    height: 24px;
+    font-size: 0.6875rem;
+    box-shadow: none;
+}
+
 .user-avatar-circle.avatar-sm {
     width: 28px;
     height: 28px;
@@ -1513,7 +1520,7 @@ body {
     overflow: hidden;
 }
 
-.user-avatar-circle:has(img),
+.user-avatar-circle:has(img:not(.hidden)),
 .user-avatar-circle.has-image {
     background: transparent;
 }
@@ -2970,8 +2977,7 @@ input[data-transform="title-case"] {
     border: 1px solid rgba(147, 51, 234, 0.25);
 }
 
-.badge-role-murid,
-.badge-role-siswa {
+.badge-role-murid {
     background-color: rgba(245, 158, 11, 0.12);
     color: #d97706;
     border: 1px solid rgba(245, 158, 11, 0.25);
@@ -4763,7 +4769,7 @@ body.modal-open {
 /* ==========================================================================
    Universal Master-Detail Layout System and Activation Controls
    Dapat digunakan dalam: Master Tahun Ajaran dan Semester, Master Mapel dan KD,
-   Master Kelas dan Siswa, serta hierarki relasi data lainnya.
+   Master Kelas dan Murid, serta hierarki relasi data lainnya.
    ========================================================================== */
 .master-detail-layout {
     display: flex;

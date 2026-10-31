@@ -118,14 +118,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if the user is a Student (backward compatibility alias).
-     */
-    public function isSiswa(): bool
-    {
-        return $this->isMurid() || $this->user_type === 'siswa';
-    }
-
-    /**
      * Get all menu permissions assigned to this user.
      *
      * @return HasMany<UserMenuPermission, $this>
@@ -212,6 +204,14 @@ class User extends Authenticatable
         }
 
         return null;
+    }
+
+    /**
+     * Alias foto_url untuk kompatibilitas universal.
+     */
+    public function getFotoUrlAttribute(): ?string
+    {
+        return $this->avatar_url;
     }
 
     /**

@@ -17,13 +17,7 @@
         {{-- Sisi Kiri: Navigasi Sidebar & Mini Profile Card --}}
         <div>
             <div class="card-surface p-4 text-center">
-                <div class="user-avatar-circle avatar-lg mx-auto mb-3 {{ $user->avatar_url ? 'has-image' : '' }}">
-                    @if ($user->avatar_url)
-                        <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}">
-                    @else
-                        {{ strtoupper(substr($user->name, 0, 2)) }}
-                    @endif
-                </div>
+                <x-avatar :src="$user->avatar_url" :name="$user->name" size="lg" class="mx-auto mb-3" />
 
                 <h3 class="user-name-text font-bold text-base mb-1">{{ $user->name }}</h3>
                 <div class="brand-subtitle text-xs mb-3">&#64;{{ $user->username }}</div>
@@ -34,7 +28,7 @@
                             'super_admin' => 'Super Administrator',
                             'admin' => 'Administrator Sekolah',
                             'guru' => 'Pendidik / Guru',
-                            'murid', 'siswa' => 'Peserta Didik',
+                            'murid' => 'Peserta Didik',
                             default => ucfirst($user->user_type)
                         } }}
                     </span>

@@ -117,16 +117,10 @@
                     <!-- Reusable Universal Dropdown Menu (Upward) -->
                     <div id="userDropupMenu" class="dropdown-menu dropdown-menu-up dropdown-menu-full hidden" role="menu" aria-orientation="vertical" aria-labelledby="userProfileTrigger">
                         <div class="dropdown-header">
-                            <div class="user-avatar-circle avatar-sm {{ auth()->user()?->avatar_url ? 'has-image' : '' }}">
-                                @if (auth()->user()?->avatar_url)
-                                    <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}">
-                                @else
-                                    {{ strtoupper(substr(auth()->user()->name ?? 'SA', 0, 2)) }}
-                                @endif
-                            </div>
+                            <x-avatar :src="auth()->user()?->avatar_url" :name="auth()->user()?->name" size="sm" />
                             <div class="user-meta-info">
                                 <span class="user-name-text">{{ auth()->user()->name }}</span>
-                                <span class="brand-subtitle">{{ auth()->user()?->isSuperAdmin() ? 'Super Administrator' : match(auth()->user()?->user_type) { 'admin' => 'Administrator Sekolah', 'guru' => 'Tenaga Pendidik', 'siswa' => 'Peserta Didik', default => 'Pengguna Sistem' } }}</span>
+                                <span class="brand-subtitle">{{ auth()->user()?->isSuperAdmin() ? 'Super Administrator' : match(auth()->user()?->user_type) { 'admin' => 'Administrator Sekolah', 'guru' => 'Tenaga Pendidik', 'murid' => 'Peserta Didik', default => 'Pengguna Sistem' } }}</span>
                             </div>
                         </div>
                         <div class="dropdown-divider"></div>
@@ -156,13 +150,7 @@
 
                     <!-- User Section Button Trigger -->
                     <button type="button" class="user-card-button" id="userProfileTrigger" aria-haspopup="true" aria-expanded="false" title="Menu Pengguna">
-                        <div class="user-avatar-circle {{ auth()->user()?->avatar_url ? 'has-image' : '' }}">
-                            @if (auth()->user()?->avatar_url)
-                                <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}">
-                            @else
-                                {{ strtoupper(substr(auth()->user()->name ?? 'SA', 0, 2)) }}
-                            @endif
-                        </div>
+                        <x-avatar :src="auth()->user()?->avatar_url" :name="auth()->user()?->name" />
                         <div class="user-meta-info">
                             <span class="user-name-text">{{ auth()->user()->name }}</span>
                             <span class="brand-subtitle">@<span>{{ auth()->user()->username ?? 'superadmin' }}</span></span>

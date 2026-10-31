@@ -65,14 +65,14 @@ test('search toolbar renders the filter form with search input and per-page sele
 
 test('search toolbar renders customizable total prefix', function () {
     $defaultView = $this->blade(
-        '<x-search-toolbar :total="10" total-label="siswa" />'
+        '<x-search-toolbar :total="10" total-label="murid" />'
     );
     $defaultView->assertSee('Total:');
     $defaultView->assertSee('10');
-    $defaultView->assertSee('siswa');
+    $defaultView->assertSee('murid');
 
     $customView = $this->blade(
-        '<x-search-toolbar :total="10" total-label="siswa" total-prefix="Jumlah Keseluruhan:" />'
+        '<x-search-toolbar :total="10" total-label="murid" total-prefix="Jumlah Keseluruhan:" />'
     );
     $customView->assertSee('Jumlah Keseluruhan:');
     $customView->assertDontSee('Total:');
@@ -636,4 +636,35 @@ test('status-banner renders built-in button action when action-type is button', 
     $view->assertSee('id="btnRunDiagnostic"', false);
     $view->assertSee('btn-primary', false);
     $view->assertSee('Jalankan Diagnostik');
+});
+
+test('avatar component renders initials from name when no image is provided', function () {
+    $view = $this->blade(
+        '<x-avatar name="Nurul Fajrin" />'
+    );
+
+    $view->assertSee('user-avatar-circle');
+    $view->assertSee('NU');
+    $view->assertDontSee('<img', false);
+});
+
+test('avatar component renders image when src is provided', function () {
+    $view = $this->blade(
+        '<x-avatar src="photos/avatar/avatar_sample.jpg" name="Ahmad Dani" size="sm" />'
+    );
+
+    $view->assertSee('user-avatar-circle avatar-sm has-image', false);
+    $view->assertSee('/storage/photos/avatar/avatar_sample.jpg', false);
+    $view->assertSee('alt="Ahmad Dani"', false);
+    $view->assertDontSee('<span>AH</span>', false);
+});
+
+test('avatar component accepts custom classes and attributes', function () {
+    $view = $this->blade(
+        '<x-avatar name="Budi" size="lg" class="mx-auto mb-3" id="profileAvatar" />'
+    );
+
+    $view->assertSee('user-avatar-circle avatar-lg mx-auto mb-3', false);
+    $view->assertSee('id="profileAvatar"', false);
+    $view->assertSee('BU');
 });

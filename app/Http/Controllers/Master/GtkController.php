@@ -198,7 +198,7 @@ class GtkController extends Controller
             'alamat_lengkap' => $gtk->alamat_lengkap,
             'pendidikan_terakhir' => $gtk->pendidikan_terakhir ?: '-',
             'jurusan_pendidikan' => $gtk->jurusan_pendidikan ?: '-',
-            'foto_url' => $gtk->foto_path ? asset('storage/'.$gtk->foto_path) : null,
+            'foto_url' => $gtk->foto_url,
             'is_active' => (bool) $gtk->is_active,
             'user_id' => $gtk->user_id,
             'username' => $gtk->user?->username ?: '-',

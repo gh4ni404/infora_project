@@ -243,6 +243,45 @@ test('authenticated user can update avatar photo via personal tab', function () 
         ->and($this->gtk->foto_path)->not->toBeNull();
 });
 
+test('authenticated murid user can upload and sync avatar photo', function () {
+    $muridUser = User::factory()->create([
+        'school_id' => $this->school->id,
+        'name' => 'Nurul Fajrin',
+        'username' => '0006284915',
+        'email' => 'nurul@infora.test',
+        'user_type' => 'murid',
+        'is_active' => true,
+    ]);
+
+    $murid = Murid::factory()->create([
+        'school_id' => $this->school->id,
+        'user_id' => $muridUser->id,
+        'nama_lengkap' => 'Nurul Fajrin',
+        'nisn' => '0006284915',
+        'foto_path' => null,
+    ]);
+
+    $base64Image = 'data:image/png;base64,'.base64_encode(
+        base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==')
+    );
+
+    $response = $this->actingAs($muridUser)->put(route('profile.update'), [
+        'tab' => 'personal',
+        'foto' => $base64Image,
+    ]);
+
+    $response->assertRedirect(route('profile.index', ['tab' => 'personal']))
+        ->assertSessionHas('success');
+
+    $muridUser->refresh();
+    $murid->refresh();
+
+    expect($muridUser->avatar_path)->not->toBeNull()
+        ->and($murid->foto_path)->not->toBeNull()
+        ->and($murid->foto_path)->toBe($muridUser->avatar_path)
+        ->and($murid->foto_url)->not->toBeNull();
+});
+
 test('authenticated user can remove avatar photo', function () {
     $response = $this->actingAs($this->guruUser)->put(route('profile.update'), [
         'tab' => 'personal',

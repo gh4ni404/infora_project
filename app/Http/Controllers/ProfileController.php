@@ -218,11 +218,13 @@ class ProfileController extends Controller
             if ($gtk && $gtk->foto_path) {
                 ImageUploader::delete($gtk->foto_path);
                 $gtk->foto_path = null;
+                $gtk->save();
             }
 
             if ($murid && $murid->foto_path) {
                 ImageUploader::delete($murid->foto_path);
                 $murid->foto_path = null;
+                $murid->save();
             }
         } elseif (! empty($validated['foto'])) {
             $newAvatarPath = ImageUploader::uploadBase64(
@@ -240,10 +242,12 @@ class ProfileController extends Controller
 
                 if ($gtk) {
                     $gtk->foto_path = $newAvatarPath;
+                    $gtk->save();
                 }
 
                 if ($murid) {
                     $murid->foto_path = $newAvatarPath;
+                    $murid->save();
                 }
             }
         }

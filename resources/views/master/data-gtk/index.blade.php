@@ -127,13 +127,7 @@
                     </td>
                     <td>
                         <div class="d-flex align-items-center gap-2">
-                            <div class="user-avatar-circle avatar-sm {{ $gtk->foto_path ? 'has-image' : '' }}">
-                                @if ($gtk->foto_path)
-                                    <img src="{{ asset('storage/' . $gtk->foto_path) }}" alt="{{ $gtk->nama_lengkap }}">
-                                @else
-                                    <span>{{ strtoupper(substr($gtk->nama_lengkap, 0, 2)) }}</span>
-                                @endif
-                            </div>
+                            <x-avatar :src="$gtk->foto_url" :name="$gtk->nama_lengkap" size="sm" />
                             <div>
                                 <div class="table-cell-title font-weight-bold">{{ $gtk->nama_bergelar }}</div>
                                 <div class="table-cell-muted text-xs">
@@ -257,7 +251,7 @@
                                 title="Ubah Data {{ $gtk->nama_bergelar }}"
                                 data-gtk="{{ json_encode($gtk) }}"
                                 data-action="{{ route('master.data-gtk.update', $gtk) }}"
-                                :data-foto-url="$gtk->foto_path ? asset('storage/' . $gtk->foto_path) : null"
+                                :data-foto-url="$gtk->foto_url"
                                 data-username="{{ $gtk->user?->username }}"
                             />
 
