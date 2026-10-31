@@ -114,16 +114,16 @@
                 :options="['' => 'Semua L/P', 'L' => 'Laki-laki', 'P' => 'Perempuan']"
             />
 
-            {{-- Filter Status Siswa --}}
+            {{-- Filter Status Murid --}}
             <x-form-select
                 name="status"
                 id="filterStatus"
                 class="form-select-sm"
-                placeholder="Semua Status Siswa"
+                placeholder="Semua Status Murid"
                 onchange="this.form.submit()"
                 :selected="request('status')"
                 :options="[
-                    '' => 'Semua Status Siswa',
+                    '' => 'Semua Status Murid',
                     'aktif' => 'Aktif',
                     'lulus' => 'Lulus',
                     'mutasi' => 'Mutasi / Pindah',
@@ -154,7 +154,7 @@
                 <th>Peserta Didik</th>
                 <th>Rombel & Angkatan</th>
                 <th class="text-center w-16">L/P</th>
-                <th>Kontak Siswa & Ortu</th>
+                <th>Kontak Murid & Ortu</th>
                 <th class="text-center w-28">Status</th>
                 <th class="text-center w-24">Keaktifan</th>
                 <th class="text-right w-36">Aksi</th>
@@ -171,9 +171,7 @@
                     {{-- Profil Murid --}}
                     <td>
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-brand/10 text-brand flex items-center justify-center font-bold text-sm shrink-0 border border-brand/20">
-                                {{ strtoupper(substr($murid->nama_lengkap, 0, 2)) }}
-                            </div>
+                            <x-avatar :src="$murid->foto_url" :name="$murid->nama_lengkap" size="sm" />
                             <div class="min-w-0">
                                 <div class="font-semibold text-slate-900 truncate">
                                     {{ $murid->nama_lengkap }}
@@ -186,7 +184,7 @@
                                         &bull;
                                     @endif
                                     @if ($murid->nis)
-                                        <span title="NIS">NIS: {{ $murid->nis }}</span>
+                                        <span title="{{ $selectedSchool?->isMadrasah() ? 'NISM' : 'NIS' }}">{{ $selectedSchool?->isMadrasah() ? 'NISM' : 'NIS' }}: {{ $murid->nis }}</span>
                                     @endif
                                     @if (! $murid->nisn && ! $murid->nis)
                                         <span class="text-slate-400 italic">Belum ada nomor induk</span>
@@ -232,11 +230,11 @@
                         </span>
                     </td>
 
-                    {{-- Kontak Siswa & Ortu --}}
+                    {{-- Kontak Murid & Ortu --}}
                     <td>
                         <div class="text-xs space-y-0.5">
                             @if ($murid->no_hp)
-                                <div class="text-slate-700 font-mono" title="No. HP Siswa">
+                                <div class="text-slate-700 font-mono" title="No. HP Murid">
                                     {{ $murid->no_hp }}
                                 </div>
                             @endif
@@ -251,7 +249,7 @@
                         </div>
                     </td>
 
-                    {{-- Status Siswa --}}
+                    {{-- Status Murid --}}
                     <td class="text-center">
                         @php
                             $statusBadgeClass = match($murid->status) {
@@ -369,7 +367,7 @@
         name="confirm"
         id="modalResetPasswordMurid"
         form-id="formResetPasswordMurid"
-        title="Reset Kata Sandi Akun Siswa"
+        title="Reset Kata Sandi Akun Murid"
         cancel-btn-id="btnCancelResetPasswordMurid"
         confirm-btn-id="btnConfirmResetPasswordMurid"
         message-id="resetPasswordMuridMessage"
@@ -453,7 +451,33 @@
                         statusBadge.textContent = data.is_active ? 'Aktif' : 'Nonaktif';
                         statusBadge.className = 'badge ' + (data.is_active ? 'badge-success' : 'badge-neutral');
 
-                        document.getElementById('showMuridInitials').textContent = (data.nama_lengkap || 'MD').substring(0, 2).toUpperCase();
+                        const avatarImg = document.getElementById('showMuridAvatarImg');
+                        const avatarInitials = document.getElementById('showMuridInitials');
+                        const avatarWrap = document.getElementById('showMuridAvatarWrap');
+                        if (data.foto_url) {
+                            if (avatarImg) {
+                                avatarImg.src = data.foto_url;
+                                avatarImg.classList.remove('hidden');
+                            }
+                            if (avatarInitials) {
+                                avatarInitials.classList.add('hidden');
+                            }
+                            if (avatarWrap) {
+                                avatarWrap.classList.add('has-image');
+                            }
+                        } else {
+                            if (avatarImg) {
+                                avatarImg.classList.add('hidden');
+                                avatarImg.src = '';
+                            }
+                            if (avatarInitials) {
+                                avatarInitials.classList.remove('hidden');
+                                avatarInitials.textContent = (data.nama_lengkap || 'MD').substring(0, 2).toUpperCase();
+                            }
+                            if (avatarWrap) {
+                                avatarWrap.classList.remove('has-image');
+                            }
+                        }
                         document.getElementById('showMuridNisn').textContent = data.nisn || '-';
                         document.getElementById('showMuridNis').textContent = data.nis || '-';
                         document.getElementById('showMuridNik').textContent = data.nik || '-';

@@ -187,6 +187,14 @@ class School extends Model
     }
 
     /**
+     * Menentukan apakah satuan pendidikan berada di bawah naungan Kementerian Agama (Kemenag).
+     */
+    public function isMadrasah(): bool
+    {
+        return in_array(strtoupper((string) $this->school_type), ['MI', 'MTS', 'MA', 'MAK'], true);
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

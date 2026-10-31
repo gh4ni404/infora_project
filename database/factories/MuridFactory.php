@@ -99,4 +99,14 @@ class MuridFactory extends Factory
             ]),
         ]);
     }
+
+    /**
+     * State untuk murid madrasah dengan NIS berupa NISM valid 18 digit.
+     */
+    public function madrasah(?string $nism = null): static
+    {
+        return $this->state(fn () => [
+            'nis' => $nism ?? '121232010001'.date('y').fake()->unique()->numerify('####'),
+        ]);
+    }
 }

@@ -63,6 +63,39 @@ class SchoolFactory extends Factory
     }
 
     /**
+     * State: Madrasah Aliyah (MA) school.
+     */
+    public function ma(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'school_type' => 'MA',
+            'name' => 'MA '.$attributes['status'].' '.fake()->numberBetween(1, 20).' '.fake()->city(),
+        ]);
+    }
+
+    /**
+     * State: Madrasah Tsanawiyah (MTs) school.
+     */
+    public function mts(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'school_type' => 'MTs',
+            'name' => 'MTs '.$attributes['status'].' '.fake()->numberBetween(1, 20).' '.fake()->city(),
+        ]);
+    }
+
+    /**
+     * State: Madrasah Ibtidaiyah (MI) school.
+     */
+    public function mi(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'school_type' => 'MI',
+            'name' => 'MI '.$attributes['status'].' '.fake()->numberBetween(1, 20).' '.fake()->city(),
+        ]);
+    }
+
+    /**
      * State: Public (Negeri) school.
      */
     public function negeri(): static

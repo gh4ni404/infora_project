@@ -9,7 +9,8 @@
     {{-- Header Banner Profil Murid --}}
     <div class="card-surface border rounded-2xl p-5 mb-5 bg-gradient-to-r from-slate-50 to-blue-50/40">
         <div class="flex items-start gap-4">
-            <div id="showMuridAvatarWrap" class="w-16 h-16 rounded-2xl bg-brand/10 text-brand flex items-center justify-center font-bold text-xl shrink-0 overflow-hidden shadow-sm border border-brand/20">
+            <div class="user-avatar-circle avatar-lg" id="showMuridAvatarWrap">
+                <img id="showMuridAvatarImg" src="" alt="Foto Murid" class="hidden">
                 <span id="showMuridInitials">MD</span>
             </div>
             <div class="flex-1 min-w-0">
@@ -31,14 +32,14 @@
     <div class="space-y-5 text-sm">
         {{-- Kelompok 1: Identitas & Akademik --}}
         <div>
-            <div class="form-section-label">Identitas & Akademik Siswa</div>
+            <div class="form-section-label">Identitas & Akademik Murid</div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2 bg-slate-50/50 p-3.5 rounded-xl border border-slate-200/70">
                 <div>
                     <span class="text-xs text-slate-500 block">NISN</span>
                     <span class="font-semibold text-slate-800 font-mono" id="showMuridNisn">-</span>
                 </div>
                 <div>
-                    <span class="text-xs text-slate-500 block">Nomor Induk Siswa (NIS)</span>
+                    <span class="text-xs text-slate-500 block">{{ $selectedSchool?->isMadrasah() ? 'NISM (Madrasah)' : 'Nomor Induk Murid (NIS)' }}</span>
                     <span class="font-semibold text-slate-800 font-mono" id="showMuridNis">-</span>
                 </div>
                 <div>
@@ -85,7 +86,7 @@
 
         {{-- Kelompok 3: Data Orang Tua / Wali --}}
         <div>
-            <div class="form-section-label">Data Orang Tua / Wali Siswa</div>
+            <div class="form-section-label">Data Orang Tua / Wali Murid</div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2 bg-slate-50/50 p-3.5 rounded-xl border border-slate-200/70">
                 <div>
                     <span class="text-xs text-slate-500 block">Nama Ayah</span>

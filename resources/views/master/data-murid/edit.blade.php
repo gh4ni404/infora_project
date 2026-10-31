@@ -41,17 +41,21 @@
         <x-form-input
             name="nisn"
             id="edit_nisn"
-            label="NISN (Nomor Induk Siswa Nasional)"
-            placeholder="10 digit nomor NISN nasional"
-            maxlength="20"
+            label="NISN (Nomor Induk Murid Nasional)"
+            placeholder="Maksimal 10 digit nomor NISN"
+            maxlength="10"
+            pattern="[0-9]{1,10}"
         />
 
         <x-form-input
             name="nis"
             id="edit_nis"
-            label="NIS (Nomor Induk Siswa)"
-            placeholder="Nomor induk siswa lokal sekolah"
-            maxlength="30"
+            :label="$selectedSchool?->isMadrasah() ? 'NISM (Nomor Induk Murid Madrasah)' : 'NIS (Nomor Induk Murid)'"
+            :placeholder="$selectedSchool?->isMadrasah() ? '18 digit nomor NISM madrasah' : 'Nomor induk murid lokal sekolah'"
+            :maxlength="$selectedSchool?->isMadrasah() ? '18' : '30'"
+            :pattern="$selectedSchool?->isMadrasah() ? '[0-9]{18}' : null"
+            :hint="$selectedSchool?->isMadrasah() ? 'Aturan wajib madrasah Kemenag (18 digit: 12 digit NSM, 2 digit tahun masuk, 4 digit no. urut).' : null"
+            :required="$selectedSchool?->isMadrasah() ?? false"
         />
 
         <x-form-input
@@ -74,7 +78,7 @@
         <x-form-select
             name="status"
             id="edit_status"
-            label="Status Siswa"
+            label="Status Murid"
             :options="[
                 'aktif' => 'Aktif',
                 'lulus' => 'Lulus',

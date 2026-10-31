@@ -19,7 +19,6 @@
                 label="Nama Lengkap Murid"
                 data-transform="title-case"
                 placeholder="Contoh: Muhammad Raditya"
-                hint="Nama resmi sesuai akta kelahiran / ijazah sebelumnya."
                 required
             />
         </div>
@@ -39,25 +38,27 @@
             label="Rombongan Belajar / Kelas"
             placeholder="-- Belum Masuk Kelas (Dapat Diatur Nanti) --"
             :options="$kelasList->mapWithKeys(fn($k) => [$k->id => $k->nama . ($k->tingkatan ? ' (' . $k->tingkatan->nama . ')' : '')])->all()"
-            hint="Pilih rombel jika murid sudah ditentukan kelasnya."
         />
 
         <x-form-input
             name="nisn"
             id="create_nisn"
-            label="NISN (Nomor Induk Siswa Nasional)"
-            placeholder="10 digit nomor NISN nasional"
-            maxlength="20"
-            hint="Digunakan otomatis sebagai username & kata sandi awal akun murid."
+            label="NISN (Nomor Induk Murid Nasional)"
+            placeholder="Maksimal 10 digit nomor NISN"
+            maxlength="10"
+            pattern="[0-9]{1,10}"
+            hint="Digunakan sebagai username & kata sandi awal akun murid."
         />
 
         <x-form-input
             name="nis"
             id="create_nis"
-            label="NIS (Nomor Induk Siswa)"
-            placeholder="Nomor induk siswa lokal sekolah"
-            maxlength="30"
-            hint="Digunakan sebagai alternatif login jika murid belum memiliki NISN."
+            :label="$selectedSchool?->isMadrasah() ? 'NISM (Nomor Induk Murid Madrasah)' : 'NIS (Nomor Induk Murid)'"
+            :placeholder="$selectedSchool?->isMadrasah() ? '18 digit nomor NISM madrasah' : 'Nomor induk murid lokal sekolah'"
+            :maxlength="$selectedSchool?->isMadrasah() ? '18' : '30'"
+            :pattern="$selectedSchool?->isMadrasah() ? '[0-9]{18}' : null"
+            :hint="$selectedSchool?->isMadrasah() ? 'Aturan wajib madrasah Kemenag (18 digit: 12 digit NSM, 2 digit tahun masuk, 4 digit no. urut).' : 'Digunakan sebagai alternatif login jika murid belum memiliki NISN.'"
+            :required="$selectedSchool?->isMadrasah() ?? false"
         />
 
         <x-form-input
@@ -76,7 +77,6 @@
             label="Alamat Email Murid"
             placeholder="nama@email.com"
             maxlength="100"
-            hint="Opsional: untuk notifikasi dan pemulihan akun murid."
         />
     </div>
 

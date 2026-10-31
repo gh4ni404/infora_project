@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Master;
 
 use App\Models\Murid;
+use App\Models\School;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -28,6 +29,18 @@ class UpdateMuridRequest extends FormRequest
             ]);
         }
 
+        if ($this->has('nisn')) {
+            $this->merge([
+                'nisn' => filled($this->input('nisn')) ? preg_replace('/\s+/', '', (string) $this->input('nisn')) : null,
+            ]);
+        }
+
+        if ($this->has('nis')) {
+            $this->merge([
+                'nis' => filled($this->input('nis')) ? preg_replace('/\s+/', '', (string) $this->input('nis')) : null,
+            ]);
+        }
+
         $this->merge([
             'is_active' => $this->boolean('is_active', true),
         ]);
@@ -44,6 +57,21 @@ class UpdateMuridRequest extends FormRequest
         $murid = $this->route('murid');
         $schoolId = $this->input('school_id') ?? $murid?->school_id;
         $muridId = $murid?->id;
+        $school = $schoolId ? School::find($schoolId) : ($murid?->school ?? null);
+        $isMadrasah = $school?->isMadrasah() ?? false;
+
+        $nisRules = [
+            $isMadrasah ? 'required' : 'nullable',
+            'string',
+            $isMadrasah ? 'size:18' : 'max:30',
+            Rule::unique('murids', 'nis')
+                ->where(fn ($query) => $query->where('school_id', $schoolId)->whereNull('deleted_at'))
+                ->ignore($muridId),
+        ];
+
+        if ($isMadrasah) {
+            $nisRules[] = 'regex:/^\d{18}$/';
+        }
 
         return [
             'school_id' => ['required', 'integer', 'exists:schools,id'],
@@ -52,19 +80,13 @@ class UpdateMuridRequest extends FormRequest
             'nisn' => [
                 'nullable',
                 'string',
-                'max:20',
+                'max:10',
+                'regex:/^\d{1,10}$/',
                 Rule::unique('murids', 'nisn')
                     ->where(fn ($query) => $query->where('school_id', $schoolId)->whereNull('deleted_at'))
                     ->ignore($muridId),
             ],
-            'nis' => [
-                'nullable',
-                'string',
-                'max:30',
-                Rule::unique('murids', 'nis')
-                    ->where(fn ($query) => $query->where('school_id', $schoolId)->whereNull('deleted_at'))
-                    ->ignore($muridId),
-            ],
+            'nis' => $nisRules,
             'kelas_id' => [
                 'nullable',
                 'integer',
@@ -84,6 +106,12 @@ class UpdateMuridRequest extends FormRequest
      */
     public function messages(): array
     {
+        /** @var Murid|null $murid */
+        $murid = $this->route('murid');
+        $schoolId = $this->input('school_id') ?? $murid?->school_id;
+        $school = $schoolId ? School::find($schoolId) : ($murid?->school ?? null);
+        $isMadrasah = $school?->isMadrasah() ?? false;
+
         return [
             'school_id.required' => 'Unit sekolah wajib dipilih.',
             'school_id.exists' => 'Unit sekolah yang dipilih tidak terdaftar di sistem.',
@@ -91,11 +119,45 @@ class UpdateMuridRequest extends FormRequest
             'nama_lengkap.max' => 'Nama lengkap maksimal terdiri atas 255 karakter.',
             'jenis_kelamin.required' => 'Jenis kelamin murid wajib dipilih.',
             'jenis_kelamin.in' => 'Pilihan jenis kelamin tidak valid (harus L atau P).',
+            'nisn.max' => 'NISN maksimal terdiri dari 10 digit angka.',
+            'nisn.regex' => 'NISN harus berupa digit angka dengan panjang maksimal 10 digit.',
             'nisn.unique' => 'NISN ini sudah terdaftar pada murid lain di sekolah yang sama.',
-            'nis.unique' => 'Nomor Induk Siswa (NIS) ini sudah terdaftar pada murid lain di sekolah yang sama.',
+            'nis.required' => 'NISM (Nomor Induk Murid Madrasah) wajib diisi untuk madrasah di bawah naungan Kemenag.',
+            'nis.size' => 'NISM harus terdiri tepat 18 digit angka (12 digit NSM, 2 digit tahun masuk, dan 4 digit nomor urut).',
+            'nis.regex' => 'NISM harus berupa 18 digit angka.',
+            'nis.max' => 'Nomor Induk Murid (NIS) maksimal terdiri dari 30 karakter.',
+            'nis.unique' => $isMadrasah
+                ? 'NISM ini sudah terdaftar pada murid lain di madrasah ini.'
+                : 'Nomor Induk Murid (NIS) ini sudah terdaftar pada murid lain di sekolah yang sama.',
             'kelas_id.exists' => 'Rombongan belajar / kelas yang dipilih tidak valid untuk unit sekolah ini.',
             'email.email' => 'Format alamat email tidak valid.',
-            'status.required' => 'Status siswa wajib dipilih.',
+            'status.required' => 'Status murid wajib dipilih.',
+        ];
+    }
+
+    /**
+     * Nama atribut khusus untuk pesan kesalahan validasi.
+     *
+     * @return array<string, string>
+     */
+    public function attributes(): array
+    {
+        /** @var Murid|null $murid */
+        $murid = $this->route('murid');
+        $schoolId = $this->input('school_id') ?? $murid?->school_id;
+        $school = $schoolId ? School::find($schoolId) : ($murid?->school ?? null);
+        $isMadrasah = $school?->isMadrasah() ?? false;
+
+        return [
+            'school_id' => 'unit sekolah',
+            'nama_lengkap' => 'nama lengkap',
+            'jenis_kelamin' => 'jenis kelamin',
+            'nisn' => 'NISN',
+            'nis' => $isMadrasah ? 'NISM' : 'NIS',
+            'kelas_id' => 'kelas / rombel',
+            'angkatan' => 'tahun angkatan',
+            'email' => 'alamat email',
+            'status' => 'status murid',
         ];
     }
 }
