@@ -60,6 +60,8 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
         Route::put('/user/user/{user}', [MenuAccessController::class, 'updateUser'])->name('user.user.update');
         Route::post('/user/user/{user}/apply-template', [MenuAccessController::class, 'applyTemplateToUser'])->name('user.user.apply-template');
         Route::patch('/user/user/{user}/activate', [MenuAccessController::class, 'activate'])->name('user.activate');
+        Route::patch('/user/user/{user}/toggle-status', [MenuAccessController::class, 'toggleStatus'])->name('user.toggle-status');
+        Route::delete('/user/user/{user}', [MenuAccessController::class, 'destroy'])->name('user.destroy');
         Route::get('/user/template/{roleKey}', [MenuAccessController::class, 'editTemplate'])->name('user.template');
         Route::put('/user/template/{roleKey}', [MenuAccessController::class, 'updateTemplate'])->name('user.template.update');
     });

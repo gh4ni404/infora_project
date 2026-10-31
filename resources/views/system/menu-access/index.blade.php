@@ -87,7 +87,7 @@
                     <th>Tipe Akun</th>
                     <th>Status Akun</th>
                     <th>Status Izin Navigasi</th>
-                    <th class="text-center">Aksi</th>
+                    <th class="text-right">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -99,7 +99,13 @@
                         <td>
                             <div class="user-meta-info">
                                 <div class="user-name-text">{{ $user->name }}</div>
-                                <div class="brand-subtitle">{{ $user->email ?? 'Tanpa Email' }} ({{ $user->username }})</div>
+                                <div class="brand-subtitle">
+                                    @if ($user->email)
+                                        {{ $user->email }} ({{ $user->username }})
+                                    @else
+                                        Tanpa Email ({{ $user->username }})
+                                    @endif
+                                </div>
                             </div>
                         </td>
                         <td>
@@ -123,22 +129,42 @@
                                 <span class="badge badge-neutral">Belum Dikonfigurasi</span>
                             @endif
                         </td>
-                        <td class="text-center">
-                            @if ($user->is_active)
-                                <a href="{{ route('sistem.user.user', $user) }}" class="btn-secondary">
-                                    <x-icon name="square-check" size="16" />
-                                    <span>Kelola Hak Akses</span>
-                                </a>
-                            @else
-                                <form method="POST" action="{{ route('sistem.user.activate', $user) }}" class="inline">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit" class="btn-primary" title="Aktifkan Akun {{ $user->name }}">
-                                        <x-icon name="check-circle" size="16" />
-                                        <span>Aktifkan Akun</span>
+                        <td class="text-right">
+                            <x-table-actions align="right">
+                                @if ($user->is_active)
+                                    <a href="{{ route('sistem.user.user', $user) }}" class="btn-secondary" title="Kelola Hak Akses">
+                                        <x-icon name="square-check" size="16" />
+                                        <span>Hak Akses</span>
+                                    </a>
+                                @endif
+
+                                @if ($user->id !== auth()->id())
+                                    {{-- Tombol Toggle Status (Aktifkan / Nonaktifkan) --}}
+                                    <button
+                                        type="button"
+                                        class="btn-icon btn-open-toggle-user"
+                                        title="{{ $user->is_active ? 'Nonaktifkan Akun ' . $user->name : 'Aktifkan Akun ' . $user->name }}"
+                                        data-action="{{ route('sistem.user.toggle-status', $user) }}"
+                                        data-name="{{ $user->name }}"
+                                        data-username="{{ $user->username }}"
+                                        data-status="{{ $user->is_active ? 'menonaktifkan' : 'mengaktifkan' }}"
+                                        data-user-type="{{ strtoupper($user->user_type === 'siswa' ? 'murid' : $user->user_type) }}"
+                                    >
+                                        <x-icon name="{{ $user->is_active ? 'power' : 'check-circle' }}" class="{{ $user->is_active ? 'text-danger' : 'text-success' }}" size="16" />
                                     </button>
-                                </form>
-                            @endif
+
+                                    {{-- Tombol Hapus Permanen --}}
+                                    <x-crud-button
+                                        action="delete"
+                                        title="Hapus Permanen Akun {{ $user->name }}"
+                                        class="btn-open-delete-user"
+                                        data-action="{{ route('sistem.user.destroy', $user) }}"
+                                        data-name="{{ $user->name }}"
+                                        data-username="{{ $user->username }}"
+                                        data-user-type="{{ strtoupper($user->user_type === 'siswa' ? 'murid' : $user->user_type) }}"
+                                    />
+                                @endif
+                            </x-table-actions>
                         </td>
                     </tr>
                 @empty
@@ -154,4 +180,94 @@
         </x-data-table>
     @endif
 </div>
+
+{{-- Modal Konfirmasi Ubah Status Keaktifan Pengguna --}}
+<x-modal
+    name="confirm"
+    id="modalToggleStatusUser"
+    form-id="formToggleStatusUser"
+    method="PATCH"
+    title="Ubah Status Keaktifan Pengguna"
+    cancel-btn-id="btnCancelToggleStatusUser"
+    confirm-btn-id="btnConfirmToggleStatusUser"
+    message-id="toggleStatusUserMessage"
+    badge-id="toggleStatusUserBadge"
+    item-title-id="toggleStatusUserItemTitle"
+    hint-id="toggleStatusUserHint"
+/>
+
+{{-- Modal Konfirmasi Hapus Permanen Pengguna --}}
+<x-modal
+    name="delete"
+    id="modalDeleteUser"
+    form-id="formDeleteUser"
+    title="Hapus Permanen Pengguna"
+    cancel-btn-id="btnCancelDeleteUser"
+    confirm-btn-id="btnConfirmDeleteUser"
+    message-id="deleteUserMessage"
+    badge-id="deleteUserBadge"
+    item-title-id="deleteUserItemTitle"
+    hint-id="deleteUserHint"
+/>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Setup & Binding Modal Ubah Status Keaktifan Pengguna
+        InforaModals.setup('modalToggleStatusUser', { cancelBtnId: 'btnCancelToggleStatusUser' });
+        InforaModals.bindConfirmButtons('.btn-open-toggle-user', 'modalToggleStatusUser', {
+            formId: 'formToggleStatusUser',
+            title: 'Ubah Status Keaktifan Akun?',
+            message: (el) => `Apakah Anda yakin ingin ${el.dataset.status} akun pengguna berikut?`,
+            badge: (el) => el.dataset.userType,
+            itemTitle: (el) => `${el.dataset.name} (${el.dataset.username})`,
+            hint: (el) => el.dataset.status === 'menonaktifkan'
+                ? 'Pengguna tidak akan dapat masuk ke sistem sampai akun diaktifkan kembali.'
+                : 'Pengguna akan dapat masuk kembali ke sistem menggunakan kredensial yang ada.',
+            confirmText: (el) => el.dataset.status === 'menonaktifkan' ? 'Nonaktifkan' : 'Aktifkan',
+            confirmBtnClass: (el) => el.dataset.status === 'menonaktifkan'
+                ? 'btn-delete w-full justify-center font-medium'
+                : 'btn-primary w-full justify-center font-medium',
+            badgeId: 'toggleStatusUserBadge',
+            messageId: 'toggleStatusUserMessage',
+            itemTitleId: 'toggleStatusUserItemTitle',
+            hintId: 'toggleStatusUserHint',
+        });
+
+        // Setup & Binding Modal Hapus Permanen Pengguna
+        InforaModals.setup('modalDeleteUser', { cancelBtnId: 'btnCancelDeleteUser' });
+        InforaModals.bindDeleteButtons('.btn-open-delete-user', 'modalDeleteUser', {
+            titleId: 'deleteUserItemTitle',
+            onOpen: function (modal, btn) {
+                const name = btn.dataset.name;
+                const username = btn.dataset.username;
+                const userType = btn.dataset.userType;
+
+                const titleHeading = document.getElementById('modalDeleteUserTitle');
+                if (titleHeading) {
+                    titleHeading.textContent = `Hapus Pengguna ${name}?`;
+                }
+
+                const messageEl = document.getElementById('deleteUserMessage');
+                if (messageEl) {
+                    messageEl.textContent = 'Apakah Anda yakin ingin menghapus akun pengguna ini secara permanen dari sistem?';
+                }
+
+                const badgeEl = document.getElementById('deleteUserBadge');
+                if (badgeEl) {
+                    badgeEl.textContent = userType;
+                }
+
+                const itemTitleEl = document.getElementById('deleteUserItemTitle');
+                if (itemTitleEl) {
+                    itemTitleEl.textContent = `${name} (${username})`;
+                }
+
+                const hintEl = document.getElementById('deleteUserHint');
+                if (hintEl) {
+                    hintEl.textContent = 'Seluruh data izin navigasi dan berkas foto profil terkait akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.';
+                }
+            }
+        });
+    });
+</script>
 @endsection

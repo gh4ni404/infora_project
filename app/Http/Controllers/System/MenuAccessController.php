@@ -8,6 +8,7 @@ use App\Http\Requests\System\UpdateUserPermissionsRequest;
 use App\Models\MenuAccessTemplate;
 use App\Models\User;
 use App\Models\UserMenuPermission;
+use App\Support\ImageUploader;
 use App\Support\SidebarCache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -255,18 +256,89 @@ class MenuAccessController extends Controller
     }
 
     /**
-     * Aktifkan kembali akun pengguna yang berstatus nonaktif.
+     * Alihkan status keaktifan akun pengguna (aktif / nonaktif).
      */
-    public function activate(User $user): RedirectResponse
+    public function toggleStatus(Request $request, User $user): RedirectResponse
     {
+        if ($user->id === $request->user()->id) {
+            return back()->with('error', 'Anda tidak dapat mengubah status keaktifan akun Anda sendiri.');
+        }
+
+        $newStatus = ! $user->is_active;
+
+        $user->update(['is_active' => $newStatus]);
+
+        if ($user->gtk) {
+            $user->gtk->update(['is_active' => $newStatus]);
+        }
+
+        if ($user->murid) {
+            $user->murid->update(['is_active' => $newStatus]);
+        }
+
+        SidebarCache::forgetUser($user->id);
+
+        $statusText = $newStatus ? 'diaktifkan kembali' : 'dinonaktifkan';
+
+        return back()->with('success', "Akun pengguna {$user->name} ({$user->username}) berhasil {$statusText}.");
+    }
+
+    /**
+     * Aktifkan kembali akun pengguna yang berstatus nonaktif (kompatibilitas rute lama).
+     */
+    public function activate(Request $request, User $user): RedirectResponse
+    {
+        if ($user->id === $request->user()->id) {
+            return back()->with('error', 'Anda tidak dapat mengubah status keaktifan akun Anda sendiri.');
+        }
+
         $user->update(['is_active' => true]);
 
         if ($user->gtk) {
             $user->gtk->update(['is_active' => true]);
         }
 
+        if ($user->murid) {
+            $user->murid->update(['is_active' => true]);
+        }
+
         SidebarCache::forgetUser($user->id);
 
         return back()->with('success', "Akun pengguna {$user->name} ({$user->username}) berhasil diaktifkan kembali.");
+    }
+
+    /**
+     * Hapus akun pengguna secara permanen dari basis data beserta dependensinya.
+     */
+    public function destroy(Request $request, User $user): RedirectResponse
+    {
+        if ($user->id === $request->user()->id) {
+            return back()->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
+        }
+
+        $name = $user->name;
+        $username = $user->username;
+
+        DB::transaction(function () use ($user) {
+            if ($user->gtk) {
+                $user->gtk->update(['user_id' => null]);
+            }
+
+            if ($user->murid) {
+                $user->murid->update(['user_id' => null]);
+            }
+
+            $user->menuPermissions()->delete();
+
+            if ($user->avatar_path) {
+                ImageUploader::delete($user->avatar_path);
+            }
+
+            $user->delete();
+        });
+
+        SidebarCache::forgetUser($user->id);
+
+        return back()->with('success', "Akun pengguna {$name} ({$username}) berhasil dihapus secara permanen.");
     }
 }

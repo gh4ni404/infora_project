@@ -1,8 +1,10 @@
 <?php
 
+use App\Models\Gtk;
 use App\Models\Menu;
 use App\Models\MenuAccessTemplate;
 use App\Models\Module;
+use App\Models\Murid;
 use App\Models\School;
 use App\Models\SubMenu;
 use App\Models\User;
@@ -448,4 +450,143 @@ test('super admin can activate inactive user from menu access page', function ()
     $response->assertSessionHas('success');
 
     expect($inactiveUser->fresh()->is_active)->toBeTrue();
+});
+
+test('super admin can toggle user active status from active to inactive and vice versa', function () {
+    // 1. Nonaktifkan user aktif
+    $responseDeactivate = $this->actingAs($this->superAdmin)
+        ->patch(route('sistem.user.toggle-status', $this->guruUser));
+
+    $responseDeactivate->assertRedirect();
+    $responseDeactivate->assertSessionHas('success');
+    expect($this->guruUser->fresh()->is_active)->toBeFalse();
+
+    // 2. Aktifkan kembali user yang sudah nonaktif
+    $responseActivate = $this->actingAs($this->superAdmin)
+        ->patch(route('sistem.user.toggle-status', $this->guruUser));
+
+    $responseActivate->assertRedirect();
+    $responseActivate->assertSessionHas('success');
+    expect($this->guruUser->fresh()->is_active)->toBeTrue();
+});
+
+test('super admin cannot toggle their own account status', function () {
+    $response = $this->actingAs($this->superAdmin)
+        ->patch(route('sistem.user.toggle-status', $this->superAdmin));
+
+    $response->assertRedirect();
+    $response->assertSessionHas('error');
+    expect($this->superAdmin->fresh()->is_active)->toBeTrue();
+});
+
+test('super admin can permanently delete another user and their permissions', function () {
+    $userToDelete = User::factory()->create([
+        'username' => 'user_dihapus',
+        'name' => 'User Dihapus',
+        'user_type' => 'guru',
+        'is_active' => true,
+    ]);
+
+    $menu = Menu::create([
+        'module_id' => Module::create(['name' => 'MODUL TEST', 'order' => 1, 'is_active' => true])->id,
+        'name' => 'Menu Test',
+        'route_name' => 'dashboard',
+        'order' => 1,
+        'is_active' => true,
+    ]);
+
+    UserMenuPermission::create([
+        'user_id' => $userToDelete->id,
+        'menu_id' => $menu->id,
+        'can_view' => true,
+    ]);
+
+    $response = $this->actingAs($this->superAdmin)
+        ->delete(route('sistem.user.destroy', $userToDelete));
+
+    $response->assertRedirect();
+    $response->assertSessionHas('success');
+
+    $this->assertDatabaseMissing('users', ['id' => $userToDelete->id]);
+    $this->assertDatabaseMissing('user_menu_permissions', ['user_id' => $userToDelete->id]);
+});
+
+test('super admin cannot permanently delete their own account', function () {
+    $response = $this->actingAs($this->superAdmin)
+        ->delete(route('sistem.user.destroy', $this->superAdmin));
+
+    $response->assertRedirect();
+    $response->assertSessionHas('error');
+
+    $this->assertDatabaseHas('users', ['id' => $this->superAdmin->id]);
+});
+
+test('deleting user disconnects linked gtk profile without deleting gtk record', function () {
+    $school = School::create([
+        'name' => 'SMK Negeri 1 Test',
+        'npsn' => '11223344',
+        'school_type' => 'SMK',
+        'status' => 'Negeri',
+    ]);
+
+    $userGtk = User::factory()->create([
+        'username' => 'guru_terhubung',
+        'name' => 'Guru Terhubung',
+        'user_type' => 'guru',
+        'school_id' => $school->id,
+    ]);
+
+    $gtk = Gtk::factory()->create([
+        'school_id' => $school->id,
+        'user_id' => $userGtk->id,
+        'nama_lengkap' => 'Guru Terhubung S.Pd',
+        'is_active' => true,
+    ]);
+
+    $response = $this->actingAs($this->superAdmin)
+        ->delete(route('sistem.user.destroy', $userGtk));
+
+    $response->assertRedirect();
+    $response->assertSessionHas('success');
+
+    $this->assertDatabaseMissing('users', ['id' => $userGtk->id]);
+    $this->assertDatabaseHas('gtks', [
+        'id' => $gtk->id,
+        'user_id' => null,
+    ]);
+});
+
+test('deleting user disconnects linked murid profile without deleting murid record', function () {
+    $school = School::create([
+        'name' => 'SMK Negeri 1 Test',
+        'npsn' => '11223344',
+        'school_type' => 'SMK',
+        'status' => 'Negeri',
+    ]);
+
+    $userMurid = User::factory()->create([
+        'username' => 'murid_terhubung',
+        'name' => 'Murid Terhubung',
+        'user_type' => 'murid',
+        'school_id' => $school->id,
+    ]);
+
+    $murid = Murid::factory()->create([
+        'school_id' => $school->id,
+        'user_id' => $userMurid->id,
+        'nama_lengkap' => 'Murid Terhubung',
+        'is_active' => true,
+    ]);
+
+    $response = $this->actingAs($this->superAdmin)
+        ->delete(route('sistem.user.destroy', $userMurid));
+
+    $response->assertRedirect();
+    $response->assertSessionHas('success');
+
+    $this->assertDatabaseMissing('users', ['id' => $userMurid->id]);
+    $this->assertDatabaseHas('murids', [
+        'id' => $murid->id,
+        'user_id' => null,
+    ]);
 });
