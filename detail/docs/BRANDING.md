@@ -38,7 +38,7 @@ Berkas gambar logo telah disimpan secara permanen di direktori proyek:
 2. **Buku Terbuka dan Simpul Infinity:** Simbol pendidikan berkelanjutan serta aliran data akademik, nilai, dan dokumen yang tersinkronisasi tanpa henti (*real-time data flow*).
 3. **Perisai Mutu (App Icon):** Melambangkan perlindungan kualitas mutu dan kesiapan menghadapi **Akreditasi Sekolah (BAN-SM / IASP)**.
 4. **Gradasi Sky Blue, Royal Blue dan Latar Bersih:**
-   - **Sky Blue (`#0284C7`):** Kesegaran inovasi, ramah bagi guru dan siswa, serta keterbukaan informasi.
+   - **Sky Blue (`#0284C7`):** Kesegaran inovasi, ramah bagi guru dan murid, serta keterbukaan informasi.
    - **Royal Blue (`#2563EB`):** Kepercayaan institusi pendidikan, stabilitas, dan profesionalisme tata kelola.
    - **Latar Terang dan Bersih (`#F8FAFC` dan `#FFFFFF`):** Kemudahan membaca (*high readability*), ketenangan visual (*eye-friendly*), dan transparansi data sekolah.
 

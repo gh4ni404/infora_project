@@ -24,8 +24,9 @@
 - [x] Konfigurasi Sekolah: Tahun Ajaran dan Manajemen Semester
 - [x] Konfigurasi Sekolah: Kalender Akademik Terpadu dan Agenda Multi-Day (Grid Bulanan dan Tabel Agenda via `<x-tab-pills>`)
 - [x] Layanan Universal Spreadsheet (`SpreadsheetService`) & Impor / Ekspor Excel Data GTK via `<x-crud-button>`
-- [x] Ekosistem 25 Anonymous Blade Components dan Test Suite 371 Tests Lulus 100% (1.728 Assertions)
-- [ ] Arsitektur Akun Sivitas (4 Tipe Akun: Siswa, Guru, Staff, Admin dengan profil relasional 1-to-1)
+- [x] Master Data Murid (Peserta Didik) Multi-Tenancy, Validasi Khusus Kemenag NISM (18-digit) & NISN (10-digit), UI Validasi Bebas Browser Bubble, Sinkronisasi Akun Otomatis & Foto Profil Dual-Way
+- [x] Ekosistem 27 Anonymous Blade Components dan Test Suite 445 Tests Lulus 100% (2.053 Assertions)
+- [ ] Arsitektur Akun Sivitas (4 Tipe Akun: Murid, Guru, Staff, Admin dengan profil relasional 1-to-1)
 - [ ] Dedicated Layout Separation (Desktop dan Mobile)
 - [ ] Implementasi Modul Akademik Lanjutan dan Tata Kelola Utama
 
@@ -68,7 +69,7 @@
     - `teacher_profiles`: NIP, NUPTK, gelar_depan, gelar_belakang, no_hp.
     - `staff_profiles`: NIP, unit_kerja, jabatan_tu.
   - [ ] Autentikasi Fleksibel (Auto-Detect Login Identifier):
-    - Siswa login via **NISN** / NIS.
+    - Murid login via **NISN** / NIS.
     - Guru login via **NIP / NUPTK** atau Email.
     - Admin dan Super Admin login via **Username** atau Email.
   - [ ] Setup Laravel Sanctum untuk otentikasi ganda (Web Session dan RESTful API Tokens).
@@ -112,7 +113,7 @@
 - [x] **2.4. Tata Kelola Menu Akses dan Dynamic Role Templates (User-Centric Granular Permissions)**
   - [x] Skema database: tabel `user_menu_permissions` dan `menu_access_templates` tanpa constraint `unique` pada teks.
   - [x] Model Eloquent `UserMenuPermission`, `MenuAccessTemplate`, serta relasi dan helper otorisasi di `User.php` (`hasMenuAccess()`, `hasSubMenuAccess()`).
-  - [x] Seeder awal `MenuAccessTemplateSeeder` untuk preset beragam peran guru (Pengajar, Wali Kelas, Wakasek) dan siswa (Reguler, PKL).
+  - [x] Seeder awal `MenuAccessTemplateSeeder` untuk preset beragam peran guru (Pengajar, Wali Kelas, Wakasek) dan murid (Reguler, PKL).
   - [x] Form Requests dan Controller: `MenuAccessController`, `UpdateUserPermissionsRequest`, `UpdateTemplatePermissionsRequest`.
   - [x] Antarmuka manajemen lengkap di `resources/views/system/menu-access/` (Tab Hak Akses per Pengguna, Tab Template Peran Sistem, Form Matriks Izin User, Form Matriks Template Peran).
   - [x] Dukungan tab filter peran Staf (Tendik) dan tombol aktivasi instan akun nonaktif langsung dari baris tabel (`PATCH /sistem/user/{user}/activate`).
@@ -187,7 +188,7 @@
     - **Opsi C (Seksi Kolapsibel / Accordion):** Field wajib di atas selalu terbuka; seksi Biodata Tambahan, Kontak, Kredensial, dan Pasfoto terlipat rapi.
     - [x] **Opsi D (Impor Massal Excel & Ekspor Terfilter serta Modal Tambah Ringkas):** *(Selesai diimplementasikan via `SpreadsheetService` dan `create.blade.php` dengan filosofi Quick Onboarding 6-Kolom Esensial & Self-Service Completion)* Pengunggahan berkas template spreadsheet dan modal tambah ringkas untuk pendaftaran GTK cepat.
   - [x] CRUD Data Rombel/Kelas dan Ruangan Belajar (`Kelas`) terhubung ke unit sekolah (`school_id`), tahun ajaran (`tahun_ajaran_id`), jenjang tingkatan (`tingkatan_id`), jurusan opsional (`jurusan_id`), dan wali kelas (`gtks`), rute resource `/rombel/kelas` (`rombel.kelas.*`), Form Requests validasi tenancy, kartu metrik KPI, 1-klik toggle status, antarmuka modal modular (`index.blade.php`, `create.blade.php`, `edit.blade.php`) dengan asisten saran nama & kode, dan automated test suite `KelasTest.php` (15 feature tests, 100% lulus).
-  - [x] CRUD Data Murid / Peserta Didik (`Murid`) terhubung ke unit sekolah (`school_id`), akun login pengguna (`user_id`), penempatan rombongan belajar (`kelas_id`), dan domisili Kemendagri 4-tier, rute resource `/master/data-murid` (`master.data-murid.*`), otomasi pembuatan & sinkronisasi akun `MuridAccountManager`, Form Requests validasi tenancy, kartu metrik KPI, 1-klik toggle status, reset password, unduh template & impor massal Excel serta ekspor terfilter via `SpreadsheetService`, antarmuka modal modular (`index.blade.php`, `create.blade.php`, `edit.blade.php`, `show.blade.php`, `import.blade.php`), dan automated test suite `MuridTest.php` serta `MuridImportExportTest.php` (22 feature tests, 100% lulus).
+  - [x] CRUD Data Murid / Peserta Didik (`Murid`) terhubung ke unit sekolah (`school_id`), akun login pengguna (`user_id`), penempatan rombongan belajar (`kelas_id`), dan domisili Kemendagri 4-tier, rute resource `/master/data-murid` (`master.data-murid.*`), otomasi pembuatan & sinkronisasi akun `MuridAccountManager`, validasi khusus Kemenag (NISM 18-digit pada NIS untuk MI/MTs/MA) dan Kemendikbud (NISN 10-digit), UI validasi interaktif tanpa browser bubble default (`infora-validation.js`), sinkronisasi avatar/foto profil dua arah, Form Requests validasi tenancy, kartu metrik KPI, 1-klik toggle status, reset password, unduh template & impor massal Excel serta ekspor terfilter via `SpreadsheetService`, antarmuka modal modular (`index.blade.php`, `create.blade.php`, `edit.blade.php`, `show.blade.php`, `import.blade.php`), dan automated test suite `MuridTest.php` serta `MuridImportExportTest.php` (22 feature tests, 100% lulus).
 - [ ] **3.4. Kalender dan Jadwal Pelajaran**
   - [x] Manajemen Tahun Ajaran dan Semester (`TahunAjaran` dan `Semester`, relasi berjenjang, tanggal pelaksanaan, aktivasi 1-klik, modal interaktif di `/konfigurasi-sekolah/tahun-ajaran`).
   - [x] Kalender Akademik Terpadu dan Agenda Multi-Day (tampilan ganda Kalender Bulanan Grid dan Tabel Agenda via `<x-tab-pills>`, rentang kegiatan multi-hari, tag kategori warna, feed JSON `/events`, modal interaktif di `/konfigurasi-sekolah/kalender-akademik`).
@@ -195,10 +196,10 @@
   - [ ] Alokasi Jam Mengajar Guru dan Penyusunan Jadwal Mingguan per Kelas.
 - [ ] **3.5. Jurnal KBM Digital Guru**
   - [ ] Form input jurnal mengajar harian guru per jam tatap muka.
-  - [ ] Pencatatan topik/materi, kendala siswa di kelas, dan upload foto dokumentasi KBM via `ImageUploader` / `<x-image-upload>`.
+  - [ ] Pencatatan topik/materi, kendala murid di kelas, dan upload foto dokumentasi KBM via `ImageUploader` / `<x-image-upload>`.
 - [ ] **3.6. Kesiswaan dan Bimbingan Konseling (BK)**
   - [ ] Buku catatan pelanggaran tata tertib dan kalkulasi poin disiplin.
-  - [ ] Portofolio prestasi, sertifikat, dan kejuaraan siswa.
+  - [ ] Portofolio prestasi, sertifikat, dan kejuaraan murid.
 
 ---
 
@@ -206,9 +207,9 @@
 - [ ] **4.1. Master Data Kemitraan DUDI**
   - [ ] Database Rekanan Dunia Usaha dan Dunia Industri.
   - [ ] Profil MoU, kuota magang, dan bidang kompetensi keahlian terkait.
-- [ ] **4.2. Manajemen PKL / Magang Siswa**
-  - [ ] Ploting penempatan siswa magang dan penetapan guru pembimbing sekolah.
-  - [ ] Jurnal Harian PKL Digital bagi siswa di lokasi magang.
+- [ ] **4.2. Manajemen PKL / Magang Murid**
+  - [ ] Ploting penempatan murid magang dan penetapan guru pembimbing sekolah.
+  - [ ] Jurnal Harian PKL Digital bagi murid di lokasi magang.
   - [ ] Form penilaian dan evaluasi kompetensi oleh instruktur industri.
 - [ ] **4.3. Penelusuran Tamatan dan BKK**
   - [ ] Modul Tracer Study keterserapan alumni di dunia kerja/kuliah.
@@ -222,7 +223,7 @@
   - [ ] Progress bar kelengkapan bukti fisik tiap butir instrumen akreditasi.
 - [ ] **5.2. Bank Dokumen Digital**
   - [ ] Manajemen folder terstruktur per butir akreditasi (SK, Modul Ajar, Notula, Foto Kegiatan).
-  - [ ] Otomasi integrasi data sekolah (Rekap jurnal KBM, prestasi siswa, dan data PKL langsung terhubung ke butir mutu).
+  - [ ] Otomasi integrasi data sekolah (Rekap jurnal KBM, prestasi murid, dan data PKL langsung terhubung ke butir mutu).
   - [ ] Portal Guest Asesor (Akses audit read-only saat visitasi akreditasi).
 
 ---
@@ -239,7 +240,7 @@
 - [ ] **6.3. Testing, Security Hardening dan Finalisasi**
   - [ ] Unit dan Feature Testing (Pest / PHPUnit).
   - [ ] Rate limiting pada endpoint otentikasi/API dan proteksi SQL Injection/XSS.
-  - [ ] Panduan Penggunaan Guru, Siswa, dan Administrator.
+  - [ ] Panduan Penggunaan Guru, Murid, dan Administrator.
 
 ---
 

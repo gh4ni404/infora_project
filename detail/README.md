@@ -35,19 +35,21 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 26. [Pengaturan Profil Pengguna Mandiri dan Keamanan Akun](#-26-pengaturan-profil-pengguna-mandiri-dan-keamanan-akun)
 27. [Layanan Universal Spreadsheet dan Fitur Impor / Ekspor Excel Data GTK](#-27-layanan-universal-spreadsheet-dan-fitur-impor--ekspor-excel-data-gtk)
 28. [Master Data Tingkatan Kelas](#-28-master-data-tingkatan-kelas-tingkat-x-xi-xii-dan-fase-kurikulum-merdeka)
+29. [Master Data Rombongan Belajar (Rombel / Kelas)](#-29-master-data-rombongan-belajar-rombel--kelas)
+30. [Master Data Murid (Peserta Didik), Standardisasi Validasi NISM/NISN & UI Validasi Terpadu](#-30-master-data-murid-peserta-didik-standardisasi-validasi-nismnisn--ui-validasi-terpadu)
 
 ---
 
 ### 🏫 1. Manajemen Terpadu SMA, SMK, dan MA
 - **Struktur Akademik Fleksibel:** Mendukung Peminatan/Fase (SMA), Konsentrasi Keahlian/Jurusan (SMK), serta Program Keagamaan/Peminatan (Madrasah Aliyah - MA).
-- **Jurnal Digital KBM Guru:** Catatan materi harian, kendala siswa di kelas, dan dokumentasi KBM.
-- **Modul Kesiswaan dan Bimbingan Konseling (BK):** Rekap poin pelanggaran tata tertib dan portofolio prestasi siswa.
+- **Jurnal Digital KBM Guru:** Catatan materi harian, kendala murid di kelas, dan dokumentasi KBM.
+- **Modul Kesiswaan dan Bimbingan Konseling (BK):** Rekap poin pelanggaran tata tertib dan portofolio prestasi murid.
 
 ---
 
 ### 🏭 2. Modul Kemitraan Industri dan PKL (Khusus SMK)
 - **Database DUDI:** Manajemen data mitra Dunia Usaha dan Dunia Industri.
-- **Monitoring Magang/PKL:** Penempatan siswa, plotting guru pembimbing, dan jurnal digital siswa di tempat magang.
+- **Monitoring Magang/PKL:** Penempatan murid, plotting guru pembimbing, dan jurnal digital murid di tempat magang.
 - **Tracer Study dan BKK:** Penelusuran keterserapan alumni di dunia kerja.
 
 ---
@@ -68,7 +70,7 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 
 ### 📱 5. Mobile-First dan Dedicated Layout System
 - **Dedicated Layout Separation:** Memisahkan struktur layout antara tampilan Desktop dan Mobile secara khusus (bukan sekadar responsive CSS hiding biasa), menjaga ukuran DOM tetap ramping dan rendering super cepat.
-- **Mobile Experience (App-Like):** Dioptimalkan untuk genggaman ponsel pintar dengan navigasi bawah (*bottom bar navigation*), gesture sentuhan yang intuitif, serta akses cepat untuk pengisian jurnal guru dan cek portofolio siswa.
+- **Mobile Experience (App-Like):** Dioptimalkan untuk genggaman ponsel pintar dengan navigasi bawah (*bottom bar navigation*), gesture sentuhan yang intuitif, serta akses cepat untuk pengisian jurnal guru dan cek portofolio murid.
 - **Desktop Power-Dashboard:** Antarmuka layar lebar untuk produktivitas staf tata usaha dan pimpinan sekolah, dilengkapi navigasi sidebar fleksibel, tabel analitik bervolume besar, serta panel dokumen akreditasi.
 
 ---
@@ -80,7 +82,7 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 ---
 
 ### 🎨 7. Standar Styling: Reusable Global CSS Classes (Strict No Ad-Hoc Classes)
-- **Nuansa Terang, Halus dan Ramah Sivitas (Bright, Smooth dan Clean):** Antarmuka dirancang dengan latar kanvas sejuk (`#F8FAFC`), permukaan kartu putih bersih (`#FFFFFF`), teks berkontras tinggi (`#0F172A`) yang mudah dibaca guru dan siswa, serta aksen biru inspiratif (`#0284C7` dan `#2563EB`).
+- **Nuansa Terang, Halus dan Ramah Sivitas (Bright, Smooth dan Clean):** Antarmuka dirancang dengan latar kanvas sejuk (`#F8FAFC`), permukaan kartu putih bersih (`#FFFFFF`), teks berkontras tinggi (`#0F172A`) yang mudah dibaca guru dan murid, serta aksen biru inspiratif (`#0284C7` dan `#2563EB`).
 - **Reusable Global Classes (Dilarang Keras Class Khusus/Ad-hoc):** Dilarang keras membuat class CSS khusus sekali pakai (*one-off / page-specific classes*) yang hanya dipakai pada elemen atau halaman tertentu. Seluruh styling antarmuka wajib memanfaatkan sistem class global yang bersifat dapat digunakan kembali (*reusable design tokens dan utilities*).
 - **Sistem Komponen UI Universal Terpusat:** Menyediakan sistem komponen siap pakai seperti Dropdown universal (`.dropdown`, `.dropdown-menu`, `.dropdown-item`), Kartu Pengguna (`.user-card-button`, `.user-avatar-circle`), serta Modal Dialog (`.modal-backdrop`, `.modal-dialog`).
 - **Tanpa Inline Style (`style="..."`):** Dilarang keras menggunakan *inline style* langsung pada tag HTML untuk menjamin kebersihan kode (*clean markup*), kemudahan *maintenance*, dan konsistensi visual lintas halaman.
@@ -89,7 +91,7 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 ---
 
 ### 📸 8. Standar Upload Dokumentasi: Base64 dan Naming Convention (Maks. 1MB)
-- **Format Upload Base64:** Seluruh pengunggahan foto dokumentasi (kegiatan KBM, berkas bukti akreditasi, sertifikat siswa, dan jurnal PKL) wajib menggunakan format string **Base64** di dalam payload request JSON, selaras dengan arsitektur *Pure JSON*.
+- **Format Upload Base64:** Seluruh pengunggahan foto dokumentasi (kegiatan KBM, berkas bukti akreditasi, sertifikat murid, dan jurnal PKL) wajib menggunakan format string **Base64** di dalam payload request JSON, selaras dengan arsitektur *Pure JSON*.
 - **Batasan Ukuran Maksimal 1MB:** Ukuran payload foto per berkas dibatasi maksimal **1MB** untuk menjaga efisiensi bandwidth dan responsivitas API.
 - **Preservasi Kualitas Gambar:** Wajib menerapkan optimasi/kompresi cerdas sebelum konversi base64 sehingga ukuran berkas tetap di bawah 1MB tanpa mengorbankan ketajaman resolusi, keterbacaan teks dokumen, maupun fidelitas visual foto.
 - **Pola Penamaan File Semantik (Naming Convention):** Berkas hasil upload wajib dinamai secara otomatis mengikuti pola terstandarisasi:
@@ -139,10 +141,10 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 ---
 
 ### 🔐 12. Sistem Tata Kelola Menu Akses dan Dynamic Role Templates (User-Centric Granular Permissions)
-- **Otorisasi Berbasis Pengguna (User-Centric):** Setiap akun pengguna (Guru, Staf TU, Siswa) dapat dikonfigurasi hak akses navigasinya secara independen tanpa dibatasi satu role kaku.
+- **Otorisasi Berbasis Pengguna (User-Centric):** Setiap akun pengguna (Guru, Staf TU, Murid) dapat dikonfigurasi hak akses navigasinya secara independen tanpa dibatasi satu role kaku.
 - **Wewenang Aksi Granular (Lihat, Tambah, Ubah, Hapus):** Hak akses diatur mendalam per-menu dan sub-menu dengan 4 pilar izin: **Lihat** (tampil di sidebar dan buka halaman), **Tambah** (buat data), **Ubah** (edit data), dan **Hapus** (delete data).
-- **Template Peran Dinamis (Dikelola Super Admin):** Menyediakan sistem template peran bawaan (Guru Pengajar, Wali Kelas, Wakasek Kurikulum, Wakasek Kesiswaan, Staf TU, Siswa Reguler, Siswa PKL) yang menu standarnya dapat diubah dan disesuaikan oleh Super Admin kapan saja di tab *Template Peran Sistem*.
-- **Penerapan Template Cepat (1-Click Preset):** Saat mengatur akun guru atau siswa, Super Admin cukup memilih template peran untuk mengisi seluruh centang izin secara instan dalam 1 detik, lalu dapat menambah/mengurangi izin secara personal.
+- **Template Peran Dinamis (Dikelola Super Admin):** Menyediakan sistem template peran bawaan (Guru Pengajar, Wali Kelas, Wakasek Kurikulum, Wakasek Kesiswaan, Staf TU, Murid Reguler, Murid PKL) yang menu standarnya dapat diubah dan disesuaikan oleh Super Admin kapan saja di tab *Template Peran Sistem*.
+- **Penerapan Template Cepat (1-Click Preset):** Saat mengatur akun guru atau murid, Super Admin cukup memilih template peran untuk mengisi seluruh centang izin secara instan dalam 1 detik, lalu dapat menambah/mengurangi izin secara personal.
 - **Dukungan Filter Peran Staf & Aktivasi Cepat Akun Nonaktif:** Tab filter peran dilengkapi opsi `staf` (Tendik), kolom status akun (`badge-success` / `badge-neutral`), serta tombol aktivasi akun nonaktif langsung dari baris tabel (`PATCH /sistem/user/{user}/activate`).
 - **Standardisasi Ekosistem Komponen UI Blade:** Antarmuka tabel dan tab navigasi dimigrasikan sepenuhnya menggunakan komponen resmi `<x-page-header>`, `<x-tab-pills>`, `<x-tab-pill>`, `<x-data-table>`, dan `<x-pagination-summary>` bebas raw markup bespoke table.
 - **Filtering Dinamis pada Sidebar (`SidebarComposer`):** Sidebar hanya menampilkan modul, menu, dan sub-menu yang diizinkan (`can_view = true`) untuk pengguna yang sedang login. Akun `super_admin` secara permanen mempertahankan akses penuh (*root bypass*).
@@ -162,7 +164,7 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 ---
 
 ### ⚡ 14. Universal Smooth Real-Time Progressive Loading Screen (`window.InforaProgress`)
-- **Indikator Global Lintas Modul:** Mesin indikator loading universal yang dapat dipanggil oleh seluruh modul dan fitur aplikasi (impor siswa, ekspor laporan, kalkulasi akreditasi, backup dan restore, dll.) via API JavaScript global `window.InforaProgress`.
+- **Indikator Global Lintas Modul:** Mesin indikator loading universal yang dapat dipanggil oleh seluruh modul dan fitur aplikasi (impor murid, ekspor laporan, kalkulasi akreditasi, backup dan restore, dll.) via API JavaScript global `window.InforaProgress`.
 - **Desain Minimalis dan Tanpa Elemen Kaku:** Menggantikan tampilan kaku dan teknis dengan kartu melayang modern berbalut *backdrop blur*, *ambient status orb* berdenyut lembut, judul aktivitas dinamis, serta bar progres ramping (*sleek pill bar*) 9px.
 - **Animasi Sangat Halus (*Buttery Smooth Motion dan Gradient Shimmer*):** Bar progres dilengkapi sapuan gradien bercahaya Royal Blue (`#2563EB`) ke Cyan (`#06B6D4`) yang mengalir kontinu (`@keyframes progressGradientShimmer`), transisi pergerakan kurva `cubic-bezier(0.25, 1, 0.5, 1)`, serta interpolasi persentase mulus dengan `requestAnimationFrame`.
 - **Dukungan Streaming SSE Terintegrasi:** Dilengkapi pembaca stream *Server-Sent Events* (`InforaProgress.stream(url, formData)`) untuk menyajikan progres riil langsung dari backend secara otomatis.
@@ -293,14 +295,14 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 
 ---
 
-### 🧪 23. Ekosistem Komponen Blade UI dan Kematangan Pengujian (371 Tests dan 1.728 Assertions)
-- **25 Anonymous Blade Components Universal:**
+### 🧪 23. Ekosistem Komponen Blade UI dan Kematangan Pengujian (445 Tests dan 2.053 Assertions)
+- **27 Anonymous Blade Components Universal:**
   - Tersedia di `resources/views/components/` dan terdokumentasi lengkap di [`docs/COMPONENTS.md`](../docs/COMPONENTS.md).
-  - Meliputi: form inputs, form select dengan rendering opsi otomatis, searchable select bertingkat, drag-and-drop document upload `<x-file-upload>`, tab-pills aksesibel, data table dengan search toolbar terintegrasi, tombol aksi terotorisasi `<x-crud-button>`, modal dialog flexbox, dan indikator progres global.
+  - Meliputi: form inputs, form select dengan rendering opsi otomatis, searchable select bertingkat, drag-and-drop document upload `<x-file-upload>`, tab-pills aksesibel, data table dengan search toolbar terintegrasi, tombol aksi terotorisasi `<x-crud-button>`, modal dialog flexbox, indikator progres global, universal avatar `<x-avatar>`, dan pesan galat terstandarisasi `<x-form-error>`.
 - **Pembersihan Kelas Kolom Legacy dan Zero Inline Styles:**
   - Seluruh view pada modul sistem, wilayah administratif, master data, dan konfigurasi sekolah telah dibersihkan dari inline style dan class kolom legacy, menghasilkan antarmuka yang seragam dan performa render yang cepat.
-- **371 Automated Tests Lolos 100%:**
-  - Rangkaian pengujian Pest mencakup seluruh alur sistem: autentikasi, otorisasi RBAC, operasi CRUD, validasi data, mutator, format nama file, integrasi modal JavaScript, dan rendering komponen Blade, dengan total **371 tests dan 1.728 assertions lulus tanpa kendala**.
+- **445 Automated Tests Lolos 100%:**
+  - Rangkaian pengujian Pest mencakup seluruh alur sistem: autentikasi, otorisasi RBAC, operasi CRUD, validasi data, mutator, format nama file, integrasi modal JavaScript, dan rendering komponen Blade, dengan total **445 tests dan 2.053 assertions lulus tanpa kendala**.
 
 ---
 
@@ -393,7 +395,7 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 
 ### 📊 27. Layanan Universal Spreadsheet dan Fitur Impor / Ekspor Excel Data GTK
 - **Layanan Terpusat Global Universal (`App\Services\SpreadsheetService`):**
-  - **Arsitektur Domain-Agnostic:** Dirancang sebagai mesin pengolah lembar sebar universal untuk seluruh modul platform INFORA (GTK, Siswa, Rombel, Nilai, Presensi, Pelanggaran, dll.) tanpa duplikasi logika (*DRY*).
+  - **Arsitektur Domain-Agnostic:** Dirancang sebagai mesin pengolah lembar sebar universal untuk seluruh modul platform INFORA (GTK, Murid, Rombel, Nilai, Presensi, Pelanggaran, dll.) tanpa duplikasi logika (*DRY*).
   - **Pembuatan Template Profesional (`template()`):**
     - Menghasilkan berkas format `.xlsx` dengan styling elegan: Baris judul berkepala Royal Blue (`#1E3A8A`) dengan teks putih tebal (Bold).
     - Membekukan baris header (*freeze panes* pada baris ke-2) sehingga kolom tetap terlihat saat pengguna menggulir ke bawah.
@@ -448,6 +450,41 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 - **Automated Test Suite:**
   - Diuji secara menyeluruh melalui [`tests/Feature/TingkatanTest.php`](../tests/Feature/TingkatanTest.php) (16 feature tests mencakup otentikasi, otorisasi RBAC, isolasi sekolah, validasi keunikan berjenjang, toggle status, dan operasi CRUD).
   - Total test suite aplikasi meningkat menjadi **371 tests lulus 100% (1.728 assertions)**.
+
+---
+
+### 🏫 29. Master Data Rombongan Belajar (Rombel / Kelas)
+- **Rasionalisasi & Peran Arsitektural:**
+  - Rombongan belajar (rombel) merupakan entitas sentral yang menghubungkan tahun ajaran aktif, penjenjangan tingkatan kelas, peminatan/jurusan kejuruan, penugasan wali kelas (GTK), dan alokasi kapasitas murid di ruangan kelas.
+  - Setiap rombel diisolasi secara ketat per unit sekolah (`school_id`) dan terikat dengan tahun ajaran (`tahun_ajaran_id`).
+- **Fitur Pokok & Antarmuka Pengguna (`rombel/kelas`):**
+  - **Asisten Penamaan & Kode Otomatis:** Antarmuka modal `create.blade.php` dan `edit.blade.php` dilengkapi asisten saran nama rombel otomatis berbasis kombinasi tingkatan, jurusan, dan nomor urut paralel (mis. *X TKJ 1*, *XI IPA 2*).
+  - **Penugasan Wali Kelas & Kapasitas Ruangan:** Relasi langsung ke data GTK aktif sebagai wali kelas, penentuan nama ruangan/lokasi kelas, serta pembatasan kapasitas maksimal murid.
+  - **Kartu Metrik KPI:** 4 kartu metrik berbasis `<x-stats-grid>` dan `<x-stat-card>`: Total Rombel, Rombel Aktif, Rombel Non-Aktif, dan Total Kapasitas Murid.
+  - **Aksi Cepat & Modal Modular:** Toggle status aktif 1-klik, rute resource `/rombel/kelas`, dan dialog konfirmasi hapus terpadu via `InforaModals`.
+- **Automated Test Suite:**
+  - Diuji secara menyeluruh melalui [`tests/Feature/KelasTest.php`](../tests/Feature/KelasTest.php) (15 skenario feature test mencakup otentikasi, otorisasi RBAC, isolasi tenancy, validasi keunikan nama rombel per tahun ajaran, dan operasi CRUD).
+
+---
+
+### 👨‍🎓 30. Master Data Murid (Peserta Didik), Standardisasi Validasi NISM/NISN & UI Validasi Terpadu
+- **Rasionalisasi & Peran Arsitektural:**
+  - Modul Master Data Murid mengelola data pokok peserta didik di seluruh tingkatan satuan pendidikan (SMA, SMK, dan Madrasah Aliyah - MA) dengan isolasi multi-tenancy sekolah yang ketat.
+  - Mengintegrasikan siklus hidup akun login murid secara otomatis tanpa perlu pembuatan manual berulang kali, terhubung dengan profil biodata dan rombongan belajar.
+- **Validasi Cerdas Kemenag & Kemendikbud Tanpa Kolom Redundan:**
+  - **Aturan NISM Kemenag:** Pada satuan pendidikan madrasah (MI, MTs, MA), Nomor Induk Siswa Madrasah (NISM) merupakan pengenal wajib berkode 18 digit numerik. Sistem secara cerdas mengadaptasi aturan validasi pada kolom `nis` di Form Requests (`StoreMuridRequest`, `UpdateMuridRequest`) sehingga sekolah madrasah wajib mengisi 18 digit tanpa perlu menambah kolom baru di basis data.
+  - **Aturan NISN Kemendikbudristek:** Validasi format standar Pusdatin Kemendikbudristek di mana NISN bersifat numerik dengan batas maksimal 10 digit angka.
+- **Penyempurnaan Antarmuka Validasi Galat (Form Error UI Interaktif):**
+  - **Eliminasi Default Browser Tooltip Bubble:** Formulir entri modal dilengkapi atribut `novalidate` untuk menonaktifkan tooltip pop-up bawaan browser yang sering kali tidak konsisten antar-peramban dan mengganggu estetika antarmuka.
+  - **Modul Client-Side `infora-validation.js`:** Menghadirkan pendeteksi validasi otomatis dengan efek visual getar (*vibration shake animation*), border merah semantik (`var(--danger)`), serta hint teks galat langsung di bawah input terkait melalui komponen resmi `<x-form-error>`.
+- **Standardisasi Komponen Universal `<x-avatar>` & Sinkronisasi Dua Arah:**
+  - **Komponen Ringkas `<x-avatar>`:** Komponen Blade universal yang bersih dengan 3 props esensial (`src`, `name`, `size`), otomatis menghasilkan 2 inisial huruf kapital berlatar gradien brand INFORA (`.user-avatar-circle`) bila foto tidak tersedia.
+  - **Aksesor Bidirectional Foto Profil:** Menghadirkan aksesor `foto_url` dan `avatar_url` pada model `Murid`, `Gtk`, dan `User` sehingga foto yang diunggah oleh murid melalui menu **Pengaturan Profil** tersinkronisasi otomatis dan tampil secara sempurna pada tabel master maupun kartu profil Data Murid.
+- **Konsistensi Nomenklatur Murid:**
+  - Melakukan pembersihan total (*strict refactoring*) dari istilah legacy `siswa` menjadi murni `murid` di seluruh arsitektur (controller, model, view, Form Request, test suite, dan helper `User::isMurid()`).
+- **Automated Test Suite:**
+  - Diuji secara menyeluruh melalui [`tests/Feature/MuridTest.php`](../tests/Feature/MuridTest.php) dan [`tests/Feature/MuridImportExportTest.php`](../tests/Feature/MuridImportExportTest.php) (22 skenario feature test lulus 100%).
+  - Total test suite aplikasi kini mencapai **445 tests lulus 100% (2.053 assertions)**.
 
 ---
 

@@ -30,20 +30,20 @@
 | **Success Emerald** | `#16A34A` / `#F0FDF4` | Status Verifikasi, Validasi Dokumen, Akun Aktif |
 | **Warning Amber** | `#D97706` / `#FFFBEB` | Peringatan Kelengkapan Dokumen, Keterlambatan |
 | **Danger Rose** | `#DC2626` / `#FEF2F2` | Pelanggaran Disiplin, Pesan Error, Peringatan Sistem |
-| **Text Primary (Readability)** | `#0F172A` (Slate 900) | Teks Utama dengan kontras tajam (WCAG AAA) mudah dibaca guru dan siswa |
+| **Text Primary (Readability)** | `#0F172A` (Slate 900) | Teks Utama dengan kontras tajam (WCAG AAA) mudah dibaca guru dan murid |
 | **Text Muted** | `#475569` (Slate 600) | Label Formulir, Sub-heading, Deskripsi Sekunder |
 | **Text Dim** | `#64748B` (Slate 500) | Metadata, Placeholder, Timestamp |
 
 ### 2.3. Tipografi
 - **Headings dan Display:** `Plus Jakarta Sans` (Modern, geometric, tegas, ramah, dan bersahabat bagi sivitas sekolah).
 - **Body dan Data Tables:** `Inter` / `Plus Jakarta Sans` (Tingkat keterbacaan tinggi untuk tabel nilai, jurnal KBM, dan berkas akreditasi).
-- **Monospace (ID Siswa/NISN/Kode):** `JetBrains Mono` / `Fira Code`.
+- **Monospace (ID Murid/NISN/Kode):** `JetBrains Mono` / `Fira Code`.
 
 ### 2.4. Prinsip UI/UX dan Arsitektur Layout
-1. **Nuansa Terang, Halus dan Bersih (*Bright, Smooth dan Clean*):** Antarmuka dirancang dengan latar terang yang menyejukkan mata (*eye-friendly*), transisi halus, serta sangat ramah bagi penggunaan harian guru dan siswa tanpa memicu kelelahan visual (*visual fatigue*).
+1. **Nuansa Terang, Halus dan Bersih (*Bright, Smooth dan Clean*):** Antarmuka dirancang dengan latar terang yang menyejukkan mata (*eye-friendly*), transisi halus, serta sangat ramah bagi penggunaan harian guru dan murid tanpa memicu kelelahan visual (*visual fatigue*).
 2. **Keterbacaan Tinggi (*High Readability*):** Mengutamakan ketajaman teks dengan rasio kontras tinggi antara teks gelap (`#0F172A`) dan latar bersih (`#FFFFFF`/`#F8FAFC`), memudahkan guru senior membaca formulir dan rekap data.
 3. **Dedicated Layout Separation (Desktop vs Mobile):** Menggunakan pemisahan master layout secara terpisah (`layouts/desktop.blade.php` dan `layouts/mobile.blade.php`), bukan sekadar menyembunyikan elemen via CSS (`hidden md:block`). Pendekatan ini menjaga ukuran DOM tetap ramping dan interaksi terasa native.
-4. **Mobile First Experience:** Antarmuka ponsel pintar dirancang dengan *bottom bar navigation*, ramah gestur sentuh (touch target minimal 44px), dan kecepatan interaksi instan (<300ms) untuk guru dan siswa.
+4. **Mobile First Experience:** Antarmuka ponsel pintar dirancang dengan *bottom bar navigation*, ramah gestur sentuh (touch target minimal 44px), dan kecepatan interaksi instan (<300ms) untuk guru dan murid.
 5. **Desktop Power-Dashboard:** Menyajikan tata letak *high-density data* untuk staf administrasi, pimpinan sekolah, dan asesor akreditasi dengan *sidebar* navigasi fleksibel, tabel analitik bervolume besar, dan visualisasi grafik komprehensif.
 6. **Reusable Global CSS Classes (Strict No Ad-Hoc Classes):** Seluruh styling antarmuka dikembangkan menggunakan nama class CSS global terstruktur dan reusable. Dilarang keras membuat class CSS khusus/ad-hoc sekali pakai, dilarang menggunakan *inline style* (`style="..."`), dan dilarang menyisipkan tag `<style>` di dalam berkas Blade view. Seluruh kustomisasi UI wajib didaftarkan sebagai class reusable melalui berkas stylesheet terpusat (`resources/css/`). Termasuk di dalamnya komponen universal: Dropdown (`.dropdown`, `.dropdown-menu`, `.dropdown-item`), Kartu Pengguna (`.user-card-button`), dan Modal Dialog (`.modal-backdrop`, `.modal-dialog`).
 7. **Pemisah Modul Classic Minimalist:** Label modul berfungsi sebagai pemisah kategori yang rapi dan elegan (`.menu-category-label` dengan garis pembatas tipis atas dan tipografi uppercase) tanpa memerlukan opsi icon modul yang redundan.
@@ -109,8 +109,8 @@ graph TD
 - **Data Response Contract:** Strict Pure JSON (`application/json`), Eloquent API Resources (Zero HTML in Data Payloads)
 - **Backend Framework:** Laravel (Versi Terbaru / Latest Version)
 - **Frontend Stack:** Blade + Alpine.js / Vue.js + Vanilla CSS dan TailwindCSS (Mobile-First Architecture dan Dedicated Layouts)
-- **Automated Testing Suite:** Pest PHP — **355 Tests Passed dan 1,668 Assertions (100% Pass Rate)**
-- **UI Components:** 25 Anonymous Blade Components ([`docs/COMPONENTS.md`](../docs/COMPONENTS.md))
+- **Automated Testing Suite:** Pest PHP — **445 Tests Passed dan 2,053 Assertions (100% Pass Rate)**
+- **UI Components:** 27 Anonymous Blade Components ([`docs/COMPONENTS.md`](../docs/COMPONENTS.md))
 - **Database:** MySQL 8.0 / MariaDB
 - **Caching dan Real-time Queue:** Redis (untuk antrian pemrosesan dokumen akreditasi dan notifikasi)
 - **Containerization:** Docker dan Docker Compose (Nginx, PHP-FPM, MySQL, Node.js)
@@ -122,9 +122,9 @@ graph TD
 ### 4.1. Empat Tipe Akun Utama (`user_type`)
 Untuk menjamin integritas data dan keamanan, platform mengelompokkan pengguna ke dalam 4 tipe akun utama pada tabel `users`:
 1. **`super_admin`:** Tim IT / Developer / Yayasan. Memiliki akses root (*bypass permission*), mengelola konfigurasi global, audit log, dan integrasi API bridging.
-2. **`admin`:** Staf Tata Usaha (TU) / Operator Sekolah. Mengelola master data sekolah (Rombel, TA, Mapel), akun guru/siswa, plotting jadwal, dan alokasi menu guru.
+2. **`admin`:** Staf Tata Usaha (TU) / Operator Sekolah. Mengelola master data sekolah (Rombel, TA, Mapel), akun guru/murid, plotting jadwal, dan alokasi menu guru.
 3. **`guru`:** Pendidik dan Tenaga Pengajar. Dapat memegang tugas tambahan majemuk (Guru Mapel, Wali Kelas, Pembimbing PKL, Tim Akreditasi, Guru BK).
-4. **`siswa`:** Peserta Didik Aktif (terhubung ke data orang tua). Mengakses informasi akademik, portofolio prestasi, dan jurnal mandiri PKL (SMK).
+4. **`murid`:** Peserta Didik Aktif (terhubung ke data orang tua). Mengakses informasi akademik, portofolio prestasi, dan jurnal mandiri PKL (SMK).
 
 ### 4.2. Arsitektur Basis Data: *Single User Table + 1-to-1 Profile Relations*
 Menghindari kerumitan *multi-auth guard* dengan memusatkan otentikasi pada tabel `users` tunggal yang berelasi spesifik:
@@ -135,12 +135,12 @@ Menghindari kerumitan *multi-auth guard* dengan memusatkan otentikasi pada tabel
 
 ### 4.3. Autentikasi Fleksibel (Auto-Detect Login Identifier)
 Pengguna dapat masuk menggunakan pengenal yang familiar tanpa terbebani keharusan email:
-- **Siswa:** Login via **NISN** / NIS.
+- **Murid:** Login via **NISN** / NIS.
 - **Guru:** Login via **NIP / NUPTK** atau Email Resmi.
 - **Admin dan Super Admin:** Login via **Username** atau Email.
 
 ### 4.4. User-Centric Menu Access dan Dynamic Role Templates
-Untuk mengakomodasi realitas sivitas sekolah di mana guru dan siswa sering memiliki sub-peran majemuk (contoh guru: Guru Pengajar, Wali Kelas, Pembimbing PKL, Wakasek Kurikulum/Kesiswaan, Guru Piket; contoh siswa: Siswa Reguler Kelas 10-11 vs Siswa PKL SMK Kelas 12):
+Untuk mengakomodasi realitas sivitas sekolah di mana guru dan murid sering memiliki sub-peran majemuk (contoh guru: Guru Pengajar, Wali Kelas, Pembimbing PKL, Wakasek Kurikulum/Kesiswaan, Guru Piket; contoh murid: Murid Reguler Kelas 10-11 vs Murid PKL SMK Kelas 12):
 - **Otorisasi Berbasis Pengguna (Granular User-Level Access):** Menu akses dikonfigurasi per akun user pada tabel `user_menu_permissions` dengan 4 hak aksi granular: **Lihat** (`can_view`), **Tambah** (`can_create`), **Ubah** (`can_edit`), dan **Hapus** (`can_delete`).
 - **Template Peran Dinamis (Configurable Role Templates):** Disimpan pada tabel `menu_access_templates`, memungkinkan Super Admin menentukan dan mengubah menu bawaan untuk setiap sub-peran kapan saja melalui antarmuka khusus tanpa hardcoded rules.
 - **Penerapan Template 1-Klik (Preset Application):** Super Admin dapat menyalin hak akses template peran ke pengguna secara instan saat mengelola akun, lalu menyesuaikan izin khusus perorangan sesuai kebutuhan.
@@ -171,17 +171,17 @@ Untuk mengakomodasi realitas sivitas sekolah di mana guru dan siswa sering memil
 - Manajemen Tahun Ajaran, Semester, Rombel/Kelas, dan Mata Pelajaran.
 - Pembagian Konsentrasi Keahlian (SMK) dan Peminatan/Fase (SMA).
 - Jurnal Mengajar Digital Guru dan Catatan BK (Bimbingan Konseling).
-- Poin Pelanggaran Disiplin dan Portofolio Prestasi Siswa.
+- Poin Pelanggaran Disiplin dan Portofolio Prestasi Murid.
 
 ### 5.2. Modul 2: Vokasi dan Link-and-Match Industri (Khusus SMK)
 - Database Rekanan Industri (DUDI).
-- Manajemen PKL / Prakerin: Ploting siswa, pembimbing industri, jurnal harian magang digital.
+- Manajemen PKL / Prakerin: Ploting murid, pembimbing industri, jurnal harian magang digital.
 - Penelusuran Tamatan (*Tracer Study*) dan Bursa Kerja Khusus (BKK).
 
 ### 5.3. Modul 3: Akreditasi dan Penjaminan Mutu Otomatis (BAN-SM / IASP)
 - **Dashboard Kesiapan Akreditasi:** Mengukur persentase kelengkapan bukti fisik berdasarkan 4 komponen utama IASP:
   1. Mutu Lulusan (Kedisiplinan rekam jejak kesiswaan, portofolio prestasi, rekam jejak BKK).
-  2. Proses Pembelajaran (Jurnal KBM guru, keaktifan siswa).
+  2. Proses Pembelajaran (Jurnal KBM guru, keaktifan murid).
   3. Mutu Guru (Sertifikasi, keterlaksanaan jurnal KBM pendidik, karya inovasi).
   4. Manajemen Sekolah (Tata kelola transparan, sarana prasarana).
 - **Bank Dokumen Digital:** Penyimpanan terstruktur SK, RPP/Modul Ajar, dan arsip kegiatan yang siap diunduh sekali klik saat visitasi.
@@ -246,7 +246,7 @@ erDiagram
   - **Arsitektur Real-Time Progress Stream (SSE dan Native HTML5 Progress Bar):** Umpan balik kemajuan pemrosesan backup dan restore dipancarkan secara riil langsung dari siklus backend via SSE (`text/event-stream`), mencerminkan status pengeksporan tabel, penghitungan berkas, ekstraksi arsip, hingga reparasi symlink. Dirender di antarmuka menggunakan elemen native HTML5 `<progress>` dengan nol atribut inline style dan kepatuhan desain Infora (Royal Blue dan Cyan gradients).
   - **Sinkronisasi Zona Waktu Server:** Seluruh konfigurasi PHP (`docker/php/php.ini`), Nginx, dan aplikasi Laravel diselaraskan pada zona waktu **`Asia/Makassar`** (WITA / GMT+8).
 - **Arsitektur Layanan Universal Spreadsheet (`SpreadsheetService`):**
-  - Layanan terpusat modular `App\Services\SpreadsheetService` untuk standarisasi pembuatan template, streaming ekspor, dan pembacaan berkas spreadsheet (.xlsx, .xls, .csv) di seluruh modul platform (GTK, Siswa, Rombel, Nilai, dll.).
+  - Layanan terpusat modular `App\Services\SpreadsheetService` untuk standarisasi pembuatan template, streaming ekspor, dan pembacaan berkas spreadsheet (.xlsx, .xls, .csv) di seluruh modul platform (GTK, Murid, Rombel, Nilai, dll.).
   - Streaming ekspor via `php://output` untuk mencegah kehabisan memori RAM saat mengekspor dataset dalam jumlah besar.
   - Preservasi tipe data teks numerik panjang (`DataType::TYPE_STRING`) via `setCellValueExplicit()` guna mencegah korupsi format, pemotongan digit, atau konversi otomatis ke notasi ilmiah (`7.308E+15`) pada data NIK (16 digit), NIP (18 digit), NUPTK (16 digit), dan nomor telepon.
   - Proteksi sanitasi terhadap kerentanan *CSV / Spreadsheet Formula Injection* (`stripFormulaInjection`) untuk menyaring karakter berbahaya (`=`, `+`, `-`, `@`, `\t`, `\r`).

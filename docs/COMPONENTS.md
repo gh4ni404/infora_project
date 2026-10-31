@@ -1,6 +1,6 @@
 # 🧩 Panduan Lengkap Blade Components — INFORA
 
-Dokumentasi resmi ini merangkum seluruh **25 Anonymous Blade Components** yang tersedia di aplikasi **INFORA** ([`resources/views/components/`](../resources/views/components/)). Komponen-komponen ini dirancang untuk memastikan konsistensi antarmuka pengguna (UI/UX), mereduksi pengulangan kode (*boilerplate*), dan menyatu secara native dengan sistem desain di [`resources/css/app.css`](../resources/css/app.css).
+Dokumentasi resmi ini merangkum seluruh **27 Anonymous Blade Components** yang tersedia di aplikasi **INFORA** ([`resources/views/components/`](../resources/views/components/)). Komponen-komponen ini dirancang untuk memastikan konsistensi antarmuka pengguna (UI/UX), mereduksi pengulangan kode (*boilerplate*), dan menyatu secara native dengan sistem desain di [`resources/css/app.css`](../resources/css/app.css).
 
 ---
 
@@ -15,6 +15,7 @@ Dokumentasi resmi ini merangkum seluruh **25 Anonymous Blade Components** yang t
    - [`<x-icon-picker>`](#x-icon-picker)
    - [`<x-image-upload>`](#x-image-upload)
    - [`<x-file-upload>`](#x-file-upload)
+   - [`<x-form-error>`](#x-form-error)
 2. [Komponen Halaman, Navigasi dan Metrik](#-2-komponen-halaman-navigasi--metrik)
    - [`<x-page-header>`](#x-page-header)
    - [`<x-tab-pills>` dan `<x-tab-pill>`](#x-tab-pills--x-tab-pill)
@@ -32,7 +33,8 @@ Dokumentasi resmi ini merangkum seluruh **25 Anonymous Blade Components** yang t
 4. [Komponen Dialog dan Modal](#-4-komponen-dialog--modal)
    - [`<x-modal>`](#x-modal)
    - [`<x-progress-modal>`](#x-progress-modal)
-5. [Komponen Grafis dan Ikon](#-5-komponen-grafis--ikon)
+5. [Komponen Grafis, Avatar dan Ikon](#-5-komponen-grafis-avatar-dan-ikon)
+   - [`<x-avatar>`](#x-avatar)
    - [`<x-icon>`](#x-icon)
 6. [Integrasi Modul JavaScript](#-6-integrasi-modul-javascript)
    - [`InforaModals`](#inforamodals)
@@ -371,6 +373,26 @@ Komponen menggunakan **Event Delegation** langsung pada level dokumen. Seluruh i
 
 ---
 
+### `<x-form-error>`
+Komponen universal untuk menampilkan pesan kesalahan validasi form dengan ikon alert, tipografi kontras tinggi, border bergetar (`.border-danger` dengan `@keyframes inputShake`), dan kepatuhan penuh pada token CSS `:root` (`--infora-danger`).
+
+#### Props
+| Prop | Tipe | Default | Wajib? | Deskripsi |
+| :--- | :--- | :--- | :--- | :--- |
+| `name` | `string` | `null` | Opsional | Nama field request untuk otomatis mengambil error pertama via `$errors->first($name)`. |
+| `message` | `string` | `null` | Opsional | Teks pesan kesalahan eksplisit kustom. |
+
+#### Contoh Penggunaan
+```blade
+{{-- Penggunaan Otomatis berdasarkan nama field --}}
+<x-form-error name="nisn" />
+
+{{-- Penggunaan dengan pesan kustom --}}
+<x-form-error :message="$customErrorMessage" />
+```
+
+---
+
 ## 🏛️ 2. Komponen Halaman, Navigasi dan Metrik
 
 ### `<x-page-header>`
@@ -470,7 +492,7 @@ Menampilkan kartu metrik statistik ringkasan (KPI) secara responsif di bagian at
 #### Props `<x-stat-card>`
 | Prop | Tipe | Default | Deskripsi |
 | :--- | :--- | :--- | :--- |
-| `label` | `string` | `null` | Label metrik (misal: "Total Jurusan", "Siswa Aktif"). |
+| `label` | `string` | `null` | Label metrik (misal: "Total Jurusan", "Murid Aktif"). |
 | `value` | `string\|int` | `null` | Angka/nilai metrik. Jika kosong, membaca dari default `$slot`. |
 | `icon` | `string` | `null` | Nama ikon yang dirender di samping kiri. |
 | `color` | `string` | `'primary'` | Variasi tema warna ikon (`primary`, `success`, `warning`, `danger`, `info`). Menghasilkan class `.stat-icon.is-{$color}`. |
@@ -619,7 +641,7 @@ Komponen terpadu pembungkus tabel data dengan dua mode tampilan: **Mode Form Pen
 | `perPage` | `int\|string` | `null` | Nilai `per_page` aktif saat ini untuk memunculkan pemilih jumlah baris. |
 | `perPageText` | `string` | `'data'` | Teks di samping pemilih per_page (misal: `'jurusan'`). |
 | `total` | `int` | `null` | Jumlah total data untuk ditampilkan di toolbar. |
-| `totalLabel` | `string` | `'Data'` | Label satuan data total (misal: `'Siswa'`, `'Jurusan'`). |
+| `totalLabel` | `string` | `'Data'` | Label satuan data total (misal: `'Murid'`, `'Jurusan'`). |
 | `totalPrefix` | `string` | `'Total:'` | Awalan teks total. |
 
 #### Slots
@@ -1056,7 +1078,33 @@ Modal indikator proses global (*singleton*) dengan ambient status orb, bilah per
 
 ---
 
-## 🎨 5. Komponen Grafis dan Ikon
+## 🎨 5. Komponen Grafis, Avatar dan Ikon
+
+### `<x-avatar>`
+Komponen universal untuk merender foto profil atau pasfoto pengguna, murid, dan GTK secara seragam dengan fallback 2 inisial huruf kapital berlatar gradien brand INFORA (`.user-avatar-circle`).
+
+#### Props
+| Prop | Tipe | Default | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `src` | `string` | `null` | URL publik atau storage relative path pasfoto (`/storage/...`, `photos/avatar/...`, dsb). |
+| `name` | `string` | `null` | Nama untuk atribut `alt` dan pembuatan otomatis 2 huruf inisial kapital jika foto kosong. |
+| `size` | `string` | `null` | Ukuran avatar: `'sm'` (28px), `null` (38px, default), `'lg'` (72px), `'xl'` (84px). |
+
+#### Contoh Penggunaan
+```blade
+{{-- 1. Baris Tabel Data Murid / GTK --}}
+<x-avatar :src="$murid->foto_url" :name="$murid->nama_lengkap" size="sm" />
+<x-avatar :src="$gtk->foto_url" :name="$gtk->nama_lengkap" size="sm" />
+
+{{-- 2. Dropdown Header & Profil Pengguna --}}
+<x-avatar :src="auth()->user()->avatar_url" :name="auth()->user()->name" size="sm" />
+<x-avatar :src="auth()->user()->avatar_url" :name="auth()->user()->name" />
+
+{{-- 3. Kartu Profil Besar di Halaman Pengaturan Profile --}}
+<x-avatar :src="$user->avatar_url" :name="$user->name" size="lg" class="mx-auto mb-3" />
+```
+
+---
 
 ### `<x-icon>`
 Merender SVG icon native dari keluarga Lucide Icons secara instan tanpa ketergantungan web font eksternal.

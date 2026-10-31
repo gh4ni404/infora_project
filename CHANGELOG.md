@@ -8,6 +8,17 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 
 ## [Unreleased]
 
+### Added dan Improved (Master Data Murid Kemenag, Standardisasi Avatar Universal, UI Error Validation & Konsistensi Nomenklatur)
+- **Master Data Murid (Peserta Didik) & Validasi Khusus Madrasah Kemenag (`master/data-murid`):**
+  - *Validasi Cerdas Kemenag & Kemendikbud:* Menambahkan validasi kontekstual pada Form Requests (`StoreMuridRequest`, `UpdateMuridRequest`) di mana sekolah bertipe madrasah (MI, MTs, MA) mewajibkan Nomor Induk Siswa Madrasah (NISM) 18 digit angka pada kolom `nis` tanpa menambah kolom basis data baru, serta validasi NISN maksimal 10 digit numerik.
+  - *Penyempurnaan Antarmuka Validasi Galat (Form Error UI):* Mengimplementasikan modul interaktif `resources/js/infora-validation.js` yang menyaring pesan galat validasi server-side dan client-side tanpa alert/tooltip popup default browser (`novalidate`), memberikan efek getar (*vibration shake animation*), border merah semantik (`var(--danger)`), serta hint teks galat langsung di bawah input terkait.
+  - *Pembersihan Menyeluruh Nomenklatur `siswa` ke `murid`:* Mengeliminasi seluruh istilah dan fallback legacy `siswa` di seluruh controller, request, model, seeder, dan views menjadi murni `murid` (termasuk helper `User::isMurid()` dan relasi `murid()`).
+  - *Sinkronisasi Foto Profil Murid Dua Arah:* Memperbaiki desinkronisasi antara `murids.foto_path` dan `users.avatar_path` dengan menghadirkan aksesor bidirectional `foto_url` dan `avatar_url` pada model `Murid`, `Gtk`, dan `User` sehingga foto yang diunggah via Pengaturan Profil langsung tampil di daftar dan kartu profil Data Murid.
+- **Standardisasi Ekosistem Komponen UI Blade (Total 27 Komponen):**
+  - *Komponen Universal `<x-avatar>`:* Menghadirkan komponen `<x-avatar>` yang ringkas dan bersih (`src`, `name`, `size`) tanpa overengineering maupun defensive programming berlebih, lengkap dengan auto initials fallback 2 huruf kapital.
+  - *Komponen Pesan Galat `<x-form-error>`:* Menghadirkan komponen kanonikal `<x-form-error>` berbasis ikon Lucide `alert-circle` untuk menampilkan pesan galat validasi form secara konsisten di seluruh antarmuka.
+  - *Ekspansi Test Suite:* Rangkaian pengujian otomatis Pest feature dan unit tests berjalan 100% sukses dengan **445 tests passed (2.053 assertions)**.
+
 ### Added dan Improved (Master Data Tingkatan Sekolah, Desain Empty-State Terpusat & Standardisasi Komponen UI)
 - **Master Data Tingkatan Kelas (`master/data-tingkatan`):**
   - *CRUD Penjenjangan Kelas Multi-Tenancy:* Mengimplementasikan pengelolaan penjenjangan tingkatan kelas (X, XI, XII / 1-13) berbasis unit sekolah (`school_id`), pemetaan Fase Kurikulum Merdeka (Fase E, Fase F, dll.), serta integrasi mutator teks otomatis (`UPPERCASE` untuk notasi kode dan `Title Case` untuk nama serta fase).
@@ -95,7 +106,7 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
     5. *Pencegahan Freeze InforaProgress pada Unduh Berkas & Ekspor (Fix Stuck 70%):* Menambahkan atribut `data-no-progress` dan `download` pada tautan unduh template serta memperbarui interceptor global pada `resources/js/app.js` agar secara otomatis mengabaikan URL berkas (`/download`, `/template`, `/export`). Tindakan ini mencegah overlay progres memblokir layar karena respons unduhan binary attachment tidak memicu *unload* halaman oleh browser.
 - **Layanan Universal Spreadsheet (`App\Services\SpreadsheetService`) & Fitur Impor / Ekspor Excel Data GTK (`master/data-gtk`):**
   - **Latar Belakang & Kebutuhan Arsitektur Global:**
-    - Awalnya fitur impor dan ekspor direncanakan khusus untuk data GTK (`GtkSpreadsheetService`). Namun untuk menjaga efisiensi, konsistensi reusabilitas, dan kepatuhan arsitektur modular INFORA, layanan ini direkayasa menjadi layanan global universal `App\Services\SpreadsheetService`. Seluruh modul lain di masa mendatang (Data Siswa, Rombel, Nilai, Presensi, Pelanggaran, dll.) dapat langsung memanfaatkan satu mesin spreadsheet yang sama tanpa duplikasi kode (*DRY*).
+    - Awalnya fitur impor dan ekspor direncanakan khusus untuk data GTK (`GtkSpreadsheetService`). Namun untuk menjaga efisiensi, konsistensi reusabilitas, dan kepatuhan arsitektur modular INFORA, layanan ini direkayasa menjadi layanan global universal `App\Services\SpreadsheetService`. Seluruh modul lain di masa mendatang (Data Murid, Rombel, Nilai, Presensi, Pelanggaran, dll.) dapat langsung memanfaatkan satu mesin spreadsheet yang sama tanpa duplikasi kode (*DRY*).
   - **Fitur Unggulan Layanan Universal `SpreadsheetService`:**
     1. *Pembuatan Template Spreadsheet Universal (`template`):* Menghasilkan berkas `.xlsx` dengan styling profesional (Header Royal Blue `#1E3A8A` dengan teks putih tebal, *freeze panes* pada baris judul, *auto-fit column width* dengan margin kenyamanan baca, dan baris data contoh yang realistis).
     2. *Streaming Ekspor Terproteksi (`export`):* Mendukung ekspor format `.xlsx` dan `.csv` secara streaming langsung via `php://output` dengan header HTTP download yang tepat, menghemat penggunaan RAM pada server.
@@ -296,7 +307,7 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
   - Test suite Pest diperluas dengan [SystemBaselineSeederTest.php](tests/Feature/System/SystemBaselineSeederTest.php) (total 83 tests aplikasi lulus 100%, 377 assertions).
 - **Sistem Tata Kelola Menu Akses dan Dynamic Role Templates (User-Centric Granular Permissions):**
   - Mengimplementasikan otorisasi navigasi berbasis pengguna pada rute `/sistem/menu-akses` (`sistem.menu-akses`) lengkap dengan 4 hak aksi granular: Lihat (`can_view`), Tambah (`can_create`), Ubah (`can_edit`), dan Hapus (`can_delete`).
-  - Sistem template peran dinamis (`menu_access_templates`) yang dapat dikonfigurasi penuh oleh Super Admin untuk beragam peran (Guru Pengajar, Wali Kelas, Wakasek Kurikulum, Wakasek Kesiswaan, Staf TU, Siswa Reguler, Siswa PKL) melalui antarmuka khusus.
+  - Sistem template peran dinamis (`menu_access_templates`) yang dapat dikonfigurasi penuh oleh Super Admin untuk beragam peran (Guru Pengajar, Wali Kelas, Wakasek Kurikulum, Wakasek Kesiswaan, Staf TU, Murid Reguler, Murid PKL) melalui antarmuka khusus.
   - Fitur 1-Klik Salin Template Peran (*Apply Preset*) saat mengelola izin pengguna untuk pengisian hak akses instan dalam 1 detik.
   - Antarmuka manajemen lengkap di `resources/views/system/menu-access/` dengan kepatuhan arsitektur 100% bebas *inline style* dan bebas tag `<style>`.
   - Integrasi filtering dinamis pada `SidebarComposer` dengan proteksi *root bypass* permanen untuk Super Admin.
@@ -362,7 +373,7 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 - **Database dan Model:**
   - Migrasi penambahan kolom sistem pada tabel `users`: `username`, `user_type`, `is_active`, `avatar_path`.
   - Seeder default Super Admin (`superadmin` / `password` / `superadmin@infora.test`).
-  - Helper methods pada model `User`: `isSuperAdmin()`, `isAdmin()`, `isGuru()`, `isSiswa()`.
+  - Helper methods pada model `User`: `isSuperAdmin()`, `isAdmin()`, `isGuru()`, `isMurid()`.
 - **Design System dan Antarmuka Awal:**
   - Standardisasi class CSS global reusable di `resources/css/app.css` (bebas class ad-hoc, tanpa *inline styles*, dan tanpa tag `<style>`).
   - Master layout `layouts/auth.blade.php` dan `layouts/app.blade.php`.
@@ -411,7 +422,7 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 ### Changed
 - **Transformasi Desain Sistem ke Nuansa Terang, Ramah dan Keterbacaan Tinggi:**
   - Pembaruan tema visual global di `resources/css/app.css` dari nuansa gelap ke tema terang (*bright, smooth, clean modern*).
-  - Peningkatan kontras teks (`Slate-900 #0F172A` di atas latar kanvas sejuk `#F8FAFC` dan kartu `#FFFFFF`) untuk menjamin keterbacaan maksimal (WCAG AAA) yang nyaman bagi guru dan siswa.
+  - Peningkatan kontras teks (`Slate-900 #0F172A` di atas latar kanvas sejuk `#F8FAFC` dan kartu `#FFFFFF`) untuk menjamin keterbacaan maksimal (WCAG AAA) yang nyaman bagi guru dan murid.
   - Harmonisasi palet warna aksen pendidikan: Sky Blue (`#0284C7`) dan Royal Blue (`#2563EB`) dengan latar navigasi aktif *soft blue* (`#EFF6FF`).
   - Penyesuaian elevasi kartu putih bersih dengan batas presisi halus (`#E2E8F0`) dan bayangan lembut melayang.
 
@@ -436,7 +447,7 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
   - **Standar Reusable Global CSS:** Seluruh styling antarmuka wajib menggunakan class global reusable; dilarang keras membuat class khusus/ad-hoc, tanpa *inline styles* (`style="..."`), dan tanpa tag `<style>` pada view.
   - **Standar Media Upload Base64:** Seluruh pengunggahan dokumentasi foto (KBM, PKL, Akreditasi) menggunakan string Base64 maksimal 1MB per berkas dengan preservasi kualitas visual.
   - **Pola Penamaan Berkas Semantik:** Standarisasi nama file otomatis `{modul}_u{user_id}_{YYYYMMDD_His}_{random_8char}.{ekstensi}` untuk audit trail dan pencegahan tabrakan nama berkas.
-  - **Arsitektur Akun Sivitas (4 Tipe Akun):** Klasifikasi tingkat pengguna `super_admin`, `admin`, `guru`, dan `siswa` dengan profil relasional terpisah dan login fleksibel (NISN/NIP/Username/Email).
+  - **Arsitektur Akun Sivitas (4 Tipe Akun):** Klasifikasi tingkat pengguna `super_admin`, `admin`, `guru`, dan `murid` dengan profil relasional terpisah dan login fleksibel (NISN/NIP/Username/Email).
   - **Sistem Menu User-Centric:** Alokasi menu berbasis pengguna untuk mengakomodasi peran majemuk guru tanpa duplikasi menu.
 - **Dokumentasi Proyek Komprehensif:**
   - `README.md`: Gambaran platform, badges arsitektur, dan panduan quick start Docker.
