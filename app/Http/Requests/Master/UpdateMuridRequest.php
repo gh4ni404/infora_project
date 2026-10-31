@@ -44,7 +44,6 @@ class UpdateMuridRequest extends FormRequest
         $murid = $this->route('murid');
         $schoolId = $this->input('school_id') ?? $murid?->school_id;
         $muridId = $murid?->id;
-        $userId = $murid?->user_id;
 
         return [
             'school_id' => ['required', 'integer', 'exists:schools,id'],
@@ -66,40 +65,15 @@ class UpdateMuridRequest extends FormRequest
                     ->where(fn ($query) => $query->where('school_id', $schoolId)->whereNull('deleted_at'))
                     ->ignore($muridId),
             ],
-            'nik' => ['nullable', 'string', 'max:20'],
             'kelas_id' => [
                 'nullable',
                 'integer',
                 Rule::exists('kelas', 'id')->where(fn ($query) => $query->where('school_id', $schoolId)),
             ],
             'angkatan' => ['nullable', 'string', 'max:20'],
-            'tempat_lahir' => ['nullable', 'string', 'max:100'],
-            'tanggal_lahir' => ['nullable', 'date'],
-            'agama' => ['nullable', 'string', 'max:30'],
-            'no_hp' => ['nullable', 'string', 'max:30'],
             'email' => ['nullable', 'email', 'max:100'],
-            'provinsi_id' => ['nullable', 'integer', 'exists:provinsi,id'],
-            'kabupaten_id' => ['nullable', 'integer', 'exists:kabupaten,id'],
-            'kecamatan_id' => ['nullable', 'integer', 'exists:kecamatan,id'],
-            'kelurahan_id' => ['nullable', 'integer', 'exists:kelurahan,id'],
-            'alamat' => ['nullable', 'string', 'max:1000'],
-            'nama_ayah' => ['nullable', 'string', 'max:150'],
-            'nama_ibu' => ['nullable', 'string', 'max:150'],
-            'nama_wali' => ['nullable', 'string', 'max:150'],
-            'no_hp_ortu' => ['nullable', 'string', 'max:30'],
-            'foto' => ['nullable', 'string'],
-            'status' => ['nullable', 'string', 'in:aktif,lulus,mutasi,keluar,dropout'],
+            'status' => ['required', 'string', 'in:aktif,lulus,mutasi,keluar,dropout'],
             'is_active' => ['boolean'],
-
-            // Akun pengguna login
-            'username' => [
-                'nullable',
-                'string',
-                'max:50',
-                Rule::unique('users', 'username')->ignore($userId),
-            ],
-            'password' => ['nullable', 'string', 'min:6'],
-            'role_template' => ['nullable', 'string'],
         ];
     }
 
@@ -121,9 +95,7 @@ class UpdateMuridRequest extends FormRequest
             'nis.unique' => 'Nomor Induk Siswa (NIS) ini sudah terdaftar pada murid lain di sekolah yang sama.',
             'kelas_id.exists' => 'Rombongan belajar / kelas yang dipilih tidak valid untuk unit sekolah ini.',
             'email.email' => 'Format alamat email tidak valid.',
-            'tanggal_lahir.date' => 'Format tanggal lahir tidak valid.',
-            'username.unique' => 'Username ini telah digunakan oleh pengguna lain.',
-            'password.min' => 'Kata sandi akun minimal terdiri atas 6 karakter.',
+            'status.required' => 'Status siswa wajib dipilih.',
         ];
     }
 }

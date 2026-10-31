@@ -416,15 +416,6 @@
             InforaModals.setup('modalCreateMurid', { cancelBtnId: 'btnCancelCreateMurid' });
             InforaModals.bindOpenButton('btnOpenCreateMurid', 'modalCreateMurid');
 
-            // Toggle visibilitas kredensial kustom saat checkbox diubah
-            const createUserAccountCb = document.getElementById('create_create_user_account');
-            const userCredsBox = document.getElementById('createUserCredentialsBox');
-            if (createUserAccountCb && userCredsBox) {
-                createUserAccountCb.addEventListener('change', function() {
-                    userCredsBox.style.display = this.checked ? 'grid' : 'none';
-                });
-            }
-
             // 2. Modal Ubah Murid
             InforaModals.setup('modalEditMurid', { cancelBtnId: 'btnCancelEditMurid' });
             InforaModals.bindEditButtons('.btn-open-edit-murid', 'modalEditMurid', function(modal, data, formEdit) {
@@ -433,49 +424,10 @@
                 document.getElementById('edit_kelas_id').value = data.kelas_id || '';
                 document.getElementById('edit_nisn').value = data.nisn || '';
                 document.getElementById('edit_nis').value = data.nis || '';
-                document.getElementById('edit_nik').value = data.nik || '';
                 document.getElementById('edit_angkatan').value = data.angkatan || '';
-                document.getElementById('edit_tempat_lahir').value = data.tempat_lahir || '';
-                document.getElementById('edit_tanggal_lahir').value = data.tanggal_lahir ? data.tanggal_lahir.substring(0, 10) : '';
-                document.getElementById('edit_agama').value = data.agama || '';
-                document.getElementById('edit_no_hp').value = data.no_hp || '';
                 document.getElementById('edit_email').value = data.email || '';
-                document.getElementById('edit_alamat').value = data.alamat || '';
-                document.getElementById('edit_nama_ayah').value = data.nama_ayah || '';
-                document.getElementById('edit_nama_ibu').value = data.nama_ibu || '';
-                document.getElementById('edit_nama_wali').value = data.nama_wali || '';
-                document.getElementById('edit_no_hp_ortu').value = data.no_hp_ortu || '';
                 document.getElementById('edit_status').value = data.status || 'aktif';
                 document.getElementById('edit_is_active').checked = Boolean(data.is_active);
-
-                // Kredensial & Status Info Akun
-                const user = data.user || null;
-                const username = data.username || (user ? user.username : '');
-                const userId = data.user_id || (user ? user.id : null);
-
-                document.getElementById('edit_username').value = username;
-                document.getElementById('edit_password').value = '';
-
-                const usernameText = document.getElementById('edit_account_username_text');
-                const statusBadge = document.getElementById('edit_account_status_badge');
-                const menuAccessBtn = document.getElementById('edit_account_menu_access_btn');
-
-                if (usernameText) usernameText.textContent = username || 'Tanpa Akun (Belum Dibuat)';
-                if (statusBadge) {
-                    statusBadge.textContent = data.is_active ? 'Aktif' : 'Nonaktif';
-                    statusBadge.className = data.is_active ? 'badge badge-success' : 'badge badge-neutral';
-                }
-                if (menuAccessBtn) {
-                    if (userId) {
-                        menuAccessBtn.href = '/sistem/user/user/' + userId;
-                        menuAccessBtn.style.display = 'inline-flex';
-                    } else {
-                        menuAccessBtn.style.display = 'none';
-                    }
-                }
-
-                // Populate Cascading Wilayah Kemendagri
-                window.InforaWilayah?.populateCascade('edit', data);
             });
 
             // 3. Modal Pratinjau Detail Profil Murid
@@ -580,26 +532,13 @@
                 hintId: 'toggleStatusMuridHint',
             });
 
-            // 7. Cascading Wilayah Administratif Kemendagri
-            window.InforaWilayah?.bindCascade({ prefix: 'create' });
-            window.InforaWilayah?.bindCascade({ prefix: 'edit' });
-
-            // 8. Reopen modal otomatis saat terjadi validasi error
+            // 7. Reopen modal otomatis saat terjadi validasi error
             window.hasValidationErrors = {{ $errors->any() ? 'true' : 'false' }};
             window.errorMethod = @json(old('_method'));
             InforaModals.reopenOnError({
                 create: 'modalCreateMurid',
                 edit: 'modalEditMurid'
             });
-
-            @if ($errors->any() && old('provinsi_id'))
-                window.InforaWilayah?.restoreOnError('{{ old('_method') === 'PUT' ? 'edit' : 'create' }}', {
-                    provinsi_id: '{{ old('provinsi_id') }}',
-                    kabupaten_id: '{{ old('kabupaten_id') }}',
-                    kecamatan_id: '{{ old('kecamatan_id') }}',
-                    kelurahan_id: '{{ old('kelurahan_id') }}',
-                });
-            @endif
         });
     </script>
 @endsection

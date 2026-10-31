@@ -12,7 +12,6 @@ use App\Models\Murid;
 use App\Models\Provinsi;
 use App\Models\Tingkatan;
 use App\Services\SpreadsheetService;
-use App\Support\ImageUploader;
 use App\Support\MuridAccountManager;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -103,7 +102,7 @@ class MuridController extends Controller
     }
 
     /**
-     * Simpan data murid baru dan otomatis buatkan akun pengguna terkait jika dipilih.
+     * Simpan data murid baru dan otomatis buatkan akun pengguna terkait.
      */
     public function store(StoreMuridRequest $request): RedirectResponse
     {
@@ -113,31 +112,16 @@ class MuridController extends Controller
             $data['school_id'] = $request->user()->school_id;
         }
 
-        if (! empty($data['foto'])) {
-            $data['foto_path'] = ImageUploader::uploadBase64($data['foto'], 'photos/murid', 'murid');
-        }
-        unset($data['foto']);
-
-        $createUserAccount = ! empty($data['create_user_account']);
-        $credentials = [
-            'username' => $data['username'] ?? null,
-            'password' => $data['password'] ?? null,
-            'role_template' => $data['role_template'] ?? 'murid_reguler',
-        ];
-        unset($data['create_user_account'], $data['username'], $data['password'], $data['role_template']);
+        unset($data['create_user_account']);
 
         $murid = Murid::create($data);
 
-        $passwordNote = '';
-        if ($createUserAccount) {
-            $user = MuridAccountManager::createOrUpdateUserForMurid($murid, $credentials);
-            $cleanPassword = MuridAccountManager::resolveDefaultPassword($murid, $credentials['password'] ?? null, $user->username);
-            $passwordNote = " dengan kata sandi: {$cleanPassword}";
-        }
+        $user = MuridAccountManager::createOrUpdateUserForMurid($murid);
+        $cleanPassword = MuridAccountManager::resolveDefaultPassword($murid, null, $user->username);
 
         return redirect()
             ->route('master.data-murid', $this->schoolRedirectParams($request, $murid->school_id))
-            ->with('success', "Data murid {$murid->nama_lengkap} berhasil ditambahkan ke sistem{$passwordNote}.");
+            ->with('success', "Data murid {$murid->nama_lengkap} berhasil ditambahkan. Akun login otomatis dibuat dengan Username: {$user->username} dan Kata Sandi: {$cleanPassword}");
     }
 
     /**
@@ -204,26 +188,14 @@ class MuridController extends Controller
             $data['school_id'] = $request->user()->school_id;
         }
 
-        if (! empty($data['foto'])) {
-            if ($murid->foto_path) {
-                ImageUploader::delete($murid->foto_path);
-            }
-            $data['foto_path'] = ImageUploader::uploadBase64($data['foto'], 'photos/murid', 'murid');
-        }
-        unset($data['foto']);
-
-        $credentials = [
-            'username' => $data['username'] ?? null,
-            'password' => $data['password'] ?? null,
-            'role_template' => $data['role_template'] ?? null,
-        ];
-        unset($data['username'], $data['password'], $data['role_template']);
-
         $murid->update($data);
 
-        // Sinkronisasi data akun login jika murid memiliki user_id atau credentials ditentukan
-        if ($murid->user_id || ! empty($credentials['username']) || ! empty($credentials['password'])) {
-            MuridAccountManager::createOrUpdateUserForMurid($murid, $credentials);
+        if ($murid->user) {
+            $murid->user->update([
+                'name' => $murid->nama_lengkap,
+                'email' => $murid->email,
+                'is_active' => (bool) $murid->is_active,
+            ]);
         }
 
         return redirect()

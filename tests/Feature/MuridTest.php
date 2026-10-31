@@ -187,20 +187,9 @@ test('super admin can create new murid and automatically generate user account',
         'jenis_kelamin' => 'P',
         'nisn' => '0098765432',
         'nis' => '24050',
-        'nik' => '7308123456789012',
         'kelas_id' => $this->kelasA->id,
         'angkatan' => '2026',
-        'tempat_lahir' => 'bone',
-        'tanggal_lahir' => '2010-08-17',
-        'agama' => 'Islam',
-        'no_hp' => '081234567899',
         'email' => 'annisa@example.com',
-        'nama_ayah' => 'haji ruslan',
-        'nama_ibu' => 'hajjah rosma',
-        'no_hp_ortu' => '081298765433',
-        'status' => 'aktif',
-        'is_active' => 1,
-        'create_user_account' => 1,
     ];
 
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-murid.store'), $payload);
@@ -213,9 +202,9 @@ test('super admin can create new murid and automatically generate user account',
         'nama_lengkap' => 'Annisa Dwi Lestari',
         'nisn' => '0098765432',
         'nis' => '24050',
-        'tempat_lahir' => 'Bone',
-        'nama_ayah' => 'Haji Ruslan',
-        'nama_ibu' => 'Hajjah Rosma',
+        'jenis_kelamin' => 'P',
+        'angkatan' => '2026',
+        'email' => 'annisa@example.com',
     ]);
 
     $murid = Murid::where('nisn', '0098765432')->first();
@@ -286,9 +275,9 @@ test('super admin can update murid data and sync user account', function () {
         'nisn' => '0078888888',
         'nis' => '24111',
         'angkatan' => '2026',
+        'email' => 'rian.new@example.com',
         'status' => 'aktif',
         'is_active' => 1,
-        'username' => 'rian_hidayat_new',
     ];
 
     $response = $this->actingAs($this->superAdmin)->put(route('master.data-murid.update', $murid), $payload);
@@ -300,11 +289,14 @@ test('super admin can update murid data and sync user account', function () {
         'id' => $murid->id,
         'nama_lengkap' => 'Rian Hidayat Pratama',
         'nis' => '24111',
+        'email' => 'rian.new@example.com',
     ]);
 
     $this->assertDatabaseHas('users', [
         'id' => $murid->user_id,
-        'username' => 'rian_hidayat_new',
+        'name' => 'Rian Hidayat Pratama',
+        'email' => 'rian.new@example.com',
+        'is_active' => true,
     ]);
 });
 
