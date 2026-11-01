@@ -278,9 +278,9 @@
                         <td>
                             <x-table-actions align="right">
                                 <x-crud-button
-                                action="edit"
-                                class="btn-open-edit-kalender"
-                                title="Ubah Agend"
+                                    action="edit"
+                                    class="btn-open-edit-kalender"
+                                    title="Ubah Agenda"
                                 data-event="{{ json_encode([
                                     'id' => $item->id,
                                     'school_id' => $item->school_id,
@@ -724,9 +724,13 @@
             });
 
             // ── Modal Ubah Agenda ───────────────────────────────────────────────────────────
-            function populateEditModal(data) {
-                const form = document.getElementById('formEditKalender');
-                if (form && data.id) form.action = `{{ url('konfigurasi-sekolah/kalender-akademik') }}/${data.id}`;
+            const kalenderUpdateUrlTemplate = '{{ route("konfigurasi-sekolah.kalender-akademik.update", ":id") }}';
+
+            function populateEditModal(data, formEdit) {
+                const form = formEdit || document.getElementById('formEditKalender');
+                if (form && data.id) {
+                    form.action = kalenderUpdateUrlTemplate.replace(':id', data.id);
+                }
 
                 const fieldMap = {
                     edit_kalender_id:     data.id,
@@ -755,7 +759,7 @@
                 InforaModals.open('modalEditKalender');
             }
 
-            InforaModals.bindEditButtons('.btn-open-edit-kalender', 'modalEditKalender', (modal, data) => populateEditModal(data));
+            InforaModals.bindEditButtons('.btn-open-edit-kalender', 'modalEditKalender', (modal, data, formEdit) => populateEditModal(data, formEdit));
 
             // ── Modal Hapus Agenda ──────────────────────────────────────────────────────────
             InforaModals.bindConfirmButtons('.btn-open-delete-kalender', 'modalDeleteKalender', {
