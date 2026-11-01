@@ -207,14 +207,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Alias foto_url untuk kompatibilitas universal.
-     */
-    public function getFotoUrlAttribute(): ?string
-    {
-        return $this->avatar_url;
-    }
-
-    /**
      * Evaluasi apakah akun pengguna masih perlu melengkapi profil atau mengganti kata sandi bawaan.
      */
     public function needsProfileCompletion(): bool
