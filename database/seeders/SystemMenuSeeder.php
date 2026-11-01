@@ -96,6 +96,18 @@ class SystemMenuSeeder extends Seeder
             ]
         );
 
+        SubMenu::firstOrCreate(
+            [
+                'menu_id' => $systemMenu->id,
+                'name' => 'Referensi',
+            ],
+            [
+                'route_name' => 'system.referensi',
+                'order' => 5,
+                'is_active' => true,
+            ]
+        );
+
         // Direct Menu: Backup Dan Restore
         Menu::firstOrCreate(
             [

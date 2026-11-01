@@ -16,6 +16,7 @@ use App\Http\Controllers\System\BackupRestoreController;
 use App\Http\Controllers\System\MenuAccessController;
 use App\Http\Controllers\System\MenuController;
 use App\Http\Controllers\System\ModuleController;
+use App\Http\Controllers\System\ReferensiController;
 use App\Http\Controllers\System\SubMenuController;
 use App\Http\Controllers\System\UnderDevelopmentController;
 use App\Http\Controllers\Wilayah\KabupatenController;
@@ -51,6 +52,14 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
         Route::resource('modules', ModuleController::class)->except(['show']);
         Route::resource('menus', MenuController::class)->except(['show']);
         Route::resource('sub-menus', SubMenuController::class)->except(['show']);
+        Route::get('referensi', [ReferensiController::class, 'index'])->name('referensi');
+        Route::post('referensi/kategori', [ReferensiController::class, 'storeKategori'])->name('referensi.kategori.store');
+        Route::put('referensi/kategori/{referensi}', [ReferensiController::class, 'updateKategori'])->name('referensi.kategori.update');
+        Route::delete('referensi/kategori/{referensi}', [ReferensiController::class, 'destroyKategori'])->name('referensi.kategori.destroy');
+        Route::post('referensi/item', [ReferensiController::class, 'storeItem'])->name('referensi.item.store');
+        Route::put('referensi/item/{referensi}', [ReferensiController::class, 'updateItem'])->name('referensi.item.update');
+        Route::delete('referensi/item/{referensi}', [ReferensiController::class, 'destroyItem'])->name('referensi.item.destroy');
+        Route::patch('referensi/{referensi}/toggle-status', [ReferensiController::class, 'toggleStatus'])->name('referensi.toggle-status');
     });
 
     // Tata Kelola Menu Akses dan Template Peran

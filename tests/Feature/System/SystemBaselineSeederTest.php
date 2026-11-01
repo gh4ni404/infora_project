@@ -31,10 +31,10 @@ test('database seeder seeds baseline modules, menus, and backup dan restore dire
     expect($systemMenu)->not()->toBeNull()
         ->and($systemMenu->route_name)->toBeNull();
 
-    // Verify 3 baseline sub-menus under Sistem
+    // Verify 4 baseline sub-menus under Sistem
     $subMenus = SubMenu::where('menu_id', $systemMenu->id)->orderBy('order')->get();
-    expect($subMenus)->toHaveCount(3);
-    expect($subMenus->pluck('name')->toArray())->toBe(['Modul', 'Menu', 'Sub-Menu']);
+    expect($subMenus)->toHaveCount(4);
+    expect($subMenus->pluck('name')->toArray())->toBe(['Modul', 'Menu', 'Sub-Menu', 'Referensi']);
 
     // 4. Verify Baseline Direct Menu: Backup Dan Restore
     $backupMenu = Menu::where('module_id', $systemModule->id)->where('name', 'Backup Dan Restore')->first();

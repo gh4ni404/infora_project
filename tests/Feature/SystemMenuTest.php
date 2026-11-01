@@ -5,7 +5,7 @@ use App\Models\Module;
 use App\Models\SubMenu;
 use Database\Seeders\SystemMenuSeeder;
 
-test('system menu seeder seeds baseline modules, sistem menu, and 3 sub-menus', function () {
+test('system menu seeder seeds baseline modules, sistem menu, and sub-menus including referensi', function () {
     $this->seed(SystemMenuSeeder::class);
 
     $this->assertDatabaseHas('modules', [
@@ -31,6 +31,11 @@ test('system menu seeder seeds baseline modules, sistem menu, and 3 sub-menus', 
     $this->assertDatabaseHas('sub_menus', [
         'name' => 'Sub-Menu',
         'route_name' => 'system.sub-menus.index',
+    ]);
+
+    $this->assertDatabaseHas('sub_menus', [
+        'name' => 'Referensi',
+        'route_name' => 'system.referensi',
     ]);
 
     $this->assertDatabaseHas('menus', [
