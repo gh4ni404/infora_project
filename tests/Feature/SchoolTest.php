@@ -6,6 +6,7 @@ use App\Models\Kelurahan;
 use App\Models\Menu;
 use App\Models\Module;
 use App\Models\Provinsi;
+use App\Models\Referensi;
 use App\Models\School;
 use App\Models\SubMenu;
 use App\Models\User;
@@ -15,6 +16,43 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
+    // Siapkan data referensi standar untuk pengujian sekolah
+    $schoolTypeCat = Referensi::create([
+        'nama' => 'Jenis Sekolah',
+        'kode' => 'school_type',
+        'is_active' => true,
+        'is_system' => true,
+    ]);
+
+    foreach (['SMA', 'SMK', 'MA'] as $type) {
+        Referensi::create([
+            'referensi_id' => $schoolTypeCat->id,
+            'nama' => $type,
+            'kode' => $type,
+            'is_active' => true,
+            'is_system' => true,
+        ]);
+    }
+
+    $accreditationCat = Referensi::create([
+        'nama' => 'Akreditasi',
+        'kode' => 'accreditation',
+        'is_active' => true,
+        'is_system' => true,
+    ]);
+
+    foreach (['A', 'B', 'C', 'Belum'] as $acc) {
+        Referensi::create([
+            'referensi_id' => $accreditationCat->id,
+            'nama' => $acc,
+            'kode' => $acc,
+            'is_active' => true,
+            'is_system' => true,
+        ]);
+    }
+
+    Referensi::clearCache();
+
     $this->superAdmin = User::factory()->create([
         'username' => 'superadmin_school_tester',
         'email' => 'superadmin_school@infora.test',
@@ -584,4 +622,37 @@ test('school admin permissions are not reset when school is updated after being 
 
     $school->refresh();
     expect($school->name)->toBe('SMA Negeri 1 Perm Test Second Update');
+});
+
+test('validation returns informative message when school_type or accreditation reference data is unconfigured or invalid', function () {
+    // 1. Uji ketika opsi tidak terdaftar di referensi
+    $invalidResponse = $this->actingAs($this->superAdmin)->post(route('master.data-sekolah.store'), [
+        'name' => 'Sekolah Tidak Valid',
+        'npsn' => '99998888',
+        'school_type' => 'UNREGISTERED_TYPE',
+        'status' => 'Negeri',
+        'accreditation' => 'INVALID_ACC',
+    ]);
+
+    $invalidResponse->assertSessionHasErrors([
+        'school_type' => 'Jenis sekolah yang dipilih tidak valid atau belum terdaftar pada Data Referensi Sistem.',
+        'accreditation' => 'Akreditasi yang dipilih tidak valid atau belum terdaftar pada Data Referensi Sistem.',
+    ]);
+
+    // 2. Uji ketika Data Referensi belum diisi sama sekali oleh admin
+    Referensi::query()->delete();
+    Referensi::clearCache();
+
+    $unconfiguredResponse = $this->actingAs($this->superAdmin)->post(route('master.data-sekolah.store'), [
+        'name' => 'Sekolah Tanpa Referensi',
+        'npsn' => '99998888',
+        'school_type' => 'SMA',
+        'status' => 'Negeri',
+        'accreditation' => 'A',
+    ]);
+
+    $unconfiguredResponse->assertSessionHasErrors([
+        'school_type' => 'Data referensi jenis sekolah belum diatur. Silakan tambahkan data jenis sekolah terlebih dahulu pada menu Data Referensi.',
+        'accreditation' => 'Data referensi akreditasi belum diatur. Silakan tambahkan data akreditasi terlebih dahulu pada menu Data Referensi.',
+    ]);
 });

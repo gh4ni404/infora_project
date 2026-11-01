@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests\Master;
 
+use App\Models\Referensi;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateJurusanRequest extends FormRequest
 {
@@ -38,7 +40,11 @@ class UpdateJurusanRequest extends FormRequest
             'kode' => ['required', 'string', 'max:20'],
             'nama' => ['required', 'string', 'max:150'],
             'singkatan' => ['nullable', 'string', 'max:20'],
-            'jenjang' => ['required', 'string', 'in:SMK,SMA,MA'],
+            'jenjang' => [
+                'required',
+                'string',
+                Rule::in(array_keys(Referensi::getOptions('school_type'))),
+            ],
             'bidang_keahlian' => ['nullable', 'string', 'max:100'],
             'program_keahlian' => ['nullable', 'string', 'max:100'],
             'kepala_jurusan' => ['nullable', 'string', 'max:100'],
@@ -54,6 +60,8 @@ class UpdateJurusanRequest extends FormRequest
      */
     public function messages(): array
     {
+        $schoolTypes = array_keys(Referensi::getOptions('school_type'));
+
         return [
             'school_id.required' => 'Unit sekolah wajib dipilih.',
             'school_id.exists' => 'Unit sekolah yang dipilih tidak valid dalam sistem.',
@@ -62,7 +70,9 @@ class UpdateJurusanRequest extends FormRequest
             'nama.required' => 'Nama jurusan wajib diisi.',
             'nama.max' => 'Nama jurusan maksimal terdiri atas 150 karakter.',
             'jenjang.required' => 'Jenjang pendidikan jurusan wajib dipilih.',
-            'jenjang.in' => 'Jenjang harus berupa SMK atau SMA.',
+            'jenjang.in' => empty($schoolTypes)
+                ? 'Data referensi jenis sekolah belum diatur. Silakan tambahkan data jenis sekolah terlebih dahulu pada menu Data Referensi.'
+                : 'Jenjang yang dipilih tidak valid atau belum terdaftar pada Data Referensi Sistem.',
             'deskripsi.max' => 'Deskripsi jurusan maksimal terdiri atas 1000 karakter.',
         ];
     }

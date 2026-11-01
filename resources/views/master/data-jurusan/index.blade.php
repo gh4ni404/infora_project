@@ -194,7 +194,7 @@
             InforaModals.setup('modalEditJurusan', { cancelBtnId: 'btnCancelEditJurusan', });
             InforaModals.bindEditButtons('.btn-open-edit-jurusan', 'modalEditJurusan', function(modal, data,
                 formEdit) {
-                document.getElementById('edit_jenjang').value = data.jenjang || 'SMK';
+                document.getElementById('edit_jenjang').value = data.jenjang || '';
                 document.getElementById('edit_kode').value = data.kode || '';
                 document.getElementById('edit_singkatan').value = data.singkatan || '';
                 document.getElementById('edit_nama').value = data.nama || '';

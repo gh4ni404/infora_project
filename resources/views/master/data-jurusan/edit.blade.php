@@ -25,11 +25,7 @@
             id="edit_jenjang"
             label="Jenjang Pendidikan"
             :selected="$selectedSchool?->school_type"
-            :options="[
-                'SMK' => 'SMK (Konsentrasi Keahlian)',
-                'SMA' => 'SMA (Peminatan / Fase)',
-                'MA'  => 'MA (Peminatan / Fase)',
-            ]"
+            :options="\App\Models\Referensi::getOptions('school_type')"
             required
         />
     </div>

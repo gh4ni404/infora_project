@@ -35,7 +35,7 @@
         :per-page="$perPageInput" :total="$schools->total()" total-label="Sekolah">
         <x-slot:filters>
             <x-form-select id="school_type" name="school_type" class="form-select-sm" onchange="this.form.submit()"
-                placeholder="Semua Jenis" :selected="request('school_type')" :options="['SMA' => 'SMA', 'SMK' => 'SMK', 'MA' => 'MA']" />
+                placeholder="Semua Jenis" :selected="request('school_type')" :options="\App\Models\Referensi::getOptions('school_type')" />
         </x-slot:filters>
         <thead>
             <tr>
@@ -87,6 +87,8 @@
                             <span class="badge badge-cyan">SMK</span>
                         @elseif ($school->school_type === 'MA')
                             <span class="badge badge-warning">MA</span>
+                        @else
+                            <span class="badge badge-primary">{{ $school->school_type }}</span>
                         @endif
                     </td>
                     <td>

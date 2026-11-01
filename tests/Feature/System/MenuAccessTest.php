@@ -5,6 +5,7 @@ use App\Models\Menu;
 use App\Models\MenuAccessTemplate;
 use App\Models\Module;
 use App\Models\Murid;
+use App\Models\Referensi;
 use App\Models\School;
 use App\Models\SubMenu;
 use App\Models\User;
@@ -386,6 +387,21 @@ test('user with can_create permission can perform store action on permitted reso
         'can_view' => true,
         'can_create' => true,
     ]);
+
+    $schoolTypeCat = Referensi::create([
+        'nama' => 'Jenis Sekolah',
+        'kode' => 'school_type',
+        'is_active' => true,
+        'is_system' => true,
+    ]);
+    Referensi::create([
+        'referensi_id' => $schoolTypeCat->id,
+        'nama' => 'SMK',
+        'kode' => 'SMK',
+        'is_active' => true,
+        'is_system' => true,
+    ]);
+    Referensi::clearCache();
 
     $responseStore = $this->actingAs($this->guruUser)->post(route('master.data-sekolah.store'), [
         'name' => 'SMK Negeri 2 Test',

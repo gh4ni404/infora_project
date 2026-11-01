@@ -2,6 +2,7 @@
 
 use App\Models\Kelas;
 use App\Models\Murid;
+use App\Models\Referensi;
 use App\Models\School;
 use App\Models\Tingkatan;
 use App\Models\User;
@@ -369,6 +370,21 @@ test('destroy soft deletes murid and deactivates user account', function () {
 });
 
 test('murid in kemenag madrasah requires 18 digit nism in nis field', function () {
+    $schoolTypeCat = Referensi::firstOrCreate(
+        ['kode' => 'school_type'],
+        ['nama' => 'Jenis Sekolah', 'is_active' => true, 'is_system' => true]
+    );
+
+    Referensi::create([
+        'referensi_id' => $schoolTypeCat->id,
+        'nama' => 'MA',
+        'kode' => 'MA',
+        'extra_attributes' => ['is_madrasah' => true],
+        'is_active' => true,
+        'is_system' => true,
+    ]);
+    Referensi::clearCache();
+
     $madrasah = School::factory()->ma()->create([
         'name' => 'MAN 1 Makassar',
         'is_active' => true,

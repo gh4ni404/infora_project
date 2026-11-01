@@ -33,7 +33,7 @@
             id="edit_school_type"
             label="Jenis Sekolah"
             placeholder="Pilih Jenis"
-            :options="['SMA' => 'SMA', 'SMK' => 'SMK', 'MA' => 'MA']"
+            :options="\App\Models\Referensi::getOptions('school_type')"
             required
         />
 
@@ -51,12 +51,7 @@
             id="edit_accreditation"
             label="Akreditasi"
             placeholder="Belum Ditentukan"
-            :options="[
-                'A' => 'A (Unggul)',
-                'B' => 'B (Baik)',
-                'C' => 'C (Cukup)',
-                'Belum' => 'Belum Terakreditasi',
-            ]"
+            :options="\App\Models\Referensi::getOptions('accreditation')"
         />
 
         <x-form-input

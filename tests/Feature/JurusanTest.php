@@ -1,10 +1,30 @@
 <?php
 
 use App\Models\Jurusan;
+use App\Models\Referensi;
 use App\Models\School;
 use App\Models\User;
 
 beforeEach(function () {
+    $schoolTypeCat = Referensi::create([
+        'nama' => 'Jenis Sekolah',
+        'kode' => 'school_type',
+        'is_active' => true,
+        'is_system' => true,
+    ]);
+
+    foreach (['SMK', 'SMA', 'MA'] as $type) {
+        Referensi::create([
+            'referensi_id' => $schoolTypeCat->id,
+            'nama' => $type,
+            'kode' => $type,
+            'is_active' => true,
+            'is_system' => true,
+        ]);
+    }
+
+    Referensi::clearCache();
+
     $this->superAdmin = User::factory()->create([
         'username' => 'superadmin_jurusan_test',
         'email' => 'superadmin_jurusan@infora.test',
@@ -262,5 +282,34 @@ test('super admin can delete jurusan', function () {
 
     $this->assertDatabaseMissing('jurusan', [
         'id' => $jurusan->id,
+    ]);
+});
+
+test('validation returns informative message when jenjang reference data is unconfigured or invalid', function () {
+    // 1. Uji opsi tidak valid
+    $invalidResponse = $this->actingAs($this->superAdmin)->post(route('master.data-jurusan.store'), [
+        'school_id' => $this->schoolSmk->id,
+        'kode' => 'TKJ',
+        'nama' => 'Teknik Komputer',
+        'jenjang' => 'INVALID_JENJANG',
+    ]);
+
+    $invalidResponse->assertSessionHasErrors([
+        'jenjang' => 'Jenjang yang dipilih tidak valid atau belum terdaftar pada Data Referensi Sistem.',
+    ]);
+
+    // 2. Uji data referensi belum diatur di sistem
+    Referensi::query()->delete();
+    Referensi::clearCache();
+
+    $unconfiguredResponse = $this->actingAs($this->superAdmin)->post(route('master.data-jurusan.store'), [
+        'school_id' => $this->schoolSmk->id,
+        'kode' => 'TKJ',
+        'nama' => 'Teknik Komputer',
+        'jenjang' => 'SMK',
+    ]);
+
+    $unconfiguredResponse->assertSessionHasErrors([
+        'jenjang' => 'Data referensi jenis sekolah belum diatur. Silakan tambahkan data jenis sekolah terlebih dahulu pada menu Data Referensi.',
     ]);
 });

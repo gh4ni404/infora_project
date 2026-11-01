@@ -191,7 +191,7 @@ class School extends Model
      */
     public function isMadrasah(): bool
     {
-        return in_array(strtoupper((string) $this->school_type), ['MI', 'MTS', 'MA', 'MAK'], true);
+        return Referensi::isMadrasah($this->school_type);
     }
 
     /**

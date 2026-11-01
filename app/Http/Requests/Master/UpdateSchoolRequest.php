@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests\Master;
 
+use App\Models\Referensi;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateSchoolRequest extends FormRequest
 {
@@ -36,9 +38,17 @@ class UpdateSchoolRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'npsn' => ['required', 'string', 'size:8', 'regex:/^\d{8}$/'],
             'nss' => ['nullable', 'string', 'max:20'],
-            'school_type' => ['required', 'string', 'in:SMA,SMK,MA,MI,MTs,MAK'],
+            'school_type' => [
+                'required',
+                'string',
+                Rule::in(array_keys(Referensi::getOptions('school_type'))),
+            ],
             'status' => ['required', 'string', 'in:Negeri,Swasta'],
-            'accreditation' => ['nullable', 'string', 'in:A,B,C,Belum'],
+            'accreditation' => [
+                'nullable',
+                'string',
+                Rule::in(array_keys(Referensi::getOptions('accreditation'))),
+            ],
             'provinsi_id' => ['nullable', 'integer', 'exists:provinsi,id'],
             'kabupaten_id' => ['nullable', 'integer', 'exists:kabupaten,id'],
             'kecamatan_id' => ['nullable', 'integer', 'exists:kecamatan,id'],
@@ -106,6 +116,9 @@ class UpdateSchoolRequest extends FormRequest
      */
     public function messages(): array
     {
+        $schoolTypes = array_keys(Referensi::getOptions('school_type'));
+        $accreditations = array_keys(Referensi::getOptions('accreditation'));
+
         return [
             'name.required' => 'Nama sekolah wajib diisi.',
             'name.max' => 'Nama sekolah tidak boleh melebihi 255 karakter.',
@@ -113,10 +126,14 @@ class UpdateSchoolRequest extends FormRequest
             'npsn.size' => 'NPSN harus terdiri dari tepat 8 digit.',
             'npsn.regex' => 'NPSN harus berupa 8 digit angka.',
             'school_type.required' => 'Jenis sekolah wajib dipilih.',
-            'school_type.in' => 'Jenis sekolah harus SMA, SMK, MA, MI, atau MTs.',
+            'school_type.in' => empty($schoolTypes)
+                ? 'Data referensi jenis sekolah belum diatur. Silakan tambahkan data jenis sekolah terlebih dahulu pada menu Data Referensi.'
+                : 'Jenis sekolah yang dipilih tidak valid atau belum terdaftar pada Data Referensi Sistem.',
             'status.required' => 'Status sekolah wajib dipilih.',
             'status.in' => 'Status sekolah harus Negeri atau Swasta.',
-            'accreditation.in' => 'Akreditasi harus salah satu dari A, B, C, atau Belum.',
+            'accreditation.in' => empty($accreditations)
+                ? 'Data referensi akreditasi belum diatur. Silakan tambahkan data akreditasi terlebih dahulu pada menu Data Referensi.'
+                : 'Akreditasi yang dipilih tidak valid atau belum terdaftar pada Data Referensi Sistem.',
             'email.email' => 'Format email sekolah tidak valid.',
             'website.url' => 'Format URL website tidak valid.',
         ];
