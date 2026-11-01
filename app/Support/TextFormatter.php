@@ -17,6 +17,7 @@ class TextFormatter
         'MI', 'MTS', 'MA', 'MAK',
         'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII',
         'RPL', 'TKJ', 'PPLG', 'DKV', 'AKL', 'MPLB', 'TKR', 'TBSM', 'TITL', 'IPA', 'IPS', 'MIPA',
+        'DKV', 'AT', 'OTKP', 'ATPH',
     ];
 
     /**
