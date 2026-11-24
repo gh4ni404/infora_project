@@ -272,18 +272,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 3. Modal Edit Kecamatan
     InforaModals.setup('modalEditKecamatan', { cancelBtnId: 'btnCancelEditKecamatan' });
-    InforaModals.bindEditButtons('.btn-open-edit-kecamatan', 'modalEditKecamatan', function(modal, formEdit, btn) {
-        const data = JSON.parse(btn.dataset.kecamatan || '{}');
+    InforaModals.bindEditButtons('.btn-open-edit-kecamatan', 'modalEditKecamatan', function(modal, data, formEdit) {
+        const provId = data.kabupaten?.provinsi_id || data.provinsi_id || '';
 
         const editProvInst = window.SearchableSelect ? window.SearchableSelect.getInstance('edit_provinsi_id') : null;
         const editKabInst = window.SearchableSelect ? window.SearchableSelect.getInstance('edit_kabupaten_id') : null;
 
         if (editProvInst) {
-            editProvInst.setValue(data.provinsi_id || '', '', '', false);
+            editProvInst.setValue(provId, '', '', false);
         }
 
-        if (data.provinsi_id && editKabInst) {
-            loadKabupatenOptions(editKabInst, data.provinsi_id, data.kabupaten_id);
+        if (provId && editKabInst) {
+            loadKabupatenOptions(editKabInst, provId, data.kabupaten_id);
         } else if (editKabInst) {
             editKabInst.setOptions([], '');
             editKabInst.setDisabled(true);

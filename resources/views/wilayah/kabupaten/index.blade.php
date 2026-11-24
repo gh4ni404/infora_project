@@ -199,8 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 2. Modal Edit Kabupaten
     InforaModals.setup('modalEditKabupaten', { cancelBtnId: 'btnCancelEditKabupaten' });
-    InforaModals.bindEditButtons('.btn-open-edit-kabupaten', 'modalEditKabupaten', function(modal, formEdit, btn) {
-        const data = JSON.parse(btn.dataset.kabupaten || '{}');
+    InforaModals.bindEditButtons('.btn-open-edit-kabupaten', 'modalEditKabupaten', function(modal, data, formEdit) {
         const editProvInst = window.SearchableSelect ? window.SearchableSelect.getInstance('edit_provinsi_id') : null;
         if (editProvInst) {
             editProvInst.setValue(data.provinsi_id || '', '', '', false);

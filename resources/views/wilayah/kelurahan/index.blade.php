@@ -387,8 +387,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 3. Modal Edit Kelurahan / Desa
     InforaModals.setup('modalEditKelurahan', { cancelBtnId: 'btnCancelEditKelurahan' });
-    InforaModals.bindEditButtons('.btn-open-edit-kelurahan', 'modalEditKelurahan', function(modal, formEdit, btn) {
-        const data = JSON.parse(btn.dataset.kelurahan || '{}');
+    InforaModals.bindEditButtons('.btn-open-edit-kelurahan', 'modalEditKelurahan', function(modal, data, formEdit) {
         const provId = data.kecamatan?.kabupaten?.provinsi_id || '';
         const kabId = data.kecamatan?.kabupaten_id || '';
         const kecId = data.kecamatan_id || '';
