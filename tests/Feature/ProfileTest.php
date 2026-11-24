@@ -166,6 +166,31 @@ test('authenticated gtk user can update employment classification and qualificat
         ->and($this->gtk->jurusan_pendidikan)->toBe('Pendidikan Bahasa Inggris');
 });
 
+test('validation fails when status kepegawaian is empty or not selected on employment tab', function () {
+    $response = $this->actingAs($this->guruUser)->from(route('profile.index', ['tab' => 'employment']))->put(route('profile.update'), [
+        'tab' => 'employment',
+        'status_kepegawaian' => '',
+    ]);
+
+    $response->assertRedirect(route('profile.index', ['tab' => 'employment']))
+        ->assertSessionHasErrors([
+            'status_kepegawaian' => 'Harap pilih status kepegawaian.',
+        ]);
+});
+
+test('validation fails when jenis kelamin is not selected on personal tab', function () {
+    $response = $this->actingAs($this->guruUser)->from(route('profile.index', ['tab' => 'personal']))->put(route('profile.update'), [
+        'tab' => 'personal',
+        'nama_lengkap' => 'Budi Santoso',
+        'jenis_kelamin' => '',
+    ]);
+
+    $response->assertRedirect(route('profile.index', ['tab' => 'personal']))
+        ->assertSessionHasErrors([
+            'jenis_kelamin' => 'Jenis kelamin wajib dipilih.',
+        ]);
+});
+
 test('authenticated gtk user can update contact and wilayah domisili', function () {
     $provinsi = Provinsi::factory()->create(['nama' => 'Sulawesi Selatan', 'status' => true]);
     $kabupaten = Kabupaten::factory()->create(['provinsi_id' => $provinsi->id, 'nama' => 'Kabupaten Bone', 'status' => true]);

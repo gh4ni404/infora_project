@@ -22,6 +22,7 @@
                     placeholder="Pilih Status Kepegawaian"
                     :options="collect($statusKepegawaianList ?? [])->mapWithKeys(fn($item) => [$item => $item])->all()"
                     :selected="old('status_kepegawaian', $gtk?->status_kepegawaian)"
+                    required
                 />
 
                 <x-form-input

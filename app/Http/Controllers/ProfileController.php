@@ -91,7 +91,7 @@ class ProfileController extends Controller
             }
         }
 
-        $activeTab = $request->query('tab', 'personal');
+        $activeTab = $request->query('tab', old('tab', 'personal'));
         $validTabs = ['personal', 'employment', 'contact', 'parent', 'account', 'status', 'photo', 'security', 'official'];
         if (! in_array($activeTab, $validTabs, true)) {
             $activeTab = 'personal';
@@ -263,14 +263,22 @@ class ProfileController extends Controller
             }
 
             // Informasi Pribadi
-            foreach (['gelar_depan', 'gelar_belakang', 'jenis_kelamin', 'nik', 'tempat_lahir', 'tanggal_lahir', 'agama'] as $field) {
+            if (array_key_exists('jenis_kelamin', $validated) && filled($validated['jenis_kelamin'])) {
+                $gtkData['jenis_kelamin'] = $validated['jenis_kelamin'];
+            }
+
+            foreach (['gelar_depan', 'gelar_belakang', 'nik', 'tempat_lahir', 'tanggal_lahir', 'agama'] as $field) {
                 if (array_key_exists($field, $validated)) {
                     $gtkData[$field] = $validated[$field] ?: null;
                 }
             }
 
             // Klasifikasi Kepegawaian & Kualifikasi Pendidikan
-            foreach (['status_kepegawaian', 'nip', 'nuptk', 'pendidikan_terakhir', 'jurusan_pendidikan'] as $field) {
+            if (array_key_exists('status_kepegawaian', $validated) && filled($validated['status_kepegawaian'])) {
+                $gtkData['status_kepegawaian'] = $validated['status_kepegawaian'];
+            }
+
+            foreach (['nip', 'nuptk', 'pendidikan_terakhir', 'jurusan_pendidikan'] as $field) {
                 if (array_key_exists($field, $validated)) {
                     $gtkData[$field] = $validated[$field] ?: null;
                 }
@@ -305,7 +313,11 @@ class ProfileController extends Controller
             }
 
             // Informasi Pribadi
-            foreach (['jenis_kelamin', 'nik', 'tempat_lahir', 'tanggal_lahir', 'agama'] as $field) {
+            if (array_key_exists('jenis_kelamin', $validated) && filled($validated['jenis_kelamin'])) {
+                $muridData['jenis_kelamin'] = $validated['jenis_kelamin'];
+            }
+
+            foreach (['nik', 'tempat_lahir', 'tanggal_lahir', 'agama'] as $field) {
                 if (array_key_exists($field, $validated)) {
                     $muridData[$field] = $validated[$field] ?: null;
                 }
