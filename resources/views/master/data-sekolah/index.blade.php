@@ -267,10 +267,10 @@
                         kelurahan_id: '{{ old('kelurahan_id') }}',
                     });
                 @endif
-            });
 
-            // Delegasi Event Global untuk Cascading Wilayah (Modal Tambah dan Modal Edit)
-            window.InforaWilayah?.bindCascade({ prefix: 'create', syncTextInputs: true });
-            window.InforaWilayah?.bindCascade({ prefix: 'edit', syncTextInputs: true });
+                // Delegasi Event Global untuk Cascading Wilayah (Modal Tambah dan Modal Edit)
+                window.InforaWilayah?.bindCascade({ prefix: 'create', syncTextInputs: true });
+                window.InforaWilayah?.bindCascade({ prefix: 'edit', syncTextInputs: true });
+            });
         </script>
     @endsection
