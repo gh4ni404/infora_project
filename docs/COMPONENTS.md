@@ -1093,15 +1093,15 @@ Komponen universal untuk merender foto profil atau pasfoto pengguna, murid, dan 
 #### Contoh Penggunaan
 ```blade
 {{-- 1. Baris Tabel Data Murid / GTK --}}
-<x-avatar :src="$murid->foto_url" :name="$murid->nama_lengkap" size="sm" />
-<x-avatar :src="$gtk->foto_url" :name="$gtk->nama_lengkap" size="sm" />
+<x-avatar src="{{ $murid->foto_url }}" name="{{ $murid->nama_lengkap }}" />
+<x-avatar src="{{ $gtk->foto_url }}" name="{{ $gtk->nama_lengkap }}" />
 
 {{-- 2. Dropdown Header & Profil Pengguna --}}
-<x-avatar :src="auth()->user()->avatar_url" :name="auth()->user()->name" size="sm" />
-<x-avatar :src="auth()->user()->avatar_url" :name="auth()->user()->name" />
+<x-avatar src="{{ auth()->user()->avatar_url }}" name="{{ auth()->user()->name }}" />
+<x-avatar src="{{ auth()->user()->avatar_url }}" name="{{ auth()->user()->name }}" />
 
 {{-- 3. Kartu Profil Besar di Halaman Pengaturan Profile --}}
-<x-avatar :src="$user->avatar_url" :name="$user->name" size="lg" class="mx-auto mb-3" />
+<x-avatar src="{{ $user->avatar_url }}" name="{{ $user->name }}" size="lg" class="mx-auto mb-3" />
 ```
 
 ---

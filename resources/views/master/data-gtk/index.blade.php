@@ -127,7 +127,7 @@
                     </td>
                     <td>
                         <div class="d-flex align-items-center gap-2">
-                            <x-avatar :src="$gtk->foto_url" :name="$gtk->nama_lengkap" size="sm" />
+                            <x-avatar src="{{ $gtk->foto_url }}" name="{{ $gtk->nama_lengkap }}" />
                             <div>
                                 <div class="table-cell-title font-weight-bold">{{ $gtk->nama_bergelar }}</div>
                                 <div class="table-cell-muted text-xs">

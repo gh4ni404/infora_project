@@ -17,7 +17,7 @@
         {{-- Sisi Kiri: Navigasi Sidebar & Mini Profile Card --}}
         <div>
             <div class="card-surface p-4 text-center">
-                <x-avatar :src="$user->avatar_url" :name="$user->name" size="lg" class="mx-auto mb-3" />
+                <x-avatar src="{{ $user->avatar_url }}" name="{{ $user->name }}" size="lg" class="mx-auto mb-3" />
 
                 <h3 class="user-name-text font-bold text-base mb-1">{{ $user->name }}</h3>
                 <div class="brand-subtitle text-xs mb-3">&#64;{{ $user->username }}</div>

@@ -31,7 +31,7 @@
         'create' => 'btn-primary',
         'edit' => 'btn-edit',
         'delete' => 'btn-delete',
-        'view' => '',
+        'view' => 'btn-icon',
     ];
     $colorClass = $styles[$action] ?? $styles['view'];
 

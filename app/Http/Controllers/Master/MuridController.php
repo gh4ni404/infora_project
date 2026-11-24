@@ -13,13 +13,11 @@ use App\Models\Provinsi;
 use App\Models\Tingkatan;
 use App\Services\SpreadsheetService;
 use App\Support\MuridAccountManager;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class MuridController extends Controller
@@ -274,24 +272,19 @@ class MuridController extends Controller
     public function template(Request $request, SpreadsheetService $spreadsheet): StreamedResponse
     {
         [$selectedSchool, $selectedSchoolId] = $this->resolveSchoolContext($request);
+        $isMadrasah = $selectedSchool?->isMadrasah() ?? false;
+
+        $nisHeader = $isMadrasah ? 'NISM*' : 'NIS';
+        $sampleNis1 = $isMadrasah ? '131273710001260001' : '24001';
+        $sampleNis2 = $isMadrasah ? '131273710001260002' : '24002';
 
         $headers = [
             'Nama Lengkap*',
             'Jenis Kelamin (L/P)*',
             'NISN',
-            'NIS',
-            'Kelas / Rombel',
+            $nisHeader,
             'Angkatan',
-            'Tempat Lahir',
-            'Tanggal Lahir (YYYY-MM-DD)',
-            'Agama',
-            'No HP Murid',
             'Email',
-            'Nama Ayah',
-            'Nama Ibu',
-            'Nama Wali',
-            'No HP Ortu / WhatsApp',
-            'Alamat Domisili',
         ];
 
         $sampleRows = [
@@ -299,55 +292,32 @@ class MuridController extends Controller
                 'Muhammad Raditya',
                 'L',
                 '0071234567',
-                '24001',
-                'X PPLG 1',
+                $sampleNis1,
                 '2026',
-                'Watampone',
-                '2010-05-14',
-                'Islam',
-                '081234567890',
                 'raditya@example.com',
-                'Baharuddin',
-                'Nurhaeni',
-                '',
-                '081298765432',
-                'Jl. Ahmad Yani No. 12',
             ],
             [
                 'Aisyah Putri Azzahra',
                 'P',
                 '0087654321',
-                '24002',
-                'X PPLG 1',
+                $sampleNis2,
                 '2026',
-                'Makassar',
-                '2010-09-21',
-                'Islam',
-                '085211223344',
                 'aisyah@example.com',
-                'Syamsuddin',
-                'Mardiana',
-                '',
-                '085299887766',
-                'Jl. Merdeka No. 45',
             ],
         ];
 
-        $kelasList = Kelas::query()
-            ->where('school_id', $selectedSchoolId)
-            ->aktif()
-            ->orderBy('nama')
-            ->pluck('nama')
-            ->all();
-
-        $agamaList = [
-            'Islam',
-            'Kristen',
-            'Katolik',
-            'Hindu',
-            'Buddha',
-            'Konghucu',
+        $referenceColumns = [
+            'Pilihan Jenis Kelamin' => ['L', 'P'],
         ];
+
+        if ($isMadrasah) {
+            $referenceColumns['Ketentuan NISM (Madrasah)'] = [
+                'Wajib terdiri tepat 18 digit angka',
+                '12 digit: Nomor Statistik Madrasah (NSM)',
+                '2 digit: Tahun masuk (contoh: 26)',
+                '4 digit: Nomor urut murid (contoh: 0001)',
+            ];
+        }
 
         return $spreadsheet->template(
             'Template_Import_Data_Murid_INFORA.xlsx',
@@ -355,26 +325,17 @@ class MuridController extends Controller
             $sampleRows,
             [
                 'sheet_title' => 'Template Murid',
-                'text_columns' => ['NISN', 'NIS', 'No HP Murid', 'No HP Ortu / WhatsApp'],
+                'text_columns' => ['NISN', $nisHeader, 'NIS', 'NISM'],
                 'validations' => [
                     'Jenis Kelamin (L/P)*' => [
                         'options' => ['L', 'P'],
                         'title' => 'Pilih Jenis Kelamin',
                         'prompt' => 'Pilih L (Laki-laki) atau P (Perempuan)',
                     ],
-                    'Agama' => [
-                        'options' => $agamaList,
-                        'title' => 'Pilih Agama',
-                        'prompt' => 'Pilih agama resmi murid',
-                    ],
                 ],
                 'reference_sheet' => [
                     'title' => 'Panduan & Referensi',
-                    'columns' => [
-                        'Pilihan Jenis Kelamin' => ['L', 'P'],
-                        'Pilihan Agama' => $agamaList,
-                        'Daftar Rombel / Kelas Aktif' => ! empty($kelasList) ? $kelasList : ['(Belum ada kelas terdaftar)'],
-                    ],
+                    'columns' => $referenceColumns,
                 ],
             ]
         );
@@ -474,14 +435,12 @@ class MuridController extends Controller
                 ->with('error', 'Berkas spreadsheet kosong atau tidak berisi baris data yang dapat diproses.');
         }
 
-        // Cache daftar kelas di unit sekolah ini untuk mapping instan
-        $kelasCache = Kelas::where('school_id', $selectedSchoolId)
-            ->get()
-            ->keyBy(fn (Kelas $k) => strtolower(trim($k->nama)));
+        $isMadrasah = $selectedSchool?->isMadrasah() ?? false;
 
         $inserted = 0;
         $updated = 0;
         $skipped = 0;
+        $invalidNismCount = 0;
 
         foreach ($rawRows as $row) {
             $namaLengkap = trim((string) ($row['nama_lengkap'] ?? $row['nama'] ?? ''));
@@ -493,44 +452,50 @@ class MuridController extends Controller
             }
 
             $nisn = preg_replace('/\s+/', '', (string) ($row['nisn'] ?? '')) ?: null;
-            $nis = trim((string) ($row['nis'] ?? '')) ?: null;
-            $nik = preg_replace('/\s+/', '', (string) ($row['nik'] ?? '')) ?: null;
+            if ($nisn !== null && ! preg_match('/^\d{1,10}$/', $nisn)) {
+                $skipped++;
+
+                continue;
+            }
+
+            $rawNis = (string) ($row['nism'] ?? $row['nis'] ?? '');
+            $nis = preg_replace('/\s+/', '', $rawNis) ?: null;
+
+            // Validasi aturan NIS / NISM berdasarkan tipe naungan sekolah
+            if ($isMadrasah) {
+                // Di madrasah Kemenag: NISM wajib diisi dan harus tepat 18 digit angka
+                if ($nis === null || ! preg_match('/^\d{18}$/', $nis)) {
+                    $skipped++;
+                    $invalidNismCount++;
+
+                    continue;
+                }
+            } else {
+                // Di sekolah umum: jika diisi, maksimal 30 karakter
+                if ($nis !== null && mb_strlen($nis) > 30) {
+                    $skipped++;
+
+                    continue;
+                }
+            }
 
             // Resolusi jenis kelamin (L atau P)
             $rawJk = strtoupper(trim((string) ($row['jenis_kelamin'] ?? $row['jk'] ?? 'L')));
             $jenisKelamin = str_starts_with($rawJk, 'P') ? 'P' : 'L';
 
-            // Resolusi kelas
-            $kelasId = null;
-            $rawKelas = strtolower(trim((string) ($row['kelas_rombel'] ?? $row['kelas'] ?? $row['rombel'] ?? '')));
-            if (! empty($rawKelas) && isset($kelasCache[$rawKelas])) {
-                $kelasId = $kelasCache[$rawKelas]->id;
-            }
-
             $dataMurid = [
                 'school_id' => $selectedSchoolId,
-                'kelas_id' => $kelasId,
-                'angkatan' => trim((string) ($row['angkatan'] ?? '')) ?: null,
                 'nama_lengkap' => $namaLengkap,
                 'jenis_kelamin' => $jenisKelamin,
                 'nisn' => $nisn,
                 'nis' => $nis,
-                'nik' => $nik,
-                'tempat_lahir' => trim((string) ($row['tempat_lahir'] ?? '')) ?: null,
-                'tanggal_lahir' => $this->parseDate($row['tanggal_lahir'] ?? null),
-                'agama' => trim((string) ($row['agama'] ?? '')) ?: null,
-                'no_hp' => trim((string) ($row['no_hp_murid'] ?? $row['no_hp'] ?? '')) ?: null,
+                'angkatan' => trim((string) ($row['angkatan'] ?? '')) ?: null,
                 'email' => trim((string) ($row['email'] ?? '')) ?: null,
-                'nama_ayah' => trim((string) ($row['nama_ayah'] ?? '')) ?: null,
-                'nama_ibu' => trim((string) ($row['nama_ibu'] ?? '')) ?: null,
-                'nama_wali' => trim((string) ($row['nama_wali'] ?? '')) ?: null,
-                'no_hp_ortu' => trim((string) ($row['no_hp_ortu_whatsapp'] ?? $row['no_hp_ortu'] ?? '')) ?: null,
-                'alamat' => trim((string) ($row['alamat_domisili'] ?? $row['alamat'] ?? '')) ?: null,
                 'status' => 'aktif',
                 'is_active' => true,
             ];
 
-            // Strategi Upsert Cerdas: cari berdasarkan NISN, NIS, atau Nama Lengkap
+            // Strategi Upsert Cerdas: cari berdasarkan NISN, NIS/NISM, atau Nama Lengkap
             $existingMurid = null;
             if ($nisn) {
                 $existingMurid = Murid::where('school_id', $selectedSchoolId)->where('nisn', $nisn)->first();
@@ -555,9 +520,23 @@ class MuridController extends Controller
             }
         }
 
+        // Jika seluruh baris data ditolak / tidak dapat diproses
+        if ($inserted === 0 && $updated === 0 && $skipped > 0) {
+            $errorMessage = $invalidNismCount > 0
+                ? "Gagal mengimpor data murid: {$skipped} baris dilewati karena format NISM madrasah tidak valid (wajib 18 digit angka)."
+                : "Gagal mengimpor data murid: {$skipped} baris dilewati karena data tidak lengkap atau tidak valid.";
+
+            return redirect()
+                ->route('master.data-murid', $this->schoolRedirectParams($request, $selectedSchoolId))
+                ->with('error', $errorMessage);
+        }
+
         $summaryMessage = "Impor data murid selesai: {$inserted} data baru ditambahkan, {$updated} data diperbarui";
         if ($skipped > 0) {
-            $summaryMessage .= ", {$skipped} baris dilewati karena data tidak lengkap.";
+            $reason = $invalidNismCount > 0
+                ? "{$skipped} baris dilewati (termasuk {$invalidNismCount} baris dengan format NISM tidak valid; madrasah mewajibkan 18 digit angka)."
+                : "{$skipped} baris dilewati karena format data tidak lengkap atau tidak valid.";
+            $summaryMessage .= ", {$reason}";
         } else {
             $summaryMessage .= '.';
         }
@@ -631,31 +610,5 @@ class MuridController extends Controller
         }
 
         return $query;
-    }
-
-    /**
-     * Konversi tanggal dari format Excel serial number atau teks menjadi format Y-m-d.
-     */
-    protected function parseDate(mixed $rawDate): ?string
-    {
-        if (empty($rawDate)) {
-            return null;
-        }
-
-        if (is_numeric($rawDate)) {
-            try {
-                return Date::excelToDateTimeObject((float) $rawDate)->format('Y-m-d');
-            } catch (\Throwable) {
-                // Lanjut ke penanganan string
-            }
-        }
-
-        $str = trim((string) $rawDate);
-
-        try {
-            return Carbon::parse($str)->format('Y-m-d');
-        } catch (\Throwable) {
-            return null;
-        }
     }
 }

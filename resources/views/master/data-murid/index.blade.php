@@ -171,7 +171,7 @@
                     {{-- Profil Murid --}}
                     <td>
                         <div class="flex items-center gap-3">
-                            <x-avatar :src="$murid->foto_url" :name="$murid->nama_lengkap" size="sm" />
+                            <x-avatar src="{{ $murid->foto_url }}" name="{{ $murid->nama_lengkap }}" />
                             <div class="min-w-0">
                                 <div class="font-semibold text-slate-900 truncate">
                                     {{ $murid->nama_lengkap }}

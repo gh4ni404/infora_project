@@ -117,7 +117,7 @@
                     <!-- Reusable Universal Dropdown Menu (Upward) -->
                     <div id="userDropupMenu" class="dropdown-menu dropdown-menu-up dropdown-menu-full hidden" role="menu" aria-orientation="vertical" aria-labelledby="userProfileTrigger">
                         <div class="dropdown-header">
-                            <x-avatar :src="auth()->user()?->avatar_url" :name="auth()->user()?->name" size="sm" />
+                            <x-avatar src="{{ auth()->user()?->avatar_url }}" name="{{ auth()->user()?->name }}" />
                             <div class="user-meta-info">
                                 <span class="user-name-text">{{ auth()->user()->name }}</span>
                                 <span class="brand-subtitle">{{ auth()->user()?->isSuperAdmin() ? 'Super Administrator' : match(auth()->user()?->user_type) { 'admin' => 'Administrator Sekolah', 'guru' => 'Tenaga Pendidik', 'murid' => 'Peserta Didik', default => 'Pengguna Sistem' } }}</span>
@@ -150,7 +150,7 @@
 
                     <!-- User Section Button Trigger -->
                     <button type="button" class="user-card-button" id="userProfileTrigger" aria-haspopup="true" aria-expanded="false" title="Menu Pengguna">
-                        <x-avatar :src="auth()->user()?->avatar_url" :name="auth()->user()?->name" />
+                        <x-avatar src="{{ auth()->user()?->avatar_url }}" name="{{ auth()->user()?->name }}" />
                         <div class="user-meta-info">
                             <span class="user-name-text">{{ auth()->user()->name }}</span>
                             <span class="brand-subtitle">@<span>{{ auth()->user()->username ?? 'superadmin' }}</span></span>

@@ -2,6 +2,7 @@
 
 use App\Models\Kelas;
 use App\Models\Murid;
+use App\Models\Referensi;
 use App\Models\School;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -81,6 +82,9 @@ test('super admin can download murid import template with standard columns and g
     expect($sheet0->getCell('B1')->getValue())->toBe('Jenis Kelamin (L/P)*');
     expect($sheet0->getCell('C1')->getValue())->toBe('NISN');
     expect($sheet0->getCell('D1')->getValue())->toBe('NIS');
+    expect($sheet0->getCell('E1')->getValue())->toBe('Angkatan');
+    expect($sheet0->getCell('F1')->getValue())->toBe('Email');
+    expect($sheet0->getCell('G1')->getValue())->toBeNull();
 
     $sheet1 = $spreadsheet->getSheet(1);
     expect($sheet1->getTitle())->toBe('Panduan & Referensi');
@@ -105,31 +109,31 @@ test('super admin can export murid data as spreadsheet', function () {
 });
 
 test('super admin can import murid from excel file and automatically create user accounts', function () {
-    // Buat berkas excel sementara dengan baris data murid
+    // Buat berkas excel sementara dengan 6 kolom esensial
     $spreadsheet = new Spreadsheet;
     $sheet = $spreadsheet->getActiveSheet();
     $sheet->setCellValue('A1', 'Nama Lengkap*');
     $sheet->setCellValue('B1', 'Jenis Kelamin (L/P)*');
     $sheet->setCellValue('C1', 'NISN');
     $sheet->setCellValue('D1', 'NIS');
-    $sheet->setCellValue('E1', 'Kelas / Rombel');
-    $sheet->setCellValue('F1', 'Angkatan');
+    $sheet->setCellValue('E1', 'Angkatan');
+    $sheet->setCellValue('F1', 'Email');
 
     // Baris 2: Murid 1
     $sheet->setCellValue('A2', 'Rizky Ramadhan');
     $sheet->setCellValue('B2', 'L');
     $sheet->setCellValue('C2', '0081230001');
     $sheet->setCellValue('D2', '24010');
-    $sheet->setCellValue('E2', 'X PPLG 1');
-    $sheet->setCellValue('F2', '2026');
+    $sheet->setCellValue('E2', '2026');
+    $sheet->setCellValue('F2', 'rizky@infora.test');
 
     // Baris 3: Murid 2
     $sheet->setCellValue('A3', 'Nurul Aini');
     $sheet->setCellValue('B3', 'P');
     $sheet->setCellValue('C3', '0081230002');
     $sheet->setCellValue('D3', '24011');
-    $sheet->setCellValue('E3', 'X PPLG 1');
-    $sheet->setCellValue('F3', '2026');
+    $sheet->setCellValue('E3', '2026');
+    $sheet->setCellValue('F3', 'nurul@infora.test');
 
     $tempPath = tempnam(sys_get_temp_dir(), 'import_murid_').'.xlsx';
     $writer = new XlsxWriter($spreadsheet);
@@ -156,7 +160,8 @@ test('super admin can import murid from excel file and automatically create user
         'nama_lengkap' => 'Rizky Ramadhan',
         'nisn' => '0081230001',
         'nis' => '24010',
-        'kelas_id' => $this->kelas->id,
+        'email' => 'rizky@infora.test',
+        'kelas_id' => null,
     ]);
 
     $this->assertDatabaseHas('murids', [
@@ -164,6 +169,8 @@ test('super admin can import murid from excel file and automatically create user
         'nama_lengkap' => 'Nurul Aini',
         'nisn' => '0081230002',
         'nis' => '24011',
+        'email' => 'nurul@infora.test',
+        'kelas_id' => null,
     ]);
 
     // Pastikan akun user login terbuat
@@ -193,4 +200,134 @@ test('import murid rejects invalid file formats', function () {
 
     $response->assertSessionHasErrors(['file']);
     @unlink($tempText);
+});
+
+test('super admin downloading template for madrasah gets NISM column header and 18-digit samples', function () {
+    $schoolTypeCat = Referensi::firstOrCreate(
+        ['kode' => 'school_type'],
+        ['nama' => 'Jenis Sekolah', 'is_active' => true, 'is_system' => true]
+    );
+
+    Referensi::firstOrCreate(
+        ['kode' => 'MA'],
+        [
+            'referensi_id' => $schoolTypeCat->id,
+            'nama' => 'MA',
+            'extra_attributes' => ['is_madrasah' => true],
+            'is_active' => true,
+            'is_system' => true,
+        ]
+    );
+    Referensi::clearCache();
+
+    $madrasah = School::factory()->ma()->create([
+        'name' => 'MAN 1 Watampone',
+        'is_active' => true,
+    ]);
+
+    $response = $this->actingAs($this->superAdmin)
+        ->get(route('master.data-murid.template', ['school_id' => $madrasah->id]));
+
+    $response->assertOk();
+
+    $tempFile = tempnam(sys_get_temp_dir(), 'tpl_ma_').'.xlsx';
+    file_put_contents($tempFile, $response->streamedContent());
+
+    $reader = new XlsxReader;
+    $spreadsheet = $reader->load($tempFile);
+
+    $sheet0 = $spreadsheet->getSheet(0);
+    expect($sheet0->getCell('D1')->getValue())->toBe('NISM*');
+    expect((string) $sheet0->getCell('D2')->getValue())->toHaveLength(18);
+
+    @unlink($tempFile);
+});
+
+test('madrasah import rejects invalid nism with 6 digits and accepts valid 18-digit nism', function () {
+    $schoolTypeCat = Referensi::firstOrCreate(
+        ['kode' => 'school_type'],
+        ['nama' => 'Jenis Sekolah', 'is_active' => true, 'is_system' => true]
+    );
+
+    Referensi::firstOrCreate(
+        ['kode' => 'MA'],
+        [
+            'referensi_id' => $schoolTypeCat->id,
+            'nama' => 'MA',
+            'extra_attributes' => ['is_madrasah' => true],
+            'is_active' => true,
+            'is_system' => true,
+        ]
+    );
+    Referensi::clearCache();
+
+    $madrasah = School::factory()->ma()->create([
+        'name' => 'MAN 1 Watampone',
+        'is_active' => true,
+    ]);
+
+    // Berkas 1: Berisi NISM 6 digit (tidak valid untuk madrasah)
+    $spreadsheetInvalid = new Spreadsheet;
+    $sheetInvalid = $spreadsheetInvalid->getActiveSheet();
+    $sheetInvalid->setCellValue('A1', 'Nama Lengkap*');
+    $sheetInvalid->setCellValue('B1', 'Jenis Kelamin (L/P)*');
+    $sheetInvalid->setCellValue('C1', 'NISN');
+    $sheetInvalid->setCellValue('D1', 'NISM*');
+    $sheetInvalid->setCellValue('E1', 'Angkatan');
+    $sheetInvalid->setCellValue('F1', 'Email');
+
+    $sheetInvalid->setCellValue('A2', 'Siswa Gagal Validasi');
+    $sheetInvalid->setCellValue('B2', 'L');
+    $sheetInvalid->setCellValue('C2', '0089990001');
+    $sheetInvalid->setCellValue('D2', '24001'); // Hanya 5-6 digit!
+    $sheetInvalid->setCellValue('E2', '2026');
+
+    $tempInvalid = tempnam(sys_get_temp_dir(), 'invalid_ma_').'.xlsx';
+    (new XlsxWriter($spreadsheetInvalid))->save($tempInvalid);
+
+    $responseInvalid = $this->actingAs($this->superAdmin)->post(route('master.data-murid.import'), [
+        'school_id' => $madrasah->id,
+        'file' => new UploadedFile($tempInvalid, 'invalid.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true),
+    ]);
+
+    // Harus dialihkan kembali dengan pesan error karena tidak ada baris yang valid
+    $responseInvalid->assertSessionHas('error');
+    $this->assertDatabaseMissing('murids', [
+        'school_id' => $madrasah->id,
+        'nama_lengkap' => 'Siswa Gagal Validasi',
+    ]);
+    @unlink($tempInvalid);
+
+    // Berkas 2: Berisi NISM 18 digit yang valid
+    $validNism = '131273710001260001';
+    $spreadsheetValid = new Spreadsheet;
+    $sheetValid = $spreadsheetValid->getActiveSheet();
+    $sheetValid->setCellValue('A1', 'Nama Lengkap*');
+    $sheetValid->setCellValue('B1', 'Jenis Kelamin (L/P)*');
+    $sheetValid->setCellValue('C1', 'NISN');
+    $sheetValid->setCellValue('D1', 'NISM*');
+    $sheetValid->setCellValue('E1', 'Angkatan');
+    $sheetValid->setCellValue('F1', 'Email');
+
+    $sheetValid->setCellValue('A2', 'Siswa Sukses MA');
+    $sheetValid->setCellValue('B2', 'L');
+    $sheetValid->setCellValue('C2', '0089990002');
+    $sheetValid->setCellValue('D2', $validNism);
+    $sheetValid->setCellValue('E2', '2026');
+
+    $tempValid = tempnam(sys_get_temp_dir(), 'valid_ma_').'.xlsx';
+    (new XlsxWriter($spreadsheetValid))->save($tempValid);
+
+    $responseValid = $this->actingAs($this->superAdmin)->post(route('master.data-murid.import'), [
+        'school_id' => $madrasah->id,
+        'file' => new UploadedFile($tempValid, 'valid.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true),
+    ]);
+
+    $responseValid->assertSessionHas('success');
+    $this->assertDatabaseHas('murids', [
+        'school_id' => $madrasah->id,
+        'nama_lengkap' => 'Siswa Sukses MA',
+        'nis' => $validNism,
+    ]);
+    @unlink($tempValid);
 });
