@@ -34,6 +34,10 @@ When a confirmation modal (`name="confirm"` or `name="delete"`) is used to trigg
 ## Administrative Regional Cascades (InforaWilayah)
 When implementing cascading administrative region selects (Provinsi -> Kabupaten -> Kecamatan -> Kelurahan), strictly use `window.InforaWilayah` (`bindCascade`, `populateCascade`, `restoreOnError`). Do not write manual `fetch` calls or duplicate dropdown event handlers in Blade views.
 
+### Script Placement Invariant for InforaWilayah
+- **Always Inside `DOMContentLoaded`**: Because `app.js` is bundled and loaded as a deferred ES module (`<script type="module">`), `window.InforaWilayah` is not immediately defined during inline HTML parsing. Any call to `window.InforaWilayah.bindCascade(...)` or `restoreOnError(...)` in Blade views MUST be placed strictly inside `document.addEventListener('DOMContentLoaded', function() { ... })`.
+- **Strict No Overengineering**: When fixing script loading or timing issues, do NOT create new architectural layers, polling loops (`setTimeout`), or library-level auto-init functions. Keep fixes localized and minimal by placing the standard component/library call in its proper lifecycle hook.
+
 ## Modal Template DOM Invariant
 Always keep standard CRUD modal templates (`create`, `edit`, `delete`) rendered in the DOM. Do not wrap `@include` modal directives inside `@if ($user?->isSuperAdmin())`. Access control is governed by button triggers (`<x-crud-button>`) and backend middleware/policies.
 
