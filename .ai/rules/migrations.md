@@ -16,3 +16,19 @@ Target MariaDB (10.6+ LTS / minimum 10.3) with `utf8mb4_unicode_ci` as the prima
 - Use Laravel Schema Builder types (`json()`, `enum()`, `index()`) and standard SQL functions (`REPLACE(...)`) instead of vendor-proprietary DDL or MySQL 8-only collations (`utf8mb4_0900_ai_ci`) or operators.
 - Guard any engine-specific raw statements (`PRAGMA ...` vs `SET FOREIGN_KEY_CHECKS=...`) by inspecting the active driver name.
 - Keep indexed string columns reasonably bounded (e.g., 20–150 chars on codes/keys in composite indexes) so `utf8mb4` index byte sizes stay well within InnoDB limits.
+
+## Idempotent DDL Standard
+Prevent backup restore collisions (`Table already exists` / `Duplicate column`) by making every migration defensive and idempotent:
+- **New Tables:** Guard `Schema::create` by returning early if the table already exists:
+  ```php
+  if (Schema::hasTable('table_name')) {
+      return;
+  }
+  ```
+- **New Columns:** Guard column additions inside `Schema::table`:
+  ```php
+  if (! Schema::hasColumn('table_name', 'column_name')) {
+      $table->string('column_name')->nullable();
+  }
+  ```
+

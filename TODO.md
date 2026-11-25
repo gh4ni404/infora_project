@@ -30,8 +30,8 @@
 - [x] Pendaftaran Wajah & Absensi Murid Berbasis Face Recognition (`PendaftaranMukaController`, `AbsenMuridController`, `MuridFaceProfile`, `AbsensiMurid`)
 - [x] Mode Sekolah Tunggal (`1 Sekolah = 1 Database`), MariaDB Tuning, Backup Ringan Non-Wilayah & CLI Operasional (`infora:setup-school`, `infora:init-school`, `infora:prune-attendance-photos`)
 - [x] Pelacakan Progres Pengembangan Realtime (`UnderDevelopmentController::status()`, `TracksDevelopmentProgress`) & Standardisasi Rute `.index`
-- [x] Portal Master Dual-Mode (`INFORA_NODE_ROLE=master|school`), Heartbeat HMAC-SHA256 Lintas Hosting (`infora:heartbeat`), Status Server/DB Sekolah & Distribusi Hak Menu Admin
-- [x] Ekosistem 27 Anonymous Blade Components dan Test Suite **505 Tests Lulus 100% (2.370 Assertions)**
+- [x] Portal Master Dual-Mode (`INFORA_NODE_ROLE=master|school`), Heartbeat HMAC-SHA256 Lintas Hosting (`infora:heartbeat`), Monitoring Sekolah (Status Server & Status Sekolah) & Distribusi Hak Menu Admin
+- [x] Ekosistem 27 Anonymous Blade Components dan Test Suite **506 Tests Lulus 100% (2.373 Assertions)**
 - [ ] Arsitektur Akun Sivitas (4 Tipe Akun: Murid, Guru, Staff, Admin dengan profil relasional 1-to-1)
 - [ ] Dedicated Layout Separation (Desktop dan Mobile)
 - [ ] Implementasi Modul Akademik Lanjutan dan Tata Kelola Utama

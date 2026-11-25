@@ -8,6 +8,24 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 
 ## [Unreleased]
 
+### Changed dan Refactored (Penyelarasan Rute Monitoring Sekolah, Generator Scaffolding Bertingkat, Migrasi Idempoten & Pembaruan Aturan Proyek)
+- **Penyelarasan Rute & Arsitektur Monitoring Sekolah (`monitoring-sekolah.*`):**
+  - *Standardisasi Rute & Namespace:* Menyelaraskan seluruh rute, namespace controller, views, dan request dari `master-control` menjadi `monitoring-sekolah.status-sekolah` dan `monitoring-sekolah.status-server`.
+  - *Restrukturisasi Controller & Views:* Memindahkan controller ke `App\Http\Controllers\MonitoringSekolah\StatusSekolahController` dan `TenantMenuPolicyController`, serta views ke `resources/views/monitoring-sekolah/status-sekolah/` dan `status-server/`.
+  - *Pembaruan Seeder:* Menyesuaikan `MasterNodeSeeder` agar menggunakan rute kanonikal `monitoring-sekolah.status-sekolah.index` dan `monitoring-sekolah.status-server.index`.
+  - *Pembaruan Test Suite:* Memindahkan feature tests ke `tests/Feature/MonitoringSekolah/` (`MasterHeartbeatTest`, `MasterPortalTest`, `SchoolPolicyEnforcementTest`).
+- **Peningkatan Scaffolding Generator (`UnderDevelopmentController`):**
+  - Memperbaiki parser generator scaffolding agar notasi titik pada rute (misal `monitoring-sekolah.status-sekolah`) secara otomatis dipecah menjadi hierarki sub-direktori bertingkat (`MonitoringSekolah/StatusSekolahController.php`) alih-alih penamaan flat yang digabung (`MonitoringSekolahStatusSekolahController.php`).
+- **Standar Migrasi Idempoten & Otomatisasi Pasca Restore Database:**
+  - *Defensive DDL Guards:* Menambahkan pertahanan idempoten `if (Schema::hasTable(...)) return;` dan `if (! Schema::hasColumn(...))` pada seluruh file migrasi 2026_11_25 (`system_settings`, `tenant_nodes`, `tenant_node_snapshots`, `tenant_menu_policies`, `is_master_enabled`, `last_seen_at`) untuk mencegah crash `Table already exists` saat restore backup.
+  - *Auto-Sync Pasca Restore:* Menambahkan eksekusi otomatis `Artisan::call('migrate', ['--force' => true])` dan `SidebarCache::flushGlobal()` di dalam `DatabaseBackupService::restoreDatabaseFromSql()` agar skema database langsung sinkron pasca restore.
+- **Pembaruan Aturan Proyek (`.ai/rules/` & `.agents/rules/`):**
+  - *Protokol Konfirmasi Menu & Rute:* Menambahkan aturan wajib konfirmasi ke user sebelum mendefinisikan menu/rute baru pada `.ai/rules/http.md`.
+  - *Invarian Keselarasan Rute-ke-File:* Menegaskan pemetaan 1:1 antara notasi titik rute dengan struktur folder controller, view, dan request pada `.ai/rules/http.md`.
+  - *Idempotent DDL Standard:* Mendaftarkan standar migrasi defensif pada `.ai/rules/migrations.md`.
+  - *Backup Trap Resolution:* Memperbarui panduan penanganan perangkap restore database pada `.agents/rules/migration-sync-and-backups.md`.
+  - *Total Test Suite:* Total pengujian otomatis mencapai **506 passed (2.373 assertions)** 100% lulus.
+
 ### Added dan Improved (Portal Master Dual-Mode, Heartbeat Lintas Hosting, Mode Sekolah Tunggal, Face Recognition & Progres Realtime)
 - **Portal Master Dual-Mode (`INFORA_NODE_ROLE=master|school`) & Heartbeat Lintas Hosting:**
   - *Single Codebase Dual-Mode:* Menambahkan `config/infora.php` dan pembaruan `.env.example` untuk menjalankan codebase yang sama sebagai node sekolah mandiri (`school`) atau Portal Kontrol Pusat Super Admin (`master`), lengkap dengan middleware isolasi `EnsureMasterNode` (404 untuk `/master-control/*` di mode sekolah) dan `BlockSchoolRoutesOnMaster` (404 untuk rute operasional sekolah di mode master).

@@ -40,3 +40,18 @@ INFORA runs from a single codebase configured via `config('infora.node_role')` (
 1. **Master Portal Isolation:** Routes under `/monitoring-sekolah/*` (`monitoring-sekolah.*`) must use `master_node` middleware (`EnsureMasterNode`, returning `404` in `school` mode) and remain strictly restricted to `super_admin`.
 2. **Master Universal Administrative Access:** When in `master` mode, Super Admin retains universal access across all administrative and system menus (including Backup & Restore, reference data, and portal tools) without artificial route blocking.
 3. **Master Menu Entitlement (`is_master_enabled`):** Both `SidebarCache::fetchActiveTree()` and `SidebarCache::findByRoute()` filter out menus/sub-menus where `is_master_enabled` is `false` so school admins cannot view, access, or assign Master-locked menus to users.
+
+## Menu, Sub-Menu & Route Definition Protocol
+Never invent, define, or seed new Menu names, Sub-Menu names, or Route names unilaterally. Always explicitly confirm with the user first:
+1. Whether the target menu/sub-menu is already provided/seeded or needs new database records.
+2. The exact human-readable label/title desired.
+3. The exact route name and URL path agreed upon.
+*Rationale: Route name changes cause cascading renames across controllers, form requests, views, test suites, and database records.*
+
+## Route-to-File & Directory Namespace Alignment
+Route dot notation (`<feature-group>.<sub-feature>.<action>`) MUST map 1:1 to directory namespaces and class/view naming:
+1. **Controller Namespaces:** `monitoring-sekolah.status-sekolah.index` maps to `App\Http\Controllers\MonitoringSekolah\StatusSekolahController`. Every dot in the route prefix represents a sub-directory level. Never flatten into concatenated names like `MonitoringSekolahStatusSekolahController`.
+2. **Form Requests:** `App\Http\Requests\<FeatureGroup>\<SubFeature>\...`
+3. **Blade Views:** `resources/views/<feature-group>/<sub-feature>/<action>.blade.php` (kebab-case folder structure matching route dot segments).
+4. **Scaffolding Generators:** Any automated stub generator (such as `UnderDevelopmentController::generateScaffolding`) must parse route dots into nested directories, creating parent folders on the fly.
+

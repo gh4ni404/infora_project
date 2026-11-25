@@ -55,7 +55,7 @@ Agar sekolah tidak menumpuk dokumen manual menjelang visitasi, modul operasional
 ## 4. Peta Modul Wajib & Target Pengembangan Bertahap
 
 ### Lapisan A — Fondasi Sistem & Master Data *(Sudah Tersedia)*
-- Tata Kelola Sistem (`system.modules.index`, `system.menus.index`, `system.sub-menus.index`, `system.referensi.index`, `sistem.user.index`, `backup-restore.index`, `master-control.*`).
+- Tata Kelola Sistem (`system.modules.index`, `system.menus.index`, `system.sub-menus.index`, `system.referensi.index`, `sistem.user.index`, `backup-restore.index`, `monitoring-sekolah.*`).
 - Master Data Inti (`master.data-sekolah.index`, `wilayah.*`, `master.data-tingkatan.index`, `master.data-jurusan.index`, `master.data-mapel.index`, `master.data-gtk.index`, `master.data-murid.index`, `rombel.kelas.index`).
 - Konfigurasi & Presensi Awal (`konfigurasi-sekolah.tahun-ajaran.index`, `konfigurasi-sekolah.kalender-akademik.index`, `pendaftaran_muka.index`, `absen_murid.index`).
 
