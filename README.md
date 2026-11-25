@@ -9,9 +9,9 @@
   <img src="https://img.shields.io/badge/Laravel-Latest_Stable-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel Latest">
   <img src="https://img.shields.io/badge/PHP-8.4-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.4">
   <img src="https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
-  <img src="https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
+  <img src="https://img.shields.io/badge/MariaDB%20%7C%20MySQL-InnoDB-003545?style=for-the-badge&logo=mariadb&logoColor=white" alt="MariaDB / MySQL">
   <img src="https://img.shields.io/badge/Vite-HMR-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite">
-  <img src="https://img.shields.io/badge/Tests-371_Passed_%7C_1728_Assertions-10B981?style=for-the-badge&logo=pest&logoColor=white" alt="Pest Tests">
+  <img src="https://img.shields.io/badge/Tests-505_Passed_%7C_2370_Assertions-10B981?style=for-the-badge&logo=pest&logoColor=white" alt="Pest Tests">
   <img src="https://img.shields.io/badge/Architecture-API--First_&_Bridging-00D2FF?style=for-the-badge&logo=fastapi&logoColor=white" alt="API-First dan Bridging">
   <img src="https://img.shields.io/badge/UI--UX-Mobile--First_&_Dedicated_Layouts-10B981?style=for-the-badge&logo=pwa&logoColor=white" alt="Mobile-First dan Dedicated Layouts">
   <img src="https://img.shields.io/badge/Data_Contract-Modular_&_Pure_JSON-F59E0B?style=for-the-badge&logo=json&logoColor=white" alt="Modular dan Pure JSON">
@@ -46,7 +46,10 @@ INFORA menghadirkan ekosistem terpadu yang dirancang khusus untuk memenuhi stand
 - 🏆 **Automasi Instrumen Akreditasi (BAN-SM / IASP):** Dashboard kesiapan 4 komponen mutu, penyimpanan terstruktur bank dokumen digital, serta portal audit khusus asesor.
 - 🔌 **API-First Architecture dan System Bridging:** RESTful API terstandarisasi, jembatan integrasi (*bridging*) dengan ekosistem Dapodik/LMS/WhatsApp, otorisasi Sanctum, dan kontrak respons *Pure JSON*.
 - 📱 **Mobile-First dan Dedicated Layout System:** Pemisahan struktur layout native antara Desktop Power-Dashboard dan Mobile App-Like (bukan sekadar responsive CSS hiding).
-- 🗂️ **Navigasi Dinamis dan Tata Kelola Menu Akses:** Hierarki navigasi sistem (Modul ➔ Menu ➔ Sub-Menu) berbasis data, otorisasi granular *user-centric*, modul `PermissionMatrix`, template peran dinamis, dan fallback aman *Zero Dead Links*.
+- 🗂️ **Navigasi Dinamis, Progres Realtime dan Tata Kelola Menu Akses:** Hierarki navigasi sistem (Modul ➔ Menu ➔ Sub-Menu) berbasis data, otorisasi granular *user-centric*, modul `PermissionMatrix`, template peran dinamis, fallback *Zero Dead Links* dengan pelacakan progres fitur realtime, serta standardisasi rute `.index`.
+- 📸 **Pendaftaran Wajah & Absensi Murid Face Recognition:** Registrasi multi-sampel wajah peserta didik (`/pendaftaran_muka`) dan kiosk absensi harian dengan caching descriptor wajah serta CLI pemeliharaan foto (`infora:prune-attendance-photos`).
+- 🏫 **Mode Sekolah Tunggal (1 Sekolah = 1 Database) & CLI Setup:** Isolasi penuh basis data per sekolah, opsi backup ringan non-wilayah, dan setup instalasi satu perintah (`infora:setup-school` / `infora:init-school`).
+- 🌐 **Portal Master Dual-Mode & Heartbeat Lintas Hosting:** Dukungan mode `INFORA_NODE_ROLE=master|school` dalam satu codebase untuk memantau status Online/Idle/Offline/DB seluruh sekolah via heartbeat bertanda tangan HMAC-SHA256 (`infora:heartbeat`) sekaligus mengatur menu yang diizinkan Master ke Admin sekolah.
 - 💾 **Cadangan dan Pemulihan Sistem Lengkap:** Snapshot portabel satu-klik (.zip), mesin backup mandiri native PHP/PDO tanpa dependensi luar, dan auto-repair symlink storage.
 - 🗺️ **Master Wilayah Administratif Kemendagri:** Hierarki 4 tingkat (Provinsi, Kabupaten/Kota, Kecamatan, Kelurahan dan Desa) berbasis standar resmi Kemendagri RI numerik murni, cascading filter 3 tingkat dinamis, proteksi relasi sekolah, dan seeder resmi lengkap.
 - 📐 **Tata Letak 3-Tier dan Paginasi Responsif:** Arsitektur antarmuka 3-tier (fixed topbar, docked footer, dan scroll internal independen) berpadu dengan komponen paginasi universal `<x-pagination>` dan toolbar tabel adaptif.
@@ -61,7 +64,7 @@ INFORA menghadirkan ekosistem terpadu yang dirancang khusus untuk memenuhi stand
 ## 💻 Tech Stack dan Arsitektur
 
 - **Backend:** Laravel (Versi Terbaru) — *Modular Monolith, RESTful API dan Bridging Core*
-- **Automated Testing:** Pest PHP — **445 Tests Passed dan 2.053 Assertions (100% Pass Rate)**
+- **Automated Testing:** Pest PHP — **505 Tests Passed dan 2.370 Assertions (100% Pass Rate)**
 - **UI Components:** 27 Anonymous Blade Components ([`docs/COMPONENTS.md`](docs/COMPONENTS.md)) dan Reusable Global CSS Tokens (`resources/css/app.css`, Zero Inline Styles)
 - **JavaScript Client Engines:** `InforaModals` (CRUD modals), `SearchableSelect` (cascading dynamic dropdowns), `ImageUpload` (Base64 file pipeline), `PermissionMatrix` (RBAC access matrix), `InforaProgress` (global smooth loading indicator)
 - **Navigation dan Hierarchy:** System-Driven Dynamic Navigation (Modul ➔ Menu ➔ Sub-Menu), 3 Baseline Bootstrap Menus, User-Centric Menu Access Control, Configurable Role Templates, Dynamic Under-Development Fallback (Zero Dead Links), Non-Unique Entity Convention, Automatic Order dan Dual-Field Routing
@@ -72,7 +75,7 @@ INFORA menghadirkan ekosistem terpadu yang dirancang khusus untuk memenuhi stand
 - **Data dan Response Contract:** Pure JSON Responses (`application/json`), Eloquent API Resources, Zero HTML in Data Payloads
 - **Media dan File Handling:** Unified `ImageUploader` Service, Base64 Uploads (Maks. 1MB/file, Preservasi Kualitas, Pola Nama: `{modul}_u{user_id}_{timestamp}_{random8}.{ext}`)
 - **Styling dan UI Convention:** Reusable Global CSS Classes (Light, Smooth dan Clean Theme, Strict No Ad-Hoc/Specific Classes), Zero Inline Styles (`style=""`), Zero `<style>` Tags in Views
-- **Database dan Timezone:** MySQL 8.0 dan Redis Cache (Server Timezone: `Asia/Makassar` / WITA, GMT+8)
+- **Database dan Timezone:** MariaDB 10.6+ / MySQL 8.0 (`utf8mb4_unicode_ci`) dengan Session/Cache berbasis file ramah shared hosting atau Redis (Server Timezone: `Asia/Makassar` / WITA, GMT+8)
 - **Web Server:** Nginx (Alpine Linux, `client_max_body_size 250M`)
 - **Frontend / Client:** Blade, Alpine.js, TailwindCSS — *Mobile-First Architecture dan Dedicated Layouts (Desktop dan Mobile)*
 - **Containerization:** Docker dan Docker Compose (Native Multi-Platform)
@@ -128,6 +131,7 @@ Dokumentasi detail mengenai arsitektur, rencana kerja, riwayat rilis, dan identi
 - 🚀 **[detail/README.md](detail/README.md):** Rincian lengkap seluruh fitur unggulan, arsitektur sistem, dan spesifikasi teknis.
 - 📋 **[TODO.md](detail/TODO.md):** Roadmap pengembangan fase demi fase (Fase 1 sampai Fase 6).
 - 📝 **[CHANGELOG.md](CHANGELOG.md):** Riwayat perubahan dan rilis versi platform.
+- 📘 **[PANDUAN_MODUL_DAN_AKREDITASI.md](detail/PANDUAN_MODUL_DAN_AKREDITASI.md):** Panduan resmi penambahan modul SIM Sekolah dan target kesiapan akreditasi jenjang SD, SMP, SMA, dan SMK/MA.
 - 🎨 **[DESIGN.md](detail/DESIGN.md):** Spesifikasi arsitektur sistem, identitas visual, palet warna, dan skema database.
 - 🖼️ **[BRANDING.md](detail/docs/BRANDING.md):** Filosofi penamaan brand, aset logo lockup, dan app icon.
 - 🛠️ **[TROUBLESHOOTING.md](detail/docs/TROUBLESHOOTING.md):** Panduan mengatasi masalah umum saat setup Docker (halaman tanpa styling, file `hot`, dan lainnya).

@@ -109,9 +109,9 @@ graph TD
 - **Data Response Contract:** Strict Pure JSON (`application/json`), Eloquent API Resources (Zero HTML in Data Payloads)
 - **Backend Framework:** Laravel (Versi Terbaru / Latest Version)
 - **Frontend Stack:** Blade + Alpine.js / Vue.js + Vanilla CSS dan TailwindCSS (Mobile-First Architecture dan Dedicated Layouts)
-- **Automated Testing Suite:** Pest PHP — **445 Tests Passed dan 2,053 Assertions (100% Pass Rate)**
+- **Automated Testing Suite:** Pest PHP — **505 Tests Passed dan 2,370 Assertions (100% Pass Rate)**
 - **UI Components:** 27 Anonymous Blade Components ([`docs/COMPONENTS.md`](../docs/COMPONENTS.md))
-- **Database:** MySQL 8.0 / MariaDB
+- **Database:** MariaDB 10.6+ / MySQL 8.0 (`utf8mb4_unicode_ci`) — dengan dukungan portabilitas SQLite `:memory:` untuk pengujian otomatis
 - **Caching dan Real-time Queue:** Redis (untuk antrian pemrosesan dokumen akreditasi dan notifikasi)
 - **Containerization:** Docker dan Docker Compose (Nginx, PHP-FPM, MySQL, Node.js)
 
@@ -209,10 +209,10 @@ erDiagram
 ```
 
 ### Tabel-Tabel Kunci:
-1. `users`: Autentikasi, peran, status aktif, username/email/no_hp.
+1. `users`: Autentikasi, peran, status aktif, username/email/avatar, serta `last_seen_at` untuk telemetri aktivitas pengguna.
 2. `modules`: Modul kategori navigasi sistem (`id`, `name`, `order`, `is_active`).
-3. `menus`: Menu navigasi utama di bawah modul (`id`, `module_id`, `name`, `route_name`, `icon`, `order`, `is_active`).
-4. `sub_menus`: Item sub-menu berjenjang di bawah menu (`id`, `menu_id`, `name`, `route_name`, `order`, `is_active`).
+3. `menus`: Menu navigasi utama di bawah modul (`id`, `module_id`, `name`, `route_name`, `sync_key`, `icon`, `order`, `is_active`, `is_master_enabled`, `dev_progress`, `dev_stage`, `dev_note`, `dev_version`).
+4. `sub_menus`: Item sub-menu berjenjang di bawah menu (`id`, `menu_id`, `name`, `route_name`, `sync_key`, `order`, `is_active`, `is_master_enabled`, `dev_progress`, `dev_stage`, `dev_note`, `dev_version`).
    > *Catatan Prinsip Skema Navigasi:* Tidak menggunakan constraint `unique` pada kolom teks (`name`, `route_name`) untuk menjamin fleksibilitas operasional input/edit data tanpa bentrok validasi, sepenuhnya mengandalkan integritas relasional Primary Key ID dan Foreign Key dengan *cascade delete*.
    > *Standar Kapitalisasi Teks Entitas Navigasi:* Nama modul wajib disimpan dalam format **HURUF KAPITAL SEMUA (UPPERCASE)** untuk visualisasi pemisah kategori yang tegas. Nama menu dan sub-menu wajib disimpan dalam format **Capitalize Each Word (Title Case)** dengan preservasi akronim standar (SMK, SMA, SIM, PKL, KBM, GTK, BAN-SM, RPP, IT, TU). Seluruh pemformatan ini berjalan otomatis dua lapis melalui atribut `data-transform` di antarmuka pengguna serta Eloquent Mutator di backend.
 5. `schools`: Registri profil sekolah SMA dan SMK (`id`, `name`, `npsn`, `nss`, `school_type`, `status`, `accreditation`, `address`, `village`, `district`, `city`, `province`, `postal_code`, `phone`, `fax`, `email`, `website`, `principal_name`, `principal_nip`, `foundation_name`, `logo_path`, `is_active`). Kolom `npsn` di-index tanpa constraint unique kaku untuk mendukung prinsip reduksi batasan teks unik.
@@ -228,6 +228,9 @@ erDiagram
 14. `schedules` dan `journals`: Jadwal mata pelajaran dan catatan jurnal KBM harian guru.
 15. `internships` (PKL): Data penempatan industri, guru pembimbing, nilai instruktur industri.
 16. `accreditation_evidences`: Dokumen bukti fisik terhubung ke butir standar akreditasi.
+17. `murid_face_profiles` & `absensi_murids`: Sampel descriptor wajah peserta didik serta catatan kehadiran kiosk berbasis skor kemiripan (`match_score`).
+18. `system_settings`: Penyimpanan pasangan `setting_key` / `setting_value` ringan (tanpa `unique`) untuk sinkronisasi versi kebijakan lokal sekolah.
+19. `tenant_nodes`, `tenant_node_snapshots`, dan `tenant_menu_policies`: Tabel khusus node Portal Master (`INFORA_NODE_ROLE=master`) tanpa constraint `unique` pada kolom teks/komposit untuk menyimpan status heartbeat sekolah, snapshot statistik, dan kebijakan hak menu dari Master ke Admin sekolah.
 
 ---
 
@@ -251,6 +254,7 @@ erDiagram
   - Preservasi tipe data teks numerik panjang (`DataType::TYPE_STRING`) via `setCellValueExplicit()` guna mencegah korupsi format, pemotongan digit, atau konversi otomatis ke notasi ilmiah (`7.308E+15`) pada data NIK (16 digit), NIP (18 digit), NUPTK (16 digit), dan nomor telepon.
   - Proteksi sanitasi terhadap kerentanan *CSV / Spreadsheet Formula Injection* (`stripFormulaInjection`) untuk menyaring karakter berbahaya (`=`, `+`, `-`, `@`, `\t`, `\r`).
 - **Automated Daily Backup:** Pencadangan basis data dan dokumen digital secara terjadwal.
+- **Dual-Mode Node Isolation & HMAC-SHA256 Heartbeat:** Pemisahan tegas antara node `school` dan `master` (`EnsureMasterNode`, `BlockSchoolRoutesOnMaster`), verifikasi request lintas hosting melalui Bearer token ter-hash (`SHA-256`) + timestamp skew guard + tanda tangan `HMAC-SHA256` (`hmac_secret` terenkripsi `encrypted`), serta pembatasan fitur sekolah melalui flag `is_master_enabled`.
 
 ---
 
@@ -258,5 +262,6 @@ erDiagram
 - 📖 **[README.md Utama](../README.md):** Gambaran umum proyek dan panduan quick start Docker.
 - 🚀 **[README.md Detail](README.md):** Rincian lengkap seluruh fitur unggulan dan spesifikasi teknis mendalam.
 - 📋 **[TODO.md](../TODO.md):** Roadmap tahapan implementasi dari Fase 1 hingga Fase 6.
+- 📘 **[PANDUAN_MODUL_DAN_AKREDITASI.md](PANDUAN_MODUL_DAN_AKREDITASI.md):** Panduan resmi peta modul wajib SIM Sekolah dan target akreditasi SD, SMP, SMA, SMK/MA.
 - 📝 **[CHANGELOG.md](../CHANGELOG.md):** Catatan riwayat perubahan dan versi rilis platform.
 - 🖼️ **[BRANDING.md](docs/BRANDING.md):** Filosofi penamaan brand, aset logo lockup, dan app icon.

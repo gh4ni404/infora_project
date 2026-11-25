@@ -37,6 +37,10 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 28. [Master Data Tingkatan Kelas](#-28-master-data-tingkatan-kelas-tingkat-x-xi-xii-dan-fase-kurikulum-merdeka)
 29. [Master Data Rombongan Belajar (Rombel / Kelas)](#-29-master-data-rombongan-belajar-rombel--kelas)
 30. [Master Data Murid (Peserta Didik), Standardisasi Validasi NISM/NISN & UI Validasi Terpadu](#-30-master-data-murid-peserta-didik-standardisasi-validasi-nismnisn--ui-validasi-terpadu)
+31. [Pendaftaran Wajah & Absensi Murid Berbasis Face Recognition](#-31-pendaftaran-wajah--absensi-murid-berbasis-face-recognition)
+32. [Mode Sekolah Tunggal (`1 Sekolah = 1 Database`), MariaDB Tuning & CLI Operasional](#-32-mode-sekolah-tunggal-1-sekolah--1-database-mariadb-tuning--cli-operasional)
+33. [Pelacakan Progres Pengembangan Realtime & Standardisasi Rute `.index`](#-33-pelacakan-progres-pengembangan-realtime--standardisasi-rute-index)
+34. [Portal Master Dual-Mode (`INFORA_NODE_ROLE`), Heartbeat Lintas Hosting & Distribusi Hak Menu Admin](#-34-portal-master-dual-mode-infora_node_role-heartbeat-lintas-hosting--distribusi-hak-menu-admin)
 
 ---
 
@@ -484,7 +488,37 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
   - Melakukan pembersihan total (*strict refactoring*) dari istilah legacy `siswa` menjadi murni `murid` di seluruh arsitektur (controller, model, view, Form Request, test suite, dan helper `User::isMurid()`).
 - **Automated Test Suite:**
   - Diuji secara menyeluruh melalui [`tests/Feature/MuridTest.php`](../tests/Feature/MuridTest.php) dan [`tests/Feature/MuridImportExportTest.php`](../tests/Feature/MuridImportExportTest.php) (22 skenario feature test lulus 100%).
-  - Total test suite aplikasi kini mencapai **445 tests lulus 100% (2.053 assertions)**.
+
+---
+
+### 📸 31. Pendaftaran Wajah & Absensi Murid Berbasis Face Recognition
+- **Pendaftaran Wajah (`pendaftaran_muka.index`):** `PendaftaranMukaController` dan model `MuridFaceProfile` mengelola sampel foto & vektor *face descriptor* murid secara aktif dengan kartu KPI kesiapan per rombel.
+- **Kiosk Absensi & Rekap Harian (`absen_murid.index`):** `AbsenMuridController` dan model `AbsensiMurid` memproses absensi masuk/pulang beserta skor kemiripan (`match_score`), optimasi query tanggal, caching descriptor wajah, dan perintah CLI pemangkasan foto lama `php artisan infora:prune-attendance-photos` (`PruneAttendancePhotosCommand`).
+- **Automated Test Suite:** Diuji melalui [`tests/Feature/PendaftaranMukaTest.php`](../tests/Feature/PendaftaranMukaTest.php) dan [`tests/Feature/AbsenMuridTest.php`](../tests/Feature/AbsenMuridTest.php).
+
+---
+
+### 🏫 32. Mode Sekolah Tunggal (`1 Sekolah = 1 Database`), MariaDB Tuning & CLI Operasional
+- **Isolasi 1 Sekolah = 1 Database:** `Controller::resolveSchoolContext()`, `School::current()`, trait `ResolvesSingleSchoolInput`, dan pembatasan 1 profil sekolah aktif per database pada `SchoolController::store()` memastikan data operasional tiap sekolah terisolasi penuh.
+- **Kesiapan MariaDB & Shared Hosting:** Default `.env.example` diarahkan ke `DB_CONNECTION=mariadb`, `SESSION_DRIVER=file`, dan `CACHE_STORE=file` dengan collation seragam `utf8mb4_unicode_ci`. `DatabaseBackupService` turut mendukung ekspor SQL ringan tanpa tabel wilayah.
+- **CLI Setup Instan:** Command `php artisan infora:setup-school` (`SetupSchoolCommand`) dan `php artisan infora:init-school` (`InitSchoolCommand`) mengotomasi migrasi, seeding dasar, symlink storage, profil sekolah, dan akun admin awal.
+- **Automated Test Suite:** Diuji pada [`tests/Feature/SingleSchoolModeTest.php`](../tests/Feature/SingleSchoolModeTest.php).
+
+---
+
+### 🚧 33. Pelacakan Progres Pengembangan Realtime & Standardisasi Rute `.index`
+- **Progres Fitur Terukur (`menus` & `sub_menus`):** Penambahan kolom `dev_progress`, `dev_stage`, `dev_note`, dan `dev_version`, trait `TracksDevelopmentProgress` & `ValidatesDevelopmentProgress`, serta partial `dev-progress-fields.blade.php`.
+- **Polling Status Realtime:** `UnderDevelopmentController::status()` (`GET /system/under-development/status`) menyediakan pembaruan progres fitur secara langsung pada tampilan `resources/views/system/under-development.blade.php`, diuji di [`tests/Feature/System/UnderDevelopmentTest.php`](../tests/Feature/System/UnderDevelopmentTest.php).
+- **Konvensi Rute `.index`:** Eliminasi 10 rute duplikat `*/semua` dan penyeragaman rute index non-resource di `routes/web.php` menjadi konvensi standar `.index` (`system.referensi.index`, `sistem.user.index`, `konfigurasi-sekolah.tahun-ajaran.index`, `backup-restore.index`, `pendaftaran_muka.index`, `absen_murid.index`).
+
+---
+
+### 🌐 34. Portal Master Dual-Mode (`INFORA_NODE_ROLE`), Heartbeat Lintas Hosting & Distribusi Hak Menu Admin
+- **Single Codebase Dual-Mode (`config/infora.php`):** Mengatur perilaku aplikasi lewat `INFORA_NODE_ROLE=school` (node sekolah) atau `INFORA_NODE_ROLE=master` (portal Super Admin pusat) dengan middleware isolasi `EnsureMasterNode` dan `BlockSchoolRoutesOnMaster` (`404` lintas mode).
+- **Heartbeat Lintas Hosting Berkeamanan HMAC-SHA256:** Command terjadwal `php artisan infora:heartbeat` (`MasterHeartbeatClient`, default tiap 2 menit pada `routes/console.php`) mengirim status DB, latency, `last_seen_at` pengguna aktif, serta snapshot pohon modul/menu/sub-menu/user ke `POST /api/v1/master/heartbeat` (`HeartbeatController`, diverifikasi oleh `VerifyTenantNodeSignature`).
+- **Indikator Realtime Server & Database (`/master-control/server-status`):** Model `TenantNode` mengevaluasi status `online` (aktif digunakan), `idle` (sepi), `degraded` (database gagal), `maintenance`, maupun `offline` berbasis TTL heartbeat terakhir, dilengkapi tombol active ping `/up`.
+- **Kontrol Hak Menu Master → Admin Sekolah (`/master-control/nodes/{tenantNode}/menus`):** Super Admin menetapkan menu yang diizinkan per sekolah (`TenantMenuPolicyController`), menaikkan `policy_version`, lalu server sekolah menyinkronkan flag `is_master_enabled` otomatis melalui respons heartbeat sehingga `SidebarCache` dan `MenuAccessController` menyembunyikan menu yang dikunci.
+- **Automated Test Suite:** Diuji pada [`tests/Feature/MasterControl/MasterHeartbeatTest.php`](../tests/Feature/MasterControl/MasterHeartbeatTest.php), [`tests/Feature/MasterControl/MasterPortalTest.php`](../tests/Feature/MasterControl/MasterPortalTest.php), dan [`tests/Feature/MasterControl/SchoolPolicyEnforcementTest.php`](../tests/Feature/MasterControl/SchoolPolicyEnforcementTest.php) dengan total suite aplikasi mencapai **505 tests lulus 100% (2.370 assertions)**.
 
 ---
 
@@ -492,5 +526,6 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 - 🏠 **[README Utama](../README.md):** Gambaran umum, prasyarat, dan panduan menjalankan proyek.
 - 🎨 **[DESIGN.md](DESIGN.md):** Spesifikasi arsitektur teknis, sistem peran (RBAC), skema database, dan UI/UX.
 - 📋 **[TODO.md](TODO.md):** Roadmap tahapan pengembangan (Fase 1 sampai Fase 6).
+- 📘 **[PANDUAN_MODUL_DAN_AKREDITASI.md](PANDUAN_MODUL_DAN_AKREDITASI.md):** Panduan resmi penambahan modul SIM Sekolah dan target akreditasi lintas jenjang (SD, SMP, SMA, SMK/MA).
 - 🖼️ **[BRANDING.md](docs/BRANDING.md):** Filosofi penamaan brand, aset logo lockup, dan app icon.
 - 🛠️ **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md):** Solusi kendala teknis dan instalasi container.

@@ -25,7 +25,11 @@
 - [x] Konfigurasi Sekolah: Kalender Akademik Terpadu dan Agenda Multi-Day (Grid Bulanan dan Tabel Agenda via `<x-tab-pills>`)
 - [x] Layanan Universal Spreadsheet (`SpreadsheetService`) & Impor / Ekspor Excel Data GTK via `<x-crud-button>`
 - [x] Master Data Murid (Peserta Didik) Multi-Tenancy, Validasi Khusus Kemenag NISM (18-digit) & NISN (10-digit), UI Validasi Bebas Browser Bubble, Sinkronisasi Akun Otomatis & Foto Profil Dual-Way
-- [x] Ekosistem 27 Anonymous Blade Components dan Test Suite 445 Tests Lulus 100% (2.053 Assertions)
+- [x] Pendaftaran Wajah & Absensi Murid Berbasis Face Recognition (`PendaftaranMukaController`, `AbsenMuridController`, `MuridFaceProfile`, `AbsensiMurid`)
+- [x] Mode Sekolah Tunggal (`1 Sekolah = 1 Database`), MariaDB Tuning, Backup Ringan Non-Wilayah & CLI Operasional (`infora:setup-school`, `infora:init-school`, `infora:prune-attendance-photos`)
+- [x] Pelacakan Progres Pengembangan Realtime (`UnderDevelopmentController::status()`, `TracksDevelopmentProgress`) & Standardisasi Rute `.index`
+- [x] Portal Master Dual-Mode (`INFORA_NODE_ROLE=master|school`), Heartbeat HMAC-SHA256 Lintas Hosting (`infora:heartbeat`), Status Server/DB Sekolah & Distribusi Hak Menu Admin
+- [x] Ekosistem 27 Anonymous Blade Components dan Test Suite **505 Tests Lulus 100% (2.370 Assertions)**
 - [ ] Arsitektur Akun Sivitas (4 Tipe Akun: Murid, Guru, Staff, Admin dengan profil relasional 1-to-1)
 - [ ] Dedicated Layout Separation (Desktop dan Mobile)
 - [ ] Implementasi Modul Akademik Lanjutan dan Tata Kelola Utama
@@ -238,7 +242,7 @@
   - [ ] Service Worker untuk akses offline ringan.
   - [ ] Web App Manifest dan App Icon INFORA untuk install di homescreen smartphone.
 - [ ] **6.3. Testing, Security Hardening dan Finalisasi**
-  - [ ] Unit dan Feature Testing (Pest / PHPUnit).
+  - [x] Unit dan Feature Testing (Pest / PHPUnit — **505 tests passed, 2.370 assertions**).
   - [ ] Rate limiting pada endpoint otentikasi/API dan proteksi SQL Injection/XSS.
   - [ ] Panduan Penggunaan Guru, Murid, dan Administrator.
 
@@ -248,5 +252,6 @@
 - 📖 **[README.md Utama](../README.md):** Gambaran umum proyek, ringkasan fitur, dan panduan Docker.
 - 🚀 **[README.md Detail](README.md):** Rincian lengkap seluruh fitur unggulan dan spesifikasi teknis mendalam.
 - 📝 **[CHANGELOG.md](../CHANGELOG.md):** Catatan riwayat perubahan dan versi rilis platform.
+- 📘 **[PANDUAN_MODUL_DAN_AKREDITASI.md](PANDUAN_MODUL_DAN_AKREDITASI.md):** Panduan resmi daftar modul target SIM Sekolah dan kesiapan akreditasi SD, SMP, SMA, SMK/MA.
 - 🎨 **[DESIGN.md](DESIGN.md):** Spesifikasi arsitektur teknis, sistem peran (RBAC), skema basis data, dan UI/UX.
 - 🖼️ **[BRANDING.md](docs/BRANDING.md):** Filosofi penamaan brand, aset logo lockup, dan app icon.
