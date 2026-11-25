@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\MasterControl;
+namespace App\Http\Requests\MonitoringSekolah;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateTenantNodeRequest extends FormRequest
+class StoreTenantNodeRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

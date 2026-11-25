@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\MasterControl;
+namespace App\Http\Controllers\MonitoringSekolah;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\MasterControl\StoreTenantNodeRequest;
-use App\Http\Requests\MasterControl\UpdateTenantNodeRequest;
+use App\Http\Requests\MonitoringSekolah\StoreTenantNodeRequest;
+use App\Http\Requests\MonitoringSekolah\UpdateTenantNodeRequest;
 use App\Models\TenantNode;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\View\View;
 use Throwable;
 
-class TenantNodeController extends Controller
+class StatusSekolahController extends Controller
 {
     /**
      * Tampilkan daftar node sekolah serta ringkasan perkembangan modul, menu, dan user.
@@ -42,7 +42,7 @@ class TenantNodeController extends Controller
             return true;
         })->values();
 
-        return view('master-control.nodes.index', compact(
+        return view('monitoring-sekolah.status-sekolah.index', compact(
             'filtered',
             'summaryStats',
             'search',
@@ -72,7 +72,7 @@ class TenantNodeController extends Controller
         ]);
 
         return redirect()
-            ->route('master-control.nodes.show', $node)
+            ->route('monitoring-sekolah.status-sekolah.show', $node)
             ->with('success', 'Node sekolah berhasil didaftarkan. Salin kredensial di bawah ke file .env server sekolah.')
             ->with('generated_credentials', [
                 'node_code' => $node->node_code,
@@ -88,7 +88,7 @@ class TenantNodeController extends Controller
     {
         $tenantNode->load(['snapshot', 'menuPolicies']);
 
-        return view('master-control.nodes.show', compact('tenantNode'));
+        return view('monitoring-sekolah.status-sekolah.show', compact('tenantNode'));
     }
 
     /**
@@ -107,7 +107,7 @@ class TenantNodeController extends Controller
         ]);
 
         return redirect()
-            ->route('master-control.nodes.show', $tenantNode)
+            ->route('monitoring-sekolah.status-sekolah.show', $tenantNode)
             ->with('success', 'Data node sekolah berhasil diperbarui.');
     }
 
@@ -140,7 +140,7 @@ class TenantNodeController extends Controller
         ]);
 
         return redirect()
-            ->route('master-control.nodes.show', $tenantNode)
+            ->route('monitoring-sekolah.status-sekolah.show', $tenantNode)
             ->with('success', 'Kredensial node berhasil dibuat ulang. Perbarui .env pada server sekolah.')
             ->with('generated_credentials', [
                 'node_code' => $tenantNode->node_code,
@@ -192,7 +192,7 @@ class TenantNodeController extends Controller
         $tenantNode->delete();
 
         return redirect()
-            ->route('master-control.nodes.index')
+            ->route('monitoring-sekolah.status-sekolah.index')
             ->with('success', "Node sekolah {$schoolName} berhasil dihapus dari pemantauan Master.");
     }
 
@@ -209,7 +209,7 @@ class TenantNodeController extends Controller
             $nodes = $nodes->filter(fn (TenantNode $node) => $node->computed_status === $statusFilter)->values();
         }
 
-        return view('master-control.server-status.index', compact(
+        return view('monitoring-sekolah.status-server.index', compact(
             'nodes',
             'summaryStats',
             'statusFilter'

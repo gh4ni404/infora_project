@@ -28,11 +28,11 @@ test('master control routes return 404 when node role is school', function () {
     config()->set('infora.node_role', 'school');
 
     $this->actingAs($this->superAdmin)
-        ->get('/master-control/nodes')
+        ->get('/monitoring-sekolah/status-sekolah')
         ->assertNotFound();
 
     $this->actingAs($this->superAdmin)
-        ->get('/master-control/server-status')
+        ->get('/monitoring-sekolah/status-server')
         ->assertNotFound();
 });
 
@@ -53,7 +53,7 @@ test('non super admin cannot access master control portal in master mode', funct
     config()->set('infora.node_role', 'master');
 
     $this->actingAs($this->schoolAdmin)
-        ->get('/master-control/nodes')
+        ->get('/monitoring-sekolah/status-sekolah')
         ->assertForbidden();
 });
 
@@ -77,7 +77,7 @@ test('super admin can register, inspect, ping, and update menu policies for a sc
     ]);
 
     // 1. Register new tenant node
-    $storeResponse = $this->actingAs($this->superAdmin)->post('/master-control/nodes', [
+    $storeResponse = $this->actingAs($this->superAdmin)->post('/monitoring-sekolah/status-sekolah', [
         'school_name' => 'SMA Negeri 2 Makassar',
         'node_code' => 'sman2-mks',
         'npsn' => '40300111',
@@ -86,14 +86,14 @@ test('super admin can register, inspect, ping, and update menu policies for a sc
     ]);
 
     $node = TenantNode::where('node_code', 'sman2-mks')->firstOrFail();
-    $storeResponse->assertRedirect(route('master-control.nodes.show', $node));
+    $storeResponse->assertRedirect(route('monitoring-sekolah.status-sekolah.show', $node));
     $storeResponse->assertSessionHas('generated_credentials');
 
     // 2. View dashboard, nodes index, server status, and node detail
     $this->actingAs($this->superAdmin)->get('/dashboard')->assertOk()->assertSee('SMA Negeri 2 Makassar');
-    $this->actingAs($this->superAdmin)->get('/master-control/nodes')->assertOk()->assertSee('sman2-mks');
-    $this->actingAs($this->superAdmin)->get('/master-control/server-status')->assertOk()->assertSee('SMA Negeri 2 Makassar');
-    $this->actingAs($this->superAdmin)->get(route('master-control.nodes.show', $node))->assertOk();
+    $this->actingAs($this->superAdmin)->get('/monitoring-sekolah/status-sekolah')->assertOk()->assertSee('sman2-mks');
+    $this->actingAs($this->superAdmin)->get('/monitoring-sekolah/status-server')->assertOk()->assertSee('SMA Negeri 2 Makassar');
+    $this->actingAs($this->superAdmin)->get(route('monitoring-sekolah.status-sekolah.show', $node))->assertOk();
 
     // 3. Ping school server /up
     Http::fake([
@@ -101,16 +101,16 @@ test('super admin can register, inspect, ping, and update menu policies for a sc
     ]);
 
     $this->actingAs($this->superAdmin)
-        ->post(route('master-control.nodes.ping', $node))
+        ->post(route('monitoring-sekolah.status-sekolah.ping', $node))
         ->assertSessionHas('success');
 
     // 4. Update menu policy for this node and verify policy_version increments
     $this->actingAs($this->superAdmin)
-        ->get(route('master-control.nodes.menus.edit', $node))
+        ->get(route('monitoring-sekolah.status-sekolah.menus.edit', $node))
         ->assertOk()
         ->assertSee('Absen Murid');
 
-    $policyResponse = $this->actingAs($this->superAdmin)->put(route('master-control.nodes.menus.update', $node), [
+    $policyResponse = $this->actingAs($this->superAdmin)->put(route('monitoring-sekolah.status-sekolah.menus.update', $node), [
         'items' => [
             [
                 'target_type' => 'menu',
@@ -127,7 +127,7 @@ test('super admin can register, inspect, ping, and update menu policies for a sc
         ],
     ]);
 
-    $policyResponse->assertRedirect(route('master-control.nodes.menus.edit', $node));
+    $policyResponse->assertRedirect(route('monitoring-sekolah.status-sekolah.menus.edit', $node));
 
     $node->refresh();
     expect($node->policy_version)->toBe(2)

@@ -299,3 +299,22 @@ test('sub-menu update validates and stores development progress metadata', funct
         'dev_version' => 'v0.5-alpha',
     ]);
 });
+
+test('under-development page suggests namespaced controller path for dotted routes', function () {
+    $module = Module::create(['name' => 'MONITORING', 'order' => 1, 'is_active' => true]);
+    $menu = Menu::create(['module_id' => $module->id, 'name' => 'Monitoring Sekolah', 'order' => 1, 'is_active' => true]);
+    $subMenu = SubMenu::create([
+        'menu_id' => $menu->id,
+        'name' => 'Node Sekolah',
+        'route_name' => 'monitoring-sekolah.node',
+        'order' => 1,
+        'is_active' => true,
+    ]);
+
+    $response = $this->actingAs($this->user)
+        ->get(route('system.under-development', ['type' => 'submenu', 'id' => $subMenu->id]));
+
+    $response->assertOk();
+    $response->assertSee('php artisan make:controller MonitoringSekolah/NodeController');
+    $response->assertSee("Route::get('/monitoring-sekolah/node', [NodeController::class, 'index'])->name('monitoring-sekolah.node');");
+});

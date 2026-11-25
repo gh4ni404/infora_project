@@ -47,10 +47,10 @@ class MasterNodeSeeder extends Seeder
         SubMenu::firstOrCreate(
             [
                 'menu_id' => $monitoringMenu->id,
-                'name' => 'Daftar & Perkembangan Sekolah',
+                'name' => 'Status Sekolah',
             ],
             [
-                'route_name' => 'master-control.nodes.index',
+                'route_name' => 'monitoring-sekolah.status-sekolah.index',
                 'order' => 1,
                 'is_active' => true,
                 'is_master_enabled' => true,
@@ -62,10 +62,10 @@ class MasterNodeSeeder extends Seeder
         SubMenu::firstOrCreate(
             [
                 'menu_id' => $monitoringMenu->id,
-                'name' => 'Status Server & Database',
+                'name' => 'Status Server',
             ],
             [
-                'route_name' => 'master-control.server-status.index',
+                'route_name' => 'monitoring-sekolah.status-server.index',
                 'order' => 2,
                 'is_active' => true,
                 'is_master_enabled' => true,

@@ -27,11 +27,11 @@
                 <div class="brand-subtitle">Status heartbeat terbaru dari seluruh database sekolah terhubung</div>
             </div>
             <div class="page-actions">
-                <a href="{{ route('master-control.server-status.index') }}" class="btn-secondary">
+                <a href="{{ route('monitoring-sekolah.status-server.index') }}" class="btn-secondary">
                     <x-icon name="database" size="16" />
                     <span>Status Server & DB</span>
                 </a>
-                <a href="{{ route('master-control.nodes.index') }}" class="btn-primary">
+                <a href="{{ route('monitoring-sekolah.status-sekolah.index') }}" class="btn-primary">
                     <x-icon name="activity" size="16" />
                     <span>Kelola Semua Sekolah</span>
                 </a>
@@ -53,7 +53,7 @@
                         @forelse ($masterSummary['nodes'] as $node)
                             <tr>
                                 <td>
-                                    <a href="{{ route('master-control.nodes.show', $node) }}" class="table-cell-bold">{{ $node->school_name }}</a>
+                                    <a href="{{ route('monitoring-sekolah.status-sekolah.show', $node) }}" class="table-cell-bold">{{ $node->school_name }}</a>
                                     <div class="brand-subtitle">{{ $node->node_code }}</div>
                                 </td>
                                 <td>

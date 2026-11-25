@@ -6,7 +6,7 @@
     subtitle="Indikator kesehatan server, koneksi database, latency, dan aktivitas heartbeat lintas hosting"
 >
     <x-slot:actions>
-        <a href="{{ route('master-control.nodes.index') }}" class="btn-secondary">
+        <a href="{{ route('monitoring-sekolah.status-sekolah.index') }}" class="btn-secondary">
             <x-icon name="chevron-left" size="16" />
             <span>Daftar Sekolah</span>
         </a>
@@ -24,19 +24,19 @@
 </x-stats-grid>
 
 <x-tab-pills label="Filter Kesehatan Server" class="mb-4">
-    <x-tab-pill :href="route('master-control.server-status.index')" :active="$statusFilter === ''" :badge="$summaryStats['total']">
+    <x-tab-pill :href="route('monitoring-sekolah.status-server.index')" :active="$statusFilter === ''" :badge="$summaryStats['total']">
         Semua
     </x-tab-pill>
-    <x-tab-pill :href="route('master-control.server-status.index', ['status' => 'online'])" :active="$statusFilter === 'online'" :badge="$summaryStats['online']" badge-class="badge-success">
+    <x-tab-pill :href="route('monitoring-sekolah.status-server.index', ['status' => 'online'])" :active="$statusFilter === 'online'" :badge="$summaryStats['online']" badge-class="badge-success">
         Online
     </x-tab-pill>
-    <x-tab-pill :href="route('master-control.server-status.index', ['status' => 'idle'])" :active="$statusFilter === 'idle'" :badge="$summaryStats['idle']" badge-class="badge-cyan">
+    <x-tab-pill :href="route('monitoring-sekolah.status-server.index', ['status' => 'idle'])" :active="$statusFilter === 'idle'" :badge="$summaryStats['idle']" badge-class="badge-cyan">
         Idle
     </x-tab-pill>
-    <x-tab-pill :href="route('master-control.server-status.index', ['status' => 'degraded'])" :active="$statusFilter === 'degraded'" :badge="$summaryStats['degraded']" badge-class="badge-warning">
+    <x-tab-pill :href="route('monitoring-sekolah.status-server.index', ['status' => 'degraded'])" :active="$statusFilter === 'degraded'" :badge="$summaryStats['degraded']" badge-class="badge-warning">
         DB Gangguan
     </x-tab-pill>
-    <x-tab-pill :href="route('master-control.server-status.index', ['status' => 'offline'])" :active="$statusFilter === 'offline'" :badge="$summaryStats['offline']" badge-class="badge-rose">
+    <x-tab-pill :href="route('monitoring-sekolah.status-server.index', ['status' => 'offline'])" :active="$statusFilter === 'offline'" :badge="$summaryStats['offline']" badge-class="badge-rose">
         Offline
     </x-tab-pill>
 </x-tab-pills>
@@ -60,7 +60,7 @@
         @forelse ($nodes as $node)
             <tr>
                 <td>
-                    <a href="{{ route('master-control.nodes.show', $node) }}" class="table-cell-bold">{{ $node->school_name }}</a>
+                    <a href="{{ route('monitoring-sekolah.status-sekolah.show', $node) }}" class="table-cell-bold">{{ $node->school_name }}</a>
                     <div class="brand-subtitle">{{ $node->base_url ?? $node->node_code }}</div>
                 </td>
                 <td>
@@ -88,7 +88,7 @@
                 <td>
                     <x-table-actions align="right">
                         @if ($node->base_url)
-                            <form method="POST" action="{{ route('master-control.nodes.ping', $node) }}">
+                            <form method="POST" action="{{ route('monitoring-sekolah.status-sekolah.ping', $node) }}">
                                 @csrf
                                 <button type="submit" class="btn-secondary" title="Ping /up Server Sekolah">
                                     <x-icon name="zap" size="14" />
@@ -99,7 +99,7 @@
                         <x-crud-button
                             action="view"
                             tag="link"
-                            :href="route('master-control.nodes.show', $node)"
+                            :href="route('monitoring-sekolah.status-sekolah.show', $node)"
                             title="Lihat Detail Node"
                         />
                     </x-table-actions>

@@ -6,7 +6,7 @@
     subtitle="Tentukan modul, menu, dan sub-menu yang diizinkan untuk {{ $tenantNode->school_name }} agar dapat dibagikan oleh Admin ke user mereka"
 >
     <x-slot:actions>
-        <a href="{{ route('master-control.nodes.show', $tenantNode) }}" class="btn-secondary">
+        <a href="{{ route('monitoring-sekolah.status-sekolah.show', $tenantNode) }}" class="btn-secondary">
             <x-icon name="chevron-left" size="16" />
             <span>Kembali ke Detail</span>
         </a>
@@ -30,7 +30,7 @@
     </div>
 
     <div class="card-body">
-        <form method="POST" action="{{ route('master-control.nodes.menus.update', $tenantNode) }}">
+        <form method="POST" action="{{ route('monitoring-sekolah.status-sekolah.menus.update', $tenantNode) }}">
             @csrf
             @method('PUT')
 

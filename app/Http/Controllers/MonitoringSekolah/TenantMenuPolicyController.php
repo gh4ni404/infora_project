@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\MasterControl;
+namespace App\Http\Controllers\MonitoringSekolah;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\MasterControl\UpdateTenantMenuPolicyRequest;
+use App\Http\Requests\MonitoringSekolah\UpdateTenantMenuPolicyRequest;
 use App\Models\Module;
 use App\Models\TenantMenuPolicy;
 use App\Models\TenantNode;
@@ -25,7 +25,7 @@ class TenantMenuPolicyController extends Controller
 
         $modulesTree = $this->resolveModulesTreeForNode($tenantNode);
 
-        return view('master-control.nodes.menus', compact(
+        return view('monitoring-sekolah.status-sekolah.menus', compact(
             'tenantNode',
             'modulesTree',
             'existingPolicies'
@@ -65,7 +65,7 @@ class TenantMenuPolicyController extends Controller
         });
 
         return redirect()
-            ->route('master-control.nodes.menus.edit', $tenantNode)
+            ->route('monitoring-sekolah.status-sekolah.menus.edit', $tenantNode)
             ->with('success', 'Hak akses menu untuk sekolah berhasil diperbarui. Perubahan akan otomatis tersinkron pada heartbeat berikutnya.');
     }
 

@@ -11,11 +11,11 @@
     subtitle="Kode Node: {{ $tenantNode->node_code }} &bull; NPSN: {{ $tenantNode->npsn ?? '-' }}"
 >
     <x-slot:actions>
-        <a href="{{ route('master-control.nodes.index') }}" class="btn-secondary">
+        <a href="{{ route('monitoring-sekolah.status-sekolah.index') }}" class="btn-secondary">
             <x-icon name="chevron-left" size="16" />
             <span>Kembali</span>
         </a>
-        <a href="{{ route('master-control.nodes.menus.edit', $tenantNode) }}" class="btn-primary">
+        <a href="{{ route('monitoring-sekolah.status-sekolah.menus.edit', $tenantNode) }}" class="btn-primary">
             <x-icon name="sliders" size="16" />
             <span>Kelola Menu Admin</span>
         </a>
@@ -87,7 +87,7 @@ INFORA_NODE_SECRET={{ $credentials['node_secret'] }}</pre>
                     <span>Edit Node</span>
                 </button>
                 @if ($tenantNode->base_url)
-                    <form method="POST" action="{{ route('master-control.nodes.ping', $tenantNode) }}">
+                    <form method="POST" action="{{ route('monitoring-sekolah.status-sekolah.ping', $tenantNode) }}">
                         @csrf
                         <button type="submit" class="btn-secondary">
                             <x-icon name="zap" size="14" />
@@ -95,14 +95,14 @@ INFORA_NODE_SECRET={{ $credentials['node_secret'] }}</pre>
                         </button>
                     </form>
                 @endif
-                <form method="POST" action="{{ route('master-control.nodes.toggle-status', $tenantNode) }}">
+                <form method="POST" action="{{ route('monitoring-sekolah.status-sekolah.toggle-status', $tenantNode) }}">
                     @csrf
                     <button type="submit" class="btn-secondary">
                         <x-icon name="power" size="14" />
                         <span>{{ $tenantNode->is_active ? 'Nonaktifkan' : 'Aktifkan' }}</span>
                     </button>
                 </form>
-                <form method="POST" action="{{ route('master-control.nodes.regenerate-credentials', $tenantNode) }}">
+                <form method="POST" action="{{ route('monitoring-sekolah.status-sekolah.regenerate-credentials', $tenantNode) }}">
                     @csrf
                     <button type="submit" class="btn-secondary">
                         <x-icon name="key" size="14" />
@@ -157,7 +157,7 @@ INFORA_NODE_SECRET={{ $credentials['node_secret'] }}</pre>
             <h2 class="user-name-text">Perkembangan Modul, Menu & Sub-Menu Sekolah</h2>
             <div class="brand-subtitle">Struktur navigasi beserta progres pengembangan yang dilaporkan oleh server sekolah</div>
         </div>
-        <a href="{{ route('master-control.nodes.menus.edit', $tenantNode) }}" class="btn-primary">
+        <a href="{{ route('monitoring-sekolah.status-sekolah.menus.edit', $tenantNode) }}" class="btn-primary">
             <x-icon name="sliders" size="16" />
             <span>Atur Hak Menu Sekolah</span>
         </a>
@@ -235,7 +235,7 @@ INFORA_NODE_SECRET={{ $credentials['node_secret'] }}</pre>
     id="modalEditNode"
     title="Perbarui Data Node Sekolah"
     subtitle="Ubah identitas atau alamat URL aplikasi sekolah"
-    action="{{ route('master-control.nodes.update', $tenantNode) }}"
+    action="{{ route('monitoring-sekolah.status-sekolah.update', $tenantNode) }}"
     method="PUT"
 >
     <x-form-input name="school_name" id="edit_school_name" label="Nama Sekolah" :value="$tenantNode->school_name" required />

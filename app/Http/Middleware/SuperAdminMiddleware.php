@@ -45,7 +45,7 @@ class SuperAdminMiddleware
             return $next($request);
         }
 
-        if ($request->routeIs('master-control.*')) {
+        if ($request->routeIs('monitoring-sekolah.*')) {
             return $this->denyAccess($request, 'Akses ditolak. Halaman ini khusus Super Administrator.');
         }
 

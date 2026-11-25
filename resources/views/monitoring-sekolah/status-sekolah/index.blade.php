@@ -6,7 +6,7 @@
     subtitle="Pantau perkembangan modul, menu, sub-menu, user, dan distribusi izin menu per database sekolah"
 >
     <x-slot:actions>
-        <a href="{{ route('master-control.server-status.index') }}" class="btn-secondary">
+        <a href="{{ route('monitoring-sekolah.status-server.index') }}" class="btn-secondary">
             <x-icon name="database" size="16" />
             <span>Status Server & DB</span>
         </a>
@@ -30,25 +30,25 @@
 </x-stats-grid>
 
 <x-tab-pills label="Filter Status Server" class="mb-4">
-    <x-tab-pill :href="route('master-control.nodes.index', ['search' => $search])" :active="$statusFilter === ''" :badge="$summaryStats['total']">
+    <x-tab-pill :href="route('monitoring-sekolah.status-sekolah.index', ['search' => $search])" :active="$statusFilter === ''" :badge="$summaryStats['total']">
         Semua
     </x-tab-pill>
-    <x-tab-pill :href="route('master-control.nodes.index', ['status' => 'online', 'search' => $search])" :active="$statusFilter === 'online'" :badge="$summaryStats['online']" badge-class="badge-success">
+    <x-tab-pill :href="route('monitoring-sekolah.status-sekolah.index', ['status' => 'online', 'search' => $search])" :active="$statusFilter === 'online'" :badge="$summaryStats['online']" badge-class="badge-success">
         Online Aktif
     </x-tab-pill>
-    <x-tab-pill :href="route('master-control.nodes.index', ['status' => 'idle', 'search' => $search])" :active="$statusFilter === 'idle'" :badge="$summaryStats['idle']" badge-class="badge-cyan">
+    <x-tab-pill :href="route('monitoring-sekolah.status-sekolah.index', ['status' => 'idle', 'search' => $search])" :active="$statusFilter === 'idle'" :badge="$summaryStats['idle']" badge-class="badge-cyan">
         Idle
     </x-tab-pill>
-    <x-tab-pill :href="route('master-control.nodes.index', ['status' => 'degraded', 'search' => $search])" :active="$statusFilter === 'degraded'" :badge="$summaryStats['degraded']" badge-class="badge-warning">
+    <x-tab-pill :href="route('monitoring-sekolah.status-sekolah.index', ['status' => 'degraded', 'search' => $search])" :active="$statusFilter === 'degraded'" :badge="$summaryStats['degraded']" badge-class="badge-warning">
         DB Gangguan
     </x-tab-pill>
-    <x-tab-pill :href="route('master-control.nodes.index', ['status' => 'offline', 'search' => $search])" :active="$statusFilter === 'offline'" :badge="$summaryStats['offline']" badge-class="badge-rose">
+    <x-tab-pill :href="route('monitoring-sekolah.status-sekolah.index', ['status' => 'offline', 'search' => $search])" :active="$statusFilter === 'offline'" :badge="$summaryStats['offline']" badge-class="badge-rose">
         Offline
     </x-tab-pill>
 </x-tab-pills>
 
 <x-data-table
-    route="{{ route('master-control.nodes.index') }}"
+    route="{{ route('monitoring-sekolah.status-sekolah.index') }}"
     search-placeholder="Cari nama sekolah, kode node, atau NPSN..."
     :total="$filtered->count()"
     total-label="Sekolah"
@@ -68,7 +68,7 @@
             @php $snap = $node->snapshot; @endphp
             <tr>
                 <td>
-                    <a href="{{ route('master-control.nodes.show', $node) }}" class="table-cell-bold">{{ $node->school_name }}</a>
+                    <a href="{{ route('monitoring-sekolah.status-sekolah.show', $node) }}" class="table-cell-bold">{{ $node->school_name }}</a>
                     <div class="brand-subtitle">
                         <code>{{ $node->node_code }}</code>
                         @if ($node->npsn)
@@ -103,10 +103,10 @@
                         <x-crud-button
                             action="view"
                             tag="link"
-                            :href="route('master-control.nodes.show', $node)"
+                            :href="route('monitoring-sekolah.status-sekolah.show', $node)"
                             title="Detail Perkembangan Sekolah"
                         />
-                        <a href="{{ route('master-control.nodes.menus.edit', $node) }}" class="btn-edit" title="Atur Menu Admin Sekolah">
+                        <a href="{{ route('monitoring-sekolah.status-sekolah.menus.edit', $node) }}" class="btn-edit" title="Atur Menu Admin Sekolah">
                             <x-icon name="sliders" size="16" />
                         </a>
                         <x-crud-button
@@ -116,7 +116,7 @@
                             data-id="{{ $node->id }}"
                             data-name="{{ $node->school_name }}"
                             data-code="{{ $node->node_code }}"
-                            data-action="{{ route('master-control.nodes.destroy', $node) }}"
+                            data-action="{{ route('monitoring-sekolah.status-sekolah.destroy', $node) }}"
                         />
                     </x-table-actions>
                 </td>
@@ -136,7 +136,7 @@
     id="modalCreateNode"
     title="Daftarkan Node Sekolah Baru"
     subtitle="Buat identitas dan token API untuk menghubungkan database sekolah ke Portal Master"
-    action="{{ route('master-control.nodes.store') }}"
+    action="{{ route('monitoring-sekolah.status-sekolah.store') }}"
 >
     <x-form-input
         name="school_name"

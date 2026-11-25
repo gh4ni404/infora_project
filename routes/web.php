@@ -11,8 +11,8 @@ use App\Http\Controllers\Master\MapelController;
 use App\Http\Controllers\Master\MuridController;
 use App\Http\Controllers\Master\SchoolController;
 use App\Http\Controllers\Master\TingkatanController;
-use App\Http\Controllers\MasterControl\TenantMenuPolicyController;
-use App\Http\Controllers\MasterControl\TenantNodeController;
+use App\Http\Controllers\MonitoringSekolah\StatusSekolahController;
+use App\Http\Controllers\MonitoringSekolah\TenantMenuPolicyController;
 use App\Http\Controllers\PendaftaranMukaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Rombel\KelasController;
@@ -44,24 +44,28 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
     Route::get('/dashboard/admin', [DashboardController::class, 'admin'])->name('dashboard.admin');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-    // Pusat Kontrol Tenant (Khusus Node Mode Master)
-    Route::prefix('master-control')
-        ->name('master-control.')
+    // Monitoring Sekolah & Pusat Kontrol Tenant (Khusus Mode Master)
+    Route::prefix('monitoring-sekolah')
+        ->name('monitoring-sekolah.')
         ->middleware(['master_node'])
         ->group(function () {
-            Route::get('/nodes', [TenantNodeController::class, 'index'])->name('nodes.index');
-            Route::post('/nodes', [TenantNodeController::class, 'store'])->name('nodes.store');
-            Route::get('/nodes/{tenantNode}', [TenantNodeController::class, 'show'])->name('nodes.show');
-            Route::put('/nodes/{tenantNode}', [TenantNodeController::class, 'update'])->name('nodes.update');
-            Route::delete('/nodes/{tenantNode}', [TenantNodeController::class, 'destroy'])->name('nodes.destroy');
-            Route::post('/nodes/{tenantNode}/toggle-status', [TenantNodeController::class, 'toggleStatus'])->name('nodes.toggle-status');
-            Route::post('/nodes/{tenantNode}/regenerate-credentials', [TenantNodeController::class, 'regenerateCredentials'])->name('nodes.regenerate-credentials');
-            Route::post('/nodes/{tenantNode}/ping', [TenantNodeController::class, 'ping'])->name('nodes.ping');
+            // Status Sekolah (Monitoring Live, Metrik DB & Progres Modul)
+            Route::prefix('status-sekolah')->name('status-sekolah.')->group(function () {
+                Route::get('/', [StatusSekolahController::class, 'index'])->name('index');
+                Route::post('/', [StatusSekolahController::class, 'store'])->name('store');
+                Route::get('/{tenantNode}', [StatusSekolahController::class, 'show'])->name('show');
+                Route::put('/{tenantNode}', [StatusSekolahController::class, 'update'])->name('update');
+                Route::delete('/{tenantNode}', [StatusSekolahController::class, 'destroy'])->name('destroy');
+                Route::post('/{tenantNode}/toggle-status', [StatusSekolahController::class, 'toggleStatus'])->name('toggle-status');
+                Route::post('/{tenantNode}/regenerate-credentials', [StatusSekolahController::class, 'regenerateCredentials'])->name('regenerate-credentials');
+                Route::post('/{tenantNode}/ping', [StatusSekolahController::class, 'ping'])->name('ping');
 
-            Route::get('/nodes/{tenantNode}/menus', [TenantMenuPolicyController::class, 'edit'])->name('nodes.menus.edit');
-            Route::put('/nodes/{tenantNode}/menus', [TenantMenuPolicyController::class, 'update'])->name('nodes.menus.update');
+                Route::get('/{tenantNode}/menus', [TenantMenuPolicyController::class, 'edit'])->name('menus.edit');
+                Route::put('/{tenantNode}/menus', [TenantMenuPolicyController::class, 'update'])->name('menus.update');
+            });
 
-            Route::get('/server-status', [TenantNodeController::class, 'serverStatus'])->name('server-status.index');
+            // Status Server & Database Node Master
+            Route::get('/status-server', [StatusSekolahController::class, 'serverStatus'])->name('status-server.index');
         });
 
     // Pengaturan Profil Pengguna Mandiri

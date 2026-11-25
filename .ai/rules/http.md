@@ -37,6 +37,6 @@ In LoginController, non-superadmin users are redirected dynamically:
 
 ## Dual-Mode Node Governance (`INFORA_NODE_ROLE`)
 INFORA runs from a single codebase configured via `config('infora.node_role')` (`'school'` default or `'master'`):
-1. **Master Portal Isolation:** Routes under `/master-control/*` (`master-control.*`) must use `master_node` middleware (`EnsureMasterNode`, returning `404` in `school` mode) and remain strictly restricted to `super_admin`.
+1. **Master Portal Isolation:** Routes under `/monitoring-sekolah/*` (`monitoring-sekolah.*`) must use `master_node` middleware (`EnsureMasterNode`, returning `404` in `school` mode) and remain strictly restricted to `super_admin`.
 2. **Master Universal Administrative Access:** When in `master` mode, Super Admin retains universal access across all administrative and system menus (including Backup & Restore, reference data, and portal tools) without artificial route blocking.
 3. **Master Menu Entitlement (`is_master_enabled`):** Both `SidebarCache::fetchActiveTree()` and `SidebarCache::findByRoute()` filter out menus/sub-menus where `is_master_enabled` is `false` so school admins cannot view, access, or assign Master-locked menus to users.

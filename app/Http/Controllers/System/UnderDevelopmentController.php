@@ -51,15 +51,29 @@ class UnderDevelopmentController extends Controller
         $rawRoute = $item->route_name;
         $cleanRoute = $rawRoute ?: Str::slug(Str::replace(['.', '_'], '-', $item->name));
 
-        // Generate developer scaffolding suggestions
-        $controllerBaseName = Str::studly(Str::replace(['.', '-', '_'], ' ', $cleanRoute)).'Controller';
+        // Generate developer scaffolding suggestions (pecah titik sebagai subdirektori controller)
+        $routeParts = array_values(array_filter(explode('.', trim($cleanRoute, '.'))));
+        if (count($routeParts) > 1 && end($routeParts) === 'index') {
+            array_pop($routeParts);
+        }
+
+        if (count($routeParts) > 1) {
+            $controllerName = Str::studly(array_pop($routeParts)).'Controller';
+            $folderNamespace = implode('/', array_map(fn ($p) => Str::studly($p), $routeParts));
+            $suggestedArtisanPath = $folderNamespace.'/'.$controllerName;
+        } else {
+            $controllerName = Str::studly($routeParts[0] ?? $cleanRoute).'Controller';
+            $suggestedArtisanPath = $controllerName;
+        }
+
+        $controllerBaseName = $controllerName;
         $suggestedRouteCode = sprintf(
             "Route::get('/%s', [%s::class, 'index'])->name('%s');",
             str_replace('.', '/', $cleanRoute),
-            $controllerBaseName,
+            $controllerName,
             $cleanRoute
         );
-        $suggestedArtisanCmd = 'php artisan make:controller '.$controllerBaseName;
+        $suggestedArtisanCmd = 'php artisan make:controller '.$suggestedArtisanPath;
 
         return view('system.under-development', compact(
             'item',
