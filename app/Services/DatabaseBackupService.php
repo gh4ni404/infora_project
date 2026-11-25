@@ -16,6 +16,18 @@ use ZipArchive;
 class DatabaseBackupService
 {
     /**
+     * Tabel master wilayah Kemendagri yang bersifat statis dan berukuran besar.
+     *
+     * @var list<string>
+     */
+    public const REGIONAL_TABLES = [
+        'provinsi',
+        'kabupaten',
+        'kecamatan',
+        'kelurahan',
+    ];
+
+    /**
      * Get the directory where database backups are stored.
      */
     public function getBackupDirectory(): string
@@ -28,7 +40,7 @@ class DatabaseBackupService
     }
 
     /**
-     * Create a backup according to specified type ('full' for ZIP or 'database' for SQL).
+     * Create a backup according to specified type ('full' for ZIP, 'database' for full SQL, or 'school_only' for SQL without region tables).
      *
      * @param  (callable(int, string, string): void)|null  $progressCallback
      * @return array{filename: string, path: string, size_bytes: int, size_human: string, created_at: Carbon, type: string}
@@ -37,6 +49,12 @@ class DatabaseBackupService
     {
         if ($type === 'database') {
             return $this->createDatabaseBackup(null, $progressCallback);
+        }
+
+        if ($type === 'school_only') {
+            $filename = 'backup_infora_school_'.Carbon::now()->format('Ymd_His').'.sql';
+
+            return $this->createDatabaseBackup($filename, $progressCallback, 0, 100, self::REGIONAL_TABLES, 'school_only');
         }
 
         return $this->createFullBackup($progressCallback);
@@ -165,13 +183,16 @@ class DatabaseBackupService
      * Create a fresh database-only SQL dump.
      *
      * @param  (callable(int, string, string): void)|null  $progressCallback
+     * @param  array<int, string>  $excludedTables
      * @return array{filename: string, path: string, size_bytes: int, size_human: string, created_at: Carbon, type: string}
      */
     public function createDatabaseBackup(
         ?string $customFilename = null,
         ?callable $progressCallback = null,
         int $startPercent = 0,
-        int $endPercent = 100
+        int $endPercent = 100,
+        array $excludedTables = [],
+        string $backupType = 'database'
     ): array {
         $report = function (int $pct, string $stage, string $detail) use ($progressCallback): void {
             if (is_callable($progressCallback)) {
@@ -191,6 +212,8 @@ class DatabaseBackupService
         }
 
         try {
+            $this->assertSupportedDriver();
+
             $pdo = DB::connection()->getPdo();
             $dbName = DB::connection()->getDatabaseName();
             $driver = DB::connection()->getDriverName();
@@ -203,7 +226,7 @@ class DatabaseBackupService
             fwrite($handle, "-- Driver           : {$driver}\n");
             fwrite($handle, "-- ========================================================\n\n");
 
-            if ($driver === 'sqlite') {
+            if ($this->isSqliteDriver()) {
                 fwrite($handle, "PRAGMA foreign_keys = OFF;\n\n");
             } else {
                 fwrite($handle, "SET FOREIGN_KEY_CHECKS=0;\n");
@@ -213,7 +236,7 @@ class DatabaseBackupService
             }
 
             // Fetch all base tables
-            $tables = $this->getAllTables();
+            $tables = $this->getAllTables($excludedTables);
             $totalTables = count($tables);
 
             $report($startPercent + 2, 'Ekspor Basis Data', "Mengidentifikasi tabel ({$totalTables} tabel terdeteksi)...");
@@ -266,7 +289,7 @@ class DatabaseBackupService
             }
 
             // Footer reset
-            if ($driver === 'sqlite') {
+            if ($this->isSqliteDriver()) {
                 fwrite($handle, "PRAGMA foreign_keys = ON;\n");
             } else {
                 fwrite($handle, "SET FOREIGN_KEY_CHECKS=1;\n");
@@ -289,7 +312,7 @@ class DatabaseBackupService
             'size_bytes' => $sizeBytes,
             'size_human' => $this->formatBytes($sizeBytes),
             'created_at' => Carbon::now(),
-            'type' => 'database',
+            'type' => $backupType,
         ];
     }
 
@@ -311,6 +334,13 @@ class DatabaseBackupService
             $sizeBytes = (int) File::size($path);
             $mtime = File::lastModified($path);
             $isZip = str_ends_with($filename, '.zip');
+            $isSchoolOnly = ! $isZip && str_starts_with($filename, 'backup_infora_school_');
+            $type = $isZip ? 'full' : ($isSchoolOnly ? 'school_only' : 'database');
+            $typeLabel = match ($type) {
+                'full' => 'Full Snapshot (ZIP)',
+                'school_only' => 'Data Sekolah Saja (SQL)',
+                default => 'Database Saja (SQL)',
+            };
 
             return [
                 'filename' => $filename,
@@ -319,8 +349,8 @@ class DatabaseBackupService
                 'size_human' => $this->formatBytes($sizeBytes),
                 'created_at' => Carbon::createFromTimestamp($mtime),
                 'timestamp' => $mtime,
-                'type' => $isZip ? 'full' : 'database',
-                'type_label' => $isZip ? 'Full Snapshot (ZIP)' : 'Database Saja (SQL)',
+                'type' => $type,
+                'type_label' => $typeLabel,
             ];
         })->sortByDesc('timestamp')->values();
 
@@ -569,11 +599,33 @@ class DatabaseBackupService
     }
 
     /**
+     * Determine if the active database connection uses SQLite.
+     */
+    protected function isSqliteDriver(): bool
+    {
+        return DB::connection()->getDriverName() === 'sqlite';
+    }
+
+    /**
+     * Ensure the active database driver is supported by the native PHP backup/restore engine.
+     */
+    protected function assertSupportedDriver(): void
+    {
+        $driver = DB::connection()->getDriverName();
+
+        if (! in_array($driver, ['sqlite', 'mysql', 'mariadb'], true)) {
+            throw new RuntimeException("Driver basis data '{$driver}' belum didukung oleh layanan backup/restore native.");
+        }
+    }
+
+    /**
      * Temporarily disable foreign key constraints.
      */
     public function disableForeignKeys(): void
     {
-        if (DB::connection()->getDriverName() === 'sqlite') {
+        $this->assertSupportedDriver();
+
+        if ($this->isSqliteDriver()) {
             DB::statement('PRAGMA foreign_keys = OFF;');
 
             return;
@@ -587,7 +639,9 @@ class DatabaseBackupService
      */
     public function enableForeignKeys(): void
     {
-        if (DB::connection()->getDriverName() === 'sqlite') {
+        $this->assertSupportedDriver();
+
+        if ($this->isSqliteDriver()) {
             DB::statement('PRAGMA foreign_keys = ON;');
 
             return;
@@ -643,16 +697,19 @@ class DatabaseBackupService
     /**
      * Get all base table names in the active database.
      *
+     * @param  array<int, string>  $excludedTables
      * @return array<int, string>
      */
-    public function getAllTables(): array
+    public function getAllTables(array $excludedTables = []): array
     {
-        $driver = DB::connection()->getDriverName();
+        $this->assertSupportedDriver();
 
-        if ($driver === 'sqlite') {
+        if ($this->isSqliteDriver()) {
             $rows = DB::select("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'");
 
-            return array_values(array_filter(array_map(fn ($row) => ((array) $row)['name'] ?? null, $rows)));
+            $tables = array_values(array_filter(array_map(fn ($row) => ((array) $row)['name'] ?? null, $rows)));
+
+            return empty($excludedTables) ? $tables : array_values(array_diff($tables, $excludedTables));
         }
 
         $rows = DB::select('SHOW FULL TABLES WHERE Table_type = "BASE TABLE"');
@@ -661,7 +718,7 @@ class DatabaseBackupService
         foreach ($rows as $row) {
             $rowArray = (array) $row;
             $tableName = array_values($rowArray)[0] ?? null;
-            if ($tableName) {
+            if ($tableName && ! in_array($tableName, $excludedTables, true)) {
                 $tables[] = $tableName;
             }
         }
@@ -674,9 +731,9 @@ class DatabaseBackupService
      */
     public function getTableCreateSql(string $table): ?string
     {
-        $driver = DB::connection()->getDriverName();
+        $this->assertSupportedDriver();
 
-        if ($driver === 'sqlite') {
+        if ($this->isSqliteDriver()) {
             $result = DB::select("SELECT sql FROM sqlite_master WHERE type='table' AND name = ?", [$table]);
 
             return ! empty($result) ? ((array) $result[0])['sql'] : null;

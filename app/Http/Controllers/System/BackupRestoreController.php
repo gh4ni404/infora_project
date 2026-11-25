@@ -63,9 +63,11 @@ class BackupRestoreController extends Controller
                         $sendEvent($pct, $stage, $detail, 'running');
                     });
 
-                    $label = $backup['type'] === 'full'
-                        ? 'Cadangan lengkap sistem (Basis Data dan Berkas Aset)'
-                        : 'Cadangan basis data';
+                    $label = match ($backup['type']) {
+                        'full' => 'Cadangan lengkap sistem (Basis Data dan Berkas Aset)',
+                        'school_only' => 'Cadangan data sekolah (SQL tanpa tabel wilayah)',
+                        default => 'Cadangan basis data',
+                    };
 
                     $msg = "{$label} berhasil dibuat: {$backup['filename']} ({$backup['size_human']}).";
                     $sendEvent(100, 'Selesai', $msg, 'completed', $msg);
@@ -83,9 +85,11 @@ class BackupRestoreController extends Controller
         try {
             $backup = $this->backupService->createBackup($type);
 
-            $label = $backup['type'] === 'full'
-                ? 'Cadangan lengkap sistem (Basis Data dan Berkas Aset)'
-                : 'Cadangan basis data';
+            $label = match ($backup['type']) {
+                'full' => 'Cadangan lengkap sistem (Basis Data dan Berkas Aset)',
+                'school_only' => 'Cadangan data sekolah (SQL tanpa tabel wilayah)',
+                default => 'Cadangan basis data',
+            };
 
             return redirect()
                 ->route('backup-restore')

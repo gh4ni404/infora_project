@@ -15,11 +15,20 @@
             </button>
         </form>
 
+        <!-- Cadangan Data Sekolah Tanpa Wilayah (SQL Ringan) -->
+        <form method="POST" action="{{ route('backup-restore.create') }}" class="form-inline-action form-backup-trigger" data-progress-stream>
+            @csrf
+            <x-form-input type="hidden" name="type" value="school_only" />
+            <button type="submit" class="btn-secondary" id="btnCreateSchoolDbBackup" title="Cadangan Data Sekolah (SQL Ringan) - Ekspor data sekolah tanpa tabel wilayah nasional">
+                <x-icon name="school" size="16" />
+            </button>
+        </form>
+
         <!-- Cadangan Database SQL (Secondary Outline) -->
         <form method="POST" action="{{ route('backup-restore.create') }}" class="form-inline-action form-backup-trigger" data-progress-stream>
             @csrf
             <x-form-input type="hidden" name="type" value="database" />
-            <button type="submit" class="btn-outline-primary" id="btnCreateDbBackup" title="Cadangan Database (SQL) - Ekspor dump skema dan data basis data saja">
+            <button type="submit" class="btn-outline-primary" id="btnCreateDbBackup" title="Cadangan Database (SQL) - Ekspor dump skema dan data basis data penuh">
                 <x-icon name="database" size="16" />
                 {{-- <span>Cadangan Database (SQL)</span> --}}
             </button>
@@ -74,6 +83,8 @@
                     <td>
                         @if ($backup['type'] === 'full')
                             <span class="badge badge-primary" title="Snapshot Lengkap: Basis Data + Seluruh Berkas Aset">ZIP</span>
+                        @elseif ($backup['type'] === 'school_only')
+                            <span class="badge badge-success" title="Data Sekolah Saja (SQL tanpa tabel wilayah)">SQL Ringan</span>
                         @else
                             <span class="badge badge-cyan" title="Hanya Skema dan Data Basis Data">SQL</span>
                         @endif
