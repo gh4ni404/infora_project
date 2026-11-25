@@ -36,20 +36,17 @@ test('master control routes return 404 when node role is school', function () {
         ->assertNotFound();
 });
 
-test('school operational routes return 404 when node role is master', function () {
+test('super admin has universal menu access in master mode', function () {
     config()->set('infora.node_role', 'master');
 
     $this->actingAs($this->superAdmin)
-        ->get('/master/data-murid')
-        ->assertNotFound();
+        ->get('/dashboard')
+        ->assertOk();
 
     $this->actingAs($this->superAdmin)
-        ->get('/absen_murid')
-        ->assertNotFound();
-
-    $this->actingAs($this->superAdmin)
-        ->get('/dashboard/admin')
-        ->assertNotFound();
+        ->get('/backup-restore')
+        ->assertOk()
+        ->assertSee('Cadangan dan Pemulihan Sistem', false);
 });
 
 test('non super admin cannot access master control portal in master mode', function () {

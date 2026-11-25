@@ -108,14 +108,18 @@ class SystemMenuSeeder extends Seeder
             ]
         );
 
-        // Direct Menu: Backup Dan Restore
-        Menu::firstOrCreate(
+        // Direct Menu: Backup Dan Restore (hapus rekaman legacy bersimbol ampersand jika ada)
+        Menu::where('module_id', $systemModule->id)
+            ->whereIn('name', ['Backup & Restore', 'Backup & restore'])
+            ->delete();
+
+        Menu::updateOrCreate(
             [
                 'module_id' => $systemModule->id,
-                'name' => 'Backup Dan Restore',
+                'route_name' => 'backup-restore',
             ],
             [
-                'route_name' => 'backup-restore',
+                'name' => 'Backup Dan Restore',
                 'icon' => 'folder',
                 'order' => 2,
                 'is_active' => true,

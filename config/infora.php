@@ -38,23 +38,4 @@ return [
         'user_activity_throttle_minutes' => 5,
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Rute Operasional Khusus Mode Sekolah (Diblokir 404 Saat Mode Master)
-    |--------------------------------------------------------------------------
-    */
-    'school_only_route_patterns' => [
-        'dashboard.admin',
-        'master.*',
-        'rombel.*',
-        'konfigurasi-sekolah.*',
-        'wilayah.*',
-        'pendaftaran_muka.*',
-        'absen_murid.*',
-        'backup-restore.*',
-        'sistem.*',
-        'system.referensi*',
-        'system.under-development*',
-    ],
-
 ];

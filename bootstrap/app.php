@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Middleware\BlockSchoolRoutesOnMaster;
 use App\Http\Middleware\EnsureMasterNode;
 use App\Http\Middleware\SuperAdminMiddleware;
 use Illuminate\Foundation\Application;
@@ -19,7 +18,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'super_admin' => SuperAdminMiddleware::class,
             'master_node' => EnsureMasterNode::class,
-            'block_school_on_master' => BlockSchoolRoutesOnMaster::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
