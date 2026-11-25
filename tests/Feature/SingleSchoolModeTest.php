@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\AbsensiMurid;
+use App\Models\Kelurahan;
 use App\Models\Murid;
 use App\Models\MuridFaceProfile;
 use App\Models\Provinsi;
@@ -326,7 +327,18 @@ test('infora:setup-school seeds regional master data when without-wilayah is not
         '--skip-optimize' => true,
     ])->assertSuccessful();
 
-    expect(Provinsi::count())->toBeGreaterThan(0);
+    expect(Provinsi::count())->toBe(38)
+        ->and(Kelurahan::count())->toBe(295);
+
+    $this->assertDatabaseHas('kelurahan', [
+        'kode' => '7308191001',
+        'nama' => 'Unyi',
+    ]);
+    $this->assertDatabaseHas('kelurahan', [
+        'kode' => '7308241015',
+        'nama' => 'Mampotu',
+        'kode_pos' => null,
+    ]);
     $this->assertDatabaseHas('schools', [
         'npsn' => '40305555',
     ]);
