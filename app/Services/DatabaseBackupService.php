@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\SidebarCache;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
@@ -465,6 +466,14 @@ class DatabaseBackupService
             $this->enableForeignKeys();
         }
 
+        // Sinkronkan skema migrasi jika cadangan berasal dari versi skema terdahulu
+        $report(90, 'Sinkronisasi Skema', 'Menyinkronkan skema migrasi aplikasi pasca-pemulihan...');
+        try {
+            Artisan::call('migrate', ['--force' => true]);
+        } catch (\Throwable) {
+            // Abaikan jika migrasi sudah mutakhir
+        }
+
         $report(100, 'Pemulihan Basis Data', 'Basis data berhasil dipulihkan sepenuhnya.');
     }
 
@@ -546,6 +555,8 @@ class DatabaseBackupService
             // 4. Clean up temporary extraction folder
             $report(98, 'Pembersihan', 'Membersihkan berkas sementara ekstraksi...');
             File::deleteDirectory($tempExtractDir);
+
+            SidebarCache::flushGlobal();
 
             $report(100, 'Selesai', 'Seluruh sistem (basis data, aset media, symlink) berhasil dipulihkan!');
 

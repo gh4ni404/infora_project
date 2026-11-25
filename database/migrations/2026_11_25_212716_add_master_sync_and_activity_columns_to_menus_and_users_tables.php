@@ -11,22 +11,38 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('menus', function (Blueprint $table) {
-            $table->string('sync_key')->nullable()->after('route_name');
-            $table->boolean('is_master_enabled')->default(true)->after('is_active');
-            $table->index('sync_key');
-        });
+        if (Schema::hasTable('menus')) {
+            Schema::table('menus', function (Blueprint $table) {
+                if (! Schema::hasColumn('menus', 'sync_key')) {
+                    $table->string('sync_key')->nullable()->after('route_name');
+                    $table->index('sync_key');
+                }
+                if (! Schema::hasColumn('menus', 'is_master_enabled')) {
+                    $table->boolean('is_master_enabled')->default(true)->after('is_active');
+                }
+            });
+        }
 
-        Schema::table('sub_menus', function (Blueprint $table) {
-            $table->string('sync_key')->nullable()->after('route_name');
-            $table->boolean('is_master_enabled')->default(true)->after('is_active');
-            $table->index('sync_key');
-        });
+        if (Schema::hasTable('sub_menus')) {
+            Schema::table('sub_menus', function (Blueprint $table) {
+                if (! Schema::hasColumn('sub_menus', 'sync_key')) {
+                    $table->string('sync_key')->nullable()->after('route_name');
+                    $table->index('sync_key');
+                }
+                if (! Schema::hasColumn('sub_menus', 'is_master_enabled')) {
+                    $table->boolean('is_master_enabled')->default(true)->after('is_active');
+                }
+            });
+        }
 
-        Schema::table('users', function (Blueprint $table) {
-            $table->timestamp('last_seen_at')->nullable()->after('is_active');
-            $table->index('last_seen_at');
-        });
+        if (Schema::hasTable('users')) {
+            Schema::table('users', function (Blueprint $table) {
+                if (! Schema::hasColumn('users', 'last_seen_at')) {
+                    $table->timestamp('last_seen_at')->nullable()->after('is_active');
+                    $table->index('last_seen_at');
+                }
+            });
+        }
     }
 
     /**

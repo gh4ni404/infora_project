@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('tenant_nodes')) {
+            return;
+        }
+
         Schema::create('tenant_nodes', function (Blueprint $table) {
             $table->id();
             $table->string('node_code')->index();
