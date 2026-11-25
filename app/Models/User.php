@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-#[Fillable(['name', 'username', 'email', 'password', 'user_type', 'is_active', 'avatar_path', 'school_id'])]
+#[Fillable(['name', 'username', 'email', 'password', 'user_type', 'is_active', 'last_seen_at', 'avatar_path', 'school_id'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -44,6 +44,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'last_seen_at' => 'datetime',
         ];
     }
 

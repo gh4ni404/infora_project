@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\School;
+use App\Models\TenantNode;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,9 +26,25 @@ class DashboardController extends Controller
             'php_version' => PHP_VERSION,
             'environment' => config('app.env'),
             'timezone' => config('app.timezone'),
+            'node_role' => config('infora.node_role', 'school'),
         ];
 
-        return view('dashboard', compact('user', 'systemInfo'));
+        $isMasterMode = $systemInfo['node_role'] === 'master';
+        $masterSummary = null;
+
+        if ($isMasterMode) {
+            $nodes = TenantNode::query()->with('snapshot')->orderByDesc('last_heartbeat_at')->get();
+            $masterSummary = [
+                'total' => $nodes->count(),
+                'online' => $nodes->filter(fn (TenantNode $n) => $n->computed_status === 'online')->count(),
+                'idle' => $nodes->filter(fn (TenantNode $n) => $n->computed_status === 'idle')->count(),
+                'degraded' => $nodes->filter(fn (TenantNode $n) => $n->computed_status === 'degraded')->count(),
+                'offline' => $nodes->filter(fn (TenantNode $n) => $n->computed_status === 'offline')->count(),
+                'nodes' => $nodes->take(5),
+            ];
+        }
+
+        return view('dashboard', compact('user', 'systemInfo', 'isMasterMode', 'masterSummary'));
     }
 
     /**

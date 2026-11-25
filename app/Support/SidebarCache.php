@@ -110,10 +110,12 @@ class SidebarCache
             ->with([
                 'menus' => function ($query) {
                     $query->where('is_active', true)
+                        ->where('is_master_enabled', true)
                         ->orderBy('order')
                         ->with([
                             'subMenus' => function ($subQuery) {
                                 $subQuery->where('is_active', true)
+                                    ->where('is_master_enabled', true)
                                     ->orderBy('order');
                             },
                         ]);
@@ -315,7 +317,10 @@ class SidebarCache
 
         // 3. Fallback pencarian langsung jika pohon aktif belum terindeks di cache
         if (Schema::hasTable('sub_menus')) {
-            $subMenus = SubMenu::where('is_active', true)->whereNotNull('route_name')->get();
+            $subMenus = SubMenu::where('is_active', true)
+                ->where('is_master_enabled', true)
+                ->whereNotNull('route_name')
+                ->get();
             foreach ($subMenus as $subMenu) {
                 if ($request->routeIs($subMenu->route_name)) {
                     return ['type' => 'submenu', 'item' => $subMenu];
@@ -330,7 +335,10 @@ class SidebarCache
         }
 
         if (Schema::hasTable('menus')) {
-            $menus = Menu::where('is_active', true)->whereNotNull('route_name')->get();
+            $menus = Menu::where('is_active', true)
+                ->where('is_master_enabled', true)
+                ->whereNotNull('route_name')
+                ->get();
             foreach ($menus as $menu) {
                 if ($request->routeIs($menu->route_name)) {
                     return ['type' => 'menu', 'item' => $menu];

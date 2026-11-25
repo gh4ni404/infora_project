@@ -22,6 +22,12 @@ class SubMenu extends Model
      */
     protected static function booted(): void
     {
+        static::saving(function (SubMenu $subMenu): void {
+            if (blank($subMenu->sync_key) || ! blank($subMenu->route_name)) {
+                $subMenu->sync_key = $subMenu->resolveSyncKey();
+            }
+        });
+
         static::saved(function (SubMenu $subMenu): void {
             SidebarCache::flushGlobal();
             static::clearDevelopmentCache('submenu', $subMenu->id);
@@ -52,8 +58,10 @@ class SubMenu extends Model
         'menu_id',
         'name',
         'route_name',
+        'sync_key',
         'order',
         'is_active',
+        'is_master_enabled',
         'dev_progress',
         'dev_stage',
         'dev_note',
@@ -70,6 +78,7 @@ class SubMenu extends Model
         return [
             'order' => 'integer',
             'is_active' => 'boolean',
+            'is_master_enabled' => 'boolean',
             'dev_progress' => 'integer',
         ];
     }
@@ -147,5 +156,21 @@ class SubMenu extends Model
         $max = $query->max('order');
 
         return is_null($max) ? 1 : ((int) $max + 1);
+    }
+
+    /**
+     * Dapatkan kunci sinkronisasi stabil milik sub-menu ini.
+     */
+    public function resolveSyncKey(): string
+    {
+        if (! blank($this->sync_key) && blank($this->route_name)) {
+            return $this->sync_key;
+        }
+
+        return Menu::buildSyncKey(
+            $this->route_name,
+            'submenu',
+            ($this->menu?->name ?? 'menu').'-'.$this->name
+        );
     }
 }

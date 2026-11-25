@@ -11,6 +11,8 @@ use App\Http\Controllers\Master\MapelController;
 use App\Http\Controllers\Master\MuridController;
 use App\Http\Controllers\Master\SchoolController;
 use App\Http\Controllers\Master\TingkatanController;
+use App\Http\Controllers\MasterControl\TenantMenuPolicyController;
+use App\Http\Controllers\MasterControl\TenantNodeController;
 use App\Http\Controllers\PendaftaranMukaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Rombel\KelasController;
@@ -37,10 +39,30 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [LoginController::class, 'login'])->name('login.attempt');
 });
 
-Route::middleware(['auth', 'super_admin'])->group(function () {
+Route::middleware(['auth', 'block_school_on_master', 'super_admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/admin', [DashboardController::class, 'admin'])->name('dashboard.admin');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+    // Pusat Kontrol Tenant (Khusus Node Mode Master)
+    Route::prefix('master-control')
+        ->name('master-control.')
+        ->middleware(['master_node'])
+        ->group(function () {
+            Route::get('/nodes', [TenantNodeController::class, 'index'])->name('nodes.index');
+            Route::post('/nodes', [TenantNodeController::class, 'store'])->name('nodes.store');
+            Route::get('/nodes/{tenantNode}', [TenantNodeController::class, 'show'])->name('nodes.show');
+            Route::put('/nodes/{tenantNode}', [TenantNodeController::class, 'update'])->name('nodes.update');
+            Route::delete('/nodes/{tenantNode}', [TenantNodeController::class, 'destroy'])->name('nodes.destroy');
+            Route::post('/nodes/{tenantNode}/toggle-status', [TenantNodeController::class, 'toggleStatus'])->name('nodes.toggle-status');
+            Route::post('/nodes/{tenantNode}/regenerate-credentials', [TenantNodeController::class, 'regenerateCredentials'])->name('nodes.regenerate-credentials');
+            Route::post('/nodes/{tenantNode}/ping', [TenantNodeController::class, 'ping'])->name('nodes.ping');
+
+            Route::get('/nodes/{tenantNode}/menus', [TenantMenuPolicyController::class, 'edit'])->name('nodes.menus.edit');
+            Route::put('/nodes/{tenantNode}/menus', [TenantMenuPolicyController::class, 'update'])->name('nodes.menus.update');
+
+            Route::get('/server-status', [TenantNodeController::class, 'serverStatus'])->name('server-status.index');
+        });
 
     // Pengaturan Profil Pengguna Mandiri
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');

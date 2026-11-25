@@ -24,6 +24,12 @@ class Menu extends Model
      */
     protected static function booted(): void
     {
+        static::saving(function (Menu $menu): void {
+            if (blank($menu->sync_key) || ! blank($menu->route_name)) {
+                $menu->sync_key = $menu->resolveSyncKey();
+            }
+        });
+
         static::saved(function (Menu $menu): void {
             SidebarCache::flushGlobal();
             static::clearDevelopmentCache('menu', $menu->id);
@@ -54,9 +60,11 @@ class Menu extends Model
         'module_id',
         'name',
         'route_name',
+        'sync_key',
         'icon',
         'order',
         'is_active',
+        'is_master_enabled',
         'dev_progress',
         'dev_stage',
         'dev_note',
@@ -73,6 +81,7 @@ class Menu extends Model
         return [
             'order' => 'integer',
             'is_active' => 'boolean',
+            'is_master_enabled' => 'boolean',
             'dev_progress' => 'integer',
         ];
     }
@@ -195,5 +204,35 @@ class Menu extends Model
         $base = preg_split('#\s+(?:dan|&)\s+|[&/]#i', $this->name)[0] ?? $this->name;
 
         return Str::slug(trim($base));
+    }
+
+    /**
+     * Hasilkan kunci sinkronisasi stabil lintas database untuk entitas navigasi.
+     */
+    public static function buildSyncKey(?string $routeName, string $fallbackPrefix, string $fallbackName): string
+    {
+        if (! blank($routeName)) {
+            $normalized = preg_replace('/\.index$/', '', strtolower(trim((string) $routeName)));
+
+            return 'route:'.$normalized;
+        }
+
+        return $fallbackPrefix.':'.Str::slug($fallbackName);
+    }
+
+    /**
+     * Dapatkan kunci sinkronisasi stabil milik menu ini.
+     */
+    public function resolveSyncKey(): string
+    {
+        if (! blank($this->sync_key) && blank($this->route_name)) {
+            return $this->sync_key;
+        }
+
+        return static::buildSyncKey(
+            $this->route_name,
+            'menu',
+            ($this->module?->name ?? 'module').'-'.$this->name
+        );
     }
 }
