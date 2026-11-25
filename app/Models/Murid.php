@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Murid extends Model
@@ -209,6 +210,36 @@ class Murid extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Relasi ke seluruh sampel profil wajah untuk pengenalan wajah (face recognition).
+     *
+     * @return HasMany<MuridFaceProfile, $this>
+     */
+    public function faceProfiles(): HasMany
+    {
+        return $this->hasMany(MuridFaceProfile::class);
+    }
+
+    /**
+     * Relasi ke sampel profil wajah aktif milik murid.
+     *
+     * @return HasMany<MuridFaceProfile, $this>
+     */
+    public function activeFaceProfiles(): HasMany
+    {
+        return $this->hasMany(MuridFaceProfile::class)->where('is_active', true);
+    }
+
+    /**
+     * Relasi ke riwayat absensi harian murid.
+     *
+     * @return HasMany<AbsensiMurid, $this>
+     */
+    public function absensis(): HasMany
+    {
+        return $this->hasMany(AbsensiMurid::class);
     }
 
     /**

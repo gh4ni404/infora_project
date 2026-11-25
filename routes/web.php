@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AbsenMuridController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KonfigurasiSekolah\KalenderAkademikController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\Master\MapelController;
 use App\Http\Controllers\Master\MuridController;
 use App\Http\Controllers\Master\SchoolController;
 use App\Http\Controllers\Master\TingkatanController;
+use App\Http\Controllers\PendaftaranMukaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Rombel\KelasController;
 use App\Http\Controllers\System\BackupRestoreController;
@@ -195,4 +197,17 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
     Route::post('/backup-restore/restore', [BackupRestoreController::class, 'restore'])->name('backup-restore.restore');
     Route::delete('/backup-restore/all', [BackupRestoreController::class, 'destroyAll'])->name('backup-restore.destroy-all');
     Route::delete('/backup-restore/{filename}', [BackupRestoreController::class, 'destroy'])->name('backup-restore.destroy');
+
+    // Face Recognition - Pendaftaran Muka Murid
+    Route::get('/pendaftaran_muka', [PendaftaranMukaController::class, 'index'])->name('pendaftaran_muka');
+    Route::post('/pendaftaran_muka', [PendaftaranMukaController::class, 'store'])->name('pendaftaran_muka.store');
+    Route::get('/pendaftaran_muka/{murid}', [PendaftaranMukaController::class, 'show'])->name('pendaftaran_muka.show');
+    Route::patch('/pendaftaran_muka/{faceProfile}/toggle-status', [PendaftaranMukaController::class, 'toggleStatus'])->name('pendaftaran_muka.toggle-status');
+    Route::delete('/pendaftaran_muka/{faceProfile}', [PendaftaranMukaController::class, 'destroy'])->name('pendaftaran_muka.destroy');
+
+    // Face Recognition - Absen Murid (Kiosk & Rekap Harian)
+    Route::get('/absen_murid', [AbsenMuridController::class, 'index'])->name('absen_murid');
+    Route::get('/absen_murid/descriptors', [AbsenMuridController::class, 'descriptors'])->name('absen_murid.descriptors');
+    Route::post('/absen_murid', [AbsenMuridController::class, 'store'])->name('absen_murid.store');
+    Route::delete('/absen_murid/{absensi}', [AbsenMuridController::class, 'destroy'])->name('absen_murid.destroy');
 });

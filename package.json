@@ -16,5 +16,8 @@
     "optionalDependencies": {
         "@laravel/multiplex": "^0.4.1",
         "@rolldown/binding-linux-x64-gnu": "^1.2.7"
+    },
+    "dependencies": {
+        "@vladmandic/face-api": "^1.7.15"
     }
 }
