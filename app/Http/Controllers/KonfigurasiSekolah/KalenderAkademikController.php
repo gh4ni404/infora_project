@@ -263,7 +263,7 @@ class KalenderAkademikController extends Controller
         }
 
         return redirect()
-            ->route('konfigurasi-sekolah.kalender-akademik', $this->schoolRedirectParams($request, $event->school_id, [
+            ->route('konfigurasi-sekolah.kalender-akademik.index', $this->schoolRedirectParams($request, $event->school_id, [
                 'view' => $request->input('view', 'kalender'),
             ]))
             ->with('success', 'Kegiatan kalender akademik berhasil ditambahkan.');
@@ -276,7 +276,7 @@ class KalenderAkademikController extends Controller
     {
         $this->authorizeSchool($request, $kalenderAkademik->school_id);
 
-        return redirect()->route('konfigurasi-sekolah.kalender-akademik', $this->schoolRedirectParams($request, $kalenderAkademik->school_id));
+        return redirect()->route('konfigurasi-sekolah.kalender-akademik.index', $this->schoolRedirectParams($request, $kalenderAkademik->school_id));
     }
 
     /**
@@ -301,7 +301,7 @@ class KalenderAkademikController extends Controller
         }
 
         return redirect()
-            ->route('konfigurasi-sekolah.kalender-akademik', $this->schoolRedirectParams($request, $kalenderAkademik->school_id, [
+            ->route('konfigurasi-sekolah.kalender-akademik.index', $this->schoolRedirectParams($request, $kalenderAkademik->school_id, [
                 'view' => $request->input('view', 'kalender'),
             ]))
             ->with('success', 'Kegiatan kalender akademik berhasil diperbarui.');
@@ -325,7 +325,7 @@ class KalenderAkademikController extends Controller
         }
 
         return redirect()
-            ->route('konfigurasi-sekolah.kalender-akademik', $this->schoolRedirectParams($request, $schoolId, [
+            ->route('konfigurasi-sekolah.kalender-akademik.index', $this->schoolRedirectParams($request, $schoolId, [
                 'view' => $request->input('view', 'kalender'),
             ]))
             ->with('success', 'Kegiatan kalender akademik berhasil dihapus.');

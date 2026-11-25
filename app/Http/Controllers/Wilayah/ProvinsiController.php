@@ -62,7 +62,7 @@ class ProvinsiController extends Controller
         Provinsi::create($data);
 
         return redirect()
-            ->route('wilayah.provinsi')
+            ->route('wilayah.provinsi.index')
             ->with('success', 'Data provinsi berhasil ditambahkan ke dalam sistem.');
     }
 
@@ -71,7 +71,7 @@ class ProvinsiController extends Controller
      */
     public function edit(Provinsi $provinsi): RedirectResponse
     {
-        return redirect()->route('wilayah.provinsi');
+        return redirect()->route('wilayah.provinsi.index');
     }
 
     /**
@@ -85,7 +85,7 @@ class ProvinsiController extends Controller
         $provinsi->update($data);
 
         return redirect()
-            ->route('wilayah.provinsi')
+            ->route('wilayah.provinsi.index')
             ->with('success', 'Data provinsi berhasil diperbarui.');
     }
 
@@ -98,7 +98,7 @@ class ProvinsiController extends Controller
         // Proteksi integritas relasi: periksa apakah provinsi masih menaungi data kabupaten/kota
         if ($provinsi->kabupaten()->exists()) {
             return redirect()
-                ->route('wilayah.provinsi')
+                ->route('wilayah.provinsi.index')
                 ->with('error', "Provinsi {$provinsi->nama} tidak dapat dihapus karena masih memiliki relasi data kabupaten/kota aktif.");
         }
 
@@ -107,7 +107,7 @@ class ProvinsiController extends Controller
 
         if ($isLinkedToSchool) {
             return redirect()
-                ->route('wilayah.provinsi')
+                ->route('wilayah.provinsi.index')
                 ->with('error', "Provinsi {$provinsi->nama} tidak dapat dihapus karena masih digunakan oleh data sekolah aktif.");
         }
 
@@ -115,7 +115,7 @@ class ProvinsiController extends Controller
         $provinsi->delete();
 
         return redirect()
-            ->route('wilayah.provinsi')
+            ->route('wilayah.provinsi.index')
             ->with('success', "Data provinsi {$namaProvinsi} berhasil dihapus dari sistem.");
     }
 }

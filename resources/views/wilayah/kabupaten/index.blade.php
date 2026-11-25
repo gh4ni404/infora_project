@@ -17,7 +17,7 @@
 
 {{-- Data Table Kabupaten / Kota --}}
 <x-data-table
-    route="{{ route('wilayah.kabupaten') }}"
+    route="{{ route('wilayah.kabupaten.index') }}"
     search-placeholder="Cari kode, kabupaten, kota, atau provinsi..."
     :per-page="request('per_page', 15)"
     per-page-text="kabupaten"

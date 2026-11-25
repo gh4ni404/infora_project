@@ -115,7 +115,7 @@ class MenuAccessController extends Controller
         SidebarCache::forgetUser($user->id);
 
         return redirect()
-            ->route('sistem.user', ['role' => $user->user_type])
+            ->route('sistem.user.index', ['role' => $user->user_type])
             ->with('success', "Hak akses navigasi untuk pengguna {$user->name} berhasil diperbarui.");
     }
 
@@ -249,7 +249,7 @@ class MenuAccessController extends Controller
         SidebarCache::flushGlobal();
 
         return redirect()
-            ->route('sistem.user', ['tab' => 'templates'])
+            ->route('sistem.user.index', ['tab' => 'templates'])
             ->with('success', "Konfigurasi menu bawaan untuk template peran '{$roleName}' berhasil disimpan.");
     }
 

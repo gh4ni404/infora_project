@@ -152,7 +152,7 @@ test('super admin can import murid from excel file and automatically create user
         'file' => $uploadedFile,
     ]);
 
-    $response->assertRedirect(route('master.data-murid'));
+    $response->assertRedirect(route('master.data-murid.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('murids', [

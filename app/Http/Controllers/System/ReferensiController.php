@@ -61,7 +61,7 @@ class ReferensiController extends Controller
         Referensi::clearCache();
 
         return redirect()
-            ->route('system.referensi', ['kategori_id' => $category->id])
+            ->route('system.referensi.index', ['kategori_id' => $category->id])
             ->with('success', "Kategori referensi '{$category->nama}' berhasil ditambahkan.");
     }
 
@@ -72,7 +72,7 @@ class ReferensiController extends Controller
     {
         if ($referensi->referensi_id !== null) {
             return redirect()
-                ->route('system.referensi')
+                ->route('system.referensi.index')
                 ->with('error', 'Referensi yang dipilih bukan merupakan kategori induk.');
         }
 
@@ -90,7 +90,7 @@ class ReferensiController extends Controller
         Referensi::clearCache();
 
         return redirect()
-            ->route('system.referensi', ['kategori_id' => $referensi->id])
+            ->route('system.referensi.index', ['kategori_id' => $referensi->id])
             ->with('success', "Kategori referensi '{$referensi->nama}' berhasil diperbarui.");
     }
 
@@ -101,13 +101,13 @@ class ReferensiController extends Controller
     {
         if ($referensi->referensi_id !== null) {
             return redirect()
-                ->route('system.referensi')
+                ->route('system.referensi.index')
                 ->with('error', 'Target bukan merupakan kategori induk.');
         }
 
         if ($referensi->is_system) {
             return redirect()
-                ->route('system.referensi', ['kategori_id' => $referensi->id])
+                ->route('system.referensi.index', ['kategori_id' => $referensi->id])
                 ->with('error', "Kategori '{$referensi->nama}' merupakan bawaan sistem dan tidak dapat dihapus.");
         }
 
@@ -123,7 +123,7 @@ class ReferensiController extends Controller
 
             if ($isUsedInSchool || $isUsedInJurusan) {
                 return redirect()
-                    ->route('system.referensi', ['kategori_id' => $referensi->id])
+                    ->route('system.referensi.index', ['kategori_id' => $referensi->id])
                     ->with('error', "Kategori '{$referensi->nama}' tidak dapat dihapus karena beberapa item di dalamnya masih digunakan oleh data sekolah atau jurusan aktif.");
             }
         }
@@ -133,7 +133,7 @@ class ReferensiController extends Controller
         Referensi::clearCache();
 
         return redirect()
-            ->route('system.referensi')
+            ->route('system.referensi.index')
             ->with('success', "Kategori referensi '{$nama}' dan seluruh item di dalamnya berhasil dihapus.");
     }
 
@@ -164,7 +164,7 @@ class ReferensiController extends Controller
         Referensi::clearCache();
 
         return redirect()
-            ->route('system.referensi', ['kategori_id' => $parent->id])
+            ->route('system.referensi.index', ['kategori_id' => $parent->id])
             ->with('success', "Item referensi '{$item->nama}' ({$item->kode}) berhasil ditambahkan ke kategori {$parent->nama}.");
     }
 
@@ -175,7 +175,7 @@ class ReferensiController extends Controller
     {
         if ($referensi->referensi_id === null) {
             return redirect()
-                ->route('system.referensi')
+                ->route('system.referensi.index')
                 ->with('error', 'Target bukan merupakan item referensi.');
         }
 
@@ -200,7 +200,7 @@ class ReferensiController extends Controller
         Referensi::clearCache();
 
         return redirect()
-            ->route('system.referensi', ['kategori_id' => $referensi->referensi_id])
+            ->route('system.referensi.index', ['kategori_id' => $referensi->referensi_id])
             ->with('success', "Item referensi '{$referensi->nama}' berhasil diperbarui.");
     }
 
@@ -211,7 +211,7 @@ class ReferensiController extends Controller
     {
         if ($referensi->referensi_id === null) {
             return redirect()
-                ->route('system.referensi')
+                ->route('system.referensi.index')
                 ->with('error', 'Target bukan merupakan item referensi.');
         }
 
@@ -220,7 +220,7 @@ class ReferensiController extends Controller
 
         if ($referensi->is_system) {
             return redirect()
-                ->route('system.referensi', ['kategori_id' => $parentId])
+                ->route('system.referensi.index', ['kategori_id' => $parentId])
                 ->with('error', "Item referensi '{$referensi->nama}' ({$referensi->kode}) merupakan item sistem bawaan dan tidak dapat dihapus. Anda dapat menonaktifkannya jika tidak ingin digunakan.");
         }
 
@@ -231,7 +231,7 @@ class ReferensiController extends Controller
 
             if ($isUsed) {
                 return redirect()
-                    ->route('system.referensi', ['kategori_id' => $parentId])
+                    ->route('system.referensi.index', ['kategori_id' => $parentId])
                     ->with('error', "Item '{$referensi->nama}' ({$referensi->kode}) tidak dapat dihapus karena masih digunakan oleh data sekolah atau jurusan aktif.");
             }
         }
@@ -240,7 +240,7 @@ class ReferensiController extends Controller
             $isUsed = School::where('accreditation', $referensi->kode)->exists();
             if ($isUsed) {
                 return redirect()
-                    ->route('system.referensi', ['kategori_id' => $parentId])
+                    ->route('system.referensi.index', ['kategori_id' => $parentId])
                     ->with('error', "Akreditasi '{$referensi->nama}' ({$referensi->kode}) tidak dapat dihapus karena masih digunakan oleh data sekolah aktif.");
             }
         }
@@ -250,7 +250,7 @@ class ReferensiController extends Controller
         Referensi::clearCache();
 
         return redirect()
-            ->route('system.referensi', ['kategori_id' => $parentId])
+            ->route('system.referensi.index', ['kategori_id' => $parentId])
             ->with('success', "Item referensi '{$nama}' berhasil dihapus.");
     }
 
@@ -269,7 +269,7 @@ class ReferensiController extends Controller
         $targetKategoriId = $referensi->referensi_id ?: $referensi->id;
 
         return redirect()
-            ->route('system.referensi', ['kategori_id' => $targetKategoriId])
+            ->route('system.referensi.index', ['kategori_id' => $targetKategoriId])
             ->with('success', "Status '{$referensi->nama}' berhasil {$statusText}.");
     }
 }

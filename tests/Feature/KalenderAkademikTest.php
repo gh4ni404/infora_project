@@ -40,19 +40,19 @@ beforeEach(function () {
 });
 
 test('guest is redirected to login when accessing kalender akademik', function () {
-    $response = $this->get(route('konfigurasi-sekolah.kalender-akademik'));
+    $response = $this->get(route('konfigurasi-sekolah.kalender-akademik.index'));
 
     $response->assertRedirect(route('login'));
 });
 
 test('non super admin cannot access kalender akademik', function () {
-    $response = $this->actingAs($this->regularUser)->get(route('konfigurasi-sekolah.kalender-akademik'));
+    $response = $this->actingAs($this->regularUser)->get(route('konfigurasi-sekolah.kalender-akademik.index'));
 
     $response->assertForbidden();
 });
 
 test('super admin can view kalender akademik page with calendar and table views', function () {
-    $response = $this->actingAs($this->superAdmin)->get(route('konfigurasi-sekolah.kalender-akademik'));
+    $response = $this->actingAs($this->superAdmin)->get(route('konfigurasi-sekolah.kalender-akademik.index'));
 
     $response->assertOk();
     $response->assertSee('Kalender Akademik');
@@ -77,7 +77,7 @@ test('super admin can view academic calendar events in list', function () {
         'keterangan' => 'Ujian tengah semester ganjil semua jenjang',
     ]);
 
-    $response = $this->actingAs($this->superAdmin)->get(route('konfigurasi-sekolah.kalender-akademik', ['view' => 'tabel']));
+    $response = $this->actingAs($this->superAdmin)->get(route('konfigurasi-sekolah.kalender-akademik.index', ['view' => 'tabel']));
 
     $response->assertOk();
     $response->assertSee('Penilaian Tengah Semester (PTS)');
@@ -104,7 +104,7 @@ test('super admin can store new academic calendar event', function () {
     $response = $this->actingAs($this->superAdmin)
         ->post(route('konfigurasi-sekolah.kalender-akademik.store'), $payload);
 
-    $response->assertRedirect(route('konfigurasi-sekolah.kalender-akademik', [
+    $response->assertRedirect(route('konfigurasi-sekolah.kalender-akademik.index', [
         'view' => 'kalender',
     ]));
     $response->assertSessionHas('success');
@@ -179,7 +179,7 @@ test('super admin can update existing academic calendar event', function () {
     $response = $this->actingAs($this->superAdmin)
         ->put(route('konfigurasi-sekolah.kalender-akademik.update', $event), $updatePayload);
 
-    $response->assertRedirect(route('konfigurasi-sekolah.kalender-akademik', [
+    $response->assertRedirect(route('konfigurasi-sekolah.kalender-akademik.index', [
         'view' => 'kalender',
     ]));
     $response->assertSessionHas('success');
@@ -204,7 +204,7 @@ test('edit action redirects to index with school_id', function () {
 
     $response = $this->actingAs($this->superAdmin)->get(route('konfigurasi-sekolah.kalender-akademik.edit', $event));
 
-    $response->assertRedirect(route('konfigurasi-sekolah.kalender-akademik'));
+    $response->assertRedirect(route('konfigurasi-sekolah.kalender-akademik.index'));
 });
 
 test('super admin can delete academic calendar event', function () {
@@ -222,7 +222,7 @@ test('super admin can delete academic calendar event', function () {
     $response = $this->actingAs($this->superAdmin)
         ->delete(route('konfigurasi-sekolah.kalender-akademik.destroy', $event));
 
-    $response->assertRedirect(route('konfigurasi-sekolah.kalender-akademik', [
+    $response->assertRedirect(route('konfigurasi-sekolah.kalender-akademik.index', [
         'view' => 'kalender',
     ]));
     $response->assertSessionHas('success');
@@ -297,7 +297,7 @@ test('filtering agenda by category and semester works correctly', function () {
 
     // Filter KBM Efektif
     $response = $this->actingAs($this->superAdmin)
-        ->get(route('konfigurasi-sekolah.kalender-akademik', [
+        ->get(route('konfigurasi-sekolah.kalender-akademik.index', [
             'school_id' => $this->school->id,
             'view' => 'tabel',
             'kategori' => 'KBM Efektif',
@@ -310,7 +310,7 @@ test('filtering agenda by category and semester works correctly', function () {
 
     // Filter Semester Genap
     $responseGenap = $this->actingAs($this->superAdmin)
-        ->get(route('konfigurasi-sekolah.kalender-akademik', [
+        ->get(route('konfigurasi-sekolah.kalender-akademik.index', [
             'school_id' => $this->school->id,
             'view' => 'tabel',
             'semester' => 'genap',
@@ -371,7 +371,7 @@ test('school admin can only view events of their assigned school and does not se
         'warna' => 'emerald',
     ]);
 
-    $response = $this->actingAs($adminUser)->get(route('konfigurasi-sekolah.kalender-akademik', ['view' => 'tabel']));
+    $response = $this->actingAs($adminUser)->get(route('konfigurasi-sekolah.kalender-akademik.index', ['view' => 'tabel']));
 
     $response->assertOk();
     $response->assertSee('SMK Negeri 8 Bone');
@@ -488,7 +488,7 @@ test('school admin store event automatically binds to their assigned school', fu
         ]
     );
 
-    $response->assertRedirect(route('konfigurasi-sekolah.kalender-akademik', ['view' => 'kalender']));
+    $response->assertRedirect(route('konfigurasi-sekolah.kalender-akademik.index', ['view' => 'kalender']));
 
     $this->assertDatabaseHas('kalender_akademik', [
         'school_id' => $schoolA->id, // Terverifikasi terikat ke School A, bukan School B
@@ -565,7 +565,7 @@ test('kalender akademik view provides hasTahunAjaran false and shows warning whe
     TahunAjaran::query()->where('school_id', $this->school->id)->delete();
 
     $response = $this->actingAs($this->superAdmin)->get(
-        route('konfigurasi-sekolah.kalender-akademik')
+        route('konfigurasi-sekolah.kalender-akademik.index')
     );
 
     $response->assertOk();

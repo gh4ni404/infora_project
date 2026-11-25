@@ -12,10 +12,10 @@
 <div class="card-surface">
     <div class="card-header">
         <x-tab-pills>
-            <x-tab-pill :href="route('sistem.user', ['tab' => 'users'])" :active="$activeTab !== 'templates'" icon="users">
+            <x-tab-pill :href="route('sistem.user.index', ['tab' => 'users'])" :active="$activeTab !== 'templates'" icon="users">
                 Hak Akses per Pengguna
             </x-tab-pill>
-            <x-tab-pill :href="route('sistem.user', ['tab' => 'templates'])" :active="$activeTab === 'templates'" icon="square-check">
+            <x-tab-pill :href="route('sistem.user.index', ['tab' => 'templates'])" :active="$activeTab === 'templates'" icon="square-check">
                 Template Peran Sistem
             </x-tab-pill>
         </x-tab-pills>
@@ -61,16 +61,16 @@
             <x-slot:toolbar>
                 <!-- Filter Role Tabs -->
                 <x-tab-pills>
-                    <x-tab-pill :href="route('sistem.user', ['search' => $search])" :active="empty($currentRole)">Semua</x-tab-pill>
-                    <x-tab-pill :href="route('sistem.user', ['role' => 'super_admin', 'search' => $search])" :active="$currentRole === 'super_admin'">Super Admin</x-tab-pill>
-                    <x-tab-pill :href="route('sistem.user', ['role' => 'admin', 'search' => $search])" :active="$currentRole === 'admin'">Admin</x-tab-pill>
-                    <x-tab-pill :href="route('sistem.user', ['role' => 'guru', 'search' => $search])" :active="$currentRole === 'guru'">Guru</x-tab-pill>
-                    <x-tab-pill :href="route('sistem.user', ['role' => 'staf', 'search' => $search])" :active="$currentRole === 'staf'">Staf (Tendik)</x-tab-pill>
-                    <x-tab-pill :href="route('sistem.user', ['role' => 'murid', 'search' => $search])" :active="$currentRole === 'murid'">Murid</x-tab-pill>
+                    <x-tab-pill :href="route('sistem.user.index', ['search' => $search])" :active="empty($currentRole)">Semua</x-tab-pill>
+                    <x-tab-pill :href="route('sistem.user.index', ['role' => 'super_admin', 'search' => $search])" :active="$currentRole === 'super_admin'">Super Admin</x-tab-pill>
+                    <x-tab-pill :href="route('sistem.user.index', ['role' => 'admin', 'search' => $search])" :active="$currentRole === 'admin'">Admin</x-tab-pill>
+                    <x-tab-pill :href="route('sistem.user.index', ['role' => 'guru', 'search' => $search])" :active="$currentRole === 'guru'">Guru</x-tab-pill>
+                    <x-tab-pill :href="route('sistem.user.index', ['role' => 'staf', 'search' => $search])" :active="$currentRole === 'staf'">Staf (Tendik)</x-tab-pill>
+                    <x-tab-pill :href="route('sistem.user.index', ['role' => 'murid', 'search' => $search])" :active="$currentRole === 'murid'">Murid</x-tab-pill>
                 </x-tab-pills>
 
                 <!-- Search Input -->
-                <form method="GET" action="{{ route('sistem.user') }}">
+                <form method="GET" action="{{ route('sistem.user.index') }}">
                     @if ($currentRole)
                         <x-form-input type="hidden" name="role" :value="$currentRole" />
                     @endif

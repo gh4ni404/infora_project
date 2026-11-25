@@ -32,7 +32,7 @@
 
             <x-slot:actions>
                 @if ($schools->count() > 1)
-                    <form method="GET" action="{{ route('absen_murid') }}" id="schoolFilterForm">
+                    <form method="GET" action="{{ route('absen_murid.index') }}" id="schoolFilterForm">
                         <x-form-select
                             name="school_id"
                             id="school_id"
@@ -55,7 +55,7 @@
                     <span>Tes Suara</span>
                 </button>
 
-                <a href="{{ route('pendaftaran_muka') }}" class="btn-primary" title="Kelola pendaftaran wajah murid">
+                <a href="{{ route('pendaftaran_muka.index') }}" class="btn-primary" title="Kelola pendaftaran wajah murid">
                     <x-icon name="scan-face" size="16" />
                     <span>Daftar Muka</span>
                 </a>
@@ -74,7 +74,7 @@
                 badge-color="warning"
                 action-icon="scan-face"
                 action-title="Daftarkan Wajah Sekarang"
-                :action-href="route('pendaftaran_muka')">
+                :action-href="route('pendaftaran_muka.index')">
                 <br>Unit sekolah ini belum memiliki sampel wajah murid yang aktif. Silakan daftarkan minimal 1 wajah murid di menu <strong>Pendaftaran Muka</strong> sebelum memulai pemindaian absensi.
             </x-status-banner>
         @endif
@@ -252,7 +252,7 @@
 
         {{-- Tabel Rekap Absensi Harian --}}
         <x-data-table
-            route="{{ route('absen_murid') }}"
+            route="{{ route('absen_murid.index') }}"
             search-placeholder="Cari nama murid, NISN, atau NIS..."
             :per-page="$perPageInput"
             per-page-text="absensi"

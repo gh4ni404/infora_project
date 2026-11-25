@@ -34,7 +34,7 @@
 
             <x-slot:actions>
                 @if ($schools->count() > 1)
-                    <form method="GET" action="{{ route('pendaftaran_muka') }}" id="schoolFilterForm">
+                    <form method="GET" action="{{ route('pendaftaran_muka.index') }}" id="schoolFilterForm">
                         <x-form-select
                             name="school_id"
                             id="school_id"
@@ -81,7 +81,7 @@
 
         {{-- Tabel Status Pendaftaran Muka Murid --}}
         <x-data-table
-            route="{{ route('pendaftaran_muka') }}"
+            route="{{ route('pendaftaran_muka.index') }}"
             search-placeholder="Cari nama lengkap, NISN, atau NIS murid..."
             :per-page="$perPageInput"
             per-page-text="murid"

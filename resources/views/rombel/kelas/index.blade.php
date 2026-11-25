@@ -15,7 +15,7 @@
         <x-slot:actions>
             {{-- Selector Unit Sekolah (Khusus Super Admin) --}}
             @if ($schools->count() > 1)
-                <form method="GET" action="{{ route('rombel.kelas') }}" id="schoolFilterForm">
+                <form method="GET" action="{{ route('rombel.kelas.index') }}" id="schoolFilterForm">
                     <x-form-select
                         name="school_id"
                         id="school_id"
@@ -49,7 +49,7 @@
     </x-stats-grid>
 
     {{-- Tabel Data Rombel / Kelas --}}
-    <x-data-table route="{{ route('rombel.kelas') }}"
+    <x-data-table route="{{ route('rombel.kelas.index') }}"
         search-placeholder="Cari nama kelas, kode, ruangan, atau nama wali kelas..." :per-page="$perPageInput">
         <x-slot:filters>
             <x-form-input type="hidden" name="school_id" :value="$selectedSchoolId" />

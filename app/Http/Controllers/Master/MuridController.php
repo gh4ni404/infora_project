@@ -119,7 +119,7 @@ class MuridController extends Controller
         $cleanPassword = MuridAccountManager::resolveDefaultPassword($murid, null, $user->username);
 
         return redirect()
-            ->route('master.data-murid', $this->schoolRedirectParams($request, $murid->school_id))
+            ->route('master.data-murid.index', $this->schoolRedirectParams($request, $murid->school_id))
             ->with('success', "Data murid {$murid->nama_lengkap} berhasil ditambahkan. Akun login otomatis dibuat dengan Username: {$user->username} dan Kata Sandi: {$cleanPassword}");
     }
 
@@ -199,7 +199,7 @@ class MuridController extends Controller
         }
 
         return redirect()
-            ->route('master.data-murid', $this->schoolRedirectParams($request, $murid->school_id))
+            ->route('master.data-murid.index', $this->schoolRedirectParams($request, $murid->school_id))
             ->with('success', "Data murid {$murid->nama_lengkap} berhasil diperbarui.");
     }
 
@@ -221,7 +221,7 @@ class MuridController extends Controller
         MuridFaceProfile::clearDescriptorCache($schoolId);
 
         return redirect()
-            ->route('master.data-murid', $this->schoolRedirectParams($request, $schoolId))
+            ->route('master.data-murid.index', $this->schoolRedirectParams($request, $schoolId))
             ->with('success', "Data murid {$label} berhasil dihapus dari sistem.");
     }
 
@@ -242,7 +242,7 @@ class MuridController extends Controller
         $statusText = $murid->is_active ? 'diaktifkan' : 'dinonaktifkan';
 
         return redirect()
-            ->route('master.data-murid', $this->schoolRedirectParams($request, $murid->school_id))
+            ->route('master.data-murid.index', $this->schoolRedirectParams($request, $murid->school_id))
             ->with('success', "Status data murid {$murid->nama_lengkap} berhasil {$statusText}.");
     }
 
@@ -259,14 +259,14 @@ class MuridController extends Controller
             $cleanPassword = MuridAccountManager::resolveDefaultPassword($murid, null, $user->username);
 
             return redirect()
-                ->route('master.data-murid', $this->schoolRedirectParams($request, $murid->school_id))
+                ->route('master.data-murid.index', $this->schoolRedirectParams($request, $murid->school_id))
                 ->with('success', "Akun login baru untuk {$murid->nama_lengkap} berhasil dibuat dengan username: {$user->username} dan sandi default: {$cleanPassword}.");
         }
 
         $cleanPassword = MuridAccountManager::resetPassword($murid);
 
         return redirect()
-            ->route('master.data-murid', $this->schoolRedirectParams($request, $murid->school_id))
+            ->route('master.data-murid.index', $this->schoolRedirectParams($request, $murid->school_id))
             ->with('success', "Kata sandi akun murid {$murid->nama_lengkap} berhasil direset ke nilai bawaan: {$cleanPassword}.");
     }
 
@@ -435,7 +435,7 @@ class MuridController extends Controller
 
         if (empty($rawRows)) {
             return redirect()
-                ->route('master.data-murid', $this->schoolRedirectParams($request, $selectedSchoolId))
+                ->route('master.data-murid.index', $this->schoolRedirectParams($request, $selectedSchoolId))
                 ->with('error', 'Berkas spreadsheet kosong atau tidak berisi baris data yang dapat diproses.');
         }
 
@@ -531,7 +531,7 @@ class MuridController extends Controller
                 : "Gagal mengimpor data murid: {$skipped} baris dilewati karena data tidak lengkap atau tidak valid.";
 
             return redirect()
-                ->route('master.data-murid', $this->schoolRedirectParams($request, $selectedSchoolId))
+                ->route('master.data-murid.index', $this->schoolRedirectParams($request, $selectedSchoolId))
                 ->with('error', $errorMessage);
         }
 
@@ -546,7 +546,7 @@ class MuridController extends Controller
         }
 
         return redirect()
-            ->route('master.data-murid', $this->schoolRedirectParams($request, $selectedSchoolId))
+            ->route('master.data-murid.index', $this->schoolRedirectParams($request, $selectedSchoolId))
             ->with('success', $summaryMessage);
     }
 

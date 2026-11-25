@@ -57,19 +57,19 @@ beforeEach(function () {
 });
 
 test('guest is redirected to login when accessing system.referensi', function () {
-    $response = $this->get(route('system.referensi'));
+    $response = $this->get(route('system.referensi.index'));
 
     $response->assertRedirect(route('login'));
 });
 
 test('non super admin cannot access system.referensi', function () {
-    $response = $this->actingAs($this->regularUser)->get(route('system.referensi'));
+    $response = $this->actingAs($this->regularUser)->get(route('system.referensi.index'));
 
     $response->assertForbidden();
 });
 
 test('super admin can view referensi page with master-detail layout', function () {
-    $response = $this->actingAs($this->superAdmin)->get(route('system.referensi'));
+    $response = $this->actingAs($this->superAdmin)->get(route('system.referensi.index'));
 
     $response->assertOk();
     $response->assertSee('Data Referensi Sistem');

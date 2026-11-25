@@ -144,7 +144,7 @@
         subtitle="Kegiatan dan jadwal akademik sekolah mendatang"
     >
         <x-slot:actions>
-            <a href="{{ route('konfigurasi-sekolah.kalender-akademik') }}" class="btn-secondary btn-sm" title="Buka Kalender Akademik Lengkap">
+            <a href="{{ route('konfigurasi-sekolah.kalender-akademik.index') }}" class="btn-secondary btn-sm" title="Buka Kalender Akademik Lengkap">
                 <span>Buka Kalender</span>
                 <x-icon name="chevron-right" size="14" />
             </a>
@@ -200,13 +200,13 @@
         </div>
         <div class="card-body">
             <div class="form-group">
-                <a href="{{ route('konfigurasi-sekolah.tahun-ajaran') }}" class="btn-secondary btn-block" title="Konfigurasi Tahun Ajaran & Semester">
+                <a href="{{ route('konfigurasi-sekolah.tahun-ajaran.index') }}" class="btn-secondary btn-block" title="Konfigurasi Tahun Ajaran & Semester">
                     <x-icon name="calendar" size="16" />
                     <span>Tahun Ajaran & Semester</span>
                 </a>
             </div>
             <div class="form-group">
-                <a href="{{ route('konfigurasi-sekolah.kalender-akademik') }}" class="btn-secondary btn-block" title="Kelola Kalender Akademik">
+                <a href="{{ route('konfigurasi-sekolah.kalender-akademik.index') }}" class="btn-secondary btn-block" title="Kelola Kalender Akademik">
                     <x-icon name="calendar" size="16" />
                     <span>Kalender Akademik</span>
                 </a>

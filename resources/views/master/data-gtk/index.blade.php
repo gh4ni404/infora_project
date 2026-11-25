@@ -15,7 +15,7 @@
         <x-slot:actions>
             {{-- Selector Unit Sekolah untuk Super Admin --}}
             @if ($schools->count() > 1)
-                <form method="GET" action="{{ route('master.data-gtk') }}" id="schoolFilterForm">
+                <form method="GET" action="{{ route('master.data-gtk.index') }}" id="schoolFilterForm">
                     <x-form-select
                         name="school_id"
                         id="school_id"
@@ -67,7 +67,7 @@
 
     {{-- Tabel Data GTK --}}
     <x-data-table
-        route="{{ route('master.data-gtk') }}"
+        route="{{ route('master.data-gtk.index') }}"
         search-placeholder="Cari nama, NIP, NUPTK, NIK, atau kontak..."
         :per-page="$perPageInput">
 

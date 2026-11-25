@@ -172,7 +172,7 @@ class KelasController extends Controller
         $kelas = Kelas::create($data);
 
         return redirect()
-            ->route('rombel.kelas', $this->schoolRedirectParams($request, $kelas->school_id, [
+            ->route('rombel.kelas.index', $this->schoolRedirectParams($request, $kelas->school_id, [
                 'tahun_ajaran_id' => $kelas->tahun_ajaran_id,
             ]))
             ->with('success', "Data kelas {$kelas->nama} berhasil ditambahkan ke dalam sistem.");
@@ -193,7 +193,7 @@ class KelasController extends Controller
         $kelas->update($data);
 
         return redirect()
-            ->route('rombel.kelas', $this->schoolRedirectParams($request, $kelas->school_id, [
+            ->route('rombel.kelas.index', $this->schoolRedirectParams($request, $kelas->school_id, [
                 'tahun_ajaran_id' => $kelas->tahun_ajaran_id,
             ]))
             ->with('success', "Data kelas {$kelas->nama} berhasil diperbarui.");
@@ -213,7 +213,7 @@ class KelasController extends Controller
         $kelas->delete();
 
         return redirect()
-            ->route('rombel.kelas', $this->schoolRedirectParams($request, $schoolId, [
+            ->route('rombel.kelas.index', $this->schoolRedirectParams($request, $schoolId, [
                 'tahun_ajaran_id' => $tahunAjaranId,
             ]))
             ->with('success', "Data kelas {$nama} berhasil dihapus dari sistem.");
@@ -233,7 +233,7 @@ class KelasController extends Controller
         $statusText = $kelas->is_active ? 'diaktifkan' : 'dinonaktifkan';
 
         return redirect()
-            ->route('rombel.kelas', $this->schoolRedirectParams($request, $kelas->school_id, [
+            ->route('rombel.kelas.index', $this->schoolRedirectParams($request, $kelas->school_id, [
                 'tahun_ajaran_id' => $kelas->tahun_ajaran_id,
             ]))
             ->with('success', "Status kelas {$kelas->nama} berhasil {$statusText}.");

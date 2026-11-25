@@ -14,7 +14,7 @@
         <x-slot:actions>
             {{-- Selector Unit Sekolah --}}
             @if ($user->isSuperAdmin() && $schools->count() > 1)
-                <form method="GET" action="{{ route('konfigurasi-sekolah.kalender-akademik') }}" id="schoolFilterForm">
+                <form method="GET" action="{{ route('konfigurasi-sekolah.kalender-akademik.index') }}" id="schoolFilterForm">
                     <x-form-input type="hidden" name="view" :value="$activeView" id="schoolFilterView" />
                     <x-form-select
                         name="school_id"
@@ -68,7 +68,7 @@
             badge="Tahun Ajaran Diperlukan"
             action-icon="settings"
             action-title="Konfigurasi Sekarang"
-            :action-href="route('konfigurasi-sekolah.tahun-ajaran')"
+            :action-href="route('konfigurasi-sekolah.tahun-ajaran.index')"
         />
     @endif
 
@@ -182,7 +182,7 @@
      ======================================================================== --}}
     <div id="panelTableView" class="{{ $activeView === 'tabel' ? '' : 'hidden' }}">
         <x-data-table
-            route="{{ route('konfigurasi-sekolah.kalender-akademik') }}"
+            route="{{ route('konfigurasi-sekolah.kalender-akademik.index') }}"
             search-placeholder="Cari kegiatan, kategori, TA..."
             :per-page="$perPageInput">
 

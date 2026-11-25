@@ -80,7 +80,7 @@ test('backup-restore menu is marked active when on /backup-restore route', funct
         ]
     );
 
-    expect($menu->route_url)->toBe(route('backup-restore'));
+    expect($menu->route_url)->toBe(route('backup-restore.index'));
 
     $this->actingAs($this->superAdmin)->get('/backup-restore');
 
@@ -96,7 +96,7 @@ test('super admin can create a new full system backup zip archive', function () 
         'type' => 'full',
     ]);
 
-    $response->assertRedirect(route('backup-restore'));
+    $response->assertRedirect(route('backup-restore.index'));
     $response->assertSessionHas('success');
 
     $backups = $this->backupService->listBackups();
@@ -129,7 +129,7 @@ test('super admin can create a new database-only backup dump', function () {
         'type' => 'database',
     ]);
 
-    $response->assertRedirect(route('backup-restore'));
+    $response->assertRedirect(route('backup-restore.index'));
     $response->assertSessionHas('success');
 
     $backups = $this->backupService->listBackups();
@@ -156,11 +156,11 @@ test('super admin can download an existing backup file', function () {
 
 test('downloading non-existent or invalid filename fails gracefully', function () {
     $responseNonExistent = $this->actingAs($this->superAdmin)->get(route('backup-restore.download', 'non_existent.sql'));
-    $responseNonExistent->assertRedirect(route('backup-restore'));
+    $responseNonExistent->assertRedirect(route('backup-restore.index'));
     $responseNonExistent->assertSessionHas('error');
 
     $responseInvalid = $this->actingAs($this->superAdmin)->get(route('backup-restore.download', 'invalid_script.php'));
-    $responseInvalid->assertRedirect(route('backup-restore'));
+    $responseInvalid->assertRedirect(route('backup-restore.index'));
     $responseInvalid->assertSessionHas('error');
 });
 
@@ -173,7 +173,7 @@ test('super admin can delete an existing backup file', function () {
 
     $response = $this->actingAs($this->superAdmin)->delete(route('backup-restore.destroy', $dummyFilename));
 
-    $response->assertRedirect(route('backup-restore'));
+    $response->assertRedirect(route('backup-restore.index'));
     $response->assertSessionHas('success');
     expect(File::exists($dummyPath))->toBeFalse();
 });
@@ -189,7 +189,7 @@ test('super admin can delete all backup files', function () {
 
     $response = $this->actingAs($this->superAdmin)->delete(route('backup-restore.destroy-all'));
 
-    $response->assertRedirect(route('backup-restore'));
+    $response->assertRedirect(route('backup-restore.index'));
     $response->assertSessionHas('success');
     expect(File::exists($file1))->toBeFalse()
         ->and(File::exists($file2))->toBeFalse();
@@ -212,7 +212,7 @@ test('deleting all backups when directory is empty returns info notification', f
 
     $response = $this->actingAs($this->superAdmin)->delete(route('backup-restore.destroy-all'));
 
-    $response->assertRedirect(route('backup-restore'));
+    $response->assertRedirect(route('backup-restore.index'));
     $response->assertSessionHas('info');
 });
 
@@ -232,7 +232,7 @@ test('super admin can restore full system from an existing zip archive and auto-
         'filename' => $zipFilename,
     ]);
 
-    $response->assertRedirect(route('backup-restore'));
+    $response->assertRedirect(route('backup-restore.index'));
     $response->assertSessionHas('success');
 
     // Verify storage file was extracted to storage/app/public
@@ -252,7 +252,7 @@ test('super admin can restore database from an existing sql file', function () {
         'filename' => $dummyFilename,
     ]);
 
-    $response->assertRedirect(route('backup-restore'));
+    $response->assertRedirect(route('backup-restore.index'));
     $response->assertSessionHas('success');
 });
 
@@ -263,7 +263,7 @@ test('super admin can restore database from an uploaded zip or sql file', functi
         'backup_file' => $uploadedFile,
     ]);
 
-    $response->assertRedirect(route('backup-restore'));
+    $response->assertRedirect(route('backup-restore.index'));
     $response->assertSessionHas('success');
 });
 

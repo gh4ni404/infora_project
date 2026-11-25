@@ -73,13 +73,13 @@ beforeEach(function () {
 });
 
 test('guest is redirected to login when accessing data kelas', function () {
-    $response = $this->get(route('rombel.kelas'));
+    $response = $this->get(route('rombel.kelas.index'));
 
     $response->assertRedirect(route('login'));
 });
 
 test('unauthorized regular user without menu permission cannot access data kelas', function () {
-    $response = $this->actingAs($this->regularUser)->get(route('rombel.kelas'));
+    $response = $this->actingAs($this->regularUser)->get(route('rombel.kelas.index'));
 
     $response->assertForbidden();
 });
@@ -98,7 +98,7 @@ test('super admin can view data kelas page, kpi cards, and modal templates', fun
         'is_active' => true,
     ]);
 
-    $response = $this->actingAs($this->superAdmin)->get(route('rombel.kelas', [
+    $response = $this->actingAs($this->superAdmin)->get(route('rombel.kelas.index', [
         'school_id' => $this->schoolA->id,
     ]));
 
@@ -144,7 +144,7 @@ test('school selector filters kelas list correctly for super admin', function ()
     ]);
 
     // Mode 1 sekolah selalu menampilkan sekolah aktif tunggal dan menyembunyikan selector multi-sekolah
-    $responseA = $this->actingAs($this->superAdmin)->get(route('rombel.kelas', [
+    $responseA = $this->actingAs($this->superAdmin)->get(route('rombel.kelas.index', [
         'school_id' => $this->schoolB->id,
     ]));
     $responseA->assertOk();
@@ -187,7 +187,7 @@ test('can filter kelas by tahun ajaran, tingkatan, jurusan, and status', functio
     ]);
 
     // Filter Tingkatan XI
-    $responseTingkatan = $this->actingAs($this->superAdmin)->get(route('rombel.kelas', [
+    $responseTingkatan = $this->actingAs($this->superAdmin)->get(route('rombel.kelas.index', [
         'school_id' => $this->schoolA->id,
         'tingkatan_id' => $tingkatanXI->id,
     ]));
@@ -196,7 +196,7 @@ test('can filter kelas by tahun ajaran, tingkatan, jurusan, and status', functio
     $responseTingkatan->assertDontSee('X Alpha Rombel');
 
     // Filter Jurusan PPLG
-    $responseJurusan = $this->actingAs($this->superAdmin)->get(route('rombel.kelas', [
+    $responseJurusan = $this->actingAs($this->superAdmin)->get(route('rombel.kelas.index', [
         'school_id' => $this->schoolA->id,
         'jurusan_id' => $this->jurusanA->id,
     ]));
@@ -205,7 +205,7 @@ test('can filter kelas by tahun ajaran, tingkatan, jurusan, and status', functio
     $responseJurusan->assertDontSee('XI Beta Rombel');
 
     // Filter Status Nonaktif
-    $responseStatus = $this->actingAs($this->superAdmin)->get(route('rombel.kelas', [
+    $responseStatus = $this->actingAs($this->superAdmin)->get(route('rombel.kelas.index', [
         'school_id' => $this->schoolA->id,
         'status' => 'nonaktif',
     ]));
@@ -235,7 +235,7 @@ test('search filters kelas by nama, kode, ruangan, or wali kelas nama', function
     ]);
 
     // Search by nama
-    $responseNama = $this->actingAs($this->superAdmin)->get(route('rombel.kelas', [
+    $responseNama = $this->actingAs($this->superAdmin)->get(route('rombel.kelas.index', [
         'school_id' => $this->schoolA->id,
         'search' => 'Spesial',
     ]));
@@ -244,7 +244,7 @@ test('search filters kelas by nama, kode, ruangan, or wali kelas nama', function
     $responseNama->assertDontSee('X Lainnya');
 
     // Search by ruangan
-    $responseRuangan = $this->actingAs($this->superAdmin)->get(route('rombel.kelas', [
+    $responseRuangan = $this->actingAs($this->superAdmin)->get(route('rombel.kelas.index', [
         'school_id' => $this->schoolA->id,
         'search' => 'Multimedia 3',
     ]));
@@ -253,7 +253,7 @@ test('search filters kelas by nama, kode, ruangan, or wali kelas nama', function
     $responseRuangan->assertDontSee('X Lainnya');
 
     // Search by wali kelas nama
-    $responseWali = $this->actingAs($this->superAdmin)->get(route('rombel.kelas', [
+    $responseWali = $this->actingAs($this->superAdmin)->get(route('rombel.kelas.index', [
         'school_id' => $this->schoolA->id,
         'search' => 'Budi Santoso',
     ]));
@@ -278,7 +278,7 @@ test('can create a new kelas with valid data', function () {
 
     $response = $this->actingAs($this->superAdmin)->post(route('rombel.kelas.store'), $payload);
 
-    $response->assertRedirect(route('rombel.kelas', [
+    $response->assertRedirect(route('rombel.kelas.index', [
         'tahun_ajaran_id' => $this->tahunAjaranA->id,
     ]));
     $response->assertSessionHas('success');
@@ -373,7 +373,7 @@ test('can update existing kelas', function () {
 
     $response = $this->actingAs($this->superAdmin)->put(route('rombel.kelas.update', $kelas), $payload);
 
-    $response->assertRedirect(route('rombel.kelas', [
+    $response->assertRedirect(route('rombel.kelas.index', [
         'tahun_ajaran_id' => $this->tahunAjaranA->id,
     ]));
     $response->assertSessionHas('success');
@@ -474,7 +474,7 @@ test('can delete kelas', function () {
 
     $response = $this->actingAs($this->superAdmin)->delete(route('rombel.kelas.destroy', $kelas));
 
-    $response->assertRedirect(route('rombel.kelas', [
+    $response->assertRedirect(route('rombel.kelas.index', [
         'tahun_ajaran_id' => $this->tahunAjaranA->id,
     ]));
     $response->assertSessionHas('success');

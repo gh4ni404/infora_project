@@ -38,7 +38,7 @@
                     @endphp
                     <x-tab-pill
                         :active="$isActiveCat"
-                        :href="route('system.referensi', ['kategori_id' => $cat->id])"
+                        :href="route('system.referensi.index', ['kategori_id' => $cat->id])"
                         :badge="$cat->children_count"
                         :badge-class="$isActiveCat ? 'badge-primary' : 'badge-cyan'"
                         icon="folder"
@@ -96,7 +96,7 @@
     <div>
         @if ($activeCategory)
             <x-data-table
-                route="{{ route('system.referensi', ['kategori_id' => $activeCategory->id]) }}"
+                route="{{ route('system.referensi.index', ['kategori_id' => $activeCategory->id]) }}"
                 search-placeholder="Cari kode atau nama referensi..."
                 :total="$items->total()"
                 total-label="Item Referensi ({{ $activeCategory->nama }})"

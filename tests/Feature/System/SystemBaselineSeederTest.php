@@ -43,5 +43,5 @@ test('database seeder seeds baseline modules, menus, and backup dan restore dire
         ->and($backupMenu->icon)->toBe('folder')
         ->and($backupMenu->order)->toBe(2)
         ->and($backupMenu->is_active)->toBeTrue()
-        ->and($backupMenu->route_url)->toBe(route('backup-restore'));
+        ->and($backupMenu->route_url)->toBe(route('backup-restore.index'));
 });

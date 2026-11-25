@@ -15,7 +15,7 @@
         <x-slot:actions>
             {{-- Selector Unit Sekolah untuk Super Admin --}}
             @if ($schools->count() > 1)
-                <form method="GET" action="{{ route('master.data-murid') }}" id="schoolFilterForm">
+                <form method="GET" action="{{ route('master.data-murid.index') }}" id="schoolFilterForm">
                     <x-form-select
                         name="school_id"
                         id="school_id"
@@ -68,7 +68,7 @@
 
     {{-- Tabel Data Murid --}}
     <x-data-table
-        route="{{ route('master.data-murid') }}"
+        route="{{ route('master.data-murid.index') }}"
         search-placeholder="Cari nama lengkap, NISN, NIS, NIK, atau no. HP..."
         :per-page="$perPageInput">
 

@@ -22,13 +22,13 @@ beforeEach(function () {
 });
 
 test('guest is redirected to login when accessing provinsi management', function () {
-    $response = $this->get(route('wilayah.provinsi'));
+    $response = $this->get(route('wilayah.provinsi.index'));
 
     $response->assertRedirect(route('login'));
 });
 
 test('non super admin cannot access provinsi management', function () {
-    $response = $this->actingAs($this->regularUser)->get(route('wilayah.provinsi'));
+    $response = $this->actingAs($this->regularUser)->get(route('wilayah.provinsi.index'));
 
     $response->assertForbidden();
 });
@@ -40,7 +40,7 @@ test('super admin can view provinsi list and see seeded data', function () {
         'status' => true,
     ]);
 
-    $response = $this->actingAs($this->superAdmin)->get(route('wilayah.provinsi'));
+    $response = $this->actingAs($this->superAdmin)->get(route('wilayah.provinsi.index'));
 
     $response->assertOk();
     $response->assertSee('Wilayah Provinsi');
@@ -55,12 +55,12 @@ test('super admin can search provinsi by kode or nama', function () {
     Provinsi::create(['kode' => '13', 'nama' => 'Sumatera Barat', 'status' => true]);
     Provinsi::create(['kode' => '64', 'nama' => 'Kalimantan Timur', 'status' => true]);
 
-    $responseSearchName = $this->actingAs($this->superAdmin)->get(route('wilayah.provinsi', ['search' => 'Sumatera']));
+    $responseSearchName = $this->actingAs($this->superAdmin)->get(route('wilayah.provinsi.index', ['search' => 'Sumatera']));
     $responseSearchName->assertOk();
     $responseSearchName->assertSee('Sumatera Barat');
     $responseSearchName->assertDontSee('Kalimantan Timur');
 
-    $responseSearchCode = $this->actingAs($this->superAdmin)->get(route('wilayah.provinsi', ['search' => '64']));
+    $responseSearchCode = $this->actingAs($this->superAdmin)->get(route('wilayah.provinsi.index', ['search' => '64']));
     $responseSearchCode->assertOk();
     $responseSearchCode->assertSee('Kalimantan Timur');
     $responseSearchCode->assertDontSee('Sumatera Barat');
@@ -70,12 +70,12 @@ test('super admin can filter provinsi by active status', function () {
     $aktif = Provinsi::create(['kode' => '11', 'nama' => 'Provinsi Khusus Aktif', 'status' => true]);
     $nonaktif = Provinsi::create(['kode' => '99', 'nama' => 'Provinsi Khusus Nonaktif', 'status' => false]);
 
-    $responseAktif = $this->actingAs($this->superAdmin)->get(route('wilayah.provinsi', ['status' => '1']));
+    $responseAktif = $this->actingAs($this->superAdmin)->get(route('wilayah.provinsi.index', ['status' => '1']));
     $responseAktif->assertOk();
     $responseAktif->assertSee($aktif->nama);
     $responseAktif->assertDontSee($nonaktif->nama);
 
-    $responseNonaktif = $this->actingAs($this->superAdmin)->get(route('wilayah.provinsi', ['status' => '0']));
+    $responseNonaktif = $this->actingAs($this->superAdmin)->get(route('wilayah.provinsi.index', ['status' => '0']));
     $responseNonaktif->assertOk();
     $responseNonaktif->assertSee($nonaktif->nama);
     $responseNonaktif->assertDontSee($aktif->nama);
@@ -88,7 +88,7 @@ test('super admin can create a new province with valid 2-digit code and name', f
         'status' => '1',
     ]);
 
-    $response->assertRedirect(route('wilayah.provinsi'));
+    $response->assertRedirect(route('wilayah.provinsi.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('provinsi', [
@@ -141,7 +141,7 @@ test('super admin can update an existing province', function () {
         'status' => '0',
     ]);
 
-    $response->assertRedirect(route('wilayah.provinsi'));
+    $response->assertRedirect(route('wilayah.provinsi.index'));
     $response->assertSessionHas('success');
 
     $provinsi->refresh();
@@ -158,7 +158,7 @@ test('super admin can delete an unlinked province', function () {
 
     $response = $this->actingAs($this->superAdmin)->delete(route('wilayah.provinsi.destroy', $provinsi));
 
-    $response->assertRedirect(route('wilayah.provinsi'));
+    $response->assertRedirect(route('wilayah.provinsi.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseMissing('provinsi', [
@@ -184,7 +184,7 @@ test('prevents deleting a province linked to active school records', function ()
 
     $response = $this->actingAs($this->superAdmin)->delete(route('wilayah.provinsi.destroy', $provinsi));
 
-    $response->assertRedirect(route('wilayah.provinsi'));
+    $response->assertRedirect(route('wilayah.provinsi.index'));
     $response->assertSessionHas('error');
 
     $this->assertDatabaseHas('provinsi', [
@@ -198,7 +198,7 @@ test('sidebar submenu wilayah.provinsi resolves to route successfully', function
         'name' => 'Provinsi',
     ]);
 
-    expect($submenu->route_url)->toBe(route('wilayah.provinsi'));
+    expect($submenu->route_url)->toBe(route('wilayah.provinsi.index'));
 });
 
 test('super admin can change per_page limit and display all data when selecting semua', function () {
@@ -210,17 +210,17 @@ test('super admin can change per_page limit and display all data when selecting 
     }
 
     // Default 15 items per page
-    $responseDefault = $this->actingAs($this->superAdmin)->get(route('wilayah.provinsi'));
+    $responseDefault = $this->actingAs($this->superAdmin)->get(route('wilayah.provinsi.index'));
     $responseDefault->assertOk();
     $responseDefault->assertSee('Selanjutnya');
 
     // 30 items per page
-    $response30 = $this->actingAs($this->superAdmin)->get(route('wilayah.provinsi', ['per_page' => '30']));
+    $response30 = $this->actingAs($this->superAdmin)->get(route('wilayah.provinsi.index', ['per_page' => '30']));
     $response30->assertOk();
     $response30->assertSee('Selanjutnya');
 
     // Semua items per page
-    $responseSemua = $this->actingAs($this->superAdmin)->get(route('wilayah.provinsi', ['per_page' => 'semua']));
+    $responseSemua = $this->actingAs($this->superAdmin)->get(route('wilayah.provinsi.index', ['per_page' => 'semua']));
     $responseSemua->assertOk();
     $responseSemua->assertSee('Menampilkan');
     $responseSemua->assertSee('Provinsi Tes 44');
@@ -234,13 +234,13 @@ test('super admin can navigate to next page and see subsequent records', functio
         );
     }
 
-    $responsePage1 = $this->actingAs($this->superAdmin)->get(route('wilayah.provinsi', ['page' => '1']));
+    $responsePage1 = $this->actingAs($this->superAdmin)->get(route('wilayah.provinsi.index', ['page' => '1']));
     $responsePage1->assertOk();
     $responsePage1->assertSee('Selanjutnya');
     $responsePage1->assertSee('Provinsi Urutan 10');
     $responsePage1->assertDontSee('Provinsi Urutan 29');
 
-    $responsePage2 = $this->actingAs($this->superAdmin)->get(route('wilayah.provinsi', ['page' => '2']));
+    $responsePage2 = $this->actingAs($this->superAdmin)->get(route('wilayah.provinsi.index', ['page' => '2']));
     $responsePage2->assertOk();
     $responsePage2->assertSee('Sebelumnya');
     $responsePage2->assertSee('Provinsi Urutan 29');

@@ -40,13 +40,13 @@ beforeEach(function () {
 });
 
 test('guest is redirected to login when accessing master data tingkatan', function () {
-    $response = $this->get(route('master.data-tingkatan'));
+    $response = $this->get(route('master.data-tingkatan.index'));
 
     $response->assertRedirect(route('login'));
 });
 
 test('unauthorized regular user without menu permission cannot access master data tingkatan', function () {
-    $response = $this->actingAs($this->regularUser)->get(route('master.data-tingkatan'));
+    $response = $this->actingAs($this->regularUser)->get(route('master.data-tingkatan.index'));
 
     $response->assertForbidden();
 });
@@ -91,7 +91,7 @@ test('school selector filters tingkatan list correctly for super admin', functio
     ]);
 
     // Mode 1 sekolah selalu menampilkan sekolah aktif tunggal dan menyembunyikan selector
-    $responseB = $this->actingAs($this->superAdmin)->get(route('master.data-tingkatan', [
+    $responseB = $this->actingAs($this->superAdmin)->get(route('master.data-tingkatan.index', [
         'school_id' => $this->schoolB->id,
     ]));
     $responseB->assertOk();
@@ -117,7 +117,7 @@ test('search filter works accurately for kode, nama, and tingkat_angka', functio
         'fase' => 'Fase F',
     ]);
 
-    $response = $this->actingAs($this->superAdmin)->get(route('master.data-tingkatan', [
+    $response = $this->actingAs($this->superAdmin)->get(route('master.data-tingkatan.index', [
         'school_id' => $this->schoolA->id,
         'search' => 'Sepuluh',
     ]));
@@ -145,7 +145,7 @@ test('status filter returns matching tingkatan', function () {
     ]);
 
     // Filter Aktif
-    $responseActive = $this->actingAs($this->superAdmin)->get(route('master.data-tingkatan', [
+    $responseActive = $this->actingAs($this->superAdmin)->get(route('master.data-tingkatan.index', [
         'school_id' => $this->schoolA->id,
         'status' => 'aktif',
     ]));
@@ -154,7 +154,7 @@ test('status filter returns matching tingkatan', function () {
     $responseActive->assertDontSee('Kelas 13 Nonaktif');
 
     // Filter Nonaktif
-    $responseInactive = $this->actingAs($this->superAdmin)->get(route('master.data-tingkatan', [
+    $responseInactive = $this->actingAs($this->superAdmin)->get(route('master.data-tingkatan.index', [
         'school_id' => $this->schoolA->id,
         'status' => 'nonaktif',
     ]));

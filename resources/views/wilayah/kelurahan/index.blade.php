@@ -17,7 +17,7 @@
 
 {{-- Data Table Kelurahan / Desa --}}
 <x-data-table
-    route="{{ route('wilayah.kelurahan') }}"
+    route="{{ route('wilayah.kelurahan.index') }}"
     search-placeholder="Cari kode, kelurahan, desa, atau kode pos..."
     :per-page="request('per_page', 15)"
     per-page-text="kelurahan"

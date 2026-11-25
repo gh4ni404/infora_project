@@ -17,7 +17,7 @@
 
 {{-- Data Table Kecamatan --}}
 <x-data-table
-    route="{{ route('wilayah.kecamatan') }}"
+    route="{{ route('wilayah.kecamatan.index') }}"
     search-placeholder="Cari kode, kecamatan, kabupaten, atau provinsi..."
     :per-page="request('per_page', 15)"
     per-page-text="kecamatan"

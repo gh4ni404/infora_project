@@ -288,7 +288,7 @@ class AbsenMuridController extends Controller
         $absensi->delete();
 
         return redirect()
-            ->route('absen_murid', $this->schoolRedirectParams($request, $schoolId))
+            ->route('absen_murid.index', $this->schoolRedirectParams($request, $schoolId))
             ->with('success', "Catatan absensi {$nama} berhasil dihapus.");
     }
 

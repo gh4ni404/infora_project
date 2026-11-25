@@ -108,7 +108,7 @@ class PendaftaranMukaController extends Controller
 
         if (! $fotoPath) {
             return redirect()
-                ->route('pendaftaran_muka', $this->schoolRedirectParams($request, $murid->school_id))
+                ->route('pendaftaran_muka.index', $this->schoolRedirectParams($request, $murid->school_id))
                 ->with('error', 'Gagal memproses berkas foto wajah. Pastikan ukuran foto tidak melebihi 1MB.');
         }
 
@@ -150,7 +150,7 @@ class PendaftaranMukaController extends Controller
         }
 
         return redirect()
-            ->route('pendaftaran_muka', $this->schoolRedirectParams($request, $murid->school_id))
+            ->route('pendaftaran_muka.index', $this->schoolRedirectParams($request, $murid->school_id))
             ->with('success', "Sampel wajah ({$data['label']}) untuk murid {$murid->nama_lengkap} berhasil didaftarkan.");
     }
 
@@ -220,7 +220,7 @@ class PendaftaranMukaController extends Controller
         }
 
         return redirect()
-            ->route('pendaftaran_muka', $this->schoolRedirectParams($request, $faceProfile->school_id))
+            ->route('pendaftaran_muka.index', $this->schoolRedirectParams($request, $faceProfile->school_id))
             ->with('success', $message);
     }
 
@@ -249,7 +249,7 @@ class PendaftaranMukaController extends Controller
         }
 
         return redirect()
-            ->route('pendaftaran_muka', $this->schoolRedirectParams($request, $schoolId))
+            ->route('pendaftaran_muka.index', $this->schoolRedirectParams($request, $schoolId))
             ->with('success', $message);
     }
 

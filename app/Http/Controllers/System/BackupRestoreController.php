@@ -92,11 +92,11 @@ class BackupRestoreController extends Controller
             };
 
             return redirect()
-                ->route('backup-restore')
+                ->route('backup-restore.index')
                 ->with('success', "{$label} berhasil dibuat: {$backup['filename']} ({$backup['size_human']}).");
         } catch (Exception $e) {
             return redirect()
-                ->route('backup-restore')
+                ->route('backup-restore.index')
                 ->with('error', 'Gagal membuat cadangan sistem: '.$e->getMessage());
         }
     }
@@ -111,7 +111,7 @@ class BackupRestoreController extends Controller
 
             if (! $path) {
                 return redirect()
-                    ->route('backup-restore')
+                    ->route('backup-restore.index')
                     ->with('error', 'Berkas cadangan tidak ditemukan di server.');
             }
 
@@ -123,7 +123,7 @@ class BackupRestoreController extends Controller
             ]);
         } catch (Exception $e) {
             return redirect()
-                ->route('backup-restore')
+                ->route('backup-restore.index')
                 ->with('error', 'Gagal mengunduh berkas cadangan: '.$e->getMessage());
         }
     }
@@ -226,7 +226,7 @@ class BackupRestoreController extends Controller
                 $prefix = $result['type'] === 'full' ? 'Pemulihan Sistem Lengkap' : 'Pemulihan Basis Data';
 
                 return redirect()
-                    ->route('backup-restore')
+                    ->route('backup-restore.index')
                     ->with('success', "{$prefix} berhasil dari berkas unggahan: {$originalName}. {$result['message']}");
             }
 
@@ -235,7 +235,7 @@ class BackupRestoreController extends Controller
 
             if (! $path) {
                 return redirect()
-                    ->route('backup-restore')
+                    ->route('backup-restore.index')
                     ->with('error', 'Berkas cadangan terpilih tidak ditemukan.');
             }
 
@@ -243,11 +243,11 @@ class BackupRestoreController extends Controller
             $prefix = $result['type'] === 'full' ? 'Pemulihan Sistem Lengkap' : 'Pemulihan Basis Data';
 
             return redirect()
-                ->route('backup-restore')
+                ->route('backup-restore.index')
                 ->with('success', "{$prefix} berhasil dari arsip server: {$filename}. {$result['message']}");
         } catch (Exception $e) {
             return redirect()
-                ->route('backup-restore')
+                ->route('backup-restore.index')
                 ->with('error', 'Gagal memulihkan sistem: '.$e->getMessage());
         }
     }
@@ -262,16 +262,16 @@ class BackupRestoreController extends Controller
 
             if (! $deleted) {
                 return redirect()
-                    ->route('backup-restore')
+                    ->route('backup-restore.index')
                     ->with('error', 'Berkas cadangan tidak ditemukan atau gagal dihapus.');
             }
 
             return redirect()
-                ->route('backup-restore')
+                ->route('backup-restore.index')
                 ->with('success', "Berkas cadangan {$filename} berhasil dihapus dari server.");
         } catch (Exception $e) {
             return redirect()
-                ->route('backup-restore')
+                ->route('backup-restore.index')
                 ->with('error', 'Terjadi kesalahan saat menghapus cadangan: '.$e->getMessage());
         }
     }
@@ -286,16 +286,16 @@ class BackupRestoreController extends Controller
 
             if ($count === 0) {
                 return redirect()
-                    ->route('backup-restore')
+                    ->route('backup-restore.index')
                     ->with('info', 'Tidak ada berkas cadangan yang tersimpan di server.');
             }
 
             return redirect()
-                ->route('backup-restore')
+                ->route('backup-restore.index')
                 ->with('success', "Semua berkas cadangan ({$count} berkas) berhasil dihapus dari server.");
         } catch (Exception $e) {
             return redirect()
-                ->route('backup-restore')
+                ->route('backup-restore.index')
                 ->with('error', 'Terjadi kesalahan saat menghapus semua cadangan: '.$e->getMessage());
         }
     }

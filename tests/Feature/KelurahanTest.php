@@ -67,13 +67,13 @@ beforeEach(function () {
 });
 
 test('guest is redirected to login when accessing kelurahan management', function () {
-    $response = $this->get(route('wilayah.kelurahan'));
+    $response = $this->get(route('wilayah.kelurahan.index'));
 
     $response->assertRedirect(route('login'));
 });
 
 test('non super admin cannot access kelurahan management', function () {
-    $response = $this->actingAs($this->regularUser)->get(route('wilayah.kelurahan'));
+    $response = $this->actingAs($this->regularUser)->get(route('wilayah.kelurahan.index'));
 
     $response->assertForbidden();
 });
@@ -90,7 +90,7 @@ test('super admin can view kelurahan list and see modals and seeded elements', f
         ]
     );
 
-    $response = $this->actingAs($this->superAdmin)->get(route('wilayah.kelurahan'));
+    $response = $this->actingAs($this->superAdmin)->get(route('wilayah.kelurahan.index'));
 
     $response->assertOk();
     $response->assertSee('Wilayah Kelurahan');
@@ -126,13 +126,13 @@ test('super admin can search kelurahan by kode, nama, or kode pos', function () 
     );
 
     // Search by name
-    $resName = $this->actingAs($this->superAdmin)->get(route('wilayah.kelurahan', ['search' => 'Masumpu']));
+    $resName = $this->actingAs($this->superAdmin)->get(route('wilayah.kelurahan.index', ['search' => 'Masumpu']));
     $resName->assertOk();
     $resName->assertSee('Masumpu');
     $resName->assertDontSee('Macanang');
 
     // Search by postal code
-    $resPos = $this->actingAs($this->superAdmin)->get(route('wilayah.kelurahan', ['search' => '92732']));
+    $resPos = $this->actingAs($this->superAdmin)->get(route('wilayah.kelurahan.index', ['search' => '92732']));
     $resPos->assertOk();
     $resPos->assertSee('Macanang');
     $resPos->assertDontSee('Masumpu');
@@ -161,12 +161,12 @@ test('super admin can filter kelurahan by tipe', function () {
         ]
     );
 
-    $resKel = $this->actingAs($this->superAdmin)->get(route('wilayah.kelurahan', ['tipe' => 'Kelurahan']));
+    $resKel = $this->actingAs($this->superAdmin)->get(route('wilayah.kelurahan.index', ['tipe' => 'Kelurahan']));
     $resKel->assertOk();
     $resKel->assertSee('Manurunge');
     $resKel->assertDontSee('Pappolo Testing Desa');
 
-    $resDesa = $this->actingAs($this->superAdmin)->get(route('wilayah.kelurahan', ['tipe' => 'Desa']));
+    $resDesa = $this->actingAs($this->superAdmin)->get(route('wilayah.kelurahan.index', ['tipe' => 'Desa']));
     $resDesa->assertOk();
     $resDesa->assertSee('Pappolo Testing Desa');
     $resDesa->assertDontSee('Manurunge');
@@ -193,7 +193,7 @@ test('super admin can filter kelurahan by kecamatan', function () {
         ]
     );
 
-    $resKec = $this->actingAs($this->superAdmin)->get(route('wilayah.kelurahan', [
+    $resKec = $this->actingAs($this->superAdmin)->get(route('wilayah.kelurahan.index', [
         'kecamatan_id' => $this->kecamatanTaneteRiattang->id,
     ]));
 
@@ -216,7 +216,7 @@ test('super admin can create a new kelurahan with valid data', function () {
 
     $response = $this->actingAs($this->superAdmin)->post(route('wilayah.kelurahan.store'), $payload);
 
-    $response->assertRedirect(route('wilayah.kelurahan'));
+    $response->assertRedirect(route('wilayah.kelurahan.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('kelurahan', [
@@ -294,7 +294,7 @@ test('super admin can update an existing kelurahan', function () {
 
     $response = $this->actingAs($this->superAdmin)->put(route('wilayah.kelurahan.update', $kelurahan), $payload);
 
-    $response->assertRedirect(route('wilayah.kelurahan'));
+    $response->assertRedirect(route('wilayah.kelurahan.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('kelurahan', [
@@ -325,7 +325,7 @@ test('super admin cannot delete kelurahan that is linked to active school', func
 
     $response = $this->actingAs($this->superAdmin)->delete(route('wilayah.kelurahan.destroy', $kelurahan));
 
-    $response->assertRedirect(route('wilayah.kelurahan'));
+    $response->assertRedirect(route('wilayah.kelurahan.index'));
     $response->assertSessionHas('error');
     $this->assertDatabaseHas('kelurahan', ['id' => $kelurahan->id]);
 });
@@ -343,7 +343,7 @@ test('super admin can delete kelurahan that is not linked to school', function (
 
     $response = $this->actingAs($this->superAdmin)->delete(route('wilayah.kelurahan.destroy', $kelurahan));
 
-    $response->assertRedirect(route('wilayah.kelurahan'));
+    $response->assertRedirect(route('wilayah.kelurahan.index'));
     $response->assertSessionHas('success');
     $this->assertDatabaseMissing('kelurahan', ['id' => $kelurahan->id]);
 });

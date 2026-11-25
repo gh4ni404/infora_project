@@ -41,13 +41,13 @@ beforeEach(function () {
 });
 
 test('guest is redirected to login when accessing master data mapel', function () {
-    $response = $this->get(route('master.data-mapel'));
+    $response = $this->get(route('master.data-mapel.index'));
 
     $response->assertRedirect(route('login'));
 });
 
 test('unauthorized regular user without menu permission cannot access master data mapel', function () {
-    $response = $this->actingAs($this->regularUser)->get(route('master.data-mapel'));
+    $response = $this->actingAs($this->regularUser)->get(route('master.data-mapel.index'));
 
     $response->assertForbidden();
 });
@@ -91,7 +91,7 @@ test('single-school mode keeps displaying active school mapel and hides school s
         'nama' => 'Matematika SMA B',
     ]);
 
-    $responseB = $this->actingAs($this->superAdmin)->get(route('master.data-mapel', [
+    $responseB = $this->actingAs($this->superAdmin)->get(route('master.data-mapel.index', [
         'school_id' => $this->schoolB->id,
     ]));
     $responseB->assertOk();
@@ -117,7 +117,7 @@ test('search filter works accurately for kode, nama, singkatan, and keterangan',
         'keterangan' => 'Percakapan industri.',
     ]);
 
-    $response = $this->actingAs($this->superAdmin)->get(route('master.data-mapel', [
+    $response = $this->actingAs($this->superAdmin)->get(route('master.data-mapel.index', [
         'school_id' => $this->schoolA->id,
         'search' => 'Sastra',
     ]));
@@ -143,7 +143,7 @@ test('status filter returns matching mapel', function () {
     ]);
 
     // Filter Aktif
-    $responseActive = $this->actingAs($this->superAdmin)->get(route('master.data-mapel', [
+    $responseActive = $this->actingAs($this->superAdmin)->get(route('master.data-mapel.index', [
         'school_id' => $this->schoolA->id,
         'status' => 'aktif',
     ]));
@@ -152,7 +152,7 @@ test('status filter returns matching mapel', function () {
     $responseActive->assertDontSee('Astronomi Nonaktif');
 
     // Filter Nonaktif
-    $responseInactive = $this->actingAs($this->superAdmin)->get(route('master.data-mapel', [
+    $responseInactive = $this->actingAs($this->superAdmin)->get(route('master.data-mapel.index', [
         'school_id' => $this->schoolA->id,
         'status' => 'nonaktif',
     ]));
@@ -176,7 +176,7 @@ test('kelompok filter returns matching mapel', function () {
         'kelompok' => 'Muatan Lokal',
     ]);
 
-    $response = $this->actingAs($this->superAdmin)->get(route('master.data-mapel', [
+    $response = $this->actingAs($this->superAdmin)->get(route('master.data-mapel.index', [
         'school_id' => $this->schoolA->id,
         'kelompok' => 'Muatan Lokal',
     ]));
@@ -210,7 +210,7 @@ test('jurusan filter returns matching mapel', function () {
     ]);
 
     // Filter by specific Jurusan
-    $responseJurusan = $this->actingAs($this->superAdmin)->get(route('master.data-mapel', [
+    $responseJurusan = $this->actingAs($this->superAdmin)->get(route('master.data-mapel.index', [
         'school_id' => $this->schoolA->id,
         'jurusan_id' => $jurusanRpl->id,
     ]));
@@ -219,7 +219,7 @@ test('jurusan filter returns matching mapel', function () {
     $responseJurusan->assertDontSee('Pendidikan Agama Islam');
 
     // Filter by Umum (Tanpa Jurusan)
-    $responseUmum = $this->actingAs($this->superAdmin)->get(route('master.data-mapel', [
+    $responseUmum = $this->actingAs($this->superAdmin)->get(route('master.data-mapel.index', [
         'school_id' => $this->schoolA->id,
         'jurusan_id' => 'umum',
     ]));

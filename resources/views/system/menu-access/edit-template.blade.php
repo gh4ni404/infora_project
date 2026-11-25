@@ -6,7 +6,7 @@
     subtitle="Atur menu dan wewenang aksi bawaan yang akan disalin saat menerapkan template ini ke pengguna"
 >
     <x-slot:actions>
-        <a href="{{ route('sistem.user', ['tab' => 'templates']) }}" class="btn-secondary">
+        <a href="{{ route('sistem.user.index', ['tab' => 'templates']) }}" class="btn-secondary">
             <x-icon name="chevron-left" size="18" />
             <span>Kembali ke Template</span>
         </a>
@@ -234,7 +234,7 @@
             <!-- Tombol Aksi Simpan -->
             <div class="form-actions">
                 <button type="button" class="btn-primary" id="btnOpenConfirmModal">Simpan</button>
-                <a href="{{ route('sistem.user', ['tab' => 'templates']) }}" class="btn-secondary">Batal</a>
+                <a href="{{ route('sistem.user.index', ['tab' => 'templates']) }}" class="btn-secondary">Batal</a>
             </div>
         </form>
     </div>

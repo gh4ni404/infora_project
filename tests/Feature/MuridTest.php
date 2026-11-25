@@ -59,13 +59,13 @@ beforeEach(function () {
 });
 
 test('guest is redirected to login when accessing data murid', function () {
-    $response = $this->get(route('master.data-murid'));
+    $response = $this->get(route('master.data-murid.index'));
 
     $response->assertRedirect(route('login'));
 });
 
 test('unauthorized regular user without menu permission cannot access data murid', function () {
-    $response = $this->actingAs($this->regularUser)->get(route('master.data-murid'));
+    $response = $this->actingAs($this->regularUser)->get(route('master.data-murid.index'));
 
     $response->assertForbidden();
 });
@@ -110,7 +110,7 @@ test('tenancy isolation strictly filters murid to active single school', functio
         'nama_lengkap' => 'Murid Sekolah B',
     ]);
 
-    $responseB = $this->actingAs($this->superAdmin)->get(route('master.data-murid', [
+    $responseB = $this->actingAs($this->superAdmin)->get(route('master.data-murid.index', [
         'school_id' => $this->schoolB->id,
     ]));
 
@@ -135,7 +135,7 @@ test('search filter matches nama, nisn, or nis', function () {
         'nis' => '10002',
     ]);
 
-    $response = $this->actingAs($this->superAdmin)->get(route('master.data-murid', [
+    $response = $this->actingAs($this->superAdmin)->get(route('master.data-murid.index', [
         'school_id' => $this->schoolA->id,
         'search' => 'Fadhil',
     ]));
@@ -158,7 +158,7 @@ test('filter kelas filters murid assigned to class and tanpa kelas', function ()
         'nama_lengkap' => 'Murid Belum Masuk Kelas',
     ]);
 
-    $responseKelas = $this->actingAs($this->superAdmin)->get(route('master.data-murid', [
+    $responseKelas = $this->actingAs($this->superAdmin)->get(route('master.data-murid.index', [
         'school_id' => $this->schoolA->id,
         'kelas_id' => $this->kelasA->id,
     ]));
@@ -167,7 +167,7 @@ test('filter kelas filters murid assigned to class and tanpa kelas', function ()
     $responseKelas->assertSee('Murid Kelas PPLG');
     $responseKelas->assertDontSee('Murid Belum Masuk Kelas');
 
-    $responseTanpa = $this->actingAs($this->superAdmin)->get(route('master.data-murid', [
+    $responseTanpa = $this->actingAs($this->superAdmin)->get(route('master.data-murid.index', [
         'school_id' => $this->schoolA->id,
         'kelas_id' => 'tanpa_kelas',
     ]));
@@ -191,7 +191,7 @@ test('super admin can create new murid and automatically generate user account',
 
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-murid.store'), $payload);
 
-    $response->assertRedirect(route('master.data-murid'));
+    $response->assertRedirect(route('master.data-murid.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('murids', [
@@ -279,7 +279,7 @@ test('super admin can update murid data and sync user account', function () {
 
     $response = $this->actingAs($this->superAdmin)->put(route('master.data-murid.update', $murid), $payload);
 
-    $response->assertRedirect(route('master.data-murid'));
+    $response->assertRedirect(route('master.data-murid.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('murids', [
@@ -323,7 +323,7 @@ test('toggle status switches murid and user active state', function () {
 
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-murid.toggle-status', $murid));
 
-    $response->assertRedirect(route('master.data-murid'));
+    $response->assertRedirect(route('master.data-murid.index'));
     expect($murid->fresh()->is_active)->toBeFalse()
         ->and($murid->user->fresh()->is_active)->toBeFalse();
 
@@ -340,7 +340,7 @@ test('reset password resets user account password to default', function () {
 
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-murid.reset-password', $murid));
 
-    $response->assertRedirect(route('master.data-murid'));
+    $response->assertRedirect(route('master.data-murid.index'));
     $response->assertSessionHas('success');
 
     // Cek kata sandi dapat digunakan untuk login
@@ -355,7 +355,7 @@ test('destroy soft deletes murid and deactivates user account', function () {
 
     $response = $this->actingAs($this->superAdmin)->delete(route('master.data-murid.destroy', $murid));
 
-    $response->assertRedirect(route('master.data-murid'));
+    $response->assertRedirect(route('master.data-murid.index'));
     $response->assertSessionHas('success');
 
     $this->assertSoftDeleted('murids', ['id' => $murid->id]);
@@ -513,7 +513,7 @@ test('murid photo displays in index table and show modal response when uploaded'
     ]);
 
     // 1. Tampil di tabel data-murid
-    $response = $this->actingAs($this->superAdmin)->get(route('master.data-murid', [
+    $response = $this->actingAs($this->superAdmin)->get(route('master.data-murid.index', [
         'school_id' => $this->schoolA->id,
     ]));
 

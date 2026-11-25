@@ -17,7 +17,7 @@
 
 {{-- Data Table Provinsi --}}
 <x-data-table
-    route="{{ route('wilayah.provinsi') }}"
+    route="{{ route('wilayah.provinsi.index') }}"
     search-placeholder="Cari kode atau nama provinsi..."
     :per-page="request('per_page', 15)"
     per-page-text="provinsi"

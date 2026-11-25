@@ -67,13 +67,13 @@ beforeEach(function () {
 });
 
 test('guest is redirected to login when accessing absen murid', function () {
-    $this->get(route('absen_murid'))->assertRedirect(route('login'));
+    $this->get(route('absen_murid.index'))->assertRedirect(route('login'));
     $this->get(route('absen_murid.descriptors'))->assertRedirect(route('login'));
 });
 
 test('unauthorized user without menu permission is forbidden from absen murid', function () {
     $this->actingAs($this->regularUser)
-        ->get(route('absen_murid'))
+        ->get(route('absen_murid.index'))
         ->assertForbidden();
 });
 
@@ -110,7 +110,7 @@ test('user with view permission can view absen murid and descriptors but cannot 
     ]);
 
     $this->actingAs($this->adminSekolahA)
-        ->get(route('absen_murid'))
+        ->get(route('absen_murid.index'))
         ->assertOk()
         ->assertSee('Absen Murid (Face Recognition)')
         ->assertSee('btnToggleVoice')
@@ -320,7 +320,7 @@ test('destroy removes attendance record with snapshot and enforces cross-school 
 
     $this->actingAs($this->superAdmin)
         ->delete(route('absen_murid.destroy', $absenA))
-        ->assertRedirect(route('absen_murid'));
+        ->assertRedirect(route('absen_murid.index'));
 
     $this->assertDatabaseMissing('absensi_murids', ['id' => $absenA->id]);
     Storage::disk('public')->assertMissing($snapshotPath);

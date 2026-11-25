@@ -69,13 +69,13 @@ beforeEach(function () {
 });
 
 test('guest is redirected to login when accessing pendaftaran muka', function () {
-    $response = $this->get(route('pendaftaran_muka'));
+    $response = $this->get(route('pendaftaran_muka.index'));
 
     $response->assertRedirect(route('login'));
 });
 
 test('unauthorized non-superadmin user without menu permission is forbidden', function () {
-    $response = $this->actingAs($this->regularUser)->get(route('pendaftaran_muka'));
+    $response = $this->actingAs($this->regularUser)->get(route('pendaftaran_muka.index'));
 
     $response->assertForbidden();
 });
@@ -112,7 +112,7 @@ test('user with view permission can access pendaftaran muka but cannot store wit
     ]);
 
     $this->actingAs($this->adminSekolahA)
-        ->get(route('pendaftaran_muka'))
+        ->get(route('pendaftaran_muka.index'))
         ->assertOk()
         ->assertSee('Andi Pratama');
 
@@ -142,7 +142,7 @@ test('super admin can view pendaftaran muka page with kpi stats and modals', fun
         'label' => 'Tampak Depan',
     ]);
 
-    $response = $this->actingAs($this->superAdmin)->get(route('pendaftaran_muka', [
+    $response = $this->actingAs($this->superAdmin)->get(route('pendaftaran_muka.index', [
         'school_id' => $this->schoolA->id,
     ]));
 
@@ -175,7 +175,7 @@ test('tenancy isolation and active status filter apply on pendaftaran muka index
         'is_active' => true,
     ]);
 
-    $response = $this->actingAs($this->superAdmin)->get(route('pendaftaran_muka', [
+    $response = $this->actingAs($this->superAdmin)->get(route('pendaftaran_muka.index', [
         'school_id' => $this->schoolA->id,
     ]));
 
@@ -208,7 +208,7 @@ test('search, kelas, and face_status filters work properly', function () {
     ]);
 
     $this->actingAs($this->superAdmin)
-        ->get(route('pendaftaran_muka', [
+        ->get(route('pendaftaran_muka.index', [
             'school_id' => $this->schoolA->id,
             'face_status' => 'terdaftar',
         ]))
@@ -216,7 +216,7 @@ test('search, kelas, and face_status filters work properly', function () {
         ->assertViewHas('murids', fn ($murids) => $murids->pluck('nama_lengkap')->all() === ['Budi Hartono']);
 
     $this->actingAs($this->superAdmin)
-        ->get(route('pendaftaran_muka', [
+        ->get(route('pendaftaran_muka.index', [
             'school_id' => $this->schoolA->id,
             'face_status' => 'belum',
             'kelas_id' => 'tanpa_kelas',
@@ -246,7 +246,7 @@ test('super admin can store face profile with json descriptor and sync empty mur
         'sync_murid_foto' => 1,
     ]);
 
-    $response->assertRedirect(route('pendaftaran_muka'));
+    $response->assertRedirect(route('pendaftaran_muka.index'));
     $response->assertSessionHas('success');
 
     $profile = MuridFaceProfile::where('murid_id', $murid->id)->first();
@@ -414,7 +414,7 @@ test('toggle status and destroy work properly and enforce tenant isolation', fun
     // 1. Toggle status
     $this->actingAs($this->superAdmin)
         ->patch(route('pendaftaran_muka.toggle-status', $profile))
-        ->assertRedirect(route('pendaftaran_muka'));
+        ->assertRedirect(route('pendaftaran_muka.index'));
 
     expect($profile->fresh()->is_active)->toBeFalse();
 
@@ -428,7 +428,7 @@ test('toggle status and destroy work properly and enforce tenant isolation', fun
     $faceFilePath = $profile->foto_path;
     $this->actingAs($this->superAdmin)
         ->delete(route('pendaftaran_muka.destroy', $profile))
-        ->assertRedirect(route('pendaftaran_muka'));
+        ->assertRedirect(route('pendaftaran_muka.index'));
 
     $this->assertDatabaseMissing('murid_face_profiles', ['id' => $profile->id]);
     Storage::disk('public')->assertMissing($faceFilePath);

@@ -154,7 +154,7 @@ class GtkController extends Controller
             : 'kata sandi bawaan: '.GtkAccountManager::resolveDefaultPassword($gtk);
 
         return redirect()
-            ->route('master.data-gtk', $this->schoolRedirectParams($request, $gtk->school_id))
+            ->route('master.data-gtk.index', $this->schoolRedirectParams($request, $gtk->school_id))
             ->with('success', "Data GTK {$gtk->nama_bergelar} dan akun pengguna ({$user->username}) berhasil ditambahkan ke sistem ({$passwordNote}).");
     }
 
@@ -241,7 +241,7 @@ class GtkController extends Controller
         GtkAccountManager::createOrUpdateUserForGtk($gtk, $credentials);
 
         return redirect()
-            ->route('master.data-gtk', $this->schoolRedirectParams($request, $gtk->school_id))
+            ->route('master.data-gtk.index', $this->schoolRedirectParams($request, $gtk->school_id))
             ->with('success', "Data GTK {$gtk->nama_bergelar} berhasil diperbarui.");
     }
 
@@ -263,7 +263,7 @@ class GtkController extends Controller
         $gtk->delete();
 
         return redirect()
-            ->route('master.data-gtk', $this->schoolRedirectParams($request, $schoolId))
+            ->route('master.data-gtk.index', $this->schoolRedirectParams($request, $schoolId))
             ->with('success', "Data GTK {$label} beserta akun penggunanya berhasil dihapus dari sistem.");
     }
 
@@ -285,7 +285,7 @@ class GtkController extends Controller
         $statusText = $newStatus ? 'diaktifkan' : 'dinonaktifkan';
 
         return redirect()
-            ->route('master.data-gtk', $this->schoolRedirectParams($request, $gtk->school_id))
+            ->route('master.data-gtk.index', $this->schoolRedirectParams($request, $gtk->school_id))
             ->with('success', "Status GTK {$gtk->nama_bergelar} beserta akun pengguna berhasil {$statusText}.");
     }
 
@@ -300,12 +300,12 @@ class GtkController extends Controller
 
         if (! $newPassword) {
             return redirect()
-                ->route('master.data-gtk', $this->schoolRedirectParams($request, $gtk->school_id))
+                ->route('master.data-gtk.index', $this->schoolRedirectParams($request, $gtk->school_id))
                 ->with('error', "Gagal mereset kata sandi: Akun pengguna untuk {$gtk->nama_bergelar} tidak ditemukan.");
         }
 
         return redirect()
-            ->route('master.data-gtk', $this->schoolRedirectParams($request, $gtk->school_id))
+            ->route('master.data-gtk.index', $this->schoolRedirectParams($request, $gtk->school_id))
             ->with('success', "Kata sandi akun {$gtk->nama_bergelar} berhasil direset ke nilai bawaan: {$newPassword}");
     }
 
@@ -488,7 +488,7 @@ class GtkController extends Controller
 
         if (empty($rawRows)) {
             return redirect()
-                ->route('master.data-gtk', $this->schoolRedirectParams($request, $selectedSchoolId))
+                ->route('master.data-gtk.index', $this->schoolRedirectParams($request, $selectedSchoolId))
                 ->with('error', 'Berkas spreadsheet kosong atau tidak berisi baris data yang dapat diproses.');
         }
 
@@ -577,7 +577,7 @@ class GtkController extends Controller
         }
 
         return redirect()
-            ->route('master.data-gtk', $this->schoolRedirectParams($request, $selectedSchoolId))
+            ->route('master.data-gtk.index', $this->schoolRedirectParams($request, $selectedSchoolId))
             ->with('success', $summaryMessage);
     }
 

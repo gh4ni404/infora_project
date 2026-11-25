@@ -91,7 +91,7 @@ class TahunAjaranController extends Controller
         $tahunAjaran = TahunAjaran::create($data);
 
         return redirect()
-            ->route('konfigurasi-sekolah.tahun-ajaran', $this->schoolRedirectParams($request, $tahunAjaran->school_id, [
+            ->route('konfigurasi-sekolah.tahun-ajaran.index', $this->schoolRedirectParams($request, $tahunAjaran->school_id, [
                 'tahun_ajaran_id' => $tahunAjaran->id,
             ]))
             ->with('success', "Tahun ajaran {$tahunAjaran->tahun} berhasil ditambahkan.");
@@ -115,7 +115,7 @@ class TahunAjaranController extends Controller
         $tahunAjaran->update($data);
 
         return redirect()
-            ->route('konfigurasi-sekolah.tahun-ajaran', $this->schoolRedirectParams($request, $tahunAjaran->school_id, [
+            ->route('konfigurasi-sekolah.tahun-ajaran.index', $this->schoolRedirectParams($request, $tahunAjaran->school_id, [
                 'tahun_ajaran_id' => $tahunAjaran->id,
             ]))
             ->with('success', "Data tahun ajaran {$tahunAjaran->tahun} berhasil diperbarui.");
@@ -135,7 +135,7 @@ class TahunAjaranController extends Controller
         ]);
 
         return redirect()
-            ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
+            ->route('konfigurasi-sekolah.tahun-ajaran.index', $redirectParams)
             ->with('success', "Tahun ajaran {$tahunAjaran->tahun} berhasil ditetapkan sebagai Tahun Ajaran Aktif.");
     }
 
@@ -161,7 +161,7 @@ class TahunAjaranController extends Controller
         ]);
 
         return redirect()
-            ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
+            ->route('konfigurasi-sekolah.tahun-ajaran.index', $redirectParams)
             ->with('success', "Tahun ajaran {$tahunAjaran->tahun} berhasil dinonaktifkan.");
     }
 
@@ -178,14 +178,14 @@ class TahunAjaranController extends Controller
         // Proteksi 1: Tahun ajaran aktif dilarang dihapus
         if ($tahunAjaran->is_active) {
             return redirect()
-                ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
+                ->route('konfigurasi-sekolah.tahun-ajaran.index', $redirectParams)
                 ->with('error', 'Tahun ajaran yang sedang berstatus AKTIF dilarang keras untuk dihapus.');
         }
 
         // Proteksi 2: Memiliki semester aktif
         if ($tahunAjaran->hasActiveSemester()) {
             return redirect()
-                ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
+                ->route('konfigurasi-sekolah.tahun-ajaran.index', $redirectParams)
                 ->with('error', 'Tahun ajaran ini memiliki semester yang sedang aktif sehingga tidak dapat dihapus.');
         }
 
@@ -197,7 +197,7 @@ class TahunAjaranController extends Controller
 
         if ($hasCalendarEvents) {
             return redirect()
-                ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
+                ->route('konfigurasi-sekolah.tahun-ajaran.index', $redirectParams)
                 ->with('error', 'Tahun ajaran ini sudah terikat dengan agenda kegiatan Kalender Akademik sehingga tidak dapat dihapus.');
         }
 
@@ -205,7 +205,7 @@ class TahunAjaranController extends Controller
         $tahunAjaran->delete();
 
         return redirect()
-            ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
+            ->route('konfigurasi-sekolah.tahun-ajaran.index', $redirectParams)
             ->with('success', "Tahun ajaran {$namaTahun} beserta semesternya berhasil dihapus.");
     }
 
@@ -230,7 +230,7 @@ class TahunAjaranController extends Controller
             $label = ucfirst($data['semester']);
 
             return redirect()
-                ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
+                ->route('konfigurasi-sekolah.tahun-ajaran.index', $redirectParams)
                 ->with('error', "Semester {$label} sudah terdaftar untuk tahun ajaran {$tahunAjaran->tahun}.");
         }
 
@@ -241,7 +241,7 @@ class TahunAjaranController extends Controller
         }
 
         return redirect()
-            ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
+            ->route('konfigurasi-sekolah.tahun-ajaran.index', $redirectParams)
             ->with('success', "Semester {$semester->label_semester} ({$tahunAjaran->tahun}) berhasil ditambahkan.");
     }
 
@@ -271,7 +271,7 @@ class TahunAjaranController extends Controller
             $label = ucfirst($data['semester']);
 
             return redirect()
-                ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
+                ->route('konfigurasi-sekolah.tahun-ajaran.index', $redirectParams)
                 ->with('error', "Semester {$label} sudah terdaftar untuk tahun ajaran {$tahunAjaran->tahun}.");
         }
 
@@ -283,7 +283,7 @@ class TahunAjaranController extends Controller
         }
 
         return redirect()
-            ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
+            ->route('konfigurasi-sekolah.tahun-ajaran.index', $redirectParams)
             ->with('success', "Data Semester {$semester->label_semester} berhasil diperbarui.");
     }
 
@@ -306,7 +306,7 @@ class TahunAjaranController extends Controller
         // Proteksi 1: Semester aktif dilarang dihapus
         if ($semester->is_active) {
             return redirect()
-                ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
+                ->route('konfigurasi-sekolah.tahun-ajaran.index', $redirectParams)
                 ->with('error', 'Semester yang sedang berstatus AKTIF dilarang keras untuk dihapus.');
         }
 
@@ -319,7 +319,7 @@ class TahunAjaranController extends Controller
 
         if ($hasCalendarEvents) {
             return redirect()
-                ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
+                ->route('konfigurasi-sekolah.tahun-ajaran.index', $redirectParams)
                 ->with('error', "Semester {$semester->label_semester} sudah terikat dengan agenda kegiatan Kalender Akademik sehingga tidak dapat dihapus.");
         }
 
@@ -327,7 +327,7 @@ class TahunAjaranController extends Controller
         $semester->delete();
 
         return redirect()
-            ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
+            ->route('konfigurasi-sekolah.tahun-ajaran.index', $redirectParams)
             ->with('success', "Semester {$label} berhasil dihapus.");
     }
 
@@ -349,7 +349,7 @@ class TahunAjaranController extends Controller
         ]);
 
         return redirect()
-            ->route('konfigurasi-sekolah.tahun-ajaran', $redirectParams)
+            ->route('konfigurasi-sekolah.tahun-ajaran.index', $redirectParams)
             ->with('success', "Semester {$semester->label_semester} ({$tahunAjaran->tahun}) berhasil ditetapkan sebagai Semester Aktif.");
     }
 }

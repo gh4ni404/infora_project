@@ -89,7 +89,7 @@ class KecamatanController extends Controller
         $kecamatan = Kecamatan::create($data);
 
         return redirect()
-            ->route('wilayah.kecamatan')
+            ->route('wilayah.kecamatan.index')
             ->with('success', "Data {$kecamatan->nama_lengkap} berhasil ditambahkan ke dalam sistem.");
     }
 
@@ -98,7 +98,7 @@ class KecamatanController extends Controller
      */
     public function edit(Kecamatan $kecamatan): RedirectResponse
     {
-        return redirect()->route('wilayah.kecamatan');
+        return redirect()->route('wilayah.kecamatan.index');
     }
 
     /**
@@ -112,7 +112,7 @@ class KecamatanController extends Controller
         $kecamatan->update($data);
 
         return redirect()
-            ->route('wilayah.kecamatan')
+            ->route('wilayah.kecamatan.index')
             ->with('success', "Data {$kecamatan->nama_lengkap} berhasil diperbarui.");
     }
 
@@ -130,7 +130,7 @@ class KecamatanController extends Controller
 
         if ($isLinkedToSchool) {
             return redirect()
-                ->route('wilayah.kecamatan')
+                ->route('wilayah.kecamatan.index')
                 ->with('error', "{$kecamatan->nama_lengkap} tidak dapat dihapus karena masih digunakan oleh data sekolah aktif.");
         }
 
@@ -138,7 +138,7 @@ class KecamatanController extends Controller
         $kecamatan->delete();
 
         return redirect()
-            ->route('wilayah.kecamatan')
+            ->route('wilayah.kecamatan.index')
             ->with('success', "Data {$namaLengkap} berhasil dihapus dari sistem.");
     }
 }

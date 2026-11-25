@@ -156,7 +156,7 @@ test('super admin can import valid essential gtk spreadsheet and create user acc
             'file' => $uploadedFile,
         ]);
 
-    $response->assertRedirect(route('master.data-gtk'));
+    $response->assertRedirect(route('master.data-gtk.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('gtks', [
@@ -209,7 +209,7 @@ test('super admin can import spreadsheet with only essential columns and auto-ge
             'file' => $uploadedFile,
         ]);
 
-    $response->assertRedirect(route('master.data-gtk'));
+    $response->assertRedirect(route('master.data-gtk.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('gtks', [
@@ -290,7 +290,7 @@ test('super admin can import legacy 17-column gtk spreadsheet without errors', f
             'file' => $uploadedFile,
         ]);
 
-    $response->assertRedirect(route('master.data-gtk'));
+    $response->assertRedirect(route('master.data-gtk.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('gtks', [
@@ -349,7 +349,7 @@ test('importing gtk with existing nik or nip updates the existing record', funct
             'file' => $uploadedFile,
         ]);
 
-    $response->assertRedirect(route('master.data-gtk'));
+    $response->assertRedirect(route('master.data-gtk.index'));
     $response->assertSessionHas('success');
 
     // Pastikan tidak ada duplikasi data, record lama diupdate
@@ -401,7 +401,7 @@ test('importing gtk with same full name without nik or nip updates the existing 
             'file' => $uploadedFile,
         ]);
 
-    $response->assertRedirect(route('master.data-gtk'));
+    $response->assertRedirect(route('master.data-gtk.index'));
     $response->assertSessionHas('success');
 
     expect(Gtk::where('school_id', $this->school->id)->where('nama_lengkap', 'Budi Santoso')->count())->toBe(1);
@@ -469,7 +469,7 @@ test('super admin importing gtk in single-school mode always targets the active 
             'file' => $uploadedFile,
         ]);
 
-    $response->assertRedirect(route('master.data-gtk'));
+    $response->assertRedirect(route('master.data-gtk.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('gtks', [
@@ -523,7 +523,7 @@ test('super admin can import spreadsheet using simplified Guru and Staf categori
             'file' => $uploadedFile,
         ]);
 
-    $response->assertRedirect(route('master.data-gtk'));
+    $response->assertRedirect(route('master.data-gtk.index'));
     $response->assertSessionHas('success');
 
     $guru = Gtk::where('nama_lengkap', 'Guru Bahasa Indonesia')->first();

@@ -48,13 +48,13 @@ beforeEach(function () {
 });
 
 test('guest is redirected to login when accessing kecamatan management', function () {
-    $response = $this->get(route('wilayah.kecamatan'));
+    $response = $this->get(route('wilayah.kecamatan.index'));
 
     $response->assertRedirect(route('login'));
 });
 
 test('non super admin cannot access kecamatan management', function () {
-    $response = $this->actingAs($this->regularUser)->get(route('wilayah.kecamatan'));
+    $response = $this->actingAs($this->regularUser)->get(route('wilayah.kecamatan.index'));
 
     $response->assertForbidden();
 });
@@ -69,7 +69,7 @@ test('super admin can view kecamatan list and see modals and seeded data', funct
         ]
     );
 
-    $response = $this->actingAs($this->superAdmin)->get(route('wilayah.kecamatan'));
+    $response = $this->actingAs($this->superAdmin)->get(route('wilayah.kecamatan.index'));
 
     $response->assertOk();
     $response->assertSee('Wilayah Kecamatan');
@@ -100,13 +100,13 @@ test('super admin can search kecamatan by kode, nama, or kabupaten', function ()
     );
 
     // Search by name
-    $responseSearchName = $this->actingAs($this->superAdmin)->get(route('wilayah.kecamatan', ['search' => 'Bontocani']));
+    $responseSearchName = $this->actingAs($this->superAdmin)->get(route('wilayah.kecamatan.index', ['search' => 'Bontocani']));
     $responseSearchName->assertOk();
     $responseSearchName->assertSee('Kecamatan Bontocani');
     $responseSearchName->assertDontSee('Kecamatan Mandai');
 
     // Search by Kemendagri code (730901)
-    $responseSearchCode = $this->actingAs($this->superAdmin)->get(route('wilayah.kecamatan', ['search' => '730901']));
+    $responseSearchCode = $this->actingAs($this->superAdmin)->get(route('wilayah.kecamatan.index', ['search' => '730901']));
     $responseSearchCode->assertOk();
     $responseSearchCode->assertSee('Kecamatan Mandai');
     $responseSearchCode->assertDontSee('Kecamatan Bontocani');
@@ -131,7 +131,7 @@ test('super admin can filter kecamatan by kabupaten', function () {
         ]
     );
 
-    $response = $this->actingAs($this->superAdmin)->get(route('wilayah.kecamatan', [
+    $response = $this->actingAs($this->superAdmin)->get(route('wilayah.kecamatan.index', [
         'kabupaten_id' => $this->kabupatenBone->id,
     ]));
 
@@ -151,7 +151,7 @@ test('super admin can create a new kecamatan with valid data', function () {
 
     $response = $this->actingAs($this->superAdmin)->post(route('wilayah.kecamatan.store'), $payload);
 
-    $response->assertRedirect(route('wilayah.kecamatan'));
+    $response->assertRedirect(route('wilayah.kecamatan.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('kecamatan', [
@@ -236,7 +236,7 @@ test('super admin can update an existing kecamatan', function () {
         'status' => '0',
     ]);
 
-    $response->assertRedirect(route('wilayah.kecamatan'));
+    $response->assertRedirect(route('wilayah.kecamatan.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('kecamatan', [
@@ -263,7 +263,7 @@ test('super admin cannot delete kecamatan linked to an active school', function 
 
     $response = $this->actingAs($this->superAdmin)->delete(route('wilayah.kecamatan.destroy', $kecamatan));
 
-    $response->assertRedirect(route('wilayah.kecamatan'));
+    $response->assertRedirect(route('wilayah.kecamatan.index'));
     $response->assertSessionHas('error');
 
     $this->assertDatabaseHas('kecamatan', [
@@ -281,7 +281,7 @@ test('super admin can delete kecamatan not linked to any school', function () {
 
     $response = $this->actingAs($this->superAdmin)->delete(route('wilayah.kecamatan.destroy', $kecamatan));
 
-    $response->assertRedirect(route('wilayah.kecamatan'));
+    $response->assertRedirect(route('wilayah.kecamatan.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseMissing('kecamatan', [
@@ -301,5 +301,5 @@ test('edit route redirects to index', function () {
 
     $response = $this->actingAs($this->superAdmin)->get(route('wilayah.kecamatan.edit', $kecamatan));
 
-    $response->assertRedirect(route('wilayah.kecamatan'));
+    $response->assertRedirect(route('wilayah.kecamatan.index'));
 });

@@ -32,19 +32,19 @@ beforeEach(function () {
 });
 
 test('guest is redirected to login when accessing tahun ajaran page', function () {
-    $response = $this->get(route('konfigurasi-sekolah.tahun-ajaran'));
+    $response = $this->get(route('konfigurasi-sekolah.tahun-ajaran.index'));
 
     $response->assertRedirect(route('login'));
 });
 
 test('non super admin cannot access tahun ajaran page', function () {
-    $response = $this->actingAs($this->regularUser)->get(route('konfigurasi-sekolah.tahun-ajaran'));
+    $response = $this->actingAs($this->regularUser)->get(route('konfigurasi-sekolah.tahun-ajaran.index'));
 
     $response->assertForbidden();
 });
 
 test('super admin can view tahun ajaran master detail page', function () {
-    $response = $this->actingAs($this->superAdmin)->get(route('konfigurasi-sekolah.tahun-ajaran'));
+    $response = $this->actingAs($this->superAdmin)->get(route('konfigurasi-sekolah.tahun-ajaran.index'));
 
     $response->assertOk();
     $response->assertSee('Tahun Ajaran dan Semester', false);
@@ -364,7 +364,7 @@ test('school admin can access tahun ajaran page and only sees their own school d
         'is_active' => true,
     ]);
 
-    $response = $this->actingAs($adminUser)->get(route('konfigurasi-sekolah.tahun-ajaran'));
+    $response = $this->actingAs($adminUser)->get(route('konfigurasi-sekolah.tahun-ajaran.index'));
 
     $response->assertOk();
     // Harus melihat data sekolah sendiri
@@ -458,7 +458,7 @@ test('super admin does not see school switcher in single-school mode and stays o
     TahunAjaran::create(['school_id' => $this->school->id, 'tahun' => '2026/2027', 'is_active' => true]);
     TahunAjaran::create(['school_id' => $schoolB->id, 'tahun' => '2024/2025', 'is_active' => true]);
 
-    $response = $this->actingAs($this->superAdmin)->get(route('konfigurasi-sekolah.tahun-ajaran'));
+    $response = $this->actingAs($this->superAdmin)->get(route('konfigurasi-sekolah.tahun-ajaran.index'));
     $response->assertOk();
     $response->assertDontSee('id="schoolFilterForm"', false);
     $response->assertSee($this->school->name);
@@ -466,7 +466,7 @@ test('super admin does not see school switcher in single-school mode and stays o
 
     // Parameter school_id tidak mengalihkan sekolah aktif di mode 1 sekolah
     $responseSwitch = $this->actingAs($this->superAdmin)->get(
-        route('konfigurasi-sekolah.tahun-ajaran', ['school_id' => $schoolB->id])
+        route('konfigurasi-sekolah.tahun-ajaran.index', ['school_id' => $schoolB->id])
     );
     $responseSwitch->assertOk();
     $responseSwitch->assertSee($this->school->name);
@@ -546,7 +546,7 @@ test('super admin sees deactivate trigger while non super admin sees disabled ac
     ]);
 
     // Super Admin: sees input with btn-trigger-deactivate-ta and aria-label
-    $responseSuper = $this->actingAs($this->superAdmin)->get(route('konfigurasi-sekolah.tahun-ajaran'));
+    $responseSuper = $this->actingAs($this->superAdmin)->get(route('konfigurasi-sekolah.tahun-ajaran.index'));
     $responseSuper->assertOk();
     $responseSuper->assertSee('class="form-check-input btn-trigger-deactivate-ta"', false);
     $responseSuper->assertSee('aria-label="Nonaktifkan Tahun Ajaran 2025/2026"', false);

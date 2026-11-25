@@ -12,7 +12,7 @@
     </x-slot:subtitle>
     @if ($user->isSuperAdmin() && $schools->count() > 1)
         <x-slot:actions>
-            <form action="{{ route('konfigurasi-sekolah.tahun-ajaran') }}" id="schoolFilterForm" method="GET">
+            <form action="{{ route('konfigurasi-sekolah.tahun-ajaran.index') }}" id="schoolFilterForm" method="GET">
                 <x-form-select 
                     name="school_id" 
                     id="school_id" 
@@ -141,7 +141,7 @@
                         <x-table-actions align="right">
                             {{-- Tombol Pilih/Kelola Semester --}}
                             <a
-                                href="{{ route('konfigurasi-sekolah.tahun-ajaran', ['tahun_ajaran_id' => $ta->id]) }}"
+                                href="{{ route('konfigurasi-sekolah.tahun-ajaran.index', ['tahun_ajaran_id' => $ta->id]) }}"
                                 class="btn-activate {{ $isSelected ? 'is-disabled' : '' }}"
                                 title="{{ $isSelected ? 'Sedang aktif dipilih di tabel kanan' : 'Pilih tahun ajaran ini untuk mengelola semester di sebelah kanan' }}"
                             >

@@ -140,7 +140,7 @@ test('super admin can view and update granular permissions for a user', function
         ],
     ]);
 
-    $responseUpdate->assertRedirect(route('sistem.user', ['role' => 'guru']));
+    $responseUpdate->assertRedirect(route('sistem.user.index', ['role' => 'guru']));
 
     // Verifikasi di database
     $this->assertDatabaseHas('user_menu_permissions', [
@@ -221,7 +221,7 @@ test('super admin can configure role access template', function () {
         ],
     ]);
 
-    $responseUpdate->assertRedirect(route('sistem.user', ['tab' => 'templates']));
+    $responseUpdate->assertRedirect(route('sistem.user.index', ['tab' => 'templates']));
 
     $this->assertDatabaseHas('menu_access_templates', [
         'role_key' => 'murid_pkl',

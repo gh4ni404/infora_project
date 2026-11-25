@@ -6,7 +6,7 @@
     subtitle="Atur visibilitas menu dan wewenang aksi (Lihat, Tambah, Ubah, Hapus) untuk {{ $user->name }}"
 >
     <x-slot:actions>
-        <a href="{{ route('sistem.user', ['role' => $user->user_type]) }}" class="btn-secondary">
+        <a href="{{ route('sistem.user.index', ['role' => $user->user_type]) }}" class="btn-secondary">
             <x-icon name="chevron-left" size="18" />
             <span>Kembali</span>
         </a>
@@ -254,7 +254,7 @@
             <!-- Tombol Aksi Simpan -->
             <div class="form-actions">
                 <button type="button" class="btn-primary btn-submit-access-permission" id="btnOpenConfirmModal">Simpan</button>
-                <a href="{{ route('sistem.user', ['role' => $user->user_type]) }}" class="btn-secondary">Batal</a>
+                <a href="{{ route('sistem.user.index', ['role' => $user->user_type]) }}" class="btn-secondary">Batal</a>
             </div>
         </form>
     </div>

@@ -33,13 +33,13 @@ beforeEach(function () {
 });
 
 test('guest is redirected to login when accessing kabupaten management', function () {
-    $response = $this->get(route('wilayah.kabupaten'));
+    $response = $this->get(route('wilayah.kabupaten.index'));
 
     $response->assertRedirect(route('login'));
 });
 
 test('non super admin cannot access kabupaten management', function () {
-    $response = $this->actingAs($this->regularUser)->get(route('wilayah.kabupaten'));
+    $response = $this->actingAs($this->regularUser)->get(route('wilayah.kabupaten.index'));
 
     $response->assertForbidden();
 });
@@ -55,7 +55,7 @@ test('super admin can view kabupaten list and see modals and seeded data', funct
         ]
     );
 
-    $response = $this->actingAs($this->superAdmin)->get(route('wilayah.kabupaten'));
+    $response = $this->actingAs($this->superAdmin)->get(route('wilayah.kabupaten.index'));
 
     $response->assertOk();
     $response->assertSee('Wilayah Kabupaten');
@@ -88,13 +88,13 @@ test('super admin can search kabupaten by kode, nama, or provinsi', function () 
     );
 
     // Search by name
-    $responseSearchName = $this->actingAs($this->superAdmin)->get(route('wilayah.kabupaten', ['search' => 'Maros']));
+    $responseSearchName = $this->actingAs($this->superAdmin)->get(route('wilayah.kabupaten.index', ['search' => 'Maros']));
     $responseSearchName->assertOk();
     $responseSearchName->assertSee('Kabupaten Maros');
     $responseSearchName->assertDontSee('Kota Jakarta Selatan');
 
     // Search by Kemendagri code (3174 for Jakarta Selatan)
-    $responseSearchCode = $this->actingAs($this->superAdmin)->get(route('wilayah.kabupaten', ['search' => '3174']));
+    $responseSearchCode = $this->actingAs($this->superAdmin)->get(route('wilayah.kabupaten.index', ['search' => '3174']));
     $responseSearchCode->assertOk();
     $responseSearchCode->assertSee('Kota Jakarta Selatan');
     $responseSearchCode->assertDontSee('Kabupaten Maros');
@@ -132,13 +132,13 @@ test('super admin can filter kabupaten by provinsi and tipe', function () {
     );
 
     // Filter by DKI
-    $responseProv = $this->actingAs($this->superAdmin)->get(route('wilayah.kabupaten', ['provinsi_id' => $this->provinsiDki->id]));
+    $responseProv = $this->actingAs($this->superAdmin)->get(route('wilayah.kabupaten.index', ['provinsi_id' => $this->provinsiDki->id]));
     $responseProv->assertOk();
     $responseProv->assertSee('Kota Jakarta Selatan');
     $responseProv->assertDontSee('Kabupaten Maros');
 
     // Filter by Tipe = Kabupaten
-    $responseTipe = $this->actingAs($this->superAdmin)->get(route('wilayah.kabupaten', ['provinsi_id' => $this->provinsiSulsel->id, 'tipe' => 'Kabupaten']));
+    $responseTipe = $this->actingAs($this->superAdmin)->get(route('wilayah.kabupaten.index', ['provinsi_id' => $this->provinsiSulsel->id, 'tipe' => 'Kabupaten']));
     $responseTipe->assertOk();
     $responseTipe->assertSee('Kabupaten Maros');
     $responseTipe->assertDontSee('Kota Makassar');
@@ -153,7 +153,7 @@ test('super admin can create a new kabupaten with matching 2-digit province pref
         'status' => '1',
     ]);
 
-    $response->assertRedirect(route('wilayah.kabupaten'));
+    $response->assertRedirect(route('wilayah.kabupaten.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('kabupaten', [
@@ -226,7 +226,7 @@ test('super admin can update an existing kabupaten', function () {
         'status' => '0',
     ]);
 
-    $response->assertRedirect(route('wilayah.kabupaten'));
+    $response->assertRedirect(route('wilayah.kabupaten.index'));
     $response->assertSessionHas('success');
 
     $kabupaten->refresh();
@@ -247,7 +247,7 @@ test('super admin can delete an unlinked kabupaten', function () {
 
     $response = $this->actingAs($this->superAdmin)->delete(route('wilayah.kabupaten.destroy', $kabupaten));
 
-    $response->assertRedirect(route('wilayah.kabupaten'));
+    $response->assertRedirect(route('wilayah.kabupaten.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseMissing('kabupaten', [
@@ -276,7 +276,7 @@ test('prevents deleting a kabupaten linked to active school records', function (
 
     $response = $this->actingAs($this->superAdmin)->delete(route('wilayah.kabupaten.destroy', $kabupaten));
 
-    $response->assertRedirect(route('wilayah.kabupaten'));
+    $response->assertRedirect(route('wilayah.kabupaten.index'));
     $response->assertSessionHas('error');
 
     $this->assertDatabaseHas('kabupaten', [
@@ -297,7 +297,7 @@ test('prevents deleting a province that still has child kabupaten records', func
 
     $response = $this->actingAs($this->superAdmin)->delete(route('wilayah.provinsi.destroy', $this->provinsiSulsel));
 
-    $response->assertRedirect(route('wilayah.provinsi'));
+    $response->assertRedirect(route('wilayah.provinsi.index'));
     $response->assertSessionHas('error');
 
     $this->assertDatabaseHas('provinsi', [
@@ -315,5 +315,5 @@ test('sidebar submenu wilayah.kabupaten resolves to route successfully', functio
         ]);
     }
 
-    expect($submenu->route_url)->toBe(route('wilayah.kabupaten'));
+    expect($submenu->route_url)->toBe(route('wilayah.kabupaten.index'));
 });

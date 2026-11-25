@@ -50,11 +50,12 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
     // Pengaturan Sistem (System Governance)
     Route::prefix('system')->name('system.')->group(function () {
         Route::get('/under-development', [UnderDevelopmentController::class, 'show'])->name('under-development');
+        Route::get('/under-development/status', [UnderDevelopmentController::class, 'status'])->name('under-development.status');
         Route::post('modules/sync-order', [ModuleController::class, 'syncOrder'])->name('modules.sync-order');
         Route::resource('modules', ModuleController::class)->except(['show']);
         Route::resource('menus', MenuController::class)->except(['show']);
         Route::resource('sub-menus', SubMenuController::class)->except(['show']);
-        Route::get('referensi', [ReferensiController::class, 'index'])->name('referensi');
+        Route::get('referensi', [ReferensiController::class, 'index'])->name('referensi.index');
         Route::post('referensi/kategori', [ReferensiController::class, 'storeKategori'])->name('referensi.kategori.store');
         Route::put('referensi/kategori/{referensi}', [ReferensiController::class, 'updateKategori'])->name('referensi.kategori.update');
         Route::delete('referensi/kategori/{referensi}', [ReferensiController::class, 'destroyKategori'])->name('referensi.kategori.destroy');
@@ -66,7 +67,7 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
 
     // Tata Kelola Menu Akses dan Template Peran
     Route::prefix('sistem')->name('sistem.')->group(function () {
-        Route::get('/user', [MenuAccessController::class, 'index'])->name('user');
+        Route::get('/user', [MenuAccessController::class, 'index'])->name('user.index');
         Route::get('/user/user/{user}', [MenuAccessController::class, 'editUser'])->name('user.user');
         Route::put('/user/user/{user}', [MenuAccessController::class, 'updateUser'])->name('user.user.update');
         Route::post('/user/user/{user}/apply-template', [MenuAccessController::class, 'applyTemplateToUser'])->name('user.user.apply-template');
@@ -82,11 +83,8 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
         Route::post('data-sekolah/sync-admins', [SchoolController::class, 'syncAllAdmins'])->name('data-sekolah.sync-admins');
         Route::post('data-sekolah/{dataSekolah}/sync-admin', [SchoolController::class, 'syncSingleAdmin'])->name('data-sekolah.sync-single-admin');
         Route::resource('data-sekolah', SchoolController::class)->except(['show', 'create']);
-        Route::get('data-tingkatan/semua', [TingkatanController::class, 'index'])->name('data-tingkatan.index');
         Route::resource('data-tingkatan', TingkatanController::class)->parameters([
             'data-tingkatan' => 'tingkatan',
-        ])->names([
-            'index' => 'data-tingkatan',
         ])->except(['show', 'create']);
         Route::post('data-tingkatan/{tingkatan}/toggle-status', [TingkatanController::class, 'toggleStatus'])->name('data-tingkatan.toggle-status');
         Route::resource('data-jurusan', JurusanController::class)->parameters([
@@ -94,32 +92,23 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
         ])->except(['show', 'create']);
 
         Route::post('data-jurusan/{jurusan}/toggle-status', [JurusanController::class, 'toggleStatus'])->name('data-jurusan.toggle-status');
-        Route::get('data-mapel/semua', [MapelController::class, 'index'])->name('data-mapel.index');
         Route::resource('data-mapel', MapelController::class)->parameters([
             'data-mapel' => 'mapel',
-        ])->names([
-            'index' => 'data-mapel',
         ])->except(['show', 'create']);
         Route::post('data-mapel/{mapel}/toggle-status', [MapelController::class, 'toggleStatus'])->name('data-mapel.toggle-status');
-        Route::get('data-gtk/semua', [GtkController::class, 'index'])->name('data-gtk.index');
         Route::get('data-gtk/template', [GtkController::class, 'template'])->name('data-gtk.template');
         Route::get('data-gtk/export', [GtkController::class, 'export'])->name('data-gtk.export');
         Route::post('data-gtk/import', [GtkController::class, 'import'])->name('data-gtk.import');
         Route::resource('data-gtk', GtkController::class)->parameters([
             'data-gtk' => 'gtk',
-        ])->names([
-            'index' => 'data-gtk',
         ])->except(['create']);
         Route::post('data-gtk/{gtk}/toggle-status', [GtkController::class, 'toggleStatus'])->name('data-gtk.toggle-status');
         Route::post('data-gtk/{gtk}/reset-password', [GtkController::class, 'resetPassword'])->name('data-gtk.reset-password');
-        Route::get('data-murid/semua', [MuridController::class, 'index'])->name('data-murid.index');
         Route::get('data-murid/template', [MuridController::class, 'template'])->name('data-murid.template');
         Route::get('data-murid/export', [MuridController::class, 'export'])->name('data-murid.export');
         Route::post('data-murid/import', [MuridController::class, 'import'])->name('data-murid.import');
         Route::resource('data-murid', MuridController::class)->parameters([
             'data-murid' => 'murid',
-        ])->names([
-            'index' => 'data-murid',
         ])->except(['create']);
         Route::post('data-murid/{murid}/toggle-status', [MuridController::class, 'toggleStatus'])->name('data-murid.toggle-status');
         Route::post('data-murid/{murid}/reset-password', [MuridController::class, 'resetPassword'])->name('data-murid.reset-password');
@@ -127,11 +116,8 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
 
     // Rombongan Belajar dan Bimbingan (Data Kelas)
     Route::prefix('rombel')->name('rombel.')->group(function () {
-        Route::get('kelas/semua', [KelasController::class, 'index'])->name('kelas.index');
         Route::resource('kelas', KelasController::class)->parameters([
             'kelas' => 'kelas',
-        ])->names([
-            'index' => 'kelas',
         ])->except(['show', 'create']);
         Route::post('kelas/{kelas}/toggle-status', [KelasController::class, 'toggleStatus'])->name('kelas.toggle-status');
     });
@@ -139,7 +125,7 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
     // Konfigurasi Sekolah
     Route::prefix('konfigurasi-sekolah')->name('konfigurasi-sekolah.')->group(function () {
         // Tahun Ajaran dan Semester
-        Route::get('/tahun-ajaran', [TahunAjaranController::class, 'index'])->name('tahun-ajaran');
+        Route::get('/tahun-ajaran', [TahunAjaranController::class, 'index'])->name('tahun-ajaran.index');
         Route::post('/tahun-ajaran', [TahunAjaranController::class, 'store'])->name('tahun-ajaran.store');
         Route::put('/tahun-ajaran/{tahunAjaran}', [TahunAjaranController::class, 'update'])->name('tahun-ajaran.update');
         Route::delete('/tahun-ajaran/{tahunAjaran}', [TahunAjaranController::class, 'destroy'])->name('tahun-ajaran.destroy');
@@ -153,33 +139,15 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
 
         // Kalender Akademik
         Route::get('/kalender-akademik/events', [KalenderAkademikController::class, 'events'])->name('kalender-akademik.events');
-        Route::resource('kalender-akademik', KalenderAkademikController::class)->names([
-            'index' => 'kalender-akademik',
-        ])->except(['show', 'create']);
-        Route::get('/kalender-akademik/semua', [KalenderAkademikController::class, 'index'])->name('kalender-akademik.index');
+        Route::resource('kalender-akademik', KalenderAkademikController::class)->except(['show', 'create']);
     });
 
     // Master Wilayah Administratif
     Route::prefix('wilayah')->name('wilayah.')->group(function () {
-        Route::resource('provinsi', ProvinsiController::class)->names([
-            'index' => 'provinsi',
-        ])->except(['show', 'create']);
-        Route::get('/provinsi/semua', [ProvinsiController::class, 'index'])->name('provinsi.index');
-
-        Route::resource('kabupaten', KabupatenController::class)->names([
-            'index' => 'kabupaten',
-        ])->except(['show', 'create']);
-        Route::get('/kabupaten/semua', [KabupatenController::class, 'index'])->name('kabupaten.index');
-
-        Route::resource('kecamatan', KecamatanController::class)->names([
-            'index' => 'kecamatan',
-        ])->except(['show', 'create']);
-        Route::get('/kecamatan/semua', [KecamatanController::class, 'index'])->name('kecamatan.index');
-
-        Route::resource('kelurahan', KelurahanController::class)->names([
-            'index' => 'kelurahan',
-        ])->except(['show', 'create']);
-        Route::get('/kelurahan/semua', [KelurahanController::class, 'index'])->name('kelurahan.index');
+        Route::resource('provinsi', ProvinsiController::class)->except(['show', 'create']);
+        Route::resource('kabupaten', KabupatenController::class)->except(['show', 'create']);
+        Route::resource('kecamatan', KecamatanController::class)->except(['show', 'create']);
+        Route::resource('kelurahan', KelurahanController::class)->except(['show', 'create']);
 
         // Endpoint Data Dropdown Wilayah (JSON)
         Route::prefix('dropdown')->name('dropdown.')->group(function () {
@@ -191,7 +159,7 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
     });
 
     // Cadangan dan Pemulihan Basis Data (Backup dan Restore)
-    Route::get('/backup-restore', [BackupRestoreController::class, 'index'])->name('backup-restore');
+    Route::get('/backup-restore', [BackupRestoreController::class, 'index'])->name('backup-restore.index');
     Route::post('/backup-restore', [BackupRestoreController::class, 'store'])->name('backup-restore.create');
     Route::get('/backup-restore/download/{filename}', [BackupRestoreController::class, 'download'])->name('backup-restore.download');
     Route::post('/backup-restore/restore', [BackupRestoreController::class, 'restore'])->name('backup-restore.restore');
@@ -199,14 +167,14 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
     Route::delete('/backup-restore/{filename}', [BackupRestoreController::class, 'destroy'])->name('backup-restore.destroy');
 
     // Face Recognition - Pendaftaran Muka Murid
-    Route::get('/pendaftaran_muka', [PendaftaranMukaController::class, 'index'])->name('pendaftaran_muka');
+    Route::get('/pendaftaran_muka', [PendaftaranMukaController::class, 'index'])->name('pendaftaran_muka.index');
     Route::post('/pendaftaran_muka', [PendaftaranMukaController::class, 'store'])->name('pendaftaran_muka.store');
     Route::get('/pendaftaran_muka/{murid}', [PendaftaranMukaController::class, 'show'])->name('pendaftaran_muka.show');
     Route::patch('/pendaftaran_muka/{faceProfile}/toggle-status', [PendaftaranMukaController::class, 'toggleStatus'])->name('pendaftaran_muka.toggle-status');
     Route::delete('/pendaftaran_muka/{faceProfile}', [PendaftaranMukaController::class, 'destroy'])->name('pendaftaran_muka.destroy');
 
     // Face Recognition - Absen Murid (Kiosk & Rekap Harian)
-    Route::get('/absen_murid', [AbsenMuridController::class, 'index'])->name('absen_murid');
+    Route::get('/absen_murid', [AbsenMuridController::class, 'index'])->name('absen_murid.index');
     Route::get('/absen_murid/descriptors', [AbsenMuridController::class, 'descriptors'])->name('absen_murid.descriptors');
     Route::post('/absen_murid', [AbsenMuridController::class, 'store'])->name('absen_murid.store');
     Route::delete('/absen_murid/{absensi}', [AbsenMuridController::class, 'destroy'])->name('absen_murid.destroy');
