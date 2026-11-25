@@ -223,7 +223,7 @@
                     </div>
 
                     <div class="w-full bg-slate-200/80 h-2 rounded-full overflow-hidden mb-2">
-                        <div class="bg-gradient-to-r from-sky-500 to-blue-600 h-full rounded-full w-4/5"></div>
+                        <div class="bg-linear-to-r from-sky-500 to-blue-600 h-full rounded-full w-4/5"></div>
                     </div>
 
                     <div class="flex items-center justify-between text-xs text-slate-400">
