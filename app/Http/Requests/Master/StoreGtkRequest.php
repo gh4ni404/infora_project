@@ -2,11 +2,14 @@
 
 namespace App\Http\Requests\Master;
 
+use App\Http\Requests\Concerns\ResolvesSingleSchoolInput;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreGtkRequest extends FormRequest
 {
+    use ResolvesSingleSchoolInput;
+
     /**
      * Tentukan apakah pengguna memiliki otorisasi untuk melakukan permintaan ini.
      */
@@ -20,12 +23,7 @@ class StoreGtkRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        // Jika school_id tidak dikirim, ambil dari unit sekolah akun pengguna aktif
-        if (! $this->filled('school_id') && $this->user()?->school_id) {
-            $this->merge([
-                'school_id' => $this->user()->school_id,
-            ]);
-        }
+        $this->mergeSingleSchoolId();
 
         $this->merge([
             'is_active' => $this->boolean('is_active', true),

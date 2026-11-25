@@ -141,7 +141,7 @@
                         <x-table-actions align="right">
                             {{-- Tombol Pilih/Kelola Semester --}}
                             <a
-                                href="{{ route('konfigurasi-sekolah.tahun-ajaran', array_filter(['school_id' => $user->isSuperAdmin() ? $selectedSchoolId : null, 'tahun_ajaran_id' => $ta->id])) }}"
+                                href="{{ route('konfigurasi-sekolah.tahun-ajaran', ['tahun_ajaran_id' => $ta->id]) }}"
                                 class="btn-activate {{ $isSelected ? 'is-disabled' : '' }}"
                                 title="{{ $isSelected ? 'Sedang aktif dipilih di tabel kanan' : 'Pilih tahun ajaran ini untuk mengelola semester di sebelah kanan' }}"
                             >

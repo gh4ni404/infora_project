@@ -55,7 +55,7 @@
                     <span>Tes Suara</span>
                 </button>
 
-                <a href="{{ route('pendaftaran_muka', request()->only('school_id')) }}" class="btn-primary" title="Kelola pendaftaran wajah murid">
+                <a href="{{ route('pendaftaran_muka') }}" class="btn-primary" title="Kelola pendaftaran wajah murid">
                     <x-icon name="scan-face" size="16" />
                     <span>Daftar Muka</span>
                 </a>
@@ -74,7 +74,7 @@
                 badge-color="warning"
                 action-icon="scan-face"
                 action-title="Daftarkan Wajah Sekarang"
-                :action-href="route('pendaftaran_muka', request()->only('school_id'))">
+                :action-href="route('pendaftaran_muka')">
                 <br>Unit sekolah ini belum memiliki sampel wajah murid yang aktif. Silakan daftarkan minimal 1 wajah murid di menu <strong>Pendaftaran Muka</strong> sebelum memulai pemindaian absensi.
             </x-status-banner>
         @endif

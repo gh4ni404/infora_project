@@ -74,6 +74,12 @@ class SchoolController extends Controller
      */
     public function store(StoreSchoolRequest $request): RedirectResponse
     {
+        if (School::query()->exists()) {
+            return redirect()
+                ->route('master.data-sekolah.index')
+                ->with('error', 'Sistem berjalan dalam mode sekolah tunggal (1 sekolah = 1 basis data). Profil sekolah sudah terdaftar.');
+        }
+
         $data = $request->validated();
 
         if (! empty($data['logo'])) {
@@ -134,7 +140,7 @@ class SchoolController extends Controller
     }
 
     /**
-     * Sinkronkan atau terbitkan akun administrator untuk seluruh unit sekolah yang terdaftar.
+     * Sinkronkan atau terbitkan akun administrator untuk profil sekolah aktif.
      */
     public function syncAllAdmins(Request $request): RedirectResponse
     {
@@ -142,17 +148,19 @@ class SchoolController extends Controller
             abort(403, 'Akses ditolak. Tindakan ini memerlukan hak akses Super Administrator.');
         }
 
-        $schools = School::all();
-        $syncedCount = 0;
+        $school = School::current();
 
-        foreach ($schools as $school) {
-            AdminAccountManager::createOrSyncAdmin($school);
-            $syncedCount++;
+        if (! $school) {
+            return redirect()
+                ->route('master.data-sekolah.index')
+                ->with('error', 'Profil sekolah belum terdaftar. Silakan buat profil sekolah terlebih dahulu.');
         }
+
+        $admin = AdminAccountManager::createOrSyncAdmin($school);
 
         return redirect()
             ->route('master.data-sekolah.index')
-            ->with('success', "Berhasil menyinkronkan {$syncedCount} akun administrator sekolah.");
+            ->with('success', "Berhasil menyinkronkan akun administrator sekolah {$school->name} (Username: {$admin->username}).");
     }
 
     /**
@@ -175,6 +183,12 @@ class SchoolController extends Controller
     public function destroy(Request $request, School $dataSekolah): RedirectResponse
     {
         $this->authorizeSchool($request, $dataSekolah);
+
+        if ($dataSekolah->hasOperationalData()) {
+            return redirect()
+                ->route('master.data-sekolah.index')
+                ->with('error', 'Profil sekolah tidak dapat dihapus karena masih memiliki data akun, GTK, murid, kelas, atau konfigurasi akademik terkait.');
+        }
 
         // Remove logo file if exists
         if ($dataSekolah->logo_path) {

@@ -9,7 +9,7 @@ use Illuminate\Support\Collection;
 abstract class Controller
 {
     /**
-     * Resolusi sekolah aktif dan daftar sekolah untuk kebutuhan selector halaman multi-tenancy.
+     * Resolusi sekolah aktif tunggal dan daftar sekolah untuk mode 1 sekolah = 1 database.
      *
      * @return array{0: ?School, 1: int, 2: Collection<int, School>}
      */
@@ -17,28 +17,12 @@ abstract class Controller
     {
         $user = $request->user();
 
-        // 1. Dropdown daftar sekolah hanya ditarik jika Super Admin
-        $schools = collect();
-        if ($user?->isSuperAdmin()) {
-            $schools = School::query()
-                ->where('is_active', true)
-                ->orderBy('name')
-                ->get(['id', 'name', 'npsn', 'school_type']);
-        }
+        $school = $user?->school_id
+            ? $user->school
+            : School::current();
 
-        // 2. Tentukan sekolah terpilih
-        $school = null;
-        $schoolId = 0;
-
-        if ($user?->school_id) {
-            $school = $user->school;
-            $schoolId = (int) $user->school_id;
-        } elseif ($user?->isSuperAdmin()) {
-            $defaultSchool = $schools->first();
-            $selectedId = $request->integer('school_id', $defaultSchool?->id ?? 0);
-            $school = $schools->firstWhere('id', $selectedId) ?? $defaultSchool;
-            $schoolId = (int) ($school?->id ?? 0);
-        }
+        $schoolId = (int) ($school?->id ?? 0);
+        $schools = $school ? collect([$school]) : collect();
 
         return [$school, $schoolId, $schools];
     }
@@ -57,19 +41,13 @@ abstract class Controller
     }
 
     /**
-     * Buat parameter URL redirect dengan menyertakan school_id hanya jika pengguna adalah Super Admin.
+     * Buat parameter URL redirect bersih tanpa parameter school_id pada mode sekolah tunggal.
      *
      * @param  array<string, mixed>  $params
      * @return array<string, mixed>
      */
     protected function schoolRedirectParams(Request $request, int|School $school, array $params = []): array
     {
-        if ($request->user()?->isSuperAdmin()) {
-            return array_merge([
-                'school_id' => $school instanceof School ? $school->id : $school,
-            ], $params);
-        }
-
         return $params;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\KonfigurasiSekolah;
 
+use App\Http\Requests\Concerns\ResolvesSingleSchoolInput;
 use App\Models\KalenderAkademik;
 use App\Models\TahunAjaran;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -10,6 +11,8 @@ use Illuminate\Validation\Rule;
 
 class UpdateKalenderAkademikRequest extends FormRequest
 {
+    use ResolvesSingleSchoolInput;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -43,15 +46,14 @@ class UpdateKalenderAkademikRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        $merge = [
+        $kalender = $this->route('kalender_akademik');
+        $fallbackSchoolId = $kalender instanceof KalenderAkademik ? $kalender->school_id : null;
+
+        $this->mergeSingleSchoolId($fallbackSchoolId);
+
+        $this->merge([
             'libur_kbm' => $this->boolean('libur_kbm'),
-        ];
-
-        if ($this->user()?->school_id) {
-            $merge['school_id'] = $this->user()->school_id;
-        }
-
-        $this->merge($merge);
+        ]);
     }
 
     /**

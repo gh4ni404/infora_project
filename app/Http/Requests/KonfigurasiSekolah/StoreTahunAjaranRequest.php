@@ -2,11 +2,14 @@
 
 namespace App\Http\Requests\KonfigurasiSekolah;
 
+use App\Http\Requests\Concerns\ResolvesSingleSchoolInput;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreTahunAjaranRequest extends FormRequest
 {
+    use ResolvesSingleSchoolInput;
+
     /**
      * Tentukan apakah pengguna memiliki otorisasi untuk membuat request ini.
      */
@@ -20,15 +23,11 @@ class StoreTahunAjaranRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        $merge = [
+        $this->mergeSingleSchoolId();
+
+        $this->merge([
             'tahun' => trim((string) $this->input('tahun')),
-        ];
-
-        if ($this->user()?->school_id) {
-            $merge['school_id'] = $this->user()->school_id;
-        }
-
-        $this->merge($merge);
+        ]);
     }
 
     /**

@@ -169,7 +169,7 @@
                     <button type="button" id="sidebarToggle" class="btn-icon" aria-label="Buka / Tutup Sidebar" title="Buka / Tutup Sidebar">
                         <x-icon name="sidebar-close" class="icon-toggle-sidebar" size="20" />
                     </button>
-                    <span class="badge badge-cyan">{{ auth()->user()?->isSuperAdmin() ? 'Entitas Pengembang Platform' : (auth()->user()?->school?->name ?? 'Administrator Sekolah') }}</span>
+                    <span class="badge badge-cyan">{{ $activeSchool?->name ?? (auth()->user()?->isSuperAdmin() ? 'INFORA (Belum Ada Profil Sekolah)' : 'Administrator Sekolah') }}</span>
                 </div>
             </header>
 

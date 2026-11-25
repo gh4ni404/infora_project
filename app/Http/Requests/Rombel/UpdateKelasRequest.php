@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Rombel;
 
+use App\Http\Requests\Concerns\ResolvesSingleSchoolInput;
 use App\Models\Kelas;
 use App\Support\TextFormatter;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -10,6 +11,8 @@ use Illuminate\Validation\Rule;
 
 class UpdateKelasRequest extends FormRequest
 {
+    use ResolvesSingleSchoolInput;
+
     /**
      * Tentukan apakah pengguna diizinkan untuk membuat permintaan ini.
      */
@@ -23,11 +26,7 @@ class UpdateKelasRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        if ($this->user()?->school_id) {
-            $this->merge([
-                'school_id' => $this->user()->school_id,
-            ]);
-        }
+        $this->mergeSingleSchoolId($this->route('kelas')?->school_id);
 
         $this->merge([
             'is_active' => $this->boolean('is_active'),

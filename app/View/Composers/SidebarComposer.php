@@ -2,6 +2,7 @@
 
 namespace App\View\Composers;
 
+use App\Models\School;
 use App\Support\SidebarCache;
 use Illuminate\View\View;
 
@@ -13,6 +14,11 @@ class SidebarComposer
      */
     public function compose(View $view): void
     {
-        $view->with('sidebarModules', SidebarCache::get(auth()->user()));
+        $user = auth()->user();
+
+        $view->with([
+            'sidebarModules' => SidebarCache::get($user),
+            'activeSchool' => $user?->school_id ? $user->school : School::current(),
+        ]);
     }
 }

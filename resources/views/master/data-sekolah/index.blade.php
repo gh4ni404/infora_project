@@ -1,27 +1,25 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-page-header title="Data Sekolah">
+    <x-page-header title="Profil Sekolah">
         <x-slot:subtitle>
-            @if ($user?->isSuperAdmin())
-                Kelola registri sekolah SMA dan SMK dalam platform INFORA
-            @else
-                Informasi profil dan identitas unit sekolah Anda
-            @endif
+            Informasi profil, identitas resmi, dan akun administrator sekolah pada instalasi INFORA
         </x-slot:subtitle>
         <x-slot:actions>
-            @if ($user?->isSuperAdmin())
+            @if ($user?->isSuperAdmin() && $schools->total() > 0)
                 <button type="button" class="btn-secondary" id="btnOpenSyncAdmins"
-                    title="Sinkronkan Akun Administrator Semua Sekolah"
-                    aria-label="Sinkronkan Akun Administrator Semua Sekolah">
+                    title="Sinkronkan Akun Administrator Sekolah"
+                    aria-label="Sinkronkan Akun Administrator Sekolah">
                     <x-icon name="sync" size="16" />
                 </button>
             @endif
-            <x-crud-button 
-                action="create" 
-                id="btnOpenCreateSchool"
-                title="Tambah Data Sekolah"
-            />
+            @if ($schools->total() === 0)
+                <x-crud-button
+                    action="create"
+                    id="btnOpenCreateSchool"
+                    title="Daftarkan Profil Sekolah"
+                />
+            @endif
         </x-slot:actions>
     </x-page-header>
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Master;
 
+use App\Http\Requests\Concerns\ResolvesSingleSchoolInput;
 use App\Models\Murid;
 use App\Models\School;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -10,6 +11,8 @@ use Illuminate\Validation\Rule;
 
 class UpdateMuridRequest extends FormRequest
 {
+    use ResolvesSingleSchoolInput;
+
     /**
      * Tentukan apakah pengguna memiliki otorisasi untuk melakukan permintaan ini.
      */
@@ -23,11 +26,7 @@ class UpdateMuridRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        if (! $this->filled('school_id') && $this->user()?->school_id) {
-            $this->merge([
-                'school_id' => $this->user()->school_id,
-            ]);
-        }
+        $this->mergeSingleSchoolId($this->route('murid')?->school_id);
 
         if ($this->has('nisn')) {
             $this->merge([

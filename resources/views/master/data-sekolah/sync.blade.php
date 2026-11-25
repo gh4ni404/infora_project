@@ -14,7 +14,7 @@
             Sinkronkan Akun Admin Sekolah?
         </h3>
         <p class="text-sm text-slate-600 mb-4 px-2">
-            Sistem akan menerbitkan atau menyelaraskan akun administrator (<code class="text-xs font-mono font-bold text-brand">user_type: admin</code>) untuk seluruh unit sekolah yang terdaftar.
+            Sistem akan menerbitkan atau menyelaraskan akun administrator (<code class="text-xs font-mono font-bold text-brand">user_type: admin</code>) untuk profil sekolah yang terdaftar.
         </p>
         <div class="p-3 bg-slate-50 border border-slate-200/90 rounded-xl text-left text-xs text-slate-600 space-y-1.5 mb-2">
             <div class="flex items-center gap-1.5 font-semibold text-slate-800">

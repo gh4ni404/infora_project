@@ -68,7 +68,7 @@
             badge="Tahun Ajaran Diperlukan"
             action-icon="settings"
             action-title="Konfigurasi Sekarang"
-            :action-href="route('konfigurasi-sekolah.tahun-ajaran', array_filter(['school_id' => $user->isSuperAdmin() ? $selectedSchoolId : null]))"
+            :action-href="route('konfigurasi-sekolah.tahun-ajaran')"
         />
     @endif
 

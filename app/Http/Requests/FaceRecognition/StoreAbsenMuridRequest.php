@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\FaceRecognition;
 
+use App\Http\Requests\Concerns\ResolvesSingleSchoolInput;
 use App\Support\ImageUploader;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -10,6 +11,8 @@ use Illuminate\Validation\Validator;
 
 class StoreAbsenMuridRequest extends FormRequest
 {
+    use ResolvesSingleSchoolInput;
+
     /**
      * Tentukan apakah pengguna berwenang melakukan permintaan ini.
      */
@@ -23,11 +26,7 @@ class StoreAbsenMuridRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        if (! $this->filled('school_id') && $this->user()?->school_id) {
-            $this->merge([
-                'school_id' => $this->user()->school_id,
-            ]);
-        }
+        $this->mergeSingleSchoolId();
 
         if (! $this->filled('mode')) {
             $this->merge([

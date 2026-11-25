@@ -10,7 +10,7 @@
     <x-form-input type="hidden" name="view" :value="$activeView" />
 
     <div class="form-section-label">Informasi Sekolah dan Periode</div>
-    @if ($user->isSuperAdmin())
+    @if ($user->isSuperAdmin() && $schools->count() > 1)
         <div class="form-grid-2col">
             <x-form-select
                 name="school_id"

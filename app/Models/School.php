@@ -187,6 +187,46 @@ class School extends Model
     }
 
     /**
+     * Mengambil profil sekolah aktif tunggal dalam mode 1 sekolah = 1 database.
+     */
+    public static function current(): ?self
+    {
+        return static::query()
+            ->orderByDesc('is_active')
+            ->orderBy('id')
+            ->first();
+    }
+
+    /**
+     * Mengambil ID profil sekolah aktif tunggal (atau 0 jika belum dikonfigurasi).
+     */
+    public static function currentId(): int
+    {
+        return (int) (static::query()
+            ->orderByDesc('is_active')
+            ->orderBy('id')
+            ->value('id') ?? 0);
+    }
+
+    /**
+     * Menentukan apakah sekolah telah memiliki data operasional/akademik terkait.
+     */
+    public function hasOperationalData(): bool
+    {
+        return $this->users()->exists()
+            || $this->gtks()->exists()
+            || $this->murids()->exists()
+            || $this->tahunAjaran()->exists()
+            || $this->jurusans()->exists()
+            || $this->tingkatan()->exists()
+            || $this->kalenderAkademik()->exists()
+            || Kelas::where('school_id', $this->id)->exists()
+            || Mapel::where('school_id', $this->id)->exists()
+            || AbsensiMurid::where('school_id', $this->id)->exists()
+            || MuridFaceProfile::where('school_id', $this->id)->exists();
+    }
+
+    /**
      * Menentukan apakah satuan pendidikan berada di bawah naungan Kementerian Agama (Kemenag).
      */
     public function isMadrasah(): bool

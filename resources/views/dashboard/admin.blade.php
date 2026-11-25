@@ -95,7 +95,7 @@
                 icon="alert-circle"
                 :iconSize="32"
                 :colspan="false"
-                text="Akun Anda saat ini belum terikat dengan unit sekolah. Silakan hubungi Super Administrator untuk penautan data sekolah."
+                text="Profil sekolah belum dikonfigurasi pada sistem. Silakan lengkapi profil sekolah pada menu Profil Sekolah."
             />
         @endif
     </div>

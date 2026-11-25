@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\FaceRecognition;
 
+use App\Http\Requests\Concerns\ResolvesSingleSchoolInput;
 use App\Models\MuridFaceProfile;
 use App\Support\ImageUploader;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -11,6 +12,8 @@ use Illuminate\Validation\Validator;
 
 class StoreFaceRegistrationRequest extends FormRequest
 {
+    use ResolvesSingleSchoolInput;
+
     /**
      * Tentukan apakah pengguna berwenang melakukan permintaan ini.
      */
@@ -24,11 +27,7 @@ class StoreFaceRegistrationRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        if (! $this->filled('school_id') && $this->user()?->school_id) {
-            $this->merge([
-                'school_id' => $this->user()->school_id,
-            ]);
-        }
+        $this->mergeSingleSchoolId();
 
         $rawDescriptor = $this->input('face_descriptor');
         if (is_string($rawDescriptor)) {

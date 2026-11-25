@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Master;
 
+use App\Http\Requests\Concerns\ResolvesSingleSchoolInput;
 use App\Models\Referensi;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -9,6 +10,8 @@ use Illuminate\Validation\Rule;
 
 class StoreJurusanRequest extends FormRequest
 {
+    use ResolvesSingleSchoolInput;
+
     /**
      * Tentukan apakah pengguna memiliki otorisasi untuk melakukan permintaan ini.
      */
@@ -22,6 +25,8 @@ class StoreJurusanRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
+        $this->mergeSingleSchoolId();
+
         $this->merge([
             'is_active' => $this->boolean('is_active'),
             'singkatan' => $this->filled('singkatan') ? $this->input('singkatan') : $this->input('kode'),

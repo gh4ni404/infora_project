@@ -2,12 +2,15 @@
 
 namespace App\Http\Requests\Master;
 
+use App\Http\Requests\Concerns\ResolvesSingleSchoolInput;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateMapelRequest extends FormRequest
 {
+    use ResolvesSingleSchoolInput;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -21,15 +24,7 @@ class UpdateMapelRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        if ($this->user()?->school_id) {
-            $this->merge([
-                'school_id' => $this->user()->school_id,
-            ]);
-        } elseif (! $this->filled('school_id') && $this->route('mapel')) {
-            $this->merge([
-                'school_id' => $this->route('mapel')->school_id,
-            ]);
-        }
+        $this->mergeSingleSchoolId($this->route('mapel')?->school_id);
 
         $this->merge([
             'is_active' => $this->boolean('is_active'),
