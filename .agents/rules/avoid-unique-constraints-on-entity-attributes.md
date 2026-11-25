@@ -16,6 +16,7 @@ Aturan ini mengikat perancangan skema basis data migrasi dan validasi entitas si
 ## 2. Aturan Perancangan Migrasi & Validasi
 1. **Migrasi:**
    - Dilarang menambahkan `->unique()` pada kolom teks entitas administratif (`modules.name`, `menus.name`, `sub_menus.name`, `sub_menus.route_name`, `schools.npsn`).
+   - Berlaku pula untuk tabel konfigurasi/telemetri/kebijakan baru (`node_code`, `api_token_hash`, `setting_key`, relasi 1-baris snapshot, maupun kombinasi kebijakan menu): gunakan `->index()` dan jaga keunikan logis melalui `updateOrCreate()` atau transaksi *delete-and-insert* seperti pada `MenuAccessController`.
    - Gunakan `->index()` jika kolom teks tersebut memerlukan optimasi pencarian / bridging nasional (misal kolom `npsn` pada tabel `schools`).
 2. **Validasi Form Request:**
    - Hindari aturan validasi `Rule::unique(...)` pada nama entitas yang membatasi fleksibilitas operasional admin, kecuali diminta secara eksplisit atau dibatasi spesifik per-scope (misal: per `school_id`).

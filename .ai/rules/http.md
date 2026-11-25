@@ -34,3 +34,9 @@ In LoginController, non-superadmin users are redirected dynamically:
 - If the user has access to the Dashboard menu -> redirect to route('dashboard').
 - If the user does not have Dashboard access -> redirect to their first allowed menu via SidebarCache::getFirstAllowedUrl($user).
 - If the user has no menu permissions assigned -> immediately logout and reject with a descriptive Indonesian validation error.
+
+## Dual-Mode Node Governance (`INFORA_NODE_ROLE`)
+INFORA runs from a single codebase configured via `config('infora.node_role')` (`'school'` default or `'master'`):
+1. **Master Portal Isolation:** Routes under `/master-control/*` (`master-control.*`) must use `master_node` middleware (`EnsureMasterNode`, returning `404` in `school` mode) and remain strictly restricted to `super_admin`.
+2. **School Route Blocking on Master:** School-operational route patterns configured in `config('infora.school_only_route_patterns')` must remain protected by `block_school_on_master` (`BlockSchoolRoutesOnMaster`, returning `404` in `master` mode).
+3. **Master Menu Entitlement (`is_master_enabled`):** Both `SidebarCache::fetchActiveTree()` and `SidebarCache::findByRoute()` filter out menus/sub-menus where `is_master_enabled` is `false` so school admins cannot view, access, or assign Master-locked menus to users.
