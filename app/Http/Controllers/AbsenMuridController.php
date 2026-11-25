@@ -6,6 +6,7 @@ use App\Http\Requests\FaceRecognition\StoreAbsenMuridRequest;
 use App\Models\AbsensiMurid;
 use App\Models\Kelas;
 use App\Models\Murid;
+use App\Models\MuridFaceProfile;
 use App\Models\Semester;
 use App\Models\TahunAjaran;
 use App\Support\ImageUploader;
@@ -14,6 +15,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class AbsenMuridController extends Controller
@@ -82,40 +84,59 @@ class AbsenMuridController extends Controller
         $this->authorizeSchool($request, $selectedSchoolId);
 
         $kelasId = $request->query('kelas_id');
+        $kelasFilter = is_numeric($kelasId) ? (int) $kelasId : null;
         $today = today()->toDateString();
 
-        $murids = Murid::query()
-            ->with([
-                'kelas:id,nama',
-                'activeFaceProfiles:id,murid_id,label,face_descriptor',
-                'absensis' => fn ($q) => $q->whereDate('tanggal', $today)->select(['id', 'murid_id', 'jam_masuk', 'jam_pulang', 'status']),
-            ])
-            ->where('school_id', $selectedSchoolId)
-            ->aktif()
-            ->whereHas('activeFaceProfiles')
-            ->when(is_numeric($kelasId), fn (Builder $q) => $q->where('kelas_id', (int) $kelasId))
-            ->orderBy('nama_lengkap')
-            ->get(['id', 'school_id', 'kelas_id', 'nama_lengkap', 'nisn', 'nis', 'foto_path']);
+        $cacheKey = MuridFaceProfile::descriptorCacheKey($selectedSchoolId, $kelasFilter);
 
-        $students = $murids->map(function (Murid $murid): array {
-            $todayAttendance = $murid->absensis->first();
+        /** @var array<int, array<string, mixed>> $cachedProfiles */
+        $cachedProfiles = Cache::remember($cacheKey, now()->addHours(6), function () use ($selectedSchoolId, $kelasFilter): array {
+            return Murid::query()
+                ->with([
+                    'kelas:id,nama',
+                    'activeFaceProfiles:id,murid_id,label,face_descriptor',
+                ])
+                ->where('school_id', $selectedSchoolId)
+                ->aktif()
+                ->whereHas('activeFaceProfiles')
+                ->when($kelasFilter !== null, fn (Builder $q) => $q->where('kelas_id', $kelasFilter))
+                ->orderBy('nama_lengkap')
+                ->get(['id', 'school_id', 'kelas_id', 'nama_lengkap', 'nisn', 'nis', 'foto_path'])
+                ->map(fn (Murid $murid): array => [
+                    'murid_id' => $murid->id,
+                    'nama_lengkap' => $murid->nama_lengkap,
+                    'nisn' => $murid->nisn ?: '-',
+                    'nis' => $murid->nis ?: '-',
+                    'kelas_nama' => $murid->kelas?->nama ?: 'Tanpa Kelas',
+                    'foto_url' => $murid->foto_url,
+                    'descriptors' => $murid->activeFaceProfiles->map(fn ($profile): array => [
+                        'face_profile_id' => $profile->id,
+                        'label' => $profile->label,
+                        'descriptor' => $profile->face_descriptor,
+                    ])->values()->all(),
+                ])
+                ->values()
+                ->all();
+        });
 
-            return [
-                'murid_id' => $murid->id,
-                'nama_lengkap' => $murid->nama_lengkap,
-                'nisn' => $murid->nisn ?: '-',
-                'nis' => $murid->nis ?: '-',
-                'kelas_nama' => $murid->kelas?->nama ?: 'Tanpa Kelas',
-                'foto_url' => $murid->foto_url,
+        $muridIds = array_column($cachedProfiles, 'murid_id');
+        $todayAttendances = empty($muridIds)
+            ? collect()
+            : AbsensiMurid::query()
+                ->where('school_id', $selectedSchoolId)
+                ->padaTanggal($today)
+                ->whereIn('murid_id', $muridIds)
+                ->get(['id', 'murid_id', 'jam_masuk', 'jam_pulang', 'status'])
+                ->keyBy('murid_id');
+
+        $students = collect($cachedProfiles)->map(function (array $student) use ($todayAttendances): array {
+            $todayAttendance = $todayAttendances->get($student['murid_id']);
+
+            return array_merge($student, [
                 'today_jam_masuk' => $todayAttendance?->jam_masuk?->format('H:i:s'),
                 'today_jam_pulang' => $todayAttendance?->jam_pulang?->format('H:i:s'),
                 'today_status' => $todayAttendance?->status,
-                'descriptors' => $murid->activeFaceProfiles->map(fn ($profile): array => [
-                    'face_profile_id' => $profile->id,
-                    'label' => $profile->label,
-                    'descriptor' => $profile->face_descriptor,
-                ])->values()->all(),
-            ];
+            ]);
         })->values();
 
         return response()->json([
@@ -144,7 +165,7 @@ class AbsenMuridController extends Controller
         $existing = AbsensiMurid::query()
             ->where('school_id', $murid->school_id)
             ->where('murid_id', $murid->id)
-            ->whereDate('tanggal', $today)
+            ->padaTanggal($today)
             ->first();
 
         if ($mode === 'masuk') {

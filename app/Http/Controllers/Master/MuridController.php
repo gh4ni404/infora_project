@@ -9,6 +9,7 @@ use App\Http\Requests\Master\UpdateMuridRequest;
 use App\Models\Kelas;
 use App\Models\MenuAccessTemplate;
 use App\Models\Murid;
+use App\Models\MuridFaceProfile;
 use App\Models\Provinsi;
 use App\Models\Tingkatan;
 use App\Services\SpreadsheetService;
@@ -187,6 +188,7 @@ class MuridController extends Controller
         }
 
         $murid->update($data);
+        MuridFaceProfile::clearDescriptorCache($murid->school_id);
 
         if ($murid->user) {
             $murid->user->update([
@@ -216,6 +218,7 @@ class MuridController extends Controller
         }
 
         $murid->delete();
+        MuridFaceProfile::clearDescriptorCache($schoolId);
 
         return redirect()
             ->route('master.data-murid', $this->schoolRedirectParams($request, $schoolId))
@@ -230,6 +233,7 @@ class MuridController extends Controller
         $this->authorizeSchool($request, $murid->school_id);
 
         $murid->update(['is_active' => ! $murid->is_active]);
+        MuridFaceProfile::clearDescriptorCache($murid->school_id);
 
         if ($murid->user) {
             $murid->user->update(['is_active' => $murid->is_active]);

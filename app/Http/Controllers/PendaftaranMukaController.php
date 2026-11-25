@@ -129,6 +129,8 @@ class PendaftaranMukaController extends Controller
             'registered_by' => $request->user()?->id,
         ]);
 
+        MuridFaceProfile::clearDescriptorCache($murid->school_id);
+
         // Sinkronkan ke pasfoto murid dan avatar akun secara terpisah agar penghapusan sampel tidak memutus avatar
         if (! empty($data['sync_murid_foto']) && empty($murid->foto_path)) {
             $avatarPath = ImageUploader::uploadBase64(
@@ -205,6 +207,7 @@ class PendaftaranMukaController extends Controller
 
         $faceProfile->loadMissing('murid:id,nama_lengkap');
         $faceProfile->update(['is_active' => ! $faceProfile->is_active]);
+        MuridFaceProfile::clearDescriptorCache($faceProfile->school_id);
 
         $statusText = $faceProfile->is_active ? 'diaktifkan' : 'dinonaktifkan';
         $message = "Sampel wajah {$faceProfile->label} milik {$faceProfile->murid?->nama_lengkap} berhasil {$statusText}.";
@@ -235,6 +238,7 @@ class PendaftaranMukaController extends Controller
 
         ImageUploader::delete($faceProfile->foto_path);
         $faceProfile->delete();
+        MuridFaceProfile::clearDescriptorCache($schoolId);
 
         $message = "Sampel wajah {$label} milik {$muridName} berhasil dihapus.";
 

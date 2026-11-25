@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Cache;
 
 class MuridFaceProfile extends Model
 {
@@ -134,5 +135,25 @@ class MuridFaceProfile extends Model
     public function scopeUntukSekolah(Builder $query, int $schoolId): Builder
     {
         return $query->where('school_id', $schoolId);
+    }
+
+    /**
+     * Dapatkan cache key terversi untuk payload descriptor wajah (aman untuk file cache driver).
+     */
+    public static function descriptorCacheKey(int $schoolId, ?int $kelasId = null): string
+    {
+        $version = (int) Cache::get("face_descriptors_ver_{$schoolId}", 1);
+        $kelasSuffix = $kelasId !== null ? (string) $kelasId : 'all';
+
+        return "face_descriptors_{$schoolId}_v{$version}_k{$kelasSuffix}";
+    }
+
+    /**
+     * Invalidasi cache descriptor wajah untuk sekolah tertentu.
+     */
+    public static function clearDescriptorCache(int $schoolId): void
+    {
+        $version = (int) Cache::get("face_descriptors_ver_{$schoolId}", 1);
+        Cache::forever("face_descriptors_ver_{$schoolId}", $version + 1);
     }
 }

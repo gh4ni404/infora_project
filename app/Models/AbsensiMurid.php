@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 class AbsensiMurid extends Model
 {
@@ -164,13 +165,15 @@ class AbsensiMurid extends Model
     }
 
     /**
-     * Scope filter berdasarkan tanggal absensi.
+     * Scope filter berdasarkan tanggal absensi (range query agar indeks DATE tetap terpakai).
      *
      * @param  Builder<$this>  $query
      * @return Builder<$this>
      */
     public function scopePadaTanggal(Builder $query, string $date): Builder
     {
-        return $query->whereDate('tanggal', $date);
+        $nextDate = Carbon::parse($date)->addDay()->toDateString();
+
+        return $query->where('tanggal', '>=', $date)->where('tanggal', '<', $nextDate);
     }
 }
