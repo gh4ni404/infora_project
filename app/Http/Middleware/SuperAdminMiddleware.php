@@ -83,7 +83,7 @@ class SuperAdminMiddleware
         return $request->routeIs([
             'logout',
             'profile.*',
-            'system.under-development',
+            'system.under-development*',
             'wilayah.dropdown.*',
             'storage.*',
             '_boost.*',

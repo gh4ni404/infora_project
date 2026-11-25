@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\TracksDevelopmentProgress;
 use App\Support\SidebarCache;
 use App\Support\TextFormatter;
 use Database\Factories\SubMenuFactory;
@@ -14,15 +15,21 @@ use Illuminate\Support\Facades\Route;
 class SubMenu extends Model
 {
     /** @use HasFactory<SubMenuFactory> */
-    use HasFactory;
+    use HasFactory, TracksDevelopmentProgress;
 
     /**
      * The "booted" method of the model.
      */
     protected static function booted(): void
     {
-        static::saved(fn () => SidebarCache::flushGlobal());
-        static::deleted(fn () => SidebarCache::flushGlobal());
+        static::saved(function (SubMenu $subMenu): void {
+            SidebarCache::flushGlobal();
+            static::clearDevelopmentCache('submenu', $subMenu->id);
+        });
+        static::deleted(function (SubMenu $subMenu): void {
+            SidebarCache::flushGlobal();
+            static::clearDevelopmentCache('submenu', $subMenu->id);
+        });
     }
 
     /**
@@ -47,6 +54,10 @@ class SubMenu extends Model
         'route_name',
         'order',
         'is_active',
+        'dev_progress',
+        'dev_stage',
+        'dev_note',
+        'dev_version',
     ];
 
     /**
@@ -59,6 +70,7 @@ class SubMenu extends Model
         return [
             'order' => 'integer',
             'is_active' => 'boolean',
+            'dev_progress' => 'integer',
         ];
     }
 

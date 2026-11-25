@@ -113,6 +113,8 @@
         :checked="old('is_active', '1') == '1'"
     />
 
+    @include('system.partials.dev-progress-fields', ['idPrefix' => 'edit_submenu'])
+
     {{-- Footer Modal --}}
     <x-slot:footer>
         <button type="button" class="btn-secondary" id="btnCancelEditSubMenu">Batal</button>

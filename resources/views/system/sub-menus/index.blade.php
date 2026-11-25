@@ -285,6 +285,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         document.getElementById('edit_submenu_order').value = subMenu.order ?? 1;
         document.getElementById('edit_submenu_is_active').checked = Boolean(subMenu.is_active);
+        document.getElementById('edit_submenu_dev_progress').value = subMenu.dev_progress ?? 0;
+        document.getElementById('edit_submenu_dev_version').value = subMenu.dev_version || '';
+        document.getElementById('edit_submenu_dev_stage').value = subMenu.dev_stage || '';
+        document.getElementById('edit_submenu_dev_note').value = subMenu.dev_note || '';
     });
 
     // 3. Modal Konfirmasi Hapus Sub-Menu

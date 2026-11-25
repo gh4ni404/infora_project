@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\TracksDevelopmentProgress;
 use App\Support\SidebarCache;
 use App\Support\TextFormatter;
 use Database\Factories\MenuFactory;
@@ -16,15 +17,21 @@ use Illuminate\Support\Str;
 class Menu extends Model
 {
     /** @use HasFactory<MenuFactory> */
-    use HasFactory;
+    use HasFactory, TracksDevelopmentProgress;
 
     /**
      * The "booted" method of the model.
      */
     protected static function booted(): void
     {
-        static::saved(fn () => SidebarCache::flushGlobal());
-        static::deleted(fn () => SidebarCache::flushGlobal());
+        static::saved(function (Menu $menu): void {
+            SidebarCache::flushGlobal();
+            static::clearDevelopmentCache('menu', $menu->id);
+        });
+        static::deleted(function (Menu $menu): void {
+            SidebarCache::flushGlobal();
+            static::clearDevelopmentCache('menu', $menu->id);
+        });
     }
 
     /**
@@ -50,6 +57,10 @@ class Menu extends Model
         'icon',
         'order',
         'is_active',
+        'dev_progress',
+        'dev_stage',
+        'dev_note',
+        'dev_version',
     ];
 
     /**
@@ -62,6 +73,7 @@ class Menu extends Model
         return [
             'order' => 'integer',
             'is_active' => 'boolean',
+            'dev_progress' => 'integer',
         ];
     }
 

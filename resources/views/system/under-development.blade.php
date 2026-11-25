@@ -108,7 +108,7 @@
                             </div>
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span style="color: var(--infora-text-muted);">Implementasi Code:</span>
-                                <span style="color: #f59e0b; font-weight: 500;">Menunggu Controller</span>
+                                <span style="color: #f59e0b; font-weight: 500;">Menunggu Controller ({{ $devStatus['progress'] ?? 0 }}%)</span>
                             </div>
                         </div>
                     </div>
@@ -212,23 +212,50 @@
                     </p>
                 </div>
 
-                {{-- 4. Progress Card --}}
-                <div class="max-w-lg mx-auto bg-slate-50/80 border border-slate-100 rounded-xl p-4 mb-8">
-                    <div class="flex items-center justify-between text-xs sm:text-sm font-semibold mb-2">
+                {{-- 4. Progress Card (Realtime Lightweight via Cached Status Polling) --}}
+                <div
+                    id="devProgressCard"
+                    class="w-full max-w-lg mx-auto bg-slate-50/80 border border-slate-100 rounded-xl p-4 mb-8 text-left"
+                    data-status-url="{{ route('system.under-development.status', ['type' => $itemType === 'Sub-Menu' ? 'submenu' : 'menu', 'id' => $item->id]) }}"
+                >
+                    <div class="flex items-center justify-between gap-2 text-xs sm:text-sm font-semibold mb-2">
                         <div class="flex items-center gap-1.5 text-slate-700">
-                            <x-icon name="zap" size="16" class="text-sky-500" />
-                            <span>Tahap Integrasi Data Sistem</span>
+                            <x-icon name="zap" size="16" class="text-sky-500 shrink-0" />
+                            <span id="devStageLabel">{{ $devStatus['stage'] }}</span>
                         </div>
-                        <span class="text-sky-600 font-bold">80%</span>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-sky-50 text-sky-700 border border-sky-200/70" id="devLiveBadge">
+                                <span class="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse"></span>
+                                <span id="devLiveStatusText">Live</span>
+                            </span>
+                            <span class="text-sky-600 font-bold tabular-nums" id="devProgressPercent">{{ $devStatus['progress'] }}%</span>
+                        </div>
                     </div>
 
-                    <div class="w-full bg-slate-200/80 h-2 rounded-full overflow-hidden mb-2">
-                        <div class="bg-linear-to-r from-sky-500 to-blue-600 h-full rounded-full w-4/5"></div>
+                    <div class="mb-2.5">
+                        <progress id="devProgressBar" class="infora-progress" value="{{ $devStatus['progress'] }}" max="100"></progress>
                     </div>
 
-                    <div class="flex items-center justify-between text-xs text-slate-400">
-                        <span>Proses sinkronisasi komponen antarmuka</span>
-                        <span class="font-mono">v0.9-alpha</span>
+                    <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+                        <span id="devNoteLabel">{{ $devStatus['note'] }}</span>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span id="devUpdatedHuman">Diperbarui {{ $devStatus['updated_human'] }}</span>
+                            <span>&bull;</span>
+                            <span class="font-mono text-slate-500" id="devVersionLabel">{{ $devStatus['version'] }}</span>
+                            <button type="button" id="btnCheckDevStatus" class="btn-secondary btn-sm" data-no-progress title="Periksa pembaruan status fitur sekarang">
+                                <x-icon name="sync" size="12" />
+                                <span>Cek</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="devReadyBanner" class="hidden mt-3 p-3 rounded-lg bg-emerald-50 border border-emerald-200">
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="text-xs text-emerald-800 font-medium">
+                                Fitur telah selesai diperbarui dan siap digunakan. Mengalihkan halaman...
+                            </div>
+                            <a href="#" id="devReadyRedirectBtn" class="btn-primary btn-sm shrink-0">Buka Fitur</a>
+                        </div>
                     </div>
                 </div>
 
@@ -312,5 +339,136 @@
                     </div>
                 </div>
             </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const card = document.getElementById('devProgressCard');
+                if (!card || !card.dataset.statusUrl) {
+                    return;
+                }
+
+                const statusUrl = card.dataset.statusUrl;
+                const stageEl = document.getElementById('devStageLabel');
+                const noteEl = document.getElementById('devNoteLabel');
+                const percentEl = document.getElementById('devProgressPercent');
+                const barEl = document.getElementById('devProgressBar');
+                const versionEl = document.getElementById('devVersionLabel');
+                const updatedEl = document.getElementById('devUpdatedHuman');
+                const liveTextEl = document.getElementById('devLiveStatusText');
+                const readyBanner = document.getElementById('devReadyBanner');
+                const readyLink = document.getElementById('devReadyRedirectBtn');
+                const checkBtn = document.getElementById('btnCheckDevStatus');
+
+                const POLL_INTERVAL_MS = 30000;
+                let pollTimer = null;
+                let isFetching = false;
+                let isCompleted = false;
+                let lastFetchedAt = Date.now();
+
+                function applyStatus(data) {
+                    if (!data) return;
+
+                    const progress = Math.max(0, Math.min(100, Number(data.progress || 0)));
+                    if (stageEl && data.stage) stageEl.textContent = data.stage;
+                    if (noteEl && data.note) noteEl.textContent = data.note;
+                    if (percentEl) percentEl.textContent = progress + '%';
+                    if (barEl) barEl.value = progress;
+                    if (versionEl && data.version) versionEl.textContent = data.version;
+                    if (updatedEl && data.updated_human) updatedEl.textContent = 'Diperbarui ' + data.updated_human;
+
+                    if (data.ready && data.redirect_url) {
+                        isCompleted = true;
+                        stopPolling();
+                        if (liveTextEl) liveTextEl.textContent = 'Siap';
+                        if (readyLink) readyLink.href = data.redirect_url;
+                        if (readyBanner) readyBanner.classList.remove('hidden');
+
+                        window.setTimeout(function() {
+                            window.location.assign(data.redirect_url);
+                        }, 1500);
+                    } else if (progress >= 100) {
+                        isCompleted = true;
+                        stopPolling();
+                        if (liveTextEl) liveTextEl.textContent = 'Selesai';
+                    }
+                }
+
+                async function fetchStatus(isManual) {
+                    if (isFetching || (isCompleted && !isManual)) {
+                        return;
+                    }
+
+                    isFetching = true;
+                    lastFetchedAt = Date.now();
+                    if (isManual && checkBtn) {
+                        checkBtn.disabled = true;
+                    }
+
+                    try {
+                        const response = await fetch(statusUrl, {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            credentials: 'same-origin'
+                        });
+
+                        if (response.ok) {
+                            const payload = await response.json();
+                            applyStatus(payload);
+                        }
+                    } catch (_err) {
+                        // Abaikan gangguan jaringan sementara agar tidak mengganggu pengguna
+                    } finally {
+                        isFetching = false;
+                        if (isManual && checkBtn) {
+                            checkBtn.disabled = false;
+                        }
+                    }
+                }
+
+                function startPolling() {
+                    if (pollTimer !== null || isCompleted) {
+                        return;
+                    }
+                    pollTimer = window.setInterval(function() {
+                        if (!document.hidden) {
+                            fetchStatus(false);
+                        }
+                    }, POLL_INTERVAL_MS);
+                }
+
+                function stopPolling() {
+                    if (pollTimer !== null) {
+                        window.clearInterval(pollTimer);
+                        pollTimer = null;
+                    }
+                }
+
+                document.addEventListener('visibilitychange', function() {
+                    if (document.hidden) {
+                        stopPolling();
+                        return;
+                    }
+
+                    if (!isCompleted) {
+                        if (Date.now() - lastFetchedAt >= POLL_INTERVAL_MS) {
+                            fetchStatus(false);
+                        }
+                        startPolling();
+                    }
+                });
+
+                if (checkBtn) {
+                    checkBtn.addEventListener('click', function() {
+                        fetchStatus(true);
+                    });
+                }
+
+                if (!document.hidden && Number(barEl?.value || 0) < 100) {
+                    startPolling();
+                }
+            });
+        </script>
     @endif
 @endsection

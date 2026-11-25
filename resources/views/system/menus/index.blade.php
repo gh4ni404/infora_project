@@ -185,6 +185,10 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('edit_menu_route_name').value = menu.route_name || '';
         document.getElementById('edit_menu_order').value = menu.order ?? 1;
         document.getElementById('edit_menu_is_active').checked = Boolean(menu.is_active);
+        document.getElementById('edit_menu_dev_progress').value = menu.dev_progress ?? 0;
+        document.getElementById('edit_menu_dev_version').value = menu.dev_version || '';
+        document.getElementById('edit_menu_dev_stage').value = menu.dev_stage || '';
+        document.getElementById('edit_menu_dev_note').value = menu.dev_note || '';
 
         if (typeof window['setIconValue_edit_menu_icon'] === 'function') {
             window['setIconValue_edit_menu_icon'](menu.icon || 'menu');

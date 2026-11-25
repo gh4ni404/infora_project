@@ -5,6 +5,8 @@ namespace App\Http\Controllers\System;
 use App\Http\Controllers\Controller;
 use App\Models\Menu;
 use App\Models\SubMenu;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -14,7 +16,7 @@ class UnderDevelopmentController extends Controller
     /**
      * Display the under-development placeholder page for a menu or sub-menu.
      */
-    public function show(Request $request): View
+    public function show(Request $request): View|RedirectResponse
     {
         $type = $request->query('type');
         $id = $request->integer('id');
@@ -36,6 +38,15 @@ class UnderDevelopmentController extends Controller
         } else {
             abort(404, 'Item navigasi tidak valid.');
         }
+
+        $registeredUrl = $item->resolveRegisteredUrl();
+        if ($registeredUrl) {
+            return redirect()->to($registeredUrl);
+        }
+
+        $devStatus = $type === 'submenu'
+            ? SubMenu::cachedDevelopmentStatus('submenu', $item->id)
+            : Menu::cachedDevelopmentStatus('menu', $item->id);
 
         $rawRoute = $item->route_name;
         $cleanRoute = $rawRoute ?: Str::slug(Str::replace(['.', '_'], '-', $item->name));
@@ -60,7 +71,33 @@ class UnderDevelopmentController extends Controller
             'cleanRoute',
             'controllerBaseName',
             'suggestedRouteCode',
-            'suggestedArtisanCmd'
+            'suggestedArtisanCmd',
+            'devStatus'
         ));
+    }
+
+    /**
+     * Kembalikan status progres pengembangan fitur secara ringan berbasis cache dalam format JSON.
+     */
+    public function status(Request $request): JsonResponse
+    {
+        $type = (string) $request->query('type');
+        $id = $request->integer('id');
+
+        if ($id <= 0 || ! in_array($type, ['menu', 'submenu'], true)) {
+            abort(404, 'Item navigasi tidak valid.');
+        }
+
+        $devStatus = $type === 'submenu'
+            ? SubMenu::cachedDevelopmentStatus('submenu', $id)
+            : Menu::cachedDevelopmentStatus('menu', $id);
+
+        if (! $devStatus) {
+            abort(404, 'Item navigasi tidak ditemukan.');
+        }
+
+        return response()
+            ->json($devStatus)
+            ->header('Cache-Control', 'no-store, private');
     }
 }
