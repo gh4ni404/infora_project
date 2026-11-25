@@ -115,7 +115,7 @@ test('super admin can store new gtk using string jenis_ptk Guru and normalizes t
 
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-gtk.store'), $postData);
 
-    $response->assertRedirect(route('master.data-gtk', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-gtk'));
     $response->assertSessionHas('success');
 
     $gtk = Gtk::where('nama_lengkap', 'Guru Matematika Baru')->first();
@@ -135,7 +135,7 @@ test('super admin can store new gtk using string jenis_ptk Staf and normalizes t
 
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-gtk.store'), $postData);
 
-    $response->assertRedirect(route('master.data-gtk', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-gtk'));
     $response->assertSessionHas('success');
 
     $gtk = Gtk::where('nama_lengkap', 'Staf Keuangan Baru')->first();
@@ -180,7 +180,7 @@ test('super admin can store new gtk and automatically create user account', func
 
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-gtk.store'), $postData);
 
-    $response->assertRedirect(route('master.data-gtk', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-gtk'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('gtks', [
@@ -221,7 +221,7 @@ test('storing new gtk without password automatically uses nip as default passwor
 
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-gtk.store'), $postData);
 
-    $response->assertRedirect(route('master.data-gtk', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-gtk'));
     $response->assertSessionHas('success');
 
     $gtk = Gtk::where('nip', '19880101 201201 1 003')->first();
@@ -241,7 +241,7 @@ test('storing new gtk without nip nuptk nik uses name slug as default username a
 
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-gtk.store'), $postData);
 
-    $response->assertRedirect(route('master.data-gtk', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-gtk'));
     $response->assertSessionHas('success');
 
     $gtk = Gtk::where('nama_lengkap', 'Staf Honorer Baru')->first();
@@ -315,7 +315,7 @@ test('super admin can update existing gtk data and syncs user account', function
 
     $response = $this->actingAs($this->superAdmin)->put(route('master.data-gtk.update', $gtk), $updateData);
 
-    $response->assertRedirect(route('master.data-gtk', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-gtk'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('gtks', [
@@ -388,7 +388,7 @@ test('updating gtk preserves non-form fields such as alamat and tanggal lahir', 
 
     $response = $this->actingAs($this->superAdmin)->put(route('master.data-gtk.update', $gtk), $updateData);
 
-    $response->assertRedirect(route('master.data-gtk', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-gtk'));
     $response->assertSessionHas('success');
 
     $freshGtk = $gtk->fresh();
@@ -412,7 +412,7 @@ test('super admin can toggle gtk active status and syncs user status', function 
 
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-gtk.toggle-status', $gtk));
 
-    $response->assertRedirect(route('master.data-gtk', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-gtk'));
     $response->assertSessionHas('success');
 
     expect($gtk->fresh()->is_active)->toBeFalse();
@@ -433,7 +433,7 @@ test('super admin can reset gtk password', function () {
 
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-gtk.reset-password', $gtk));
 
-    $response->assertRedirect(route('master.data-gtk', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-gtk'));
     $response->assertSessionHas('success');
 
     // Password should now match NIP
@@ -454,7 +454,7 @@ test('super admin can soft delete gtk and deletes associated user account', func
 
     $response = $this->actingAs($this->superAdmin)->delete(route('master.data-gtk.destroy', $gtk));
 
-    $response->assertRedirect(route('master.data-gtk', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-gtk'));
     $response->assertSessionHas('success');
 
     $this->assertSoftDeleted('gtks', ['id' => $gtk->id]);
@@ -535,7 +535,7 @@ test('search and filter query parameters filter results correctly', function () 
 });
 
 test('redirect after failed validation on storing gtk renders data-gtk page without array to string conversion', function () {
-    $response = $this->from(route('master.data-gtk', ['school_id' => $this->schoolA->id]))
+    $response = $this->from(route('master.data-gtk'))
         ->actingAs($this->superAdmin)
         ->post(route('master.data-gtk.store'), [
             'school_id' => $this->schoolA->id,
@@ -543,9 +543,9 @@ test('redirect after failed validation on storing gtk renders data-gtk page with
             'jenis_ptk' => ['Guru Mata Pelajaran'],
         ]);
 
-    $response->assertRedirect(route('master.data-gtk', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-gtk'));
     $response->assertSessionHasErrors(['nama_lengkap']);
 
-    $indexResponse = $this->actingAs($this->superAdmin)->get(route('master.data-gtk', ['school_id' => $this->schoolA->id]));
+    $indexResponse = $this->actingAs($this->superAdmin)->get(route('master.data-gtk'));
     $indexResponse->assertOk();
 });

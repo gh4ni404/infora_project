@@ -105,7 +105,6 @@ test('super admin can store new academic calendar event', function () {
         ->post(route('konfigurasi-sekolah.kalender-akademik.store'), $payload);
 
     $response->assertRedirect(route('konfigurasi-sekolah.kalender-akademik', [
-        'school_id' => $this->school->id,
         'view' => 'kalender',
     ]));
     $response->assertSessionHas('success');
@@ -125,7 +124,6 @@ test('validation fails when required fields are missing', function () {
         ->post(route('konfigurasi-sekolah.kalender-akademik.store'), []);
 
     $response->assertSessionHasErrors([
-        'school_id',
         'judul_kegiatan',
         'tanggal_mulai',
         'tanggal_selesai',
@@ -182,7 +180,6 @@ test('super admin can update existing academic calendar event', function () {
         ->put(route('konfigurasi-sekolah.kalender-akademik.update', $event), $updatePayload);
 
     $response->assertRedirect(route('konfigurasi-sekolah.kalender-akademik', [
-        'school_id' => $this->school->id,
         'view' => 'kalender',
     ]));
     $response->assertSessionHas('success');
@@ -207,9 +204,7 @@ test('edit action redirects to index with school_id', function () {
 
     $response = $this->actingAs($this->superAdmin)->get(route('konfigurasi-sekolah.kalender-akademik.edit', $event));
 
-    $response->assertRedirect(route('konfigurasi-sekolah.kalender-akademik', [
-        'school_id' => $this->school->id,
-    ]));
+    $response->assertRedirect(route('konfigurasi-sekolah.kalender-akademik'));
 });
 
 test('super admin can delete academic calendar event', function () {
@@ -228,7 +223,6 @@ test('super admin can delete academic calendar event', function () {
         ->delete(route('konfigurasi-sekolah.kalender-akademik.destroy', $event));
 
     $response->assertRedirect(route('konfigurasi-sekolah.kalender-akademik', [
-        'school_id' => $this->school->id,
         'view' => 'kalender',
     ]));
     $response->assertSessionHas('success');
@@ -568,10 +562,10 @@ test('cannot store academic calendar event with semester not registered in acade
 });
 
 test('kalender akademik view provides hasTahunAjaran false and shows warning when school has no academic year', function () {
-    $emptySchool = School::factory()->create(['name' => 'Sekolah Belum Ada TA', 'npsn' => '77889900', 'is_active' => true]);
+    TahunAjaran::query()->where('school_id', $this->school->id)->delete();
 
     $response = $this->actingAs($this->superAdmin)->get(
-        route('konfigurasi-sekolah.kalender-akademik', ['school_id' => $emptySchool->id])
+        route('konfigurasi-sekolah.kalender-akademik')
     );
 
     $response->assertOk();

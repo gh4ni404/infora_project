@@ -99,7 +99,7 @@ test('super admin can view data murid page with kpi cards and modals', function 
     $response->assertSee('modalDeleteMurid');
 });
 
-test('tenancy isolation strictly filters murid per school', function () {
+test('tenancy isolation strictly filters murid to active single school', function () {
     $muridA = Murid::factory()->create([
         'school_id' => $this->schoolA->id,
         'nama_lengkap' => 'Murid Sekolah A',
@@ -110,21 +110,14 @@ test('tenancy isolation strictly filters murid per school', function () {
         'nama_lengkap' => 'Murid Sekolah B',
     ]);
 
-    $responseA = $this->actingAs($this->superAdmin)->get(route('master.data-murid', [
-        'school_id' => $this->schoolA->id,
-    ]));
-
-    $responseA->assertOk();
-    $responseA->assertSee('Murid Sekolah A');
-    $responseA->assertDontSee('Murid Sekolah B');
-
     $responseB = $this->actingAs($this->superAdmin)->get(route('master.data-murid', [
         'school_id' => $this->schoolB->id,
     ]));
 
     $responseB->assertOk();
-    $responseB->assertSee('Murid Sekolah B');
-    $responseB->assertDontSee('Murid Sekolah A');
+    $responseB->assertSee('Murid Sekolah A');
+    $responseB->assertDontSee('Murid Sekolah B');
+    $responseB->assertDontSee('id="schoolFilterForm"', false);
 });
 
 test('search filter matches nama, nisn, or nis', function () {
@@ -198,7 +191,7 @@ test('super admin can create new murid and automatically generate user account',
 
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-murid.store'), $payload);
 
-    $response->assertRedirect(route('master.data-murid', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-murid'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('murids', [
@@ -286,7 +279,7 @@ test('super admin can update murid data and sync user account', function () {
 
     $response = $this->actingAs($this->superAdmin)->put(route('master.data-murid.update', $murid), $payload);
 
-    $response->assertRedirect(route('master.data-murid', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-murid'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('murids', [
@@ -330,7 +323,7 @@ test('toggle status switches murid and user active state', function () {
 
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-murid.toggle-status', $murid));
 
-    $response->assertRedirect(route('master.data-murid', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-murid'));
     expect($murid->fresh()->is_active)->toBeFalse()
         ->and($murid->user->fresh()->is_active)->toBeFalse();
 
@@ -347,7 +340,7 @@ test('reset password resets user account password to default', function () {
 
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-murid.reset-password', $murid));
 
-    $response->assertRedirect(route('master.data-murid', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-murid'));
     $response->assertSessionHas('success');
 
     // Cek kata sandi dapat digunakan untuk login
@@ -362,7 +355,7 @@ test('destroy soft deletes murid and deactivates user account', function () {
 
     $response = $this->actingAs($this->superAdmin)->delete(route('master.data-murid.destroy', $murid));
 
-    $response->assertRedirect(route('master.data-murid', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-murid'));
     $response->assertSessionHas('success');
 
     $this->assertSoftDeleted('murids', ['id' => $murid->id]);

@@ -156,7 +156,7 @@ test('super admin can import valid essential gtk spreadsheet and create user acc
             'file' => $uploadedFile,
         ]);
 
-    $response->assertRedirect(route('master.data-gtk', ['school_id' => $this->school->id]));
+    $response->assertRedirect(route('master.data-gtk'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('gtks', [
@@ -209,7 +209,7 @@ test('super admin can import spreadsheet with only essential columns and auto-ge
             'file' => $uploadedFile,
         ]);
 
-    $response->assertRedirect(route('master.data-gtk', ['school_id' => $this->school->id]));
+    $response->assertRedirect(route('master.data-gtk'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('gtks', [
@@ -290,7 +290,7 @@ test('super admin can import legacy 17-column gtk spreadsheet without errors', f
             'file' => $uploadedFile,
         ]);
 
-    $response->assertRedirect(route('master.data-gtk', ['school_id' => $this->school->id]));
+    $response->assertRedirect(route('master.data-gtk'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('gtks', [
@@ -349,7 +349,7 @@ test('importing gtk with existing nik or nip updates the existing record', funct
             'file' => $uploadedFile,
         ]);
 
-    $response->assertRedirect(route('master.data-gtk', ['school_id' => $this->school->id]));
+    $response->assertRedirect(route('master.data-gtk'));
     $response->assertSessionHas('success');
 
     // Pastikan tidak ada duplikasi data, record lama diupdate
@@ -401,7 +401,7 @@ test('importing gtk with same full name without nik or nip updates the existing 
             'file' => $uploadedFile,
         ]);
 
-    $response->assertRedirect(route('master.data-gtk', ['school_id' => $this->school->id]));
+    $response->assertRedirect(route('master.data-gtk'));
     $response->assertSessionHas('success');
 
     expect(Gtk::where('school_id', $this->school->id)->where('nama_lengkap', 'Budi Santoso')->count())->toBe(1);
@@ -432,11 +432,7 @@ test('import gtk validates file type and presence', function () {
     $responseInvalid->assertSessionHasErrors('file');
 });
 
-test('super admin importing gtk with multiple schools targets the selected school in payload and not the first school', function () {
-    $schoolA = School::factory()->create([
-        'name' => 'MAS Pompanua',
-        'is_active' => true,
-    ]);
+test('super admin importing gtk in single-school mode always targets the active school', function () {
     $schoolB = School::factory()->create([
         'name' => 'SMAN 20 Bone',
         'is_active' => true,
@@ -466,23 +462,22 @@ test('super admin importing gtk with multiple schools targets the selected schoo
         true
     );
 
-    // Super admin submits to import route with school_id = School B (SMAN 20 Bone)
+    // Super admin mengirim school_id lain, namun mode 1 sekolah tetap menargetkan sekolah aktif tunggal
     $response = $this->actingAs($this->superAdmin)
         ->post(route('master.data-gtk.import'), [
             'school_id' => $schoolB->id,
             'file' => $uploadedFile,
         ]);
 
-    $response->assertRedirect(route('master.data-gtk', ['school_id' => $schoolB->id]));
+    $response->assertRedirect(route('master.data-gtk'));
     $response->assertSessionHas('success');
 
-    // Pastikan data tersimpan di SMAN 20 Bone (School B), BUKAN di MAS Pompanua (School A)
     $this->assertDatabaseHas('gtks', [
-        'school_id' => $schoolB->id,
+        'school_id' => $this->school->id,
         'nama_lengkap' => 'Guru Khusus Sman 20',
     ]);
     $this->assertDatabaseMissing('gtks', [
-        'school_id' => $schoolA->id,
+        'school_id' => $schoolB->id,
         'nama_lengkap' => 'Guru Khusus Sman 20',
     ]);
 
@@ -528,7 +523,7 @@ test('super admin can import spreadsheet using simplified Guru and Staf categori
             'file' => $uploadedFile,
         ]);
 
-    $response->assertRedirect(route('master.data-gtk', ['school_id' => $this->school->id]));
+    $response->assertRedirect(route('master.data-gtk'));
     $response->assertSessionHas('success');
 
     $guru = Gtk::where('nama_lengkap', 'Guru Bahasa Indonesia')->first();

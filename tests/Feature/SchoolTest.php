@@ -420,16 +420,14 @@ test('super admin can update school with new wilayah foreign keys', function () 
     expect($school->kabupaten_id)->toBe($kab2->id);
 });
 
-test('super admin can sync all admin accounts for schools', function () {
+test('super admin can sync admin account for the active single school', function () {
     $school1 = School::factory()->create(['npsn' => '11223344']);
-    $school2 = School::factory()->create(['npsn' => '55667788']);
 
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-sekolah.sync-admins'));
     $response->assertRedirect(route('master.data-sekolah.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('users', ['username' => '11223344', 'user_type' => 'admin', 'school_id' => $school1->id]);
-    $this->assertDatabaseHas('users', ['username' => '55667788', 'user_type' => 'admin', 'school_id' => $school2->id]);
 });
 
 test('super admin can sync single admin account for a specific school', function () {

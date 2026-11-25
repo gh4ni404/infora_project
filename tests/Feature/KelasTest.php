@@ -143,21 +143,14 @@ test('school selector filters kelas list correctly for super admin', function ()
         'nama' => 'X Rombel SMA B',
     ]);
 
-    // Lihat Sekolah A
+    // Mode 1 sekolah selalu menampilkan sekolah aktif tunggal dan menyembunyikan selector multi-sekolah
     $responseA = $this->actingAs($this->superAdmin)->get(route('rombel.kelas', [
-        'school_id' => $this->schoolA->id,
+        'school_id' => $this->schoolB->id,
     ]));
     $responseA->assertOk();
     $responseA->assertSee('X Rombel SMK A');
     $responseA->assertDontSee('X Rombel SMA B');
-
-    // Lihat Sekolah B
-    $responseB = $this->actingAs($this->superAdmin)->get(route('rombel.kelas', [
-        'school_id' => $this->schoolB->id,
-    ]));
-    $responseB->assertOk();
-    $responseB->assertSee('X Rombel SMA B');
-    $responseB->assertDontSee('X Rombel SMK A');
+    $responseA->assertDontSee('id="schoolFilterForm"', false);
 });
 
 test('can filter kelas by tahun ajaran, tingkatan, jurusan, and status', function () {
@@ -286,7 +279,6 @@ test('can create a new kelas with valid data', function () {
     $response = $this->actingAs($this->superAdmin)->post(route('rombel.kelas.store'), $payload);
 
     $response->assertRedirect(route('rombel.kelas', [
-        'school_id' => $this->schoolA->id,
         'tahun_ajaran_id' => $this->tahunAjaranA->id,
     ]));
     $response->assertSessionHas('success');
@@ -382,7 +374,6 @@ test('can update existing kelas', function () {
     $response = $this->actingAs($this->superAdmin)->put(route('rombel.kelas.update', $kelas), $payload);
 
     $response->assertRedirect(route('rombel.kelas', [
-        'school_id' => $this->schoolA->id,
         'tahun_ajaran_id' => $this->tahunAjaranA->id,
     ]));
     $response->assertSessionHas('success');
@@ -484,7 +475,6 @@ test('can delete kelas', function () {
     $response = $this->actingAs($this->superAdmin)->delete(route('rombel.kelas.destroy', $kelas));
 
     $response->assertRedirect(route('rombel.kelas', [
-        'school_id' => $this->schoolA->id,
         'tahun_ajaran_id' => $this->tahunAjaranA->id,
     ]));
     $response->assertSessionHas('success');

@@ -58,7 +58,7 @@ test('super admin can access admin dashboard and view school selector', function
     $response->assertSee('40301234');
 });
 
-test('super admin can switch previewed school using school_id query parameter', function () {
+test('super admin resolves single active school even when school_id query parameter is passed', function () {
     $schoolA = School::factory()->create([
         'name' => 'SMK Negeri 1 Bone',
         'npsn' => '40301234',
@@ -74,8 +74,9 @@ test('super admin can switch previewed school using school_id query parameter', 
     $response = $this->actingAs($this->superAdmin)->get(route('dashboard.admin', ['school_id' => $schoolB->id]));
 
     $response->assertOk();
-    $response->assertSee('SMA Negeri 2 Watampone');
-    $response->assertSee('40305678');
+    $response->assertSee('SMK Negeri 1 Bone');
+    $response->assertSee('40301234');
+    $response->assertDontSee('SMA Negeri 2 Watampone');
 });
 
 test('admin sekolah can access dashboard.admin and view their school profile, stats, and calendar', function () {

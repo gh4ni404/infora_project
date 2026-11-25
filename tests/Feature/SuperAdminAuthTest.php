@@ -100,7 +100,7 @@ test('authenticated super admin can access dashboard', function () {
 
     $response->assertOk();
     $response->assertSee('Dashboard Super Administrator');
-    $response->assertSee('Entitas Pengembang Platform');
+    $response->assertSee('INFORA (Belum Ada Profil Sekolah)');
     $response->assertSee('id="sidebarMenuSearch"', false);
     $response->assertSee('search-box');
     $response->assertSee('id="sidebarToggle"', false);

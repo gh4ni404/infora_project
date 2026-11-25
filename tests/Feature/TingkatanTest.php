@@ -90,21 +90,14 @@ test('school selector filters tingkatan list correctly for super admin', functio
         'tingkat_angka' => 11,
     ]);
 
-    // View School A
-    $responseA = $this->actingAs($this->superAdmin)->get(route('master.data-tingkatan', [
-        'school_id' => $this->schoolA->id,
-    ]));
-    $responseA->assertOk();
-    $responseA->assertSee('Tingkat Sepuluh SMK');
-    $responseA->assertDontSee('Tingkat Sebelas SMA');
-
-    // View School B
+    // Mode 1 sekolah selalu menampilkan sekolah aktif tunggal dan menyembunyikan selector
     $responseB = $this->actingAs($this->superAdmin)->get(route('master.data-tingkatan', [
         'school_id' => $this->schoolB->id,
     ]));
     $responseB->assertOk();
-    $responseB->assertSee('Tingkat Sebelas SMA');
-    $responseB->assertDontSee('Tingkat Sepuluh SMK');
+    $responseB->assertSee('Tingkat Sepuluh SMK');
+    $responseB->assertDontSee('Tingkat Sebelas SMA');
+    $responseB->assertDontSee('id="schoolFilterForm"', false);
 });
 
 test('search filter works accurately for kode, nama, and tingkat_angka', function () {
@@ -230,7 +223,7 @@ test('can store same kode in different schools (multi-tenancy isolation)', funct
         'is_active' => '1',
     ]);
 
-    $response->assertRedirect(route('master.data-tingkatan.index', ['school_id' => $this->schoolB->id]));
+    $response->assertRedirect(route('master.data-tingkatan.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('tingkatan', [
@@ -253,7 +246,7 @@ test('super admin can store new tingkatan with proper text normalization', funct
 
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-tingkatan.store'), $payload);
 
-    $response->assertRedirect(route('master.data-tingkatan.index', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-tingkatan.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('tingkatan', [
@@ -288,7 +281,7 @@ test('super admin can update existing tingkatan', function () {
 
     $response = $this->actingAs($this->superAdmin)->put(route('master.data-tingkatan.update', $tingkatan), $payload);
 
-    $response->assertRedirect(route('master.data-tingkatan.index', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-tingkatan.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('tingkatan', [
@@ -327,13 +320,13 @@ test('super admin can toggle active status of tingkatan', function () {
 
     // Deactivate
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-tingkatan.toggle-status', $tingkatan));
-    $response->assertRedirect(route('master.data-tingkatan.index', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-tingkatan.index'));
     $response->assertSessionHas('success');
     expect($tingkatan->fresh()->is_active)->toBeFalse();
 
     // Reactivate
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-tingkatan.toggle-status', $tingkatan));
-    $response->assertRedirect(route('master.data-tingkatan.index', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-tingkatan.index'));
     $response->assertSessionHas('success');
     expect($tingkatan->fresh()->is_active)->toBeTrue();
 });
@@ -347,7 +340,7 @@ test('super admin can delete tingkatan', function () {
 
     $response = $this->actingAs($this->superAdmin)->delete(route('master.data-tingkatan.destroy', $tingkatan));
 
-    $response->assertRedirect(route('master.data-tingkatan.index', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-tingkatan.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseMissing('tingkatan', [

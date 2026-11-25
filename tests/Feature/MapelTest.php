@@ -78,7 +78,7 @@ test('super admin can view master data mapel page and kpi cards', function () {
     $response->assertSee('modalDeleteMapel');
 });
 
-test('school selector filters mapel list correctly for super admin', function () {
+test('single-school mode keeps displaying active school mapel and hides school selector', function () {
     $mapelA = Mapel::factory()->create([
         'school_id' => $this->schoolA->id,
         'kode' => 'MAT-A',
@@ -91,21 +91,13 @@ test('school selector filters mapel list correctly for super admin', function ()
         'nama' => 'Matematika SMA B',
     ]);
 
-    // View School A
-    $responseA = $this->actingAs($this->superAdmin)->get(route('master.data-mapel', [
-        'school_id' => $this->schoolA->id,
-    ]));
-    $responseA->assertOk();
-    $responseA->assertSee('Matematika SMK A');
-    $responseA->assertDontSee('Matematika SMA B');
-
-    // View School B
     $responseB = $this->actingAs($this->superAdmin)->get(route('master.data-mapel', [
         'school_id' => $this->schoolB->id,
     ]));
     $responseB->assertOk();
-    $responseB->assertSee('Matematika SMA B');
-    $responseB->assertDontSee('Matematika SMK A');
+    $responseB->assertSee('Matematika SMK A');
+    $responseB->assertDontSee('Matematika SMA B');
+    $responseB->assertDontSee('id="schoolFilterForm"', false);
 });
 
 test('search filter works accurately for kode, nama, singkatan, and keterangan', function () {
@@ -299,7 +291,7 @@ test('super admin can store new mapel with proper text normalization', function 
 
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-mapel.store'), $payload);
 
-    $response->assertRedirect(route('master.data-mapel.index', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-mapel.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('mapel', [
@@ -330,7 +322,7 @@ test('can store same kode in same school (non-unique verified)', function () {
         'is_active' => '1',
     ]);
 
-    $response->assertRedirect(route('master.data-mapel.index', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-mapel.index'));
     $response->assertSessionHas('success');
 
     expect(Mapel::where('school_id', $this->schoolA->id)->where('kode', 'PROD')->count())->toBe(2);
@@ -360,7 +352,7 @@ test('super admin can update existing mapel', function () {
 
     $response = $this->actingAs($this->superAdmin)->put(route('master.data-mapel.update', $mapel), $payload);
 
-    $response->assertRedirect(route('master.data-mapel.index', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-mapel.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('mapel', [
@@ -401,13 +393,13 @@ test('super admin can toggle active status of mapel', function () {
 
     // Deactivate
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-mapel.toggle-status', $mapel));
-    $response->assertRedirect(route('master.data-mapel.index', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-mapel.index'));
     $response->assertSessionHas('success');
     expect($mapel->fresh()->is_active)->toBeFalse();
 
     // Reactivate
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-mapel.toggle-status', $mapel));
-    $response->assertRedirect(route('master.data-mapel.index', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-mapel.index'));
     $response->assertSessionHas('success');
     expect($mapel->fresh()->is_active)->toBeTrue();
 });
@@ -421,7 +413,7 @@ test('super admin can delete mapel', function () {
 
     $response = $this->actingAs($this->superAdmin)->delete(route('master.data-mapel.destroy', $mapel));
 
-    $response->assertRedirect(route('master.data-mapel.index', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('master.data-mapel.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseMissing('mapel', [

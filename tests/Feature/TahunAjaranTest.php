@@ -452,24 +452,25 @@ test('school admin cannot manipulate tahun ajaran or semester belonging to anoth
     $responseActivate->assertForbidden();
 });
 
-test('super admin sees school switcher when multiple active schools exist and can switch previewed school', function () {
-    $schoolA = School::factory()->create(['name' => 'SMA A Watampone', 'npsn' => '33333333', 'is_active' => true]);
+test('super admin does not see school switcher in single-school mode and stays on active school', function () {
     $schoolB = School::factory()->create(['name' => 'SMA B Watampone', 'npsn' => '44444444', 'is_active' => true]);
 
-    $taA = TahunAjaran::create(['school_id' => $schoolA->id, 'tahun' => '2026/2027', 'is_active' => true]);
-    $taB = TahunAjaran::create(['school_id' => $schoolB->id, 'tahun' => '2024/2025', 'is_active' => true]);
+    TahunAjaran::create(['school_id' => $this->school->id, 'tahun' => '2026/2027', 'is_active' => true]);
+    TahunAjaran::create(['school_id' => $schoolB->id, 'tahun' => '2024/2025', 'is_active' => true]);
 
     $response = $this->actingAs($this->superAdmin)->get(route('konfigurasi-sekolah.tahun-ajaran'));
     $response->assertOk();
-    $response->assertSee('id="schoolFilterForm"', false);
+    $response->assertDontSee('id="schoolFilterForm"', false);
+    $response->assertSee($this->school->name);
+    $response->assertSee('2026/2027');
 
-    // Switch ke School B
+    // Parameter school_id tidak mengalihkan sekolah aktif di mode 1 sekolah
     $responseSwitch = $this->actingAs($this->superAdmin)->get(
         route('konfigurasi-sekolah.tahun-ajaran', ['school_id' => $schoolB->id])
     );
     $responseSwitch->assertOk();
-    $responseSwitch->assertSee('SMA B Watampone');
-    $responseSwitch->assertSee('2024/2025');
+    $responseSwitch->assertSee($this->school->name);
+    $responseSwitch->assertDontSee('2024/2025');
 });
 
 test('super admin can deactivate an active tahun ajaran and deactivates its semesters', function () {

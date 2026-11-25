@@ -246,7 +246,7 @@ test('super admin can store face profile with json descriptor and sync empty mur
         'sync_murid_foto' => 1,
     ]);
 
-    $response->assertRedirect(route('pendaftaran_muka', ['school_id' => $this->schoolA->id]));
+    $response->assertRedirect(route('pendaftaran_muka'));
     $response->assertSessionHas('success');
 
     $profile = MuridFaceProfile::where('murid_id', $murid->id)->first();
@@ -414,7 +414,7 @@ test('toggle status and destroy work properly and enforce tenant isolation', fun
     // 1. Toggle status
     $this->actingAs($this->superAdmin)
         ->patch(route('pendaftaran_muka.toggle-status', $profile))
-        ->assertRedirect(route('pendaftaran_muka', ['school_id' => $this->schoolA->id]));
+        ->assertRedirect(route('pendaftaran_muka'));
 
     expect($profile->fresh()->is_active)->toBeFalse();
 
@@ -428,7 +428,7 @@ test('toggle status and destroy work properly and enforce tenant isolation', fun
     $faceFilePath = $profile->foto_path;
     $this->actingAs($this->superAdmin)
         ->delete(route('pendaftaran_muka.destroy', $profile))
-        ->assertRedirect(route('pendaftaran_muka', ['school_id' => $this->schoolA->id]));
+        ->assertRedirect(route('pendaftaran_muka'));
 
     $this->assertDatabaseMissing('murid_face_profiles', ['id' => $profile->id]);
     Storage::disk('public')->assertMissing($faceFilePath);

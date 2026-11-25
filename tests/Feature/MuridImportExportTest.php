@@ -152,7 +152,7 @@ test('super admin can import murid from excel file and automatically create user
         'file' => $uploadedFile,
     ]);
 
-    $response->assertRedirect(route('master.data-murid', ['school_id' => $this->school->id]));
+    $response->assertRedirect(route('master.data-murid'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('murids', [
@@ -220,13 +220,14 @@ test('super admin downloading template for madrasah gets NISM column header and 
     );
     Referensi::clearCache();
 
-    $madrasah = School::factory()->ma()->create([
+    $this->school->update([
         'name' => 'MAN 1 Watampone',
-        'is_active' => true,
+        'school_type' => 'MA',
     ]);
+    $madrasah = $this->school->fresh();
 
     $response = $this->actingAs($this->superAdmin)
-        ->get(route('master.data-murid.template', ['school_id' => $madrasah->id]));
+        ->get(route('master.data-murid.template'));
 
     $response->assertOk();
 
@@ -261,10 +262,11 @@ test('madrasah import rejects invalid nism with 6 digits and accepts valid 18-di
     );
     Referensi::clearCache();
 
-    $madrasah = School::factory()->ma()->create([
+    $this->school->update([
         'name' => 'MAN 1 Watampone',
-        'is_active' => true,
+        'school_type' => 'MA',
     ]);
+    $madrasah = $this->school->fresh();
 
     // Berkas 1: Berisi NISM 6 digit (tidak valid untuk madrasah)
     $spreadsheetInvalid = new Spreadsheet;

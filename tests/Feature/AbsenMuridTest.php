@@ -320,7 +320,7 @@ test('destroy removes attendance record with snapshot and enforces cross-school 
 
     $this->actingAs($this->superAdmin)
         ->delete(route('absen_murid.destroy', $absenA))
-        ->assertRedirect(route('absen_murid', ['school_id' => $this->schoolA->id]));
+        ->assertRedirect(route('absen_murid'));
 
     $this->assertDatabaseMissing('absensi_murids', ['id' => $absenA->id]);
     Storage::disk('public')->assertMissing($snapshotPath);

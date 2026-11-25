@@ -83,11 +83,10 @@ test('super admin can view master data jurusan page', function () {
     $response->assertSee('modalCreateJurusan');
     $response->assertSee('modalEditJurusan');
     $response->assertSee('modalDeleteJurusan');
-    $response->assertSee('id="school_id"', false);
-    $response->assertSee('name="school_id"', false);
+    $response->assertDontSee('id="schoolFilterForm"', false);
 });
 
-test('school selector filters jurusan list correctly', function () {
+test('single-school mode keeps displaying active school and ignores school_id switcher', function () {
     $jurusanSmk = Jurusan::factory()->create([
         'school_id' => $this->schoolSmk->id,
         'kode' => 'TKJ',
@@ -100,21 +99,12 @@ test('school selector filters jurusan list correctly', function () {
         'nama' => 'Matematika Dan Ilmu Alam',
     ]);
 
-    // View SMK page
-    $responseSmk = $this->actingAs($this->superAdmin)->get(route('master.data-jurusan.index', [
-        'school_id' => $this->schoolSmk->id,
-    ]));
-    $responseSmk->assertOk();
-    $responseSmk->assertSee('Teknik Komputer Jaringan');
-    $responseSmk->assertDontSee('Matematika Dan Ilmu Alam');
-
-    // View SMA page
     $responseSma = $this->actingAs($this->superAdmin)->get(route('master.data-jurusan.index', [
         'school_id' => $this->schoolSma->id,
     ]));
     $responseSma->assertOk();
-    $responseSma->assertSee('Matematika Dan Ilmu Alam');
-    $responseSma->assertDontSee('Teknik Komputer Jaringan');
+    $responseSma->assertSee('Teknik Komputer Jaringan');
+    $responseSma->assertDontSee('Matematika Dan Ilmu Alam');
 });
 
 test('search filter works accurately', function () {
@@ -201,7 +191,7 @@ test('super admin can store new jurusan with proper formatting', function () {
 
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-jurusan.store'), $payload);
 
-    $response->assertRedirect(route('master.data-jurusan.index', ['school_id' => $this->schoolSmk->id]));
+    $response->assertRedirect(route('master.data-jurusan.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('jurusan', [
@@ -238,7 +228,7 @@ test('super admin can update existing jurusan', function () {
 
     $response = $this->actingAs($this->superAdmin)->put(route('master.data-jurusan.update', $jurusan), $payload);
 
-    $response->assertRedirect(route('master.data-jurusan.index', ['school_id' => $this->schoolSmk->id]));
+    $response->assertRedirect(route('master.data-jurusan.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('jurusan', [
@@ -257,13 +247,13 @@ test('super admin can toggle active status of jurusan', function () {
 
     // Deactivate
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-jurusan.toggle-status', $jurusan));
-    $response->assertRedirect(route('master.data-jurusan.index', ['school_id' => $this->schoolSmk->id]));
+    $response->assertRedirect(route('master.data-jurusan.index'));
     $response->assertSessionHas('success');
     expect($jurusan->fresh()->is_active)->toBeFalse();
 
     // Reactivate
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-jurusan.toggle-status', $jurusan));
-    $response->assertRedirect(route('master.data-jurusan.index', ['school_id' => $this->schoolSmk->id]));
+    $response->assertRedirect(route('master.data-jurusan.index'));
     $response->assertSessionHas('success');
     expect($jurusan->fresh()->is_active)->toBeTrue();
 });
@@ -277,7 +267,7 @@ test('super admin can delete jurusan', function () {
 
     $response = $this->actingAs($this->superAdmin)->delete(route('master.data-jurusan.destroy', $jurusan));
 
-    $response->assertRedirect(route('master.data-jurusan.index', ['school_id' => $this->schoolSmk->id]));
+    $response->assertRedirect(route('master.data-jurusan.index'));
     $response->assertSessionHas('success');
 
     $this->assertDatabaseMissing('jurusan', [
