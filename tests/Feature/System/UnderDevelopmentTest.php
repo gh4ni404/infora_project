@@ -4,6 +4,7 @@ use App\Models\Menu;
 use App\Models\Module;
 use App\Models\SubMenu;
 use App\Models\User;
+use App\Models\UserMenuPermission;
 
 beforeEach(function () {
     $this->user = User::factory()->create([
@@ -101,4 +102,37 @@ test('isRouteActive returns true on under-development page for the corresponding
 
     expect($subMenu->isRouteActive())->toBeTrue()
         ->and($menu->hasActiveSubMenu())->toBeTrue();
+});
+
+test('non superadmin user with menu permission can access under-development page and sees friendly view', function () {
+    $gtkUser = User::factory()->create([
+        'user_type' => 'guru',
+        'is_active' => true,
+    ]);
+
+    $module = Module::create(['name' => 'AKADEMIK', 'order' => 1, 'is_active' => true]);
+    $menu = Menu::create([
+        'module_id' => $module->id,
+        'name' => 'Absensi KBM',
+        'route_name' => 'absensi',
+        'order' => 1,
+        'is_active' => true,
+    ]);
+
+    UserMenuPermission::create([
+        'user_id' => $gtkUser->id,
+        'menu_id' => $menu->id,
+        'can_view' => true,
+    ]);
+
+    $response = $this->actingAs($gtkUser)
+        ->get($menu->route_url);
+
+    $response->assertOk();
+    $response->assertSee('Absensi KBM');
+    $response->assertSee('Fitur Sedang Dalam Tahap Persiapan');
+    $response->assertSee('Segera Hadir');
+    $response->assertDontSee('php artisan make:controller');
+    $response->assertDontSee('Edit Konfigurasi Menu');
+    $response->assertDontSee('Panduan Developer');
 });

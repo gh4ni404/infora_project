@@ -807,6 +807,61 @@
         </svg>
         @break
 
+    @case('monitor-error')
+    <svg class="w-48 h-44 drop-shadow-sm relative z-10" fill="none" viewbox="0 0 200 180"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <!-- Monitor Stand -->
+                        <path d="M78 152H122" stroke="#94A3B8" stroke-linecap="round" stroke-width="4"></path>
+                        <path d="M100 134V152" stroke="#94A3B8" stroke-linecap="round" stroke-width="4"></path>
+                        <path d="M68 156H132" stroke="#CBD5E1" stroke-linecap="round" stroke-width="3"></path>
+                        <!-- Monitor Body -->
+                        <rect fill="#F8FAFC" height="110" rx="12" stroke="#0284C7" stroke-width="3.5"
+                            width="156" x="22" y="24"></rect>
+                        <!-- Screen Top Bar / Window Controls -->
+                        <path d="M22 46H178" stroke="#E2E8F0" stroke-width="2.5"></path>
+                        <circle cx="36" cy="35" fill="#EF4444" r="3.5"></circle>
+                        <circle cx="47" cy="35" fill="#F59E0B" r="3.5"></circle>
+                        <circle cx="58" cy="35" fill="#10B981" r="3.5"></circle>
+                        <!-- Screen Inner Background Grid Lines -->
+                        <path d="M40 70H88M40 84H76" stroke="#E2E8F0" stroke-linecap="round" stroke-width="2.5"></path>
+                        <rect fill="#E0F2FE" height="16" rx="4" width="30" x="38" y="100"></rect>
+                        <!-- Large Central System Gear -->
+                        <g transform="translate(108, 54)">
+                            <circle cx="28" cy="28" fill="#F0F9FF" r="16" stroke="#0284C7"
+                                stroke-width="3"></circle>
+                            <!-- Gear teeth -->
+                            <path
+                                d="M28 6V12M28 44V50M6 28H12M44 28H50M12.4 12.4L16.6 16.6M39.4 39.4L43.6 43.6M12.4 43.6L16.6 39.4M39.4 16.6L43.6 12.4"
+                                stroke="#0284C7" stroke-linecap="round" stroke-width="3.5"></path>
+                            <circle cx="28" cy="28" fill="#0284C7" r="7"></circle>
+                        </g>
+                        <!-- Construction Cone in front / bottom-right -->
+                        <g transform="translate(132, 94)">
+                            <!-- Base shadow -->
+                            <ellipse cx="22" cy="48" fill="#E2E8F0" rx="20" ry="4">
+                            </ellipse>
+                            <!-- Base plate -->
+                            <path d="M6 46L38 46" stroke="#D97706" stroke-linecap="round" stroke-width="5"></path>
+                            <!-- Cone Body -->
+                            <path d="M12 44L19 14C19.5 12 24.5 12 25 14L32 44H12Z" fill="#F59E0B"></path>
+                            <!-- Cone White Stripes -->
+                            <path d="M15 34L17 26H27L29 34H15Z" fill="#FFFFFF"></path>
+                            <path d="M18 20L19.5 14H24.5L26 20H18Z" fill="#FEF3C7"></path>
+                            <!-- Highlights -->
+                            <line stroke="#FDE68A" stroke-linecap="round" stroke-width="1.5" x1="20"
+                                x2="16" y1="16" y2="40"></line>
+                        </g>
+                        <!-- Floating Wrench Tool (Left accent) -->
+                        <g transform="translate(14, 88) rotate(-22)">
+                            <rect fill="#64748B" height="24" rx="2" width="7" x="12" y="10"></rect>
+                            <path
+                                d="M8 8C8 4.7 10.7 2 14 2C15.6 2 17.1 2.6 18.2 3.7L15 7L17 9L20.3 5.8C21.4 6.9 22 8.4 22 10C22 13.3 19.3 16 16 16C12.7 16 8 11.3 8 8Z"
+                                fill="#475569"></path>
+                            <circle cx="15.5" cy="30" fill="#F8FAFC" r="1.75"></circle>
+                        </g>
+                    </svg>
+        @break
+
     @default
         <svg {{ $attributes }} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="4"></circle>
