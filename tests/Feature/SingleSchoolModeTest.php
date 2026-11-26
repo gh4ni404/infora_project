@@ -367,3 +367,22 @@ test('infora:init-school infers SD school_type from school name when type option
         'status' => 'Negeri',
     ]);
 });
+
+test('infora:setup-school skips all seeders when without-seed option is passed', function () {
+    $this->artisan('infora:setup-school', [
+        '--name' => 'SMA Negeri 20 Bone',
+        '--npsn' => '40320003',
+        '--without-seed' => true,
+        '--skip-optimize' => true,
+        '--no-interaction' => true,
+    ])->assertSuccessful();
+
+    $this->assertDatabaseMissing('users', ['username' => 'superadmin']);
+    $this->assertDatabaseCount('modules', 0);
+    $this->assertDatabaseCount('provinsi', 0);
+    $this->assertDatabaseHas('schools', [
+        'name' => 'SMA Negeri 20 Bone',
+        'npsn' => '40320003',
+        'school_type' => 'SMA',
+    ]);
+});
