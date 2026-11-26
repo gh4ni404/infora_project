@@ -28,6 +28,7 @@ class SetupSchoolCommand extends Command
                             {--type= : Jenis sekolah (SMA, SMK, MA)}
                             {--status= : Status sekolah (Negeri atau Swasta)}
                             {--accreditation= : Akreditasi sekolah (A, B, C, Belum)}
+                            {--without-seed : Lewati seluruh proses seeding (data inti sistem dan wilayah)}
                             {--without-wilayah : Lewati seeding master wilayah Kemendagri agar setup lebih ringan}
                             {--skip-optimize : Lewati caching konfigurasi dan rute (artisan optimize)}
                             {--force : Tetap jalankan migrasi, seeder, dan sinkronisasi admin bila sekolah sudah ada}';
@@ -72,37 +73,40 @@ class SetupSchoolCommand extends Command
         $this->info('Menjalankan migrasi basis data...');
         $this->call('migrate', ['--force' => true]);
 
-        // 5. Jalankan seeder inti sistem
-        $coreSeeders = [
-            SuperAdminSeeder::class,
-            SystemMenuSeeder::class,
-            MenuAccessTemplateSeeder::class,
-        ];
+        // 5 & 6. Jalankan seeder inti sistem dan wilayah (kecuali dilewati via --without-seed)
+        if ($this->option('without-seed')) {
+            $this->line('Melewati seluruh proses seeding (--without-seed).');
+        } else {
+            $coreSeeders = [
+                SuperAdminSeeder::class,
+                SystemMenuSeeder::class,
+                MenuAccessTemplateSeeder::class,
+            ];
 
-        $this->info('Mengisi data inti sistem (Super Admin, Menu Navigasi, Template Peran)...');
-        foreach ($coreSeeders as $seederClass) {
-            $this->call('db:seed', [
-                '--class' => $seederClass,
-                '--force' => true,
-            ]);
-        }
-
-        // 6. Jalankan seeder wilayah Kemendagri (opsional dilewati via --without-wilayah)
-        if (! $this->option('without-wilayah')) {
-            $this->info('Mengisi data master wilayah Kemendagri...');
-            foreach ([
-                ProvinsiSeeder::class,
-                KabupatenSeeder::class,
-                KecamatanSeeder::class,
-                KelurahanSeeder::class,
-            ] as $wilayahSeeder) {
+            $this->info('Mengisi data inti sistem (Super Admin, Menu Navigasi, Template Peran)...');
+            foreach ($coreSeeders as $seederClass) {
                 $this->call('db:seed', [
-                    '--class' => $wilayahSeeder,
+                    '--class' => $seederClass,
                     '--force' => true,
                 ]);
             }
-        } else {
-            $this->line('Melewati seeding master wilayah Kemendagri (--without-wilayah).');
+
+            if (! $this->option('without-wilayah')) {
+                $this->info('Mengisi data master wilayah Kemendagri...');
+                foreach ([
+                    ProvinsiSeeder::class,
+                    KabupatenSeeder::class,
+                    KecamatanSeeder::class,
+                    KelurahanSeeder::class,
+                ] as $wilayahSeeder) {
+                    $this->call('db:seed', [
+                        '--class' => $wilayahSeeder,
+                        '--force' => true,
+                    ]);
+                }
+            } else {
+                $this->line('Melewati seeding master wilayah Kemendagri (--without-wilayah).');
+            }
         }
 
         // 7. Pastikan symlink storage publik sehat
