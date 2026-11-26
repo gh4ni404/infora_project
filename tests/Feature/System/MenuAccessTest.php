@@ -353,7 +353,7 @@ test('user without dashboard permission cannot access dashboard and is denied', 
 
 test('user with specific view permission can access resource index but cannot create without can_create', function () {
     $module = Module::create(['name' => 'ADMINISTRASI', 'order' => 1, 'is_active' => true]);
-    $menu = Menu::create(['module_id' => $module->id, 'name' => 'Data Sekolah', 'route_name' => 'master.data-sekolah.index', 'order' => 1, 'is_active' => true]);
+    $menu = Menu::create(['module_id' => $module->id, 'name' => 'Data Jurusan', 'route_name' => 'master.data-jurusan.index', 'order' => 1, 'is_active' => true]);
 
     // Beri izin HANYA can_view = true (can_create = false)
     UserMenuPermission::create([
@@ -364,22 +364,24 @@ test('user with specific view permission can access resource index but cannot cr
     ]);
 
     // 1. Bisa buka halaman index
-    $responseIndex = $this->actingAs($this->guruUser)->get(route('master.data-sekolah.index'));
+    $responseIndex = $this->actingAs($this->guruUser)->get(route('master.data-jurusan.index'));
     $responseIndex->assertOk();
 
     // 2. Ditolak saat mencoba POST (tambah data)
-    $responseStore = $this->actingAs($this->guruUser)->post(route('master.data-sekolah.store'), [
-        'name' => 'SMK Negeri 1 Test',
-        'npsn' => '12345678',
-        'school_type' => 'SMK',
-        'status' => 'Negeri',
+    $responseStore = $this->actingAs($this->guruUser)->post(route('master.data-jurusan.store'), [
+        'kode' => 'RPL',
+        'nama' => 'Rekayasa Perangkat Lunak',
+        'jenjang' => 'SMK',
     ]);
     $responseStore->assertForbidden();
 });
 
 test('user with can_create permission can perform store action on permitted resource', function () {
+    $school = School::factory()->smk()->create();
+    $this->guruUser->update(['school_id' => $school->id]);
+
     $module = Module::create(['name' => 'ADMINISTRASI', 'order' => 1, 'is_active' => true]);
-    $menu = Menu::create(['module_id' => $module->id, 'name' => 'Data Sekolah', 'route_name' => 'master.data-sekolah.index', 'order' => 1, 'is_active' => true]);
+    $menu = Menu::create(['module_id' => $module->id, 'name' => 'Data Jurusan', 'route_name' => 'master.data-jurusan.index', 'order' => 1, 'is_active' => true]);
 
     UserMenuPermission::create([
         'user_id' => $this->guruUser->id,
@@ -403,15 +405,15 @@ test('user with can_create permission can perform store action on permitted reso
     ]);
     Referensi::clearCache();
 
-    $responseStore = $this->actingAs($this->guruUser)->post(route('master.data-sekolah.store'), [
-        'name' => 'SMK Negeri 2 Test',
-        'npsn' => '87654321',
-        'school_type' => 'SMK',
-        'status' => 'Negeri',
+    $responseStore = $this->actingAs($this->guruUser)->post(route('master.data-jurusan.store'), [
+        'kode' => 'TKJ',
+        'nama' => 'Teknik Komputer dan Jaringan',
+        'jenjang' => 'SMK',
+        'is_active' => '1',
     ]);
 
-    $responseStore->assertRedirect(route('master.data-sekolah.index'));
-    $this->assertDatabaseHas('schools', ['npsn' => '87654321']);
+    $responseStore->assertRedirect(route('master.data-jurusan.index'));
+    $this->assertDatabaseHas('jurusan', ['kode' => 'TKJ', 'school_id' => $school->id]);
 });
 
 test('login redirects non-super admin to first allowed menu if dashboard not permitted', function () {

@@ -14,7 +14,7 @@
 - [x] Arsitektur Modal Dialog CRUD Modular (Create dan Edit as Components in Index via `InforaModals`)
 - [x] Tata Kelola Menu Akses dan Dynamic Role Templates (User-Centric Granular Permissions via `PermissionMatrix`)
 - [x] Sistem Cadangan dan Pemulihan Sistem Lengkap (Full System Snapshot dan Server Migration Ready)
-- [x] Master Data Sekolah (Multi-Record Registry SMA, SMK, dan MA)
+- [x] Profil Data Sekolah Tunggal (SMA, SMK, dan MA)
 - [x] Master Data Wilayah Administratif Pemerintahan Berbasis Kode Kemendagri (Provinsi, Kabupaten, Kecamatan, Kelurahan dan Desa)
 - [x] Arsitektur Tata Letak 3-Tier (Docked Footer dan Scroll Internal) dan Komponen Paginasi Responsif Global
 - [x] Master Data Jurusan / Konsentrasi Keahlian dan Peminatan (SMA, SMK, dan MA)
@@ -24,12 +24,11 @@
 - [x] Konfigurasi Sekolah: Tahun Ajaran dan Manajemen Semester
 - [x] Konfigurasi Sekolah: Kalender Akademik Terpadu dan Agenda Multi-Day (Grid Bulanan dan Tabel Agenda via `<x-tab-pills>`)
 - [x] Layanan Universal Spreadsheet (`SpreadsheetService`) & Impor / Ekspor Excel Data GTK via `<x-crud-button>`
-- [x] Master Data Murid (Peserta Didik) Multi-Tenancy, Validasi Khusus Kemenag NISM (18-digit) & NISN (10-digit), UI Validasi Bebas Browser Bubble, Sinkronisasi Akun Otomatis & Foto Profil Dual-Way
+- [x] Master Data Murid (Peserta Didik), Validasi Khusus Kemenag NISM (18-digit) & NISN (10-digit), UI Validasi Bebas Browser Bubble, Sinkronisasi Akun Otomatis & Foto Profil Dual-Way
 - [x] Pendaftaran Wajah & Absensi Murid Berbasis Face Recognition (`PendaftaranMukaController`, `AbsenMuridController`, `MuridFaceProfile`, `AbsensiMurid`)
 - [x] Mode Sekolah Tunggal (`1 Sekolah = 1 Database`), MariaDB Tuning, Backup Ringan Non-Wilayah & CLI Operasional (`infora:setup-school`, `infora:init-school`, `infora:prune-attendance-photos`)
 - [x] Pelacakan Progres Pengembangan Realtime (`UnderDevelopmentController::status()`, `TracksDevelopmentProgress`) & Standardisasi Rute `.index`
-- [x] Portal Master Dual-Mode (`INFORA_NODE_ROLE=master|school`), Heartbeat HMAC-SHA256 Lintas Hosting (`infora:heartbeat`), Monitoring Sekolah (Status Server & Status Sekolah) & Distribusi Hak Menu Admin
-- [x] Ekosistem 27 Anonymous Blade Components dan Test Suite **506 Tests Lulus 100% (2.373 Assertions)**
+- [x] Ekosistem 27 Anonymous Blade Components dan Test Suite **496 Tests Lulus 100% (2.319 Assertions)**
 - [ ] Arsitektur Akun Sivitas (4 Tipe Akun: Murid, Guru, Staff, Admin dengan profil relasional 1-to-1)
 - [ ] Dedicated Layout Separation (Desktop dan Mobile)
 - [ ] Implementasi Modul Akademik Lanjutan dan Tata Kelola Utama
@@ -141,7 +140,7 @@
 ---
 
 ## 🏫 Fase 3: Modul Master Data Sekolah dan Manajemen Akademik (SMA, SMK, dan MA)
-- [x] **3.1. Master Data Sekolah (Multi-Record Registry dan Kesiapan Bridging)**
+- [x] **3.1. Profil Data Sekolah Tunggal (dan Kesiapan Bridging)**
   - [x] Skema database tabel `schools`: kolom identitas resmi (nama, NPSN non-unique terindeks, NSS, jenjang SMA/SMK/MA, status Negeri/Swasta, akreditasi A/B/C/Belum), alamat lengkap, kontak telepon/email/web, pimpinan/NIP, yayasan, dan status aktif.
   - [x] Model `School` dengan Title Case auto-mutator (`TextFormatter::titleCase()` preservasi akronim), boolean casting, dan helper query.
   - [x] Migrasi antarmuka penuh ke Anonymous Blade Components (`<x-data-table>`, `<x-form-input>`, `<x-form-select>`, `<x-image-upload>`, `<x-modal>`).

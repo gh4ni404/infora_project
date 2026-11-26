@@ -152,7 +152,7 @@ Untuk mengakomodasi realitas sivitas sekolah di mana guru dan murid sering memil
 ## 5. 🧩 Modul Fungsional Platform
 
 ### 5.0. Modul Master Data Administrasi (Registri Sekolah dan Multi-Unit)
-- **Registri Sekolah Multi-Record (`schools`):** Manajemen daftar sekolah SMA dan SMK (Negeri/Swasta) dengan data identitas resmi, akreditasi, alamat, kontak, pimpinan, dan yayasan.
+- **Profil Sekolah Tunggal (`schools`):** Pengelolaan identitas resmi sekolah aktif (SMA, SMK, dan MA; Negeri/Swasta), akreditasi, alamat, kontak, pimpinan, dan yayasan pada mode 1 sekolah = 1 database. *(Rencana multi-sekolah dicatat pada [RENCANA_PENGEMBANGAN_LANJUT.md](RENCANA_PENGEMBANGAN_LANJUT.md).)*
 - **Kesiapan Bridging API Dapodik:** Kolom `npsn` di-index secara optimal sebagai *secondary natural key* untuk sinkronisasi data nasional tanpa mengorbankan fleksibilitas operasional (non-unique pada level DBMS).
 - **Pipeline Logo Sekolah Base64 (Maks. 1MB):** Pengunggahan logo format Base64 terintegrasi langsung di form modal create dan form modal edit (`edit.blade.php`), dengan penamaan berkas collision-proof di `storage/app/public/logos`.
 
@@ -209,10 +209,10 @@ erDiagram
 ```
 
 ### Tabel-Tabel Kunci:
-1. `users`: Autentikasi, peran, status aktif, username/email/avatar, serta `last_seen_at` untuk telemetri aktivitas pengguna.
+1. `users`: Autentikasi, peran, status aktif, serta username/email/avatar.
 2. `modules`: Modul kategori navigasi sistem (`id`, `name`, `order`, `is_active`).
-3. `menus`: Menu navigasi utama di bawah modul (`id`, `module_id`, `name`, `route_name`, `sync_key`, `icon`, `order`, `is_active`, `is_master_enabled`, `dev_progress`, `dev_stage`, `dev_note`, `dev_version`).
-4. `sub_menus`: Item sub-menu berjenjang di bawah menu (`id`, `menu_id`, `name`, `route_name`, `sync_key`, `order`, `is_active`, `is_master_enabled`, `dev_progress`, `dev_stage`, `dev_note`, `dev_version`).
+3. `menus`: Menu navigasi utama di bawah modul (`id`, `module_id`, `name`, `route_name`, `icon`, `order`, `is_active`, `dev_progress`, `dev_stage`, `dev_note`, `dev_version`).
+4. `sub_menus`: Item sub-menu berjenjang di bawah menu (`id`, `menu_id`, `name`, `route_name`, `order`, `is_active`, `dev_progress`, `dev_stage`, `dev_note`, `dev_version`).
    > *Catatan Prinsip Skema Navigasi:* Tidak menggunakan constraint `unique` pada kolom teks (`name`, `route_name`) untuk menjamin fleksibilitas operasional input/edit data tanpa bentrok validasi, sepenuhnya mengandalkan integritas relasional Primary Key ID dan Foreign Key dengan *cascade delete*.
    > *Standar Kapitalisasi Teks Entitas Navigasi:* Nama modul wajib disimpan dalam format **HURUF KAPITAL SEMUA (UPPERCASE)** untuk visualisasi pemisah kategori yang tegas. Nama menu dan sub-menu wajib disimpan dalam format **Capitalize Each Word (Title Case)** dengan preservasi akronim standar (SMK, SMA, SIM, PKL, KBM, GTK, BAN-SM, RPP, IT, TU). Seluruh pemformatan ini berjalan otomatis dua lapis melalui atribut `data-transform` di antarmuka pengguna serta Eloquent Mutator di backend.
 5. `schools`: Registri profil sekolah SMA dan SMK (`id`, `name`, `npsn`, `nss`, `school_type`, `status`, `accreditation`, `address`, `village`, `district`, `city`, `province`, `postal_code`, `phone`, `fax`, `email`, `website`, `principal_name`, `principal_nip`, `foundation_name`, `logo_path`, `is_active`). Kolom `npsn` di-index tanpa constraint unique kaku untuk mendukung prinsip reduksi batasan teks unik.
@@ -229,8 +229,7 @@ erDiagram
 15. `internships` (PKL): Data penempatan industri, guru pembimbing, nilai instruktur industri.
 16. `accreditation_evidences`: Dokumen bukti fisik terhubung ke butir standar akreditasi.
 17. `murid_face_profiles` & `absensi_murids`: Sampel descriptor wajah peserta didik serta catatan kehadiran kiosk berbasis skor kemiripan (`match_score`).
-18. `system_settings`: Penyimpanan pasangan `setting_key` / `setting_value` ringan (tanpa `unique`) untuk sinkronisasi versi kebijakan lokal sekolah.
-19. `tenant_nodes`, `tenant_node_snapshots`, dan `tenant_menu_policies`: Tabel khusus node Portal Master (`INFORA_NODE_ROLE=master`) tanpa constraint `unique` pada kolom teks/komposit untuk menyimpan status heartbeat sekolah, snapshot statistik, dan kebijakan hak menu dari Master ke Admin sekolah.
+18. `system_settings`: Penyimpanan pasangan `setting_key` / `setting_value` ringan (tanpa `unique`) untuk konfigurasi lokal aplikasi.
 
 ---
 
@@ -254,7 +253,6 @@ erDiagram
   - Preservasi tipe data teks numerik panjang (`DataType::TYPE_STRING`) via `setCellValueExplicit()` guna mencegah korupsi format, pemotongan digit, atau konversi otomatis ke notasi ilmiah (`7.308E+15`) pada data NIK (16 digit), NIP (18 digit), NUPTK (16 digit), dan nomor telepon.
   - Proteksi sanitasi terhadap kerentanan *CSV / Spreadsheet Formula Injection* (`stripFormulaInjection`) untuk menyaring karakter berbahaya (`=`, `+`, `-`, `@`, `\t`, `\r`).
 - **Automated Daily Backup:** Pencadangan basis data dan dokumen digital secara terjadwal.
-- **Dual-Mode Node Isolation & HMAC-SHA256 Heartbeat:** Pemisahan tegas antara node `school` dan `master` (`EnsureMasterNode`, `BlockSchoolRoutesOnMaster`), verifikasi request lintas hosting melalui Bearer token ter-hash (`SHA-256`) + timestamp skew guard + tanda tangan `HMAC-SHA256` (`hmac_secret` terenkripsi `encrypted`), serta pembatasan fitur sekolah melalui flag `is_master_enabled`.
 
 ---
 

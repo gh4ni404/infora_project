@@ -2,13 +2,10 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Menu;
-use App\Models\SubMenu;
 use App\Models\User;
 use App\Support\SidebarCache;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
 class SuperAdminMiddleware
@@ -37,16 +34,9 @@ class SuperAdminMiddleware
             ]);
         }
 
-        // Catat aktivitas pengguna maksimal 1x per 5 menit untuk telemetry mode sekolah
-        $this->recordUserActivity($request, $user);
-
         // 1. Super Administrator mendapatkan akses penuh ke seluruh rute (root bypass)
         if ($user->isSuperAdmin()) {
             return $next($request);
-        }
-
-        if ($request->routeIs('monitoring-sekolah.*')) {
-            return $this->denyAccess($request, 'Akses ditolak. Halaman ini khusus Super Administrator.');
         }
 
         // 2. Izinkan rute utilitas umum aplikasi yang wajib bisa diakses oleh seluruh pengguna aktif
@@ -58,10 +48,6 @@ class SuperAdminMiddleware
         $resolved = SidebarCache::findByRoute($request);
 
         if (! $resolved) {
-            if ($this->isLockedByMaster($request)) {
-                return $this->denyAccess($request, 'Akses ditolak. Fitur ini belum diaktifkan oleh Pengelola Platform.');
-            }
-
             return $this->denyAccess($request, 'Akses ditolak. Halaman atau menu ini tidak terdaftar atau belum aktif.');
         }
 
@@ -161,59 +147,5 @@ class SuperAdminMiddleware
         }
 
         abort(403, $message);
-    }
-
-    /**
-     * Perbarui stempel aktivitas pengguna secara hemat (dibatasi tiap beberapa menit via session).
-     */
-    protected function recordUserActivity(Request $request, User $user): void
-    {
-        if (! $request->hasSession()) {
-            return;
-        }
-
-        $throttleMinutes = (int) config('infora.heartbeat.user_activity_throttle_minutes', 5);
-        $lastPing = (int) $request->session()->get('infora_last_seen_ping', 0);
-        $nowTs = now()->timestamp;
-
-        if (($nowTs - $lastPing) < ($throttleMinutes * 60)) {
-            return;
-        }
-
-        DB::table('users')
-            ->where('id', $user->id)
-            ->update(['last_seen_at' => now()]);
-
-        $request->session()->put('infora_last_seen_ping', $nowTs);
-    }
-
-    /**
-     * Periksa apakah rute cocok dengan menu/sub-menu aktif yang sengaja dikunci oleh Master.
-     */
-    protected function isLockedByMaster(Request $request): bool
-    {
-        $lockedSubMenus = SubMenu::where('is_active', true)
-            ->where('is_master_enabled', false)
-            ->whereNotNull('route_name')
-            ->get(['route_name']);
-
-        foreach ($lockedSubMenus as $subMenu) {
-            if (SidebarCache::matchesRoute($request, $subMenu->route_name)) {
-                return true;
-            }
-        }
-
-        $lockedMenus = Menu::where('is_active', true)
-            ->where('is_master_enabled', false)
-            ->whereNotNull('route_name')
-            ->get(['route_name']);
-
-        foreach ($lockedMenus as $menu) {
-            if (SidebarCache::matchesRoute($request, $menu->route_name)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

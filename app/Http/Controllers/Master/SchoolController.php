@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Master\StoreSchoolRequest;
 use App\Http\Requests\Master\UpdateSchoolRequest;
 use App\Models\Provinsi;
 use App\Models\School;
@@ -16,88 +15,28 @@ use Illuminate\View\View;
 class SchoolController extends Controller
 {
     /**
-     * Display a listing of schools.
+     * Tampilkan profil sekolah tunggal beserta relasi wilayah dan akun admin.
      */
     public function index(Request $request): View
     {
         $user = $request->user();
-        [$selectedSchool, $selectedSchoolId] = $this->resolveSchoolContext($request);
+        [$school] = $this->resolveSchoolContext($request);
 
-        $query = School::query()
-            ->with(['provinsi', 'kabupaten', 'kecamatan', 'kelurahan', 'adminUser'])
-            ->orderBy('name')
-            ->orderBy('id');
-
-        // Batasi akses: non-superadmin hanya dapat melihat sekolah miliknya sendiri
-        if (! $user?->isSuperAdmin()) {
-            $query->where('id', $selectedSchoolId);
+        if ($school) {
+            $school->loadMissing(['provinsi', 'kabupaten', 'kecamatan', 'kelurahan', 'adminUser']);
         }
 
-        if ($request->filled('search')) {
-            $search = trim($request->query('search'));
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('npsn', 'like', "%{$search}%")
-                    ->orWhere('city', 'like', "%{$search}%")
-                    ->orWhereHas('kabupaten', fn ($k) => $k->where('nama', 'like', "%{$search}%"));
-            });
-        }
-
-        if ($request->filled('school_type')) {
-            $query->where('school_type', $request->query('school_type'));
-        }
-
-        // Opsi batas data per halaman (15, 30, 90, semua)
-        $perPageInput = $request->query('per_page', '15');
-        if ($perPageInput === 'semua' || $perPageInput === 'all') {
-            $perPage = 1000;
-        } elseif (in_array($perPageInput, ['15', '30', '90'], true)) {
-            $perPage = (int) $perPageInput;
-        } else {
-            $perPage = 15;
-            $perPageInput = '15';
-        }
-
-        $schools = $query->paginate($perPage)->withQueryString();
-
-        // Data referensi provinsi untuk inisialisasi dropdown wilayah
+        // Data referensi provinsi untuk inisialisasi dropdown wilayah pada modal edit
         $provinsiList = Provinsi::query()
             ->aktif()
             ->orderBy('kode')
             ->get(['id', 'kode', 'nama']);
 
-        return view('master.data-sekolah.index', compact('schools', 'perPageInput', 'provinsiList', 'user'));
+        return view('master.data-sekolah.index', compact('school', 'provinsiList', 'user'));
     }
 
     /**
-     * Store a newly created school in storage.
-     */
-    public function store(StoreSchoolRequest $request): RedirectResponse
-    {
-        if (School::query()->exists()) {
-            return redirect()
-                ->route('master.data-sekolah.index')
-                ->with('error', 'Sistem berjalan dalam mode sekolah tunggal (1 sekolah = 1 basis data). Profil sekolah sudah terdaftar.');
-        }
-
-        $data = $request->validated();
-
-        if (! empty($data['logo'])) {
-            $data['logo_path'] = ImageUploader::uploadBase64($data['logo'], 'logos', 'sekolah');
-        }
-        unset($data['logo']);
-
-        $school = School::create($data);
-
-        AdminAccountManager::createOrSyncAdmin($school);
-
-        return redirect()
-            ->route('master.data-sekolah.index')
-            ->with('success', 'Data sekolah dan akun administrator (NPSN: '.$school->npsn.') berhasil dibuat.');
-    }
-
-    /**
-     * Show the form for editing the specified school.
+     * Arahkan rute edit ke halaman profil sekolah.
      */
     public function edit(School $dataSekolah): RedirectResponse
     {
@@ -105,7 +44,7 @@ class SchoolController extends Controller
     }
 
     /**
-     * Update the specified school in storage.
+     * Perbarui data profil sekolah tunggal.
      */
     public function update(UpdateSchoolRequest $request, School $dataSekolah): RedirectResponse
     {
@@ -113,15 +52,12 @@ class SchoolController extends Controller
 
         $data = $request->validated();
 
-        // Handle logo removal
         if ($request->boolean('remove_logo') && $dataSekolah->logo_path) {
             ImageUploader::delete($dataSekolah->logo_path);
             $data['logo_path'] = null;
         }
 
-        // Handle new logo upload (Base64)
         if (! empty($data['logo'])) {
-            // Remove old logo if exists
             if ($dataSekolah->logo_path) {
                 ImageUploader::delete($dataSekolah->logo_path);
             }
@@ -131,7 +67,7 @@ class SchoolController extends Controller
 
         $dataSekolah->update($data);
 
-        // Selaraskan data akun administrator sekolah jika status atau npsn berubah
+        // Selaraskan data akun administrator sekolah jika status atau NPSN berubah
         AdminAccountManager::createOrSyncAdmin($dataSekolah);
 
         return redirect()
@@ -140,31 +76,7 @@ class SchoolController extends Controller
     }
 
     /**
-     * Sinkronkan atau terbitkan akun administrator untuk profil sekolah aktif.
-     */
-    public function syncAllAdmins(Request $request): RedirectResponse
-    {
-        if (! $request->user()?->isSuperAdmin()) {
-            abort(403, 'Akses ditolak. Tindakan ini memerlukan hak akses Super Administrator.');
-        }
-
-        $school = School::current();
-
-        if (! $school) {
-            return redirect()
-                ->route('master.data-sekolah.index')
-                ->with('error', 'Profil sekolah belum terdaftar. Silakan buat profil sekolah terlebih dahulu.');
-        }
-
-        $admin = AdminAccountManager::createOrSyncAdmin($school);
-
-        return redirect()
-            ->route('master.data-sekolah.index')
-            ->with('success', "Berhasil menyinkronkan akun administrator sekolah {$school->name} (Username: {$admin->username}).");
-    }
-
-    /**
-     * Terbitkan atau selaraskan akun administrator untuk satu unit sekolah tertentu.
+     * Terbitkan atau selaraskan akun administrator untuk profil sekolah aktif.
      */
     public function syncSingleAdmin(Request $request, School $dataSekolah): RedirectResponse
     {
@@ -175,30 +87,5 @@ class SchoolController extends Controller
         return redirect()
             ->route('master.data-sekolah.index')
             ->with('success', "Akun administrator sekolah {$dataSekolah->name} (Username: {$admin->username}) berhasil disinkronkan.");
-    }
-
-    /**
-     * Remove the specified school from storage.
-     */
-    public function destroy(Request $request, School $dataSekolah): RedirectResponse
-    {
-        $this->authorizeSchool($request, $dataSekolah);
-
-        if ($dataSekolah->hasOperationalData()) {
-            return redirect()
-                ->route('master.data-sekolah.index')
-                ->with('error', 'Profil sekolah tidak dapat dihapus karena masih memiliki data akun, GTK, murid, kelas, atau konfigurasi akademik terkait.');
-        }
-
-        // Remove logo file if exists
-        if ($dataSekolah->logo_path) {
-            ImageUploader::delete($dataSekolah->logo_path);
-        }
-
-        $dataSekolah->delete();
-
-        return redirect()
-            ->route('master.data-sekolah.index')
-            ->with('success', 'Data sekolah berhasil dihapus dari sistem.');
     }
 }

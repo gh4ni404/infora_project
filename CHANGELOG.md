@@ -8,31 +8,20 @@ Format berkas ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/
 
 ## [Unreleased]
 
-### Changed dan Refactored (Penyelarasan Rute Monitoring Sekolah, Generator Scaffolding Bertingkat, Migrasi Idempoten & Pembaruan Aturan Proyek)
-- **Penyelarasan Rute & Arsitektur Monitoring Sekolah (`monitoring-sekolah.*`):**
-  - *Standardisasi Rute & Namespace:* Menyelaraskan seluruh rute, namespace controller, views, dan request dari `master-control` menjadi `monitoring-sekolah.status-sekolah` dan `monitoring-sekolah.status-server`.
-  - *Restrukturisasi Controller & Views:* Memindahkan controller ke `App\Http\Controllers\MonitoringSekolah\StatusSekolahController` dan `TenantMenuPolicyController`, serta views ke `resources/views/monitoring-sekolah/status-sekolah/` dan `status-server/`.
-  - *Pembaruan Seeder:* Menyesuaikan `MasterNodeSeeder` agar menggunakan rute kanonikal `monitoring-sekolah.status-sekolah.index` dan `monitoring-sekolah.status-server.index`.
-  - *Pembaruan Test Suite:* Memindahkan feature tests ke `tests/Feature/MonitoringSekolah/` (`MasterHeartbeatTest`, `MasterPortalTest`, `SchoolPolicyEnforcementTest`).
+### Changed dan Refactored (Generator Scaffolding Bertingkat, Migrasi Idempoten & Pembaruan Aturan Proyek)
 - **Peningkatan Scaffolding Generator (`UnderDevelopmentController`):**
-  - Memperbaiki parser generator scaffolding agar notasi titik pada rute (misal `monitoring-sekolah.status-sekolah`) secara otomatis dipecah menjadi hierarki sub-direktori bertingkat (`MonitoringSekolah/StatusSekolahController.php`) alih-alih penamaan flat yang digabung (`MonitoringSekolahStatusSekolahController.php`).
+  - Memperbaiki parser generator scaffolding agar notasi titik pada rute (misal `akademik.jurnal-kbm`) secara otomatis dipecah menjadi hierarki sub-direktori bertingkat (`Akademik/JurnalKbmController.php`) alih-alih penamaan flat yang digabung (`AkademikJurnalKbmController.php`).
 - **Standar Migrasi Idempoten & Otomatisasi Pasca Restore Database:**
-  - *Defensive DDL Guards:* Menambahkan pertahanan idempoten `if (Schema::hasTable(...)) return;` dan `if (! Schema::hasColumn(...))` pada seluruh file migrasi 2026_11_25 (`system_settings`, `tenant_nodes`, `tenant_node_snapshots`, `tenant_menu_policies`, `is_master_enabled`, `last_seen_at`) untuk mencegah crash `Table already exists` saat restore backup.
+  - *Defensive DDL Guards:* Menambahkan pertahanan idempoten `if (Schema::hasTable(...)) return;` dan `if (! Schema::hasColumn(...))` pada seluruh file migrasi (`system_settings`, dll.) untuk mencegah crash `Table already exists` saat restore backup.
   - *Auto-Sync Pasca Restore:* Menambahkan eksekusi otomatis `Artisan::call('migrate', ['--force' => true])` dan `SidebarCache::flushGlobal()` di dalam `DatabaseBackupService::restoreDatabaseFromSql()` agar skema database langsung sinkron pasca restore.
 - **Pembaruan Aturan Proyek (`.ai/rules/` & `.agents/rules/`):**
   - *Protokol Konfirmasi Menu & Rute:* Menambahkan aturan wajib konfirmasi ke user sebelum mendefinisikan menu/rute baru pada `.ai/rules/http.md`.
   - *Invarian Keselarasan Rute-ke-File:* Menegaskan pemetaan 1:1 antara notasi titik rute dengan struktur folder controller, view, dan request pada `.ai/rules/http.md`.
   - *Idempotent DDL Standard:* Mendaftarkan standar migrasi defensif pada `.ai/rules/migrations.md`.
   - *Backup Trap Resolution:* Memperbarui panduan penanganan perangkap restore database pada `.agents/rules/migration-sync-and-backups.md`.
-  - *Total Test Suite:* Total pengujian otomatis mencapai **506 passed (2.373 assertions)** 100% lulus.
+  - *Total Test Suite:* Total pengujian otomatis mencapai **496 passed (2.319 assertions)** 100% lulus.
 
-### Added dan Improved (Portal Master Dual-Mode, Heartbeat Lintas Hosting, Mode Sekolah Tunggal, Face Recognition & Progres Realtime)
-- **Portal Master Dual-Mode (`INFORA_NODE_ROLE=master|school`) & Heartbeat Lintas Hosting:**
-  - *Single Codebase Dual-Mode:* Menambahkan `config/infora.php` dan pembaruan `.env.example` untuk menjalankan codebase yang sama sebagai node sekolah mandiri (`school`) atau Portal Kontrol Pusat Super Admin (`master`), lengkap dengan middleware isolasi `EnsureMasterNode` (404 untuk `/master-control/*` di mode sekolah) dan `BlockSchoolRoutesOnMaster` (404 untuk rute operasional sekolah di mode master).
-  - *Endpoint Heartbeat HMAC-SHA256 & Scheduler Sekolah:* Membuka `routes/api.php` (`POST /api/v1/master/heartbeat`) dengan verifikasi `VerifyTenantNodeSignature` (Bearer token hash + timestamp skew check + signature HMAC-SHA256), `StoreHeartbeatRequest`, dan `HeartbeatController`, serta pengirim client `MasterHeartbeatClient` dan command `php artisan infora:heartbeat` (terjadwal tiap 2 menit pada `routes/console.php`).
-  - *Skema DB Master & Aktivitas Tanpa Constraint `unique`:* Menambahkan migrasi `tenant_nodes`, `tenant_node_snapshots`, `tenant_menu_policies`, `system_settings`, `users.last_seen_at` (throttled tiap 5 menit di `SuperAdminMiddleware`), serta `sync_key` & `is_master_enabled` pada `menus` dan `sub_menus` sesuai prinsip *Zero Unique Constraints*.
-  - *Distribusi Hak Menu Master ke Admin Sekolah:* Mengintegrasikan sinkronisasi `policy_version` & `menu_policy` melalui respons heartbeat untuk mengontrol `is_master_enabled` di sisi sekolah sehingga `SidebarCache` dan `MenuAccessController` otomatis menyembunyikan fitur yang dikunci Master.
-  - *Antarmuka Portal Master & Pengujian:* Membangun `TenantNodeController`, `TenantMenuPolicyController`, `MasterNodeSeeder`, pembaruan ringkasan `DashboardController`, views `resources/views/master-control/` (indikator realtime `Online Aktif`, `Idle`, `DB Gangguan`, `Offline`, `Maintenance`, detail modul/menu/user, tombol ping `/up`, dan matriks izin menu admin), serta `MasterHeartbeatTest.php`, `MasterPortalTest.php`, dan `SchoolPolicyEnforcementTest.php` (**505 tests passed, 2.370 assertions**).
+### Added dan Improved (Mode Sekolah Tunggal, Face Recognition & Progres Realtime)
 - **Standardisasi Rute `.index` & Pelacakan Progres Pengembangan Realtime (`UnderDevelopmentController`):**
   - *Pelacakan Progres Fitur Realtime:* Menambahkan kolom `dev_progress`, `dev_stage`, `dev_note`, `dev_version` pada `menus` dan `sub_menus`, trait `TracksDevelopmentProgress` & `ValidatesDevelopmentProgress`, endpoint polling `GET /system/under-development/status`, partial `dev-progress-fields.blade.php`, tampilan `under-development.blade.php`, dan test `UnderDevelopmentTest.php`.
   - *Standardisasi Penamaan Rute Web:* Menghapus 10 rute duplikat `*/semua` dan menyeragamkan penamaan rute index ke konvensi `.index` (`system.referensi.index`, `sistem.user.index`, `konfigurasi-sekolah.tahun-ajaran.index`, `backup-restore.index`, `pendaftaran_muka.index`, `absen_murid.index`) di `routes/web.php`.

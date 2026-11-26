@@ -11,8 +11,6 @@ use App\Http\Controllers\Master\MapelController;
 use App\Http\Controllers\Master\MuridController;
 use App\Http\Controllers\Master\SchoolController;
 use App\Http\Controllers\Master\TingkatanController;
-use App\Http\Controllers\MonitoringSekolah\StatusSekolahController;
-use App\Http\Controllers\MonitoringSekolah\TenantMenuPolicyController;
 use App\Http\Controllers\PendaftaranMukaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Rombel\KelasController;
@@ -43,30 +41,6 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/admin', [DashboardController::class, 'admin'])->name('dashboard.admin');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-
-    // Monitoring Sekolah & Pusat Kontrol Tenant (Khusus Mode Master)
-    Route::prefix('monitoring-sekolah')
-        ->name('monitoring-sekolah.')
-        ->middleware(['master_node'])
-        ->group(function () {
-            // Status Sekolah (Monitoring Live, Metrik DB & Progres Modul)
-            Route::prefix('status-sekolah')->name('status-sekolah.')->group(function () {
-                Route::get('/', [StatusSekolahController::class, 'index'])->name('index');
-                Route::post('/', [StatusSekolahController::class, 'store'])->name('store');
-                Route::get('/{tenantNode}', [StatusSekolahController::class, 'show'])->name('show');
-                Route::put('/{tenantNode}', [StatusSekolahController::class, 'update'])->name('update');
-                Route::delete('/{tenantNode}', [StatusSekolahController::class, 'destroy'])->name('destroy');
-                Route::post('/{tenantNode}/toggle-status', [StatusSekolahController::class, 'toggleStatus'])->name('toggle-status');
-                Route::post('/{tenantNode}/regenerate-credentials', [StatusSekolahController::class, 'regenerateCredentials'])->name('regenerate-credentials');
-                Route::post('/{tenantNode}/ping', [StatusSekolahController::class, 'ping'])->name('ping');
-
-                Route::get('/{tenantNode}/menus', [TenantMenuPolicyController::class, 'edit'])->name('menus.edit');
-                Route::put('/{tenantNode}/menus', [TenantMenuPolicyController::class, 'update'])->name('menus.update');
-            });
-
-            // Status Server & Database Node Master
-            Route::get('/status-server', [StatusSekolahController::class, 'serverStatus'])->name('status-server.index');
-        });
 
     // Pengaturan Profil Pengguna Mandiri
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
@@ -106,9 +80,8 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
 
     // Master Data Administrasi
     Route::prefix('master')->name('master.')->group(function () {
-        Route::post('data-sekolah/sync-admins', [SchoolController::class, 'syncAllAdmins'])->name('data-sekolah.sync-admins');
         Route::post('data-sekolah/{dataSekolah}/sync-admin', [SchoolController::class, 'syncSingleAdmin'])->name('data-sekolah.sync-single-admin');
-        Route::resource('data-sekolah', SchoolController::class)->except(['show', 'create']);
+        Route::resource('data-sekolah', SchoolController::class)->only(['index', 'edit', 'update']);
         Route::resource('data-tingkatan', TingkatanController::class)->parameters([
             'data-tingkatan' => 'tingkatan',
         ])->except(['show', 'create']);

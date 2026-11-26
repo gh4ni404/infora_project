@@ -21,7 +21,7 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 12. [Sistem Tata Kelola Menu Akses dan Dynamic Role Templates](#-12-sistem-tata-kelola-menu-akses--dynamic-role-templates-user-centric-granular-permissions)
 13. [Sistem Cadangan dan Pemulihan Sistem Lengkap](#-13-sistem-cadangan--pemulihan-sistem-lengkap-full-system-snapshot--server-migration-ready)
 14. [Universal Smooth Real-Time Progressive Loading Screen](#-14-universal-smooth-real-time-progressive-loading-screen-windowinforaprogress)
-15. [Master Data Sekolah](#-15-master-data-sekolah-multi-record-registry--kesiapan-bridging)
+15. [Profil Data Sekolah Tunggal & Kesiapan Bridging](#-15-profil-data-sekolah-tunggal--kesiapan-bridging)
 16. [Master Wilayah Administratif Kemendagri](#-16-master-wilayah-administratif-kemendagri-hierarki-4-tingkat)
 17. [Tata Letak 3-Tier Docked Footer dan Komponen Paginasi Responsif](#-17-tata-letak-3-tier-docked-footer--komponen-paginasi-responsif-global)
 18. [Master Data Jurusan / Konsentrasi Keahlian dan Peminatan](#-18-master-data-jurusan--konsentrasi-keahlian--peminatan-sma-smk--ma)
@@ -40,7 +40,6 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 31. [Pendaftaran Wajah & Absensi Murid Berbasis Face Recognition](#-31-pendaftaran-wajah--absensi-murid-berbasis-face-recognition)
 32. [Mode Sekolah Tunggal (`1 Sekolah = 1 Database`), MariaDB Tuning & CLI Operasional](#-32-mode-sekolah-tunggal-1-sekolah--1-database-mariadb-tuning--cli-operasional)
 33. [Pelacakan Progres Pengembangan Realtime & Standardisasi Rute `.index`](#-33-pelacakan-progres-pengembangan-realtime--standardisasi-rute-index)
-34. [Portal Master Dual-Mode (`INFORA_NODE_ROLE`), Heartbeat Lintas Hosting & Distribusi Hak Menu Admin](#-34-portal-master-dual-mode-infora_node_role-heartbeat-lintas-hosting--distribusi-hak-menu-admin)
 
 ---
 
@@ -176,14 +175,13 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 
 ---
 
-### 🏫 15. Master Data Sekolah (Multi-Record Registry dan Kesiapan Bridging)
-- **Registri Sekolah Fleksibel (SMA, SMK, dan MA):** Mendukung pengelolaan daftar banyak sekolah (multi-unit yayasan) dengan atribut lengkap: identitas resmi (Nama Sekolah, NPSN, NSS, Jenjang Sekolah SMA/SMK/MA, Status Negeri/Swasta, Akreditasi A/B/C/Belum), alamat komprehensif, kontak, pimpinan sekolah dan NIP, serta yayasan naungan.
-- **Migrasi Penuh ke Ekosistem Blade Components:** Seluruh tampilan antarmuka dan modal CRUD dimigrasikan ke komponen UI standar: `<x-data-table>`, `<x-form-input>`, `<x-form-select>`, `<x-image-upload>`, dan `<x-modal>`.
-- **Integrasi Layanan Mandiri `ImageUploader`:** Proses penyimpanan logo Base64 dialihkan dari controller ke class service terpusat `App\Support\ImageUploader` yang menjamin standardisasi nama berkas semantik: `sekolah_u{user_id}_{timestamp}_{random8}.{ext}` dan pembersihan aman berkas fisik lama.
-- **Arsitektur Modal Dialog Tambah dan Edit Modular (`create.blade.php` dan `edit.blade.php`):** Baik formulir tambah (*create*) maupun ubah (*edit*) beroperasi secara interaktif via dialog modal (`#modalCreateSchool` dan `#modalEditSchool`) langsung di atas tabel data tanpa reload halaman. Berkas `create.blade.php` dan `edit.blade.php` distandarisasi sebagai komponen modular yang di-include ke dalam halaman indeks (`index.blade.php`).
+### 🏫 15. Profil Data Sekolah Tunggal & Kesiapan Bridging
+- **Profil Sekolah Tunggal (SMA, SMK, dan MA):** Mengelola 1 profil sekolah aktif per database (`1 Sekolah = 1 Database`) dengan atribut lengkap: identitas resmi (Nama Sekolah, NPSN, NSS, Jenjang Sekolah SMA/SMK/MA, Status Negeri/Swasta, Akreditasi A/B/C/Belum), alamat komprehensif, kontak, pimpinan sekolah dan NIP, serta yayasan naungan.
+- **Migrasi Penuh ke Ekosistem Blade Components:** Seluruh tampilan antarmuka dan modal edit menggunakan komponen UI standar (`<x-page-header>`, `<x-form-input>`, `<x-form-select>`, `<x-image-upload>`, `<x-modal>`, dan `<x-empty-state>`).
+- **Integrasi Layanan Mandiri `ImageUploader`:** Proses penyimpanan logo Base64 ditangani oleh class service terpusat `App\Support\ImageUploader` yang menjamin standardisasi nama berkas semantik: `sekolah_u{user_id}_{timestamp}_{random8}.{ext}` dan pembersihan aman berkas fisik lama.
+- **Arsitektur Modal Edit Modular (`edit.blade.php`):** Formulir ubah (*edit*) beroperasi secara interaktif via dialog modal (`#modalEditSchool`) langsung di halaman profil tanpa reload halaman, dilengkapi sinkronisasi akun administrator (`syncSingleAdmin`). *(Catatan: Rencana dukungan multi-sekolah dipindahkan ke [RENCANA_PENGEMBANGAN_LANJUT.md](RENCANA_PENGEMBANGAN_LANJUT.md).)*
 - **Kesiapan Bridging Ekosistem Dapodik:** Kolom `npsn` di-index secara optimal sebagai kunci unik alternatif (*secondary natural key*) untuk integrasi API bridging ekosistem nasional pada fase lanjutan, tanpa mengunci constraint unik kaku pada level DBMS sesuai prinsip reduksi batasan teks unik.
-- **Pencarian Dinamis, Filter Jenis dan Paginasi Responsif:** Pencarian instan berdasarkan nama sekolah, NPSN, maupun kota/kabupaten dengan filter dropdown jenjang sekolah (Semua, SMA, SMK, MA), toolbar tabel adaptif, dan integrasi komponen paginasi global `<x-pagination>`.
-- **Akses Rute Resmi:** Dikelola pada rute `/master/data-sekolah` (`master.data-sekolah.*`) di bawah modul Administrasi ➔ Master ➔ Data Sekolah.
+- **Akses Rute Resmi:** Dikelola pada rute `/master/data-sekolah` (`master.data-sekolah.index`, `edit`, `update`, `sync-single-admin`) di bawah modul Administrasi ➔ Master ➔ Data Sekolah.
 
 ---
 
@@ -227,7 +225,7 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
   - **SMK:** Konsentrasi Keahlian / Program Keahlian vokasi (contoh: Rekayasa Perangkat Lunak, Teknik Komputer dan Jaringan, Akuntansi).
   - **SMA:** Peminatan / Fase Kurikulum Merdeka (contoh: Peminatan MIPA, IPS, Bahasa).
   - **MA:** Program Peminatan Madrasah Aliyah (contoh: Ilmu-Ilmu Keagamaan / IIK, MIPA, IPS).
-- **Isolasi Data Berbasis Unit Sekolah (`school_id`):** Data jurusan terhubung langsung dengan unit sekolah tertentu melalui pemilih dropdown sekolah (`schoolFilterForm`) yang responsif, memastikan multi-tenancy unit berjalan rapi.
+- **Isolasi Data Berbasis Unit Sekolah (`school_id`):** Data jurusan terhubung langsung dengan unit sekolah aktif (`school_id`) untuk menjaga konsistensi relasional.
 - **Standardisasi Rute Resource dan Aksi Cepat:**
   - Terdaftar di bawah URL `/master/data-jurusan` (`master.data-jurusan.*`).
   - Menyediakan endpoint 1-klik untuk beralih status: `POST /master/data-jurusan/{jurusan}/toggle-status`.
@@ -473,7 +471,7 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 
 ### 👨‍🎓 30. Master Data Murid (Peserta Didik), Standardisasi Validasi NISM/NISN & UI Validasi Terpadu
 - **Rasionalisasi & Peran Arsitektural:**
-  - Modul Master Data Murid mengelola data pokok peserta didik di seluruh tingkatan satuan pendidikan (SMA, SMK, dan Madrasah Aliyah - MA) dengan isolasi multi-tenancy sekolah yang ketat.
+  - Modul Master Data Murid mengelola data pokok peserta didik di seluruh tingkatan satuan pendidikan (SMA, SMK, dan Madrasah Aliyah - MA) yang terisolasi pada sekolah aktif.
   - Mengintegrasikan siklus hidup akun login murid secara otomatis tanpa perlu pembuatan manual berulang kali, terhubung dengan profil biodata dan rombongan belajar.
 - **Validasi Cerdas Kemenag & Kemendikbud Tanpa Kolom Redundan:**
   - **Aturan NISM Kemenag:** Pada satuan pendidikan madrasah (MI, MTs, MA), Nomor Induk Siswa Madrasah (NISM) merupakan pengenal wajib berkode 18 digit numerik. Sistem secara cerdas mengadaptasi aturan validasi pada kolom `nis` di Form Requests (`StoreMuridRequest`, `UpdateMuridRequest`) sehingga sekolah madrasah wajib mengisi 18 digit tanpa perlu menambah kolom baru di basis data.
@@ -510,15 +508,6 @@ Dokumen ini memuat spesifikasi teknis mendalam, arsitektur sistem, dan rincian l
 - **Progres Fitur Terukur (`menus` & `sub_menus`):** Penambahan kolom `dev_progress`, `dev_stage`, `dev_note`, dan `dev_version`, trait `TracksDevelopmentProgress` & `ValidatesDevelopmentProgress`, serta partial `dev-progress-fields.blade.php`.
 - **Polling Status Realtime:** `UnderDevelopmentController::status()` (`GET /system/under-development/status`) menyediakan pembaruan progres fitur secara langsung pada tampilan `resources/views/system/under-development.blade.php`, diuji di [`tests/Feature/System/UnderDevelopmentTest.php`](../tests/Feature/System/UnderDevelopmentTest.php).
 - **Konvensi Rute `.index`:** Eliminasi 10 rute duplikat `*/semua` dan penyeragaman rute index non-resource di `routes/web.php` menjadi konvensi standar `.index` (`system.referensi.index`, `sistem.user.index`, `konfigurasi-sekolah.tahun-ajaran.index`, `backup-restore.index`, `pendaftaran_muka.index`, `absen_murid.index`).
-
----
-
-### 🌐 34. Portal Master Dual-Mode (`INFORA_NODE_ROLE`), Monitoring Sekolah, Heartbeat Lintas Hosting & Distribusi Hak Menu Admin
-- **Single Codebase Dual-Mode (`config/infora.php`):** Mengatur perilaku aplikasi lewat `INFORA_NODE_ROLE=school` (node sekolah) atau `INFORA_NODE_ROLE=master` (portal Super Admin pusat) dengan middleware isolasi `EnsureMasterNode` (`404` pada rute monitoring di mode sekolah) dan akses administratif universal bagi Super Admin di mode master.
-- **Heartbeat Lintas Hosting Berkeamanan HMAC-SHA256:** Command terjadwal `php artisan infora:heartbeat` (`MasterHeartbeatClient`, default tiap 2 menit pada `routes/console.php`) mengirim status DB, latency, `last_seen_at` pengguna aktif, serta snapshot pohon modul/menu/sub-menu/user ke `POST /api/v1/master/heartbeat` (`HeartbeatController`, diverifikasi oleh `VerifyTenantNodeSignature`).
-- **Indikator Realtime Server & Database (`/monitoring-sekolah/status-server`):** Model `TenantNode` mengevaluasi status `online` (aktif digunakan), `idle` (sepi), `degraded` (database gagal), `maintenance`, maupun `offline` berbasis TTL heartbeat terakhir, dilengkapi tombol active ping `/up`.
-- **Kontrol Hak Menu Master → Admin Sekolah (`/monitoring-sekolah/status-sekolah/{tenantNode}/menus`):** Super Admin menetapkan menu yang diizinkan per sekolah (`TenantMenuPolicyController`), menaikkan `policy_version`, lalu server sekolah menyinkronkan flag `is_master_enabled` otomatis melalui respons heartbeat sehingga `SidebarCache` dan `MenuAccessController` menyembunyikan menu yang dikunci.
-- **Automated Test Suite:** Diuji pada [`tests/Feature/MonitoringSekolah/MasterHeartbeatTest.php`](../tests/Feature/MonitoringSekolah/MasterHeartbeatTest.php), [`tests/Feature/MonitoringSekolah/MasterPortalTest.php`](../tests/Feature/MonitoringSekolah/MasterPortalTest.php), dan [`tests/Feature/MonitoringSekolah/SchoolPolicyEnforcementTest.php`](../tests/Feature/MonitoringSekolah/SchoolPolicyEnforcementTest.php) dengan total suite aplikasi mencapai **506 tests lulus 100% (2.373 assertions)**.
 
 ---
 

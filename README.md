@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
   <img src="https://img.shields.io/badge/MariaDB%20%7C%20MySQL-InnoDB-003545?style=for-the-badge&logo=mariadb&logoColor=white" alt="MariaDB / MySQL">
   <img src="https://img.shields.io/badge/Vite-HMR-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite">
-  <img src="https://img.shields.io/badge/Tests-505_Passed_%7C_2370_Assertions-10B981?style=for-the-badge&logo=pest&logoColor=white" alt="Pest Tests">
+  <img src="https://img.shields.io/badge/Tests-496_Passed_%7C_2319_Assertions-10B981?style=for-the-badge&logo=pest&logoColor=white" alt="Pest Tests">
   <img src="https://img.shields.io/badge/Architecture-API--First_&_Bridging-00D2FF?style=for-the-badge&logo=fastapi&logoColor=white" alt="API-First dan Bridging">
   <img src="https://img.shields.io/badge/UI--UX-Mobile--First_&_Dedicated_Layouts-10B981?style=for-the-badge&logo=pwa&logoColor=white" alt="Mobile-First dan Dedicated Layouts">
   <img src="https://img.shields.io/badge/Data_Contract-Modular_&_Pure_JSON-F59E0B?style=for-the-badge&logo=json&logoColor=white" alt="Modular dan Pure JSON">
@@ -27,15 +27,75 @@ Dibangun dengan arsitektur **API-First dan System Bridging**, **Pengembangan Ber
 
 ---
 
+## 🛠️ Panduan Memulai Cepat (Quick Start)
+
+### Prasyarat
+- [Docker](https://docs.docker.com/get-docker/) dan [Docker Compose](https://docs.docker.com/compose/) (atau Docker Desktop) terpasang di komputer Anda.
+- Git.
+
+### 1. Kloning Repositori
+```bash
+git clone https://github.com/gh4ni404/infora_project.git
+cd infora_project
+```
+
+### 2. Salin dan Lengkapi Konfigurasi Environment
+```bash
+cp .env.docker.example .env
+```
+Buka file `.env` dan sesuaikan konfigurasi database eksternal (**cPanel / VPS**):
+```env
+DB_CONNECTION=mariadb
+DB_HOST=IP_CPANEL_ATAU_VPS
+DB_PORT=3306
+DB_DATABASE=nama_database
+DB_USERNAME=username_database
+DB_PASSWORD=password_database
+```
+
+### 3. Jalankan Container Docker
+Gunakan helper script bawaan untuk kemudahan lintas OS:
+```bash
+# Linux / macOS / WSL / Git Bash
+./dev start
+
+# Windows (PowerShell)
+.\dev.ps1 start
+```
+
+### 4. Instalasi Dependency, Migrasi & Setup Sekolah Tunggal
+```bash
+# Linux / macOS / WSL
+./dev composer install
+./dev artisan key:generate
+./dev artisan migrate --seed
+./dev artisan infora:setup-school
+
+# Windows (PowerShell)
+.\dev.ps1 composer install
+.\dev.ps1 artisan key:generate
+.\dev.ps1 artisan migrate --seed
+.\dev.ps1 artisan infora:setup-school
+```
+*(Catatan: Container `node` otomatis menjalankan `npm install && npm run dev`. Symbolic link storage publik relatif dapat dibuat/diperbaiki via `./dev artisan storage:link --relative` jika diperlukan.)*
+
+### 5. Akses Aplikasi & Verifikasi
+- **Aplikasi Web INFORA:** [http://localhost:8000](http://localhost:8000)
+- **Vite Dev Server (HMR):** [http://localhost:5173](http://localhost:5173)
+- **Jalankan Test Suite:** `./dev test`
+- **Format Kode PHP (Pint):** `./dev pint`
+
+---
+
 ## 🚀 Fitur Unggulan
 
 INFORA menghadirkan ekosistem terpadu yang dirancang khusus untuk memenuhi standar tata kelola dan akreditasi sekolah menengah:
 
-- 🏫 **Manajemen Terpadu SMA, SMK, dan MA:** Registri multi-sekolah, struktur akademik fleksibel (Konsentrasi Keahlian SMK, Peminatan/Fase SMA, dan Program Peminatan/Keagamaan MA), Jurnal Digital KBM Guru harian, dan modul BK.
+- 🏫 **Manajemen Terpadu SMA, SMK, dan MA:** Profil sekolah tunggal terisolasi (`1 Sekolah = 1 Database`), struktur akademik fleksibel (Konsentrasi Keahlian SMK, Peminatan/Fase SMA, dan Program Peminatan/Keagamaan MA), Jurnal Digital KBM Guru harian, dan modul BK.
 - 🎓 **Master Data Jurusan dan Peminatan:** Tata kelola program keahlian/peminatan berbasis unit sekolah, toggle status aktif 1-klik, dan dialog modal CRUD interaktif.
 - 📚 **Master Data Tingkatan Kelas:** Penjenjangan tingkatan kelas (X, XI, XII / 1-13) terhubung unit sekolah, pemetaan Fase Kurikulum Merdeka (Fase E & F), toggle status aktif 1-klik, kartu metrik ringkasan KPI, dan modal dialog CRUD modular.
 - 👨‍🏫 **Master Data Pendidik dan Tenaga Kependidikan (GTK):** Pengelolaan sivitas pendidik & tendik dengan dukungan tugas majemuk (*multi-role* JSON), sinkronisasi akun otomatis, reset password, dan profil modal interaktif.
-- 👨‍🎓 **Master Data Murid (Peserta Didik):** Tata kelola murid multi-sekolah, penempatan rombel/kelas, validasi cerdas Kemenag (NISM 18 digit untuk MI/MTs/MA pada kolom NIS) dan Kemendikbud (NISN 10 digit), pembuatan akun otomatis, sinkronisasi foto profil dual-way, serta antarmuka error handling form terstandarisasi.
+- 👨‍🎓 **Master Data Murid (Peserta Didik):** Tata kelola murid terisolasi per sekolah, penempatan rombel/kelas, validasi cerdas Kemenag (NISM 18 digit untuk MI/MTs/MA pada kolom NIS) dan Kemendikbud (NISN 10 digit), pembuatan akun otomatis, sinkronisasi foto profil dual-way, serta antarmuka error handling form terstandarisasi.
 - 👤 **Pengaturan Profil Pengguna Mandiri & Keamanan:** Halaman khusus 2-kolom dengan navigasi vertikal ramping (4 tab GTK dan 2 tab non-GTK), integrasi terpadu pasfoto avatar, identitas diri, kredensial login (username), dan ubah kata sandi pada Informasi Pribadi, dirty-form unsaved changes confirmation modal, serta auto-logout pasca ganti password.
 - 📅 **Konfigurasi Sekolah (Tahun Ajaran dan Semester):** Manajemen siklus tahun ajaran dan semester aktif dengan tanggal pelaksanaan terpadu serta aktivasi 1-klik.
 - 📆 **Kalender Akademik Terpadu dan Agenda Multi-Day:** Tampilan ganda via `<x-tab-pills>` (Grid Bulanan Interaktif dan Tabel Agenda), rentang kegiatan multi-hari, filter kategori, dan feed JSON real-time.
@@ -49,7 +109,6 @@ INFORA menghadirkan ekosistem terpadu yang dirancang khusus untuk memenuhi stand
 - 🗂️ **Navigasi Dinamis, Progres Realtime dan Tata Kelola Menu Akses:** Hierarki navigasi sistem (Modul ➔ Menu ➔ Sub-Menu) berbasis data, otorisasi granular *user-centric*, modul `PermissionMatrix`, template peran dinamis, fallback *Zero Dead Links* dengan pelacakan progres fitur realtime, serta standardisasi rute `.index`.
 - 📸 **Pendaftaran Wajah & Absensi Murid Face Recognition:** Registrasi multi-sampel wajah peserta didik (`/pendaftaran_muka`) dan kiosk absensi harian dengan caching descriptor wajah serta CLI pemeliharaan foto (`infora:prune-attendance-photos`).
 - 🏫 **Mode Sekolah Tunggal (1 Sekolah = 1 Database) & CLI Setup:** Isolasi penuh basis data per sekolah, opsi backup ringan non-wilayah, dan setup instalasi satu perintah (`infora:setup-school` / `infora:init-school`).
-- 🌐 **Portal Master Dual-Mode & Heartbeat Lintas Hosting:** Dukungan mode `INFORA_NODE_ROLE=master|school` dalam satu codebase untuk memantau status Online/Idle/Offline/DB seluruh sekolah via heartbeat bertanda tangan HMAC-SHA256 (`infora:heartbeat`) sekaligus mengatur menu yang diizinkan Master ke Admin sekolah.
 - 💾 **Cadangan dan Pemulihan Sistem Lengkap:** Snapshot portabel satu-klik (.zip), mesin backup mandiri native PHP/PDO tanpa dependensi luar, dan auto-repair symlink storage.
 - 🗺️ **Master Wilayah Administratif Kemendagri:** Hierarki 4 tingkat (Provinsi, Kabupaten/Kota, Kecamatan, Kelurahan dan Desa) berbasis standar resmi Kemendagri RI numerik murni, cascading filter 3 tingkat dinamis, proteksi relasi sekolah, dan seeder resmi lengkap.
 - 📐 **Tata Letak 3-Tier dan Paginasi Responsif:** Arsitektur antarmuka 3-tier (fixed topbar, docked footer, dan scroll internal independen) berpadu dengan komponen paginasi universal `<x-pagination>` dan toolbar tabel adaptif.
@@ -64,11 +123,11 @@ INFORA menghadirkan ekosistem terpadu yang dirancang khusus untuk memenuhi stand
 ## 💻 Tech Stack dan Arsitektur
 
 - **Backend:** Laravel (Versi Terbaru) — *Modular Monolith, RESTful API dan Bridging Core*
-- **Automated Testing:** Pest PHP — **505 Tests Passed dan 2.370 Assertions (100% Pass Rate)**
+- **Automated Testing:** Pest PHP — **496 Tests Passed dan 2.319 Assertions (100% Pass Rate)**
 - **UI Components:** 27 Anonymous Blade Components ([`docs/COMPONENTS.md`](docs/COMPONENTS.md)) dan Reusable Global CSS Tokens (`resources/css/app.css`, Zero Inline Styles)
 - **JavaScript Client Engines:** `InforaModals` (CRUD modals), `SearchableSelect` (cascading dynamic dropdowns), `ImageUpload` (Base64 file pipeline), `PermissionMatrix` (RBAC access matrix), `InforaProgress` (global smooth loading indicator)
 - **Navigation dan Hierarchy:** System-Driven Dynamic Navigation (Modul ➔ Menu ➔ Sub-Menu), 3 Baseline Bootstrap Menus, User-Centric Menu Access Control, Configurable Role Templates, Dynamic Under-Development Fallback (Zero Dead Links), Non-Unique Entity Convention, Automatic Order dan Dual-Field Routing
-- **School Master dan Academic:** Multi-Record School Management (SMA, SMK, dan MA, Public dan Private), Unit School Filter, Jurusan/Konsentrasi Keahlian/Peminatan Registry, Tingkatan / Grade Levels Registry, GTK / Educator Multi-Role Management, Tahun Ajaran dan Semester Management, Academic Calendar with Multi-Day Event Spanning
+- **School Master dan Academic:** Single-School Profile Management (SMA, SMK, dan MA, Public dan Private), Jurusan/Konsentrasi Keahlian/Peminatan Registry, Tingkatan / Grade Levels Registry, GTK / Educator Multi-Role Management, Tahun Ajaran dan Semester Management, Academic Calendar with Multi-Day Event Spanning
 - **Regional Administrative Master:** Kemendagri 4-Tier Standard (Provinsi, Kabupaten/Kota, Kecamatan, Kelurahan/Desa), Pure Numeric Codes (Non-BPS), 3-Tier Cascading Filter, School Relation Integrity Guard
 - **Layout dan Pagination Architecture:** 3-Tier Docked Layout (Fixed Topbar, Docked Bottom Footer, Independent Internal Scrolling), Universal Responsive Pagination Component (`<x-pagination>`, Registered Global via `Paginator::defaultView`)
 - **Global Indicator Engine:** Universal Smooth Real-Time Progressive Indicator (`window.InforaProgress`, `<x-progress-modal />`, SSE Stream Reader, Zero Inline Styles)
@@ -82,49 +141,6 @@ INFORA menghadirkan ekosistem terpadu yang dirancang khusus untuk memenuhi stand
 
 ---
 
-## 🛠️ Panduan Memulai Cepat (Quick Start)
-
-### Prasyarat
-- [Docker](https://docs.docker.com/get-docker/) dan [Docker Compose](https://docs.docker.com/compose/) (atau Docker Desktop) terpasang di komputer Anda.
-- Git.
-
-### 1. Kloning Repositori
-```bash
-git clone https://github.com/gh4ni404/infora_project.git
-cd infora_project
-```
-
-### 2. Salin Konfigurasi Environment
-```bash
-cp .env.docker.example .env
-```
-
-### 3. Jalankan Container Docker
-Gunakan helper script bawaan untuk kemudahan lintas OS:
-```bash
-# Linux / macOS / WSL / Git Bash
-./dev start
-
-# Windows (PowerShell)
-.\dev.ps1 start
-```
-
-### 4. Setup Aplikasi dan Migrasi Database
-```bash
-# Linux / macOS / WSL
-./dev artisan migrate
-
-# Windows (PowerShell)
-.\dev.ps1 artisan migrate
-```
-*(Catatan: Symbolic link storage publik relatif sudah dibuat otomatis saat `./dev start`. Anda juga dapat menjalankannya manual jika diperlukan via `./dev artisan storage:link --relative`)*
-
-### 5. Akses Aplikasi
-- **Aplikasi Web INFORA:** [http://localhost:8000](http://localhost:8000)
-- **Vite Dev Server (HMR):** [http://localhost:5173](http://localhost:5173)
-
----
-
 ## 📂 Struktur Dokumentasi Proyek
 
 Dokumentasi detail mengenai arsitektur, rencana kerja, riwayat rilis, dan identitas brand:
@@ -135,6 +151,7 @@ Dokumentasi detail mengenai arsitektur, rencana kerja, riwayat rilis, dan identi
 - 🎨 **[DESIGN.md](detail/DESIGN.md):** Spesifikasi arsitektur sistem, identitas visual, palet warna, dan skema database.
 - 🖼️ **[BRANDING.md](detail/docs/BRANDING.md):** Filosofi penamaan brand, aset logo lockup, dan app icon.
 - 🛠️ **[TROUBLESHOOTING.md](detail/docs/TROUBLESHOOTING.md):** Panduan mengatasi masalah umum saat setup Docker (halaman tanpa styling, file `hot`, dan lainnya).
+- 🚀 **[RENCANA_PENGEMBANGAN_LANJUT.md](detail/RENCANA_PENGEMBANGAN_LANJUT.md):** Rencana pengembangan tingkat lanjut untuk dukungan multi-sekolah / multi-unit yayasan.
 
 ---
 

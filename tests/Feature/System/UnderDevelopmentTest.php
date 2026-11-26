@@ -301,12 +301,12 @@ test('sub-menu update validates and stores development progress metadata', funct
 });
 
 test('under-development page suggests namespaced controller path for dotted routes', function () {
-    $module = Module::create(['name' => 'MONITORING', 'order' => 1, 'is_active' => true]);
-    $menu = Menu::create(['module_id' => $module->id, 'name' => 'Monitoring Sekolah', 'order' => 1, 'is_active' => true]);
+    $module = Module::create(['name' => 'AKADEMIK', 'order' => 1, 'is_active' => true]);
+    $menu = Menu::create(['module_id' => $module->id, 'name' => 'Akademik', 'order' => 1, 'is_active' => true]);
     $subMenu = SubMenu::create([
         'menu_id' => $menu->id,
-        'name' => 'Node Sekolah',
-        'route_name' => 'monitoring-sekolah.node',
+        'name' => 'Jurnal KBM',
+        'route_name' => 'akademik.jurnal-kbm',
         'order' => 1,
         'is_active' => true,
     ]);
@@ -315,6 +315,6 @@ test('under-development page suggests namespaced controller path for dotted rout
         ->get(route('system.under-development', ['type' => 'submenu', 'id' => $subMenu->id]));
 
     $response->assertOk();
-    $response->assertSee('php artisan make:controller MonitoringSekolah/NodeController');
-    $response->assertSee("Route::get('/monitoring-sekolah/node', [NodeController::class, 'index'])->name('monitoring-sekolah.node');");
+    $response->assertSee('php artisan make:controller Akademik/JurnalKbmController');
+    $response->assertSee("Route::get('/akademik/jurnal-kbm', [JurnalKbmController::class, 'index'])->name('akademik.jurnal-kbm');");
 });

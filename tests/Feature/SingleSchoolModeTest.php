@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\DatabaseBackupService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
@@ -58,46 +59,26 @@ beforeEach(function () {
     ]);
 });
 
-test('single-school mode prevents creating a second school through controller', function () {
-    School::factory()->smk()->create([
-        'name' => 'SMK Negeri 1 Bone',
-        'npsn' => '40301111',
-    ]);
-
-    $response = $this->actingAs($this->superAdmin)->post(route('master.data-sekolah.store'), [
-        'name' => 'SMA Negeri 2 Bone',
-        'npsn' => '40302222',
-        'school_type' => 'SMA',
-        'status' => 'Negeri',
-        'accreditation' => 'A',
-        'is_active' => '1',
-    ]);
-
-    $response->assertRedirect(route('master.data-sekolah.index'));
-    $response->assertSessionHas('error');
-
-    expect(School::count())->toBe(1);
-    $this->assertDatabaseMissing('schools', ['npsn' => '40302222']);
-});
-
-test('single-school mode prevents deleting school that has operational data', function () {
+test('single-school mode disables web routes for creating or deleting schools', function () {
     $school = School::factory()->smk()->create([
         'name' => 'SMK Negeri 1 Bone',
         'npsn' => '40301111',
     ]);
 
-    User::factory()->create([
-        'school_id' => $school->id,
-        'user_type' => 'admin',
-        'username' => '40301111',
-    ]);
+    expect(Route::has('master.data-sekolah.store'))->toBeFalse()
+        ->and(Route::has('master.data-sekolah.destroy'))->toBeFalse()
+        ->and(Route::has('master.data-sekolah.sync-admins'))->toBeFalse();
 
-    $response = $this->actingAs($this->superAdmin)
-        ->delete(route('master.data-sekolah.destroy', $school));
+    $this->actingAs($this->superAdmin)
+        ->post('/master/data-sekolah', [
+            'name' => 'SMA Negeri 2 Bone',
+            'npsn' => '40302222',
+        ])
+        ->assertStatus(405);
 
-    $response->assertRedirect(route('master.data-sekolah.index'));
-    $response->assertSessionHas('error');
-    $this->assertDatabaseHas('schools', ['id' => $school->id]);
+    $this->actingAs($this->superAdmin)
+        ->delete('/master/data-sekolah/'.$school->id)
+        ->assertStatus(405);
 });
 
 test('form request automatically resolves single school_id when omitted by super admin', function () {

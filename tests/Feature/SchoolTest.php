@@ -8,15 +8,11 @@ use App\Models\Module;
 use App\Models\Provinsi;
 use App\Models\Referensi;
 use App\Models\School;
-use App\Models\SubMenu;
 use App\Models\User;
 use App\Models\UserMenuPermission;
-use Database\Seeders\MenuAccessTemplateSeeder;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
-    // Siapkan data referensi standar untuk pengujian sekolah
     $schoolTypeCat = Referensi::create([
         'nama' => 'Jenis Sekolah',
         'kode' => 'school_type',
@@ -80,19 +76,17 @@ test('non super admin cannot access school management', function () {
     $response->assertForbidden();
 });
 
-test('super admin can view school list with empty state', function () {
+test('super admin can view school profile empty state when uninitialized', function () {
     $response = $this->actingAs($this->superAdmin)->get(route('master.data-sekolah.index'));
 
     $response->assertOk();
-    $response->assertSee('Data Sekolah');
-    $response->assertSee('Belum ada data sekolah yang terdaftar');
-    $response->assertSee('modalCreateSchool', false);
-    $response->assertSee('btnOpenCreateSchool', false);
-    $response->assertSee('modalSyncAdmins', false);
-    $response->assertSee('btnOpenSyncAdmins', false);
+    $response->assertSee('Profil Sekolah');
+    $response->assertSee('Profil sekolah belum terdaftar');
+    $response->assertDontSee('btnOpenCreateSchool', false);
+    $response->assertDontSee('modalCreateSchool', false);
 });
 
-test('super admin can view school list with schools data', function () {
+test('super admin can view single school profile data', function () {
     School::factory()->create([
         'name' => 'SMA Negeri 1 Makassar',
         'npsn' => '40312345',
@@ -108,273 +102,34 @@ test('super admin can view school list with schools data', function () {
     $response->assertSee('SMA Negeri 1 Makassar');
     $response->assertSee('40312345');
     $response->assertSee('Kota Makassar');
+    $response->assertSee('modalEditSchool', false);
 });
 
-test('super admin can search schools by name, npsn, or city', function () {
-    School::factory()->create([
+test('edit route redirects to school profile index', function () {
+    $school = School::factory()->create([
         'name' => 'SMA Negeri 1 Makassar',
         'npsn' => '40312345',
-        'city' => 'Kota Makassar',
     ]);
 
-    School::factory()->create([
-        'name' => 'SMK Negeri 2 Gowa',
-        'npsn' => '40398765',
-        'city' => 'Kabupaten Gowa',
-    ]);
-
-    $response = $this->actingAs($this->superAdmin)->get(route('master.data-sekolah.index', ['search' => 'Gowa']));
-    $response->assertOk();
-    $response->assertSee('Kabupaten Gowa');
-    $response->assertDontSee('Kota Makassar');
-
-    $responseNpsn = $this->actingAs($this->superAdmin)->get(route('master.data-sekolah.index', ['search' => '40312345']));
-    $responseNpsn->assertOk();
-    $responseNpsn->assertSee('40312345');
-    $responseNpsn->assertDontSee('40398765');
-});
-
-test('super admin can filter schools by school type', function () {
-    School::factory()->create([
-        'name' => 'SMA Terbuka 1',
-        'npsn' => '11111111',
-        'school_type' => 'SMA',
-    ]);
-
-    School::factory()->create([
-        'name' => 'SMK Vokasi 2',
-        'npsn' => '22222222',
-        'school_type' => 'SMK',
-    ]);
-
-    $response = $this->actingAs($this->superAdmin)->get(route('master.data-sekolah.index', ['school_type' => 'SMK']));
-    $response->assertOk();
-    $response->assertSee('22222222');
-    $response->assertDontSee('11111111');
-});
-
-test('school creation validates required fields', function () {
-    $response = $this->actingAs($this->superAdmin)->post(route('master.data-sekolah.store'), []);
-
-    $response->assertSessionHasErrors(['name', 'npsn', 'school_type', 'status']);
-});
-
-test('school creation validates npsn must be 8 digits', function () {
-    $response = $this->actingAs($this->superAdmin)->post(route('master.data-sekolah.store'), [
-        'name' => 'SMA Nusantara',
-        'npsn' => '123',
-        'school_type' => 'SMA',
-        'status' => 'Negeri',
-    ]);
-
-    $response->assertSessionHasErrors(['npsn']);
-});
-
-test('super admin can create a new school', function () {
-    $response = $this->actingAs($this->superAdmin)->post(route('master.data-sekolah.store'), [
-        'name' => 'sma negeri 5 makassar',
-        'npsn' => '40312345',
-        'school_type' => 'SMA',
-        'status' => 'Negeri',
-        'accreditation' => 'A',
-        'address' => 'Jl. Taman Makam Pahlawan',
-        'city' => 'Kota Makassar',
-        'province' => 'Sulawesi Selatan',
-        'email' => 'sman5@makassar.sch.id',
-        'is_active' => '1',
-    ]);
+    $response = $this->actingAs($this->superAdmin)->get(route('master.data-sekolah.edit', $school));
 
     $response->assertRedirect(route('master.data-sekolah.index'));
-    $response->assertSessionHas('success');
-
-    $this->assertDatabaseHas('schools', [
-        'npsn' => '40312345',
-        'school_type' => 'SMA',
-        'status' => 'Negeri',
-        'city' => 'Kota Makassar',
-        'is_active' => true,
-    ]);
-
-    $school = School::where('npsn', '40312345')->first();
-    expect($school->name)->toBe('SMA Negeri 5 Makassar');
-
-    // Pastikan akun administrator sekolah otomatis diterbitkan dengan kredensial NPSN
-    $this->assertDatabaseHas('users', [
-        'username' => '40312345',
-        'user_type' => 'admin',
-        'school_id' => $school->id,
-        'is_active' => true,
-    ]);
-
-    $admin = User::where('username', '40312345')->first();
-    expect(Hash::check('40312345', $admin->password))->toBeTrue();
-    expect($admin->school->id)->toBe($school->id);
-    expect($school->adminUser->id)->toBe($admin->id);
-});
-
-test('super admin can create school with base64 logo', function () {
-    Storage::fake('public');
-
-    // 1x1 transparent PNG base64
-    $base64Png = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
-
-    $response = $this->actingAs($this->superAdmin)->post(route('master.data-sekolah.store'), [
-        'name' => 'SMK Bina Informatika',
-        'npsn' => '40356789',
-        'school_type' => 'SMK',
-        'status' => 'Swasta',
-        'logo' => $base64Png,
-        'is_active' => '1',
-    ]);
-
-    $response->assertRedirect(route('master.data-sekolah.index'));
-
-    $school = School::where('npsn', '40356789')->first();
-    expect($school)->not->toBeNull();
-    expect($school->logo_path)->not->toBeNull();
-    Storage::disk('public')->assertExists($school->logo_path);
-});
-
-test('super admin can view school edit modal component on index and edit route redirects to index', function () {
-    $school = School::factory()->create([
-        'name' => 'SMA Unggulan',
-        'npsn' => '40399999',
-    ]);
-
-    $redirectResponse = $this->actingAs($this->superAdmin)->get(route('master.data-sekolah.edit', $school));
-    $redirectResponse->assertRedirect(route('master.data-sekolah.index'));
-
-    $response = $this->actingAs($this->superAdmin)->get(route('master.data-sekolah.index'));
-    $response->assertOk();
-    $response->assertSee('SMA Unggulan');
-    $response->assertSee('40399999');
-    $response->assertSee('modalEditSchool', false);
-    $response->assertSee('Formulir Perubahan Data Sekolah');
-    $response->assertSee('btn-open-edit-school', false);
 });
 
 test('super admin can update school information', function () {
     $school = School::factory()->create([
-        'name' => 'SMA Awal',
-        'npsn' => '40300001',
-        'status' => 'Swasta',
-    ]);
-
-    $response = $this->actingAs($this->superAdmin)->put(route('master.data-sekolah.update', $school), [
-        'name' => 'SMA Perubahan',
-        'npsn' => '40300001',
+        'name' => 'SMA Lama',
+        'npsn' => '40312345',
         'school_type' => 'SMA',
         'status' => 'Negeri',
-        'city' => 'Makassar Baru',
-        'is_active' => '1',
-    ]);
-
-    $response->assertRedirect(route('master.data-sekolah.index'));
-    $response->assertSessionHas('success');
-
-    $school->refresh();
-    expect($school->name)->toBe('SMA Perubahan');
-    expect($school->status)->toBe('Negeri');
-    expect($school->city)->toBe('Makassar Baru');
-});
-
-test('super admin can remove logo from school during update', function () {
-    Storage::fake('public');
-
-    $fakeLogoPath = 'logos/test_logo.png';
-    Storage::disk('public')->put($fakeLogoPath, 'dummy content');
-
-    $school = School::factory()->create([
-        'logo_path' => $fakeLogoPath,
     ]);
 
     $response = $this->actingAs($this->superAdmin)->put(route('master.data-sekolah.update', $school), [
-        'name' => $school->name,
-        'npsn' => $school->npsn,
-        'school_type' => $school->school_type,
-        'status' => $school->status,
-        'remove_logo' => '1',
-    ]);
-
-    $response->assertRedirect(route('master.data-sekolah.index'));
-
-    $school->refresh();
-    expect($school->logo_path)->toBeNull();
-    Storage::disk('public')->assertMissing($fakeLogoPath);
-});
-
-test('super admin can delete school and its logo is removed from storage', function () {
-    Storage::fake('public');
-
-    $fakeLogoPath = 'logos/sekolah_delete.png';
-    Storage::disk('public')->put($fakeLogoPath, 'dummy content');
-
-    $school = School::factory()->create([
-        'logo_path' => $fakeLogoPath,
-    ]);
-
-    $response = $this->actingAs($this->superAdmin)->delete(route('master.data-sekolah.destroy', $school));
-
-    $response->assertRedirect(route('master.data-sekolah.index'));
-    $response->assertSessionHas('success');
-
-    $this->assertDatabaseMissing('schools', [
-        'id' => $school->id,
-    ]);
-    Storage::disk('public')->assertMissing($fakeLogoPath);
-});
-
-test('school views adhere to zero inline styles convention', function () {
-    $school = School::factory()->create();
-
-    $indexResponse = $this->actingAs($this->superAdmin)->get(route('master.data-sekolah.index'));
-    $indexResponse->assertOk();
-    expect($indexResponse->getContent())->not->toContain('style="');
-    expect($indexResponse->getContent())->not->toContain('<style');
-});
-
-test('super admin can change school per_page limit and display all data when selecting semua', function () {
-    School::factory()->count(25)->create();
-
-    $responseDefault = $this->actingAs($this->superAdmin)->get(route('master.data-sekolah.index'));
-    $responseDefault->assertOk();
-    $responseDefault->assertSee('Selanjutnya');
-
-    $responseSemua = $this->actingAs($this->superAdmin)->get(route('master.data-sekolah.index', ['per_page' => 'semua']));
-    $responseSemua->assertOk();
-    $responseSemua->assertSee('Menampilkan');
-    $responseSemua->assertDontSee('Selanjutnya');
-});
-
-test('super admin can navigate to next page and see subsequent schools', function () {
-    School::factory()->count(20)->create();
-
-    $responsePage1 = $this->actingAs($this->superAdmin)->get(route('master.data-sekolah.index', ['page' => '1']));
-    $responsePage1->assertOk();
-    $responsePage1->assertSee('Selanjutnya');
-
-    $responsePage2 = $this->actingAs($this->superAdmin)->get(route('master.data-sekolah.index', ['page' => '2']));
-    $responsePage2->assertOk();
-    $responsePage2->assertSee('Sebelumnya');
-});
-
-test('super admin can store new school with wilayah foreign keys', function () {
-    $prov = Provinsi::factory()->create();
-    $kab = Kabupaten::factory()->create(['provinsi_id' => $prov->id]);
-    $kec = Kecamatan::factory()->create(['kabupaten_id' => $kab->id]);
-    $kel = Kelurahan::factory()->create(['kecamatan_id' => $kec->id]);
-
-    $response = $this->actingAs($this->superAdmin)->post(route('master.data-sekolah.store'), [
-        'name' => 'SMK Negeri 8 Bone',
-        'npsn' => '40319999',
+        'name' => 'SMA Baru Diperbarui',
+        'npsn' => '40399999',
         'school_type' => 'SMK',
-        'status' => 'Negeri',
-        'provinsi_id' => $prov->id,
-        'kabupaten_id' => $kab->id,
-        'kecamatan_id' => $kec->id,
-        'kelurahan_id' => $kel->id,
-        'address' => 'Jl. Poros Bone-Sengkang',
-        'postal_code' => '92755',
+        'status' => 'Swasta',
+        'accreditation' => 'B',
         'is_active' => '1',
     ]);
 
@@ -382,275 +137,162 @@ test('super admin can store new school with wilayah foreign keys', function () {
     $response->assertSessionHas('success');
 
     $this->assertDatabaseHas('schools', [
-        'npsn' => '40319999',
-        'provinsi_id' => $prov->id,
-        'kabupaten_id' => $kab->id,
-        'kecamatan_id' => $kec->id,
-        'kelurahan_id' => $kel->id,
+        'id' => $school->id,
+        'name' => 'SMA Baru Diperbarui',
+        'npsn' => '40399999',
+        'school_type' => 'SMK',
+        'status' => 'Swasta',
+        'accreditation' => 'B',
     ]);
-
-    $school = School::where('npsn', '40319999')->first();
-    expect($school->provinsi->id)->toBe($prov->id);
-    expect($school->kabupaten->id)->toBe($kab->id);
-    expect($school->kecamatan->id)->toBe($kec->id);
-    expect($school->kelurahan->id)->toBe($kel->id);
 });
 
-test('super admin can update school with new wilayah foreign keys', function () {
-    $prov1 = Provinsi::factory()->create();
-    $prov2 = Provinsi::factory()->create();
-    $kab2 = Kabupaten::factory()->create(['provinsi_id' => $prov2->id]);
+test('super admin can remove logo from school during update', function () {
+    Storage::fake('public');
+    Storage::disk('public')->put('logos/test_old.png', 'fake-image-content');
 
     $school = School::factory()->create([
-        'provinsi_id' => $prov1->id,
+        'name' => 'SMK Logo Lama',
+        'npsn' => '40312345',
+        'logo_path' => 'logos/test_old.png',
     ]);
 
     $response = $this->actingAs($this->superAdmin)->put(route('master.data-sekolah.update', $school), [
-        'name' => $school->name,
-        'npsn' => $school->npsn,
-        'school_type' => $school->school_type,
-        'status' => $school->status,
-        'provinsi_id' => $prov2->id,
-        'kabupaten_id' => $kab2->id,
+        'name' => 'SMK Logo Dihapus',
+        'npsn' => '40312345',
+        'school_type' => 'SMK',
+        'status' => 'Negeri',
+        'accreditation' => 'A',
+        'remove_logo' => '1',
     ]);
 
     $response->assertRedirect(route('master.data-sekolah.index'));
     $school->refresh();
-    expect($school->provinsi_id)->toBe($prov2->id);
-    expect($school->kabupaten_id)->toBe($kab2->id);
+
+    expect($school->logo_path)->toBeNull();
+    Storage::disk('public')->assertMissing('logos/test_old.png');
 });
 
-test('super admin can sync admin account for the active single school', function () {
-    $school1 = School::factory()->create(['npsn' => '11223344']);
+test('school views adhere to zero inline styles convention', function () {
+    School::factory()->create();
 
-    $response = $this->actingAs($this->superAdmin)->post(route('master.data-sekolah.sync-admins'));
+    $response = $this->actingAs($this->superAdmin)->get(route('master.data-sekolah.index'));
+
+    $response->assertOk();
+    expect($response->getContent())->not->toContain('style="')
+        ->and($response->getContent())->not->toContain('<style>');
+});
+
+test('super admin can update school with new wilayah foreign keys', function () {
+    $provinsi = Provinsi::create(['kode' => '73', 'nama' => 'Sulawesi Selatan', 'status_aktif' => true]);
+    $kabupaten = Kabupaten::create(['provinsi_id' => $provinsi->id, 'kode' => '7371', 'tipe' => 'Kota', 'nama' => 'Makassar', 'status_aktif' => true]);
+    $kecamatan = Kecamatan::create(['kabupaten_id' => $kabupaten->id, 'kode' => '7371010', 'nama' => 'Mariso', 'status_aktif' => true]);
+    $kelurahan = Kelurahan::create(['kecamatan_id' => $kecamatan->id, 'kode' => '7371010001', 'tipe' => 'Kelurahan', 'nama' => 'Lette', 'status_aktif' => true]);
+
+    $school = School::factory()->create(['npsn' => '40312345']);
+
+    $response = $this->actingAs($this->superAdmin)->put(route('master.data-sekolah.update', $school), [
+        'name' => 'SMK Wilayah Updated',
+        'npsn' => '40312345',
+        'school_type' => 'SMK',
+        'status' => 'Negeri',
+        'accreditation' => 'A',
+        'provinsi_id' => $provinsi->id,
+        'kabupaten_id' => $kabupaten->id,
+        'kecamatan_id' => $kecamatan->id,
+        'kelurahan_id' => $kelurahan->id,
+    ]);
+
     $response->assertRedirect(route('master.data-sekolah.index'));
-    $response->assertSessionHas('success');
 
-    $this->assertDatabaseHas('users', ['username' => '11223344', 'user_type' => 'admin', 'school_id' => $school1->id]);
+    $this->assertDatabaseHas('schools', [
+        'id' => $school->id,
+        'provinsi_id' => $provinsi->id,
+        'kabupaten_id' => $kabupaten->id,
+        'kecamatan_id' => $kecamatan->id,
+        'kelurahan_id' => $kelurahan->id,
+    ]);
 });
 
-test('super admin can sync single admin account for a specific school', function () {
-    $school = School::factory()->create(['npsn' => '99887766']);
+test('super admin can sync single admin account for the active school', function () {
+    $school = School::factory()->create(['npsn' => '40355566']);
 
     $response = $this->actingAs($this->superAdmin)->post(route('master.data-sekolah.sync-single-admin', $school));
+
     $response->assertRedirect(route('master.data-sekolah.index'));
     $response->assertSessionHas('success');
 
-    $this->assertDatabaseHas('users', ['username' => '99887766', 'user_type' => 'admin', 'school_id' => $school->id]);
+    $this->assertDatabaseHas('users', [
+        'school_id' => $school->id,
+        'username' => '40355566',
+        'user_type' => 'admin',
+    ]);
 });
 
 test('school index view displays admin account status badge', function () {
-    $school = School::factory()->create(['npsn' => '40312345']);
+    $school = School::factory()->create(['npsn' => '40377788']);
     User::factory()->create([
-        'username' => '40312345',
-        'user_type' => 'admin',
         'school_id' => $school->id,
+        'username' => '40377788',
+        'user_type' => 'admin',
     ]);
 
     $response = $this->actingAs($this->superAdmin)->get(route('master.data-sekolah.index'));
-    $response->assertOk();
-    $response->assertSee('Akun Admin');
-    $response->assertSee('40312345');
-});
-
-test('non super admin with permission can only see their own school in school list', function () {
-    $module = Module::firstOrCreate(['name' => 'ADMINISTRASI'], ['order' => 1, 'is_active' => true]);
-    $menu = Menu::firstOrCreate(
-        ['route_name' => 'master.data-sekolah.index'],
-        ['module_id' => $module->id, 'name' => 'Data Sekolah', 'order' => 1, 'is_active' => true]
-    );
-
-    $mySchool = School::factory()->create([
-        'name' => 'Sekolah Milik Sendiri',
-        'npsn' => '11112222',
-    ]);
-
-    $otherSchool = School::factory()->create([
-        'name' => 'Sekolah Milik Orang Lain',
-        'npsn' => '33334444',
-    ]);
-
-    $schoolAdmin = User::factory()->create([
-        'username' => 'admin_sekolah_1',
-        'user_type' => 'admin',
-        'school_id' => $mySchool->id,
-        'is_active' => true,
-    ]);
-
-    UserMenuPermission::create([
-        'user_id' => $schoolAdmin->id,
-        'menu_id' => $menu->id,
-        'can_view' => true,
-    ]);
-
-    $response = $this->actingAs($schoolAdmin)->get(route('master.data-sekolah.index'));
 
     $response->assertOk();
-    $response->assertSee('Sekolah Milik Sendiri');
-    $response->assertSee('11112222');
-    $response->assertDontSee('Sekolah Milik Orang Lain');
-    $response->assertDontSee('33334444');
-    $response->assertDontSee('id="btnOpenCreateSchool"', false);
-    $response->assertDontSee('id="btnOpenSyncAdmins"', false);
+    $response->assertSee('40377788');
 });
 
-test('non super admin cannot delete another school even with permission', function () {
-    $module = Module::firstOrCreate(['name' => 'ADMINISTRASI'], ['order' => 1, 'is_active' => true]);
-    $menu = Menu::firstOrCreate(
-        ['route_name' => 'master.data-sekolah.index'],
-        ['module_id' => $module->id, 'name' => 'Data Sekolah', 'order' => 1, 'is_active' => true]
-    );
-
-    $mySchool = School::factory()->create(['name' => 'Sekolah Sendiri']);
-    $otherSchool = School::factory()->create(['name' => 'Sekolah Target Hapus']);
-
+test('non super admin with permission can view and update their own school without resetting permissions', function () {
+    $school = School::factory()->create(['name' => 'SMA Negeri 1 Bone', 'npsn' => '40301111']);
     $schoolAdmin = User::factory()->create([
-        'username' => 'admin_sekolah_del',
+        'school_id' => $school->id,
+        'username' => '40301111',
         'user_type' => 'admin',
-        'school_id' => $mySchool->id,
+        'is_active' => true,
+    ]);
+
+    $module = Module::create(['name' => 'ADMINISTRASI', 'order' => 1, 'is_active' => true]);
+    $menu = Menu::create([
+        'module_id' => $module->id,
+        'name' => 'Data Sekolah',
+        'route_name' => 'master.data-sekolah.index',
+        'order' => 1,
         'is_active' => true,
     ]);
 
     UserMenuPermission::create([
         'user_id' => $schoolAdmin->id,
         'menu_id' => $menu->id,
-        'can_view' => true,
-        'can_delete' => true,
-    ]);
-
-    $response = $this->actingAs($schoolAdmin)->delete(route('master.data-sekolah.destroy', $otherSchool));
-
-    $response->assertForbidden();
-    $this->assertDatabaseHas('schools', ['id' => $otherSchool->id]);
-});
-
-test('non super admin without delete permission cannot delete school', function () {
-    $module = Module::firstOrCreate(['name' => 'ADMINISTRASI'], ['order' => 1, 'is_active' => true]);
-    $menu = Menu::firstOrCreate(
-        ['route_name' => 'master.data-sekolah.index'],
-        ['module_id' => $module->id, 'name' => 'Data Sekolah', 'order' => 1, 'is_active' => true]
-    );
-
-    $school = School::factory()->create(['name' => 'Sekolah Target Hapus']);
-
-    $schoolAdmin = User::factory()->create([
-        'username' => 'admin_sekolah_no_del',
-        'user_type' => 'admin',
-        'school_id' => $school->id,
-        'is_active' => true,
-    ]);
-
-    UserMenuPermission::create([
-        'user_id' => $schoolAdmin->id,
-        'menu_id' => $menu->id,
-        'can_view' => true,
-        'can_delete' => false,
-    ]);
-
-    $response = $this->actingAs($schoolAdmin)->deleteJson(route('master.data-sekolah.destroy', $school));
-
-    $response->assertForbidden();
-    $this->assertDatabaseHas('schools', ['id' => $school->id]);
-});
-
-test('school admin permissions are not reset when school is updated after being given permission by super admin', function () {
-    $this->seed(MenuAccessTemplateSeeder::class);
-
-    $module = Module::firstOrCreate(['name' => 'MASTER DATA'], ['order' => 1, 'is_active' => true]);
-    $menu = Menu::firstOrCreate(
-        ['name' => 'Data Master'],
-        ['module_id' => $module->id, 'order' => 1, 'is_active' => true]
-    );
-    $subMenu = SubMenu::firstOrCreate(
-        ['route_name' => 'master.data-sekolah'],
-        ['menu_id' => $menu->id, 'name' => 'Data Sekolah', 'order' => 1, 'is_active' => true]
-    );
-
-    $school = School::factory()->create([
-        'name' => 'SMA Negeri 1 Perm Test',
-        'npsn' => '77889900',
-    ]);
-
-    $schoolAdmin = User::factory()->create([
-        'username' => 'admin_perm_tester',
-        'user_type' => 'admin',
-        'school_id' => $school->id,
-        'is_active' => true,
-    ]);
-
-    // Super Admin memberikan izin kepada Admin Sekolah untuk mengedit Data Sekolah
-    UserMenuPermission::create([
-        'user_id' => $schoolAdmin->id,
-        'sub_menu_id' => $subMenu->id,
         'can_view' => true,
         'can_edit' => true,
-        'can_delete' => false,
     ]);
 
-    // Admin Sekolah melakukan pembaruan data sekolah
-    $response = $this->actingAs($schoolAdmin)->put(route('master.data-sekolah.update', $school), [
-        'name' => 'SMA Negeri 1 Perm Test Updated',
-        'npsn' => '77889900',
+    $this->actingAs($schoolAdmin)->get(route('master.data-sekolah.index'))
+        ->assertOk()
+        ->assertSee('SMA Negeri 1 Bone');
+
+    $this->actingAs($schoolAdmin)->put(route('master.data-sekolah.update', $school), [
+        'name' => 'SMA Negeri 1 Bone Updated',
+        'npsn' => '40301111',
         'school_type' => 'SMA',
         'status' => 'Negeri',
-        'city' => 'Makassar',
+        'accreditation' => 'A',
         'is_active' => '1',
-    ]);
+    ])->assertRedirect(route('master.data-sekolah.index'));
 
-    $response->assertRedirect(route('master.data-sekolah.index'));
-    $response->assertSessionHas('success');
-
-    // Pastikan izin granular tidak ter-reset
-    $schoolAdmin->refresh();
-    expect($schoolAdmin->hasSubMenuAccess($subMenu, 'edit'))->toBeTrue();
-
-    // Admin Sekolah dapat melakukan pembaruan kedua kalinya tanpa terhalang 403
-    $secondResponse = $this->actingAs($schoolAdmin)->put(route('master.data-sekolah.update', $school), [
-        'name' => 'SMA Negeri 1 Perm Test Second Update',
-        'npsn' => '77889900',
-        'school_type' => 'SMA',
-        'status' => 'Negeri',
-        'city' => 'Makassar',
-        'is_active' => '1',
-    ]);
-
-    $secondResponse->assertRedirect(route('master.data-sekolah.index'));
-    $secondResponse->assertSessionHas('success');
-
-    $school->refresh();
-    expect($school->name)->toBe('SMA Negeri 1 Perm Test Second Update');
+    expect(UserMenuPermission::where('user_id', $schoolAdmin->id)->where('menu_id', $menu->id)->exists())->toBeTrue();
 });
 
-test('validation returns informative message when school_type or accreditation reference data is unconfigured or invalid', function () {
-    // 1. Uji ketika opsi tidak terdaftar di referensi
-    $invalidResponse = $this->actingAs($this->superAdmin)->post(route('master.data-sekolah.store'), [
-        'name' => 'Sekolah Tidak Valid',
-        'npsn' => '99998888',
-        'school_type' => 'UNREGISTERED_TYPE',
+test('validation returns informative message when school_type or accreditation reference data is invalid on update', function () {
+    $school = School::factory()->create(['npsn' => '40312345']);
+
+    $invalidResponse = $this->actingAs($this->superAdmin)->put(route('master.data-sekolah.update', $school), [
+        'name' => 'SMK Validasi Referensi',
+        'npsn' => '40312345',
+        'school_type' => 'INVALID_TYPE',
         'status' => 'Negeri',
         'accreditation' => 'INVALID_ACC',
     ]);
 
-    $invalidResponse->assertSessionHasErrors([
-        'school_type' => 'Jenis sekolah yang dipilih tidak valid atau belum terdaftar pada Data Referensi Sistem.',
-        'accreditation' => 'Akreditasi yang dipilih tidak valid atau belum terdaftar pada Data Referensi Sistem.',
-    ]);
-
-    // 2. Uji ketika Data Referensi belum diisi sama sekali oleh admin
-    Referensi::query()->delete();
-    Referensi::clearCache();
-
-    $unconfiguredResponse = $this->actingAs($this->superAdmin)->post(route('master.data-sekolah.store'), [
-        'name' => 'Sekolah Tanpa Referensi',
-        'npsn' => '99998888',
-        'school_type' => 'SMA',
-        'status' => 'Negeri',
-        'accreditation' => 'A',
-    ]);
-
-    $unconfiguredResponse->assertSessionHasErrors([
-        'school_type' => 'Data referensi jenis sekolah belum diatur. Silakan tambahkan data jenis sekolah terlebih dahulu pada menu Data Referensi.',
-        'accreditation' => 'Data referensi akreditasi belum diatur. Silakan tambahkan data akreditasi terlebih dahulu pada menu Data Referensi.',
-    ]);
+    $invalidResponse->assertSessionHasErrors(['school_type', 'accreditation']);
 });
