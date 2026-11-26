@@ -55,9 +55,18 @@ class InitSchoolCommand extends Command
 
         $inferredType = $this->inferSchoolType($name);
         $rawType = $this->option('type');
-        $schoolType = strtoupper(trim((string) ($rawType !== null && $rawType !== ''
-            ? $rawType
-            : ($isInteractive ? $this->choice('Jenis sekolah', ['SMA', 'SMK', 'MA'], $inferredType) : $inferredType))));
+
+        if ($rawType !== null && $rawType !== '') {
+            $schoolType = strtoupper(trim((string) $rawType));
+        } elseif ($inferredType !== null) {
+            $schoolType = $inferredType;
+            $this->line("Jenis sekolah terdeteksi otomatis dari nama: {$schoolType}");
+        } else {
+            $typeOptions = ['SD', 'SMP', 'SMA', 'SMK', 'MI', 'MTS', 'MA'];
+            $schoolType = strtoupper(trim((string) ($isInteractive
+                ? $this->choice('Jenis sekolah', $typeOptions, 'SMA')
+                : 'SMA')));
+        }
 
         $inferredStatus = str_contains(strtoupper($name), 'SWASTA') ? 'Swasta' : 'Negeri';
         $rawStatus = $this->option('status');
@@ -106,24 +115,28 @@ class InitSchoolCommand extends Command
     }
 
     /**
-     * Tebak jenis sekolah default dari nama sekolah (SMA, SMK, atau MA).
+     * Deteksi otomatis jenis sekolah dari nama sekolah (SD, SMP, SMA, SMK, MI, MTS, MA).
      */
-    protected function inferSchoolType(string $name): string
+    protected function inferSchoolType(string $name): ?string
     {
         $upper = strtoupper($name);
 
-        if (preg_match('/\bSMK\b|\bSMKN\b|\bSMKS\b/', $upper) === 1) {
-            return 'SMK';
+        $patterns = [
+            'SMK' => '/\b(?:SMK|SMKN|SMKS)\b/',
+            'SMA' => '/\b(?:SMA|SMAN|SMAS)\b/',
+            'SMP' => '/\b(?:SMP|SMPN|SMPS)\b/',
+            'SD' => '/\b(?:SD|SDN|SDS)\b/',
+            'MTS' => '/\b(?:MTS|MTSN|MTSS)\b|\bMADRASAH\s+TSANAWIYAH\b/',
+            'MI' => '/\b(?:MI|MIN|MIS)\b|\bMADRASAH\s+IBTIDAIYAH\b/',
+            'MA' => '/\b(?:MA|MAN|MAS)\b|\bMADRASAH\s+ALIYAH\b/',
+        ];
+
+        foreach ($patterns as $type => $pattern) {
+            if (preg_match($pattern, $upper) === 1) {
+                return $type;
+            }
         }
 
-        if (preg_match('/\bSMA\b|\bSMAN\b|\bSMAS\b/', $upper) === 1) {
-            return 'SMA';
-        }
-
-        if (preg_match('/\bMA\b|\bMAN\b|\bMAS\b|\bMADRASAH\b/', $upper) === 1) {
-            return 'MA';
-        }
-
-        return 'SMK';
+        return null;
     }
 }

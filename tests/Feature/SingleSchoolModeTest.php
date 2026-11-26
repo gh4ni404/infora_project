@@ -352,3 +352,18 @@ test('infora:init-school infers SMA school_type from school name when type optio
         'status' => 'Negeri',
     ]);
 });
+
+test('infora:init-school infers SD school_type from school name when type option is omitted', function () {
+    $this->artisan('infora:init-school', [
+        '--name' => 'SD Negeri 1 Bone',
+        '--npsn' => '40320002',
+        '--no-interaction' => true,
+    ])->assertSuccessful();
+
+    $this->assertDatabaseHas('schools', [
+        'name' => 'SD Negeri 1 Bone',
+        'npsn' => '40320002',
+        'school_type' => 'SD',
+        'status' => 'Negeri',
+    ]);
+});
