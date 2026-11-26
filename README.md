@@ -39,47 +39,21 @@ git clone https://github.com/gh4ni404/infora_project.git
 cd infora_project
 ```
 
-### 2. Salin dan Lengkapi Konfigurasi Environment
-```bash
-cp .env.docker.example .env
-```
-Buka file `.env` dan sesuaikan konfigurasi database eksternal (**cPanel / VPS**):
-```env
-DB_CONNECTION=mariadb
-DB_HOST=IP_CPANEL_ATAU_VPS
-DB_PORT=3306
-DB_DATABASE=nama_database
-DB_USERNAME=username_database
-DB_PASSWORD=password_database
-```
-
-### 3. Jalankan Container Docker
-Gunakan helper script bawaan untuk kemudahan lintas OS:
+### 2. Jalankan Setup Otomatis (1 Perintah)
 ```bash
 # Linux / macOS / WSL / Git Bash
-./dev start
+./dev setup
 
 # Windows (PowerShell)
-.\dev.ps1 start
+.\dev.ps1 setup
 ```
+Perintah ini akan otomatis:
+1. Menyalin `.env.docker.example` menjadi `.env` (jika belum ada).
+2. Menyalakan container Docker (`app`, `web`, dan `node` untuk Vite HMR) serta menginstal dependency `composer`.
+3. Meminta detail koneksi database eksternal (**cPanel / VPS**) secara interaktif dan mengujinya langsung.
+4. Menjalankan `key:generate`, `migrate`, `db:seed`, `storage:link --relative`, serta menginisialisasi profil sekolah tunggal dan akun admin.
 
-### 4. Instalasi Dependency, Migrasi & Setup Sekolah Tunggal
-```bash
-# Linux / macOS / WSL
-./dev composer install
-./dev artisan key:generate
-./dev artisan migrate --seed
-./dev artisan infora:setup-school
-
-# Windows (PowerShell)
-.\dev.ps1 composer install
-.\dev.ps1 artisan key:generate
-.\dev.ps1 artisan migrate --seed
-.\dev.ps1 artisan infora:setup-school
-```
-*(Catatan: Container `node` otomatis menjalankan `npm install && npm run dev`. Symbolic link storage publik relatif dapat dibuat/diperbaiki via `./dev artisan storage:link --relative` jika diperlukan.)*
-
-### 5. Akses Aplikasi & Verifikasi
+### 3. Akses Aplikasi & Verifikasi
 - **Aplikasi Web INFORA:** [http://localhost:8000](http://localhost:8000)
 - **Vite Dev Server (HMR):** [http://localhost:5173](http://localhost:5173)
 - **Jalankan Test Suite:** `./dev test`

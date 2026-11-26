@@ -45,6 +45,22 @@ run_in_node() {
 }
 
 case "$1" in
+    setup)
+        shift
+        if [ ! -f .env ] && [ -f .env.docker.example ]; then
+            cp .env.docker.example .env
+            echo "File .env dibuat dari .env.docker.example."
+        fi
+        docker compose up -d
+        if [ ! -d vendor ]; then
+            run_in_app composer install --no-interaction
+        fi
+        run_in_app php artisan infora:setup-school "$@"
+        echo ""
+        echo "Web Application : http://localhost:8000"
+        echo "Vite HMR Server : http://localhost:5173"
+        ;;
+
     start|up)
         shift
         docker compose up -d "$@"
@@ -135,6 +151,7 @@ case "$1" in
         echo "Usage: ./dev <command> [args]"
         echo ""
         echo "Service Management:"
+        echo "  setup           One-command interactive setup (.env, Docker, Composer, DB, migrasi, sekolah)"
         echo "  start, up       Start all docker containers in background"
         echo "  stop, down      Stop and remove containers"
         echo "  restart         Restart containers"

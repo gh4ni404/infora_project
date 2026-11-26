@@ -38,6 +38,21 @@ function Run-InNode {
 }
 
 switch ($Command) {
+    "setup" {
+        if (-not (Test-Path ".env") -and (Test-Path ".env.docker.example")) {
+            Copy-Item ".env.docker.example" ".env"
+            Write-Host "File .env dibuat dari .env.docker.example." -ForegroundColor Green
+        }
+        docker compose up -d
+        if (-not (Test-Path "vendor")) {
+            Run-InApp @("composer", "install", "--no-interaction")
+        }
+        Run-InApp (@("php", "artisan", "infora:setup-school") + $ArgsList)
+        Write-Host ""
+        Write-Host "Web Application : http://localhost:8000" -ForegroundColor Cyan
+        Write-Host "Vite HMR Server : http://localhost:5173" -ForegroundColor Cyan
+    }
+
     { $_ -in "start", "up" } {
         docker compose up -d @ArgsList
         Write-Host "Containers started!" -ForegroundColor Green
@@ -112,6 +127,7 @@ switch ($Command) {
         Write-Host "Usage: .\dev.ps1 <command> [args]"
         Write-Host ""
         Write-Host "Service Management:"
+        Write-Host "  setup           One-command interactive setup (.env, Docker, Composer, DB, migrasi, sekolah)"
         Write-Host "  start, up       Start all docker containers in background"
         Write-Host "  stop, down      Stop and remove containers"
         Write-Host "  restart         Restart containers"

@@ -324,3 +324,31 @@ test('infora:setup-school seeds regional master data when without-wilayah is not
         'npsn' => '40305555',
     ]);
 });
+
+test('infora:setup-school fails cleanly in non-interactive mode when database connection fails', function () {
+    $originalDefault = config('database.default');
+    config()->set('database.default', 'mysql');
+    config()->set('database.connections.mysql.database', '');
+
+    try {
+        $this->artisan('infora:setup-school', ['--no-interaction' => true])
+            ->assertExitCode(1);
+    } finally {
+        config()->set('database.default', $originalDefault);
+    }
+});
+
+test('infora:init-school infers SMA school_type from school name when type option is omitted', function () {
+    $this->artisan('infora:init-school', [
+        '--name' => 'SMA Negeri 20 Bone',
+        '--npsn' => '40320001',
+        '--no-interaction' => true,
+    ])->assertSuccessful();
+
+    $this->assertDatabaseHas('schools', [
+        'name' => 'SMA Negeri 20 Bone',
+        'npsn' => '40320001',
+        'school_type' => 'SMA',
+        'status' => 'Negeri',
+    ]);
+});

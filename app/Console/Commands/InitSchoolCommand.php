@@ -16,9 +16,9 @@ class InitSchoolCommand extends Command
     protected $signature = 'infora:init-school
                             {--name= : Nama resmi sekolah}
                             {--npsn= : NPSN 8 digit angka}
-                            {--type=SMK : Jenis sekolah (SMA, SMK, MA)}
-                            {--status=Negeri : Status sekolah (Negeri atau Swasta)}
-                            {--accreditation=A : Akreditasi sekolah (A, B, C, Belum)}
+                            {--type= : Jenis sekolah (SMA, SMK, MA)}
+                            {--status= : Status sekolah (Negeri atau Swasta)}
+                            {--accreditation= : Akreditasi sekolah (A, B, C, Belum)}
                             {--force : Sinkronkan ulang akun admin jika profil sekolah sudah ada}';
 
     /**
@@ -51,9 +51,24 @@ class InitSchoolCommand extends Command
 
         $name = trim((string) ($this->option('name') ?: $this->ask('Nama resmi sekolah')));
         $npsn = trim((string) ($this->option('npsn') ?: $this->ask('NPSN (8 digit angka)')));
-        $schoolType = strtoupper(trim((string) $this->option('type')));
-        $status = ucfirst(strtolower(trim((string) $this->option('status'))));
-        $accreditation = trim((string) $this->option('accreditation'));
+        $isInteractive = $this->input->isInteractive() && ! $this->option('no-interaction') && ! app()->runningUnitTests();
+
+        $inferredType = $this->inferSchoolType($name);
+        $rawType = $this->option('type');
+        $schoolType = strtoupper(trim((string) ($rawType !== null && $rawType !== ''
+            ? $rawType
+            : ($isInteractive ? $this->choice('Jenis sekolah', ['SMA', 'SMK', 'MA'], $inferredType) : $inferredType))));
+
+        $inferredStatus = str_contains(strtoupper($name), 'SWASTA') ? 'Swasta' : 'Negeri';
+        $rawStatus = $this->option('status');
+        $status = ucfirst(strtolower(trim((string) ($rawStatus !== null && $rawStatus !== ''
+            ? $rawStatus
+            : ($isInteractive ? $this->choice('Status sekolah', ['Negeri', 'Swasta'], $inferredStatus) : $inferredStatus)))));
+
+        $rawAccreditation = $this->option('accreditation');
+        $accreditation = trim((string) ($rawAccreditation !== null && $rawAccreditation !== ''
+            ? $rawAccreditation
+            : ($isInteractive ? $this->choice('Akreditasi sekolah', ['A', 'B', 'C', 'Belum'], 'A') : 'A')));
 
         if ($name === '') {
             $this->error('Nama sekolah wajib diisi.');
@@ -88,5 +103,27 @@ class InitSchoolCommand extends Command
         $this->info("Akun administrator sekolah aktif -> Username: {$admin->username} | Password awal: {$school->npsn}");
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Tebak jenis sekolah default dari nama sekolah (SMA, SMK, atau MA).
+     */
+    protected function inferSchoolType(string $name): string
+    {
+        $upper = strtoupper($name);
+
+        if (preg_match('/\bSMK\b|\bSMKN\b|\bSMKS\b/', $upper) === 1) {
+            return 'SMK';
+        }
+
+        if (preg_match('/\bSMA\b|\bSMAN\b|\bSMAS\b/', $upper) === 1) {
+            return 'SMA';
+        }
+
+        if (preg_match('/\bMA\b|\bMAN\b|\bMAS\b|\bMADRASAH\b/', $upper) === 1) {
+            return 'MA';
+        }
+
+        return 'SMK';
     }
 }
