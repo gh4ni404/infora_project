@@ -88,4 +88,26 @@ class SchoolController extends Controller
             ->route('master.data-sekolah.index')
             ->with('success', "Akun administrator sekolah {$dataSekolah->name} (Username: {$admin->username}) berhasil disinkronkan.");
     }
+
+    /**
+     * Hapus data sekolah (khusus Super Administrator).
+     */
+    public function destroy(Request $request, School $dataSekolah): RedirectResponse
+    {
+        if (! $request->user()?->isSuperAdmin()) {
+            abort(403, 'Hanya Super Administrator yang dapat menghapus data sekolah.');
+        }
+
+        $schoolName = $dataSekolah->name;
+
+        if ($dataSekolah->logo_path) {
+            ImageUploader::delete($dataSekolah->logo_path);
+        }
+
+        $dataSekolah->delete();
+
+        return redirect()
+            ->route('master.data-sekolah.index')
+            ->with('success', "Data sekolah {$schoolName} berhasil dihapus.");
+    }
 }

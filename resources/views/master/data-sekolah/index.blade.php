@@ -24,6 +24,16 @@
                     data-action="{{ route('master.data-sekolah.update', $school) }}"
                     :data-logo-url="$school->logo_path ? asset('storage/' . $school->logo_path) : null"
                 />
+                @if ($user?->isSuperAdmin())
+                    <x-crud-button
+                        action="delete"
+                        class="btn-open-delete-school"
+                        title="Hapus Data Sekolah"
+                        data-action="{{ route('master.data-sekolah.destroy', $school) }}"
+                        data-name="{{ $school->name }}"
+                        data-npsn="{{ $school->npsn }}"
+                    />
+                @endif
             @endif
         </x-slot:actions>
     </x-page-header>
@@ -145,6 +155,17 @@
     <!-- Modal Edit Sekolah Component -->
     @include('master.data-sekolah.edit')
 
+    {{-- Modal Konfirmasi Hapus Data Sekolah --}}
+    <x-modal
+        name="delete"
+        id="modalDeleteSchool"
+        form-id="formDeleteSchool"
+        cancel-btn-id="btnCancelDeleteSchool"
+        confirm-btn-id="btnConfirmDeleteSchool"
+        message-id="deleteSchoolMessage"
+        badge-id="deleteSchoolBadge"
+        item-title-id="deleteSchoolTitle" />
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             InforaModals.setup('modalEditSchool', { cancelBtnId: 'btnCancelEditSchool' });
@@ -196,6 +217,15 @@
             @endif
 
             window.InforaWilayah?.bindCascade({ prefix: 'edit', syncTextInputs: true });
+
+            // Modal Konfirmasi Hapus Data Sekolah
+            InforaModals.setup('modalDeleteSchool', { cancelBtnId: 'btnCancelDeleteSchool' });
+            InforaModals.bindDeleteButtons('.btn-open-delete-school', 'modalDeleteSchool', function(modal, btn) {
+                document.getElementById('modalDeleteSchoolTitle').textContent = 'Hapus Data Sekolah?';
+                document.getElementById('deleteSchoolMessage').textContent = 'Apakah Anda yakin ingin menghapus data sekolah ini beserta seluruh data terkait?';
+                document.getElementById('deleteSchoolBadge').textContent = 'NPSN ' + btn.dataset.npsn;
+                document.getElementById('deleteSchoolTitle').textContent = btn.dataset.name;
+            });
         });
     </script>
 @endsection

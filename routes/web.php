@@ -51,6 +51,7 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
     Route::prefix('system')->name('system.')->group(function () {
         Route::get('/under-development', [UnderDevelopmentController::class, 'show'])->name('under-development');
         Route::get('/under-development/status', [UnderDevelopmentController::class, 'status'])->name('under-development.status');
+        Route::patch('/under-development/checklist', [UnderDevelopmentController::class, 'updateChecklist'])->name('under-development.checklist');
         Route::post('modules/sync-order', [ModuleController::class, 'syncOrder'])->name('modules.sync-order');
         Route::resource('modules', ModuleController::class)->except(['show']);
         Route::resource('menus', MenuController::class)->except(['show']);
@@ -81,7 +82,7 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
     // Master Data Administrasi
     Route::prefix('master')->name('master.')->group(function () {
         Route::post('data-sekolah/{dataSekolah}/sync-admin', [SchoolController::class, 'syncSingleAdmin'])->name('data-sekolah.sync-single-admin');
-        Route::resource('data-sekolah', SchoolController::class)->only(['index', 'edit', 'update']);
+        Route::resource('data-sekolah', SchoolController::class)->only(['index', 'edit', 'update', 'destroy']);
         Route::resource('data-tingkatan', TingkatanController::class)->parameters([
             'data-tingkatan' => 'tingkatan',
         ])->except(['show', 'create']);
