@@ -2,15 +2,12 @@
 
 namespace App\Http\Requests\System;
 
-use App\Http\Requests\Concerns\ValidatesDevelopmentProgress;
 use App\Models\SubMenu;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreSubMenuRequest extends FormRequest
 {
-    use ValidatesDevelopmentProgress;
-
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -48,8 +45,6 @@ class StoreSubMenuRequest extends FormRequest
             'order' => $this->filled('order') ? (int) $this->input('order') : SubMenu::nextOrder($menuId),
             'route_name' => $routeName ? trim($routeName) : null,
         ]);
-
-        $this->prepareDevelopmentProgress();
     }
 
     /**
@@ -59,7 +54,7 @@ class StoreSubMenuRequest extends FormRequest
      */
     public function rules(): array
     {
-        return array_merge([
+        return [
             'menu_id' => ['required', 'integer', 'exists:menus,id'],
             'name' => ['required', 'string', 'max:255'],
             'route_name' => ['nullable', 'string', 'max:255'],
@@ -67,7 +62,7 @@ class StoreSubMenuRequest extends FormRequest
             'route_suffix' => ['nullable', 'string', 'max:150'],
             'order' => ['nullable', 'integer', 'min:1'],
             'is_active' => ['nullable', 'boolean'],
-        ], $this->developmentProgressRules());
+        ];
     }
 
     /**
@@ -77,13 +72,13 @@ class StoreSubMenuRequest extends FormRequest
      */
     public function attributes(): array
     {
-        return array_merge([
+        return [
             'menu_id' => 'Induk Menu',
             'name' => 'Nama Sub-Menu',
             'route_name' => 'Nama Rute (Route)',
             'order' => 'Urutan',
             'is_active' => 'Status Aktif',
-        ], $this->developmentProgressAttributes());
+        ];
     }
 
     /**
@@ -93,12 +88,12 @@ class StoreSubMenuRequest extends FormRequest
      */
     public function messages(): array
     {
-        return array_merge([
+        return [
             'menu_id.required' => 'Induk menu wajib dipilih.',
             'menu_id.exists' => 'Menu yang dipilih tidak ditemukan dalam sistem.',
             'name.required' => 'Nama sub-menu wajib diisi.',
             'name.max' => 'Nama sub-menu tidak boleh melebihi 255 karakter.',
             'order.min' => 'Urutan sub-menu minimal bernilai 1.',
-        ], $this->developmentProgressMessages());
+        ];
     }
 }

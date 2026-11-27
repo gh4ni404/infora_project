@@ -2,15 +2,12 @@
 
 namespace App\Http\Requests\System;
 
-use App\Http\Requests\Concerns\ValidatesDevelopmentProgress;
 use App\Models\Menu;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreMenuRequest extends FormRequest
 {
-    use ValidatesDevelopmentProgress;
-
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -48,8 +45,6 @@ class StoreMenuRequest extends FormRequest
             'order' => $this->filled('order') ? (int) $this->input('order') : Menu::nextOrder($moduleId),
             'route_name' => $routeName ? trim($routeName) : null,
         ]);
-
-        $this->prepareDevelopmentProgress();
     }
 
     /**
@@ -59,14 +54,14 @@ class StoreMenuRequest extends FormRequest
      */
     public function rules(): array
     {
-        return array_merge([
+        return [
             'module_id' => ['required', 'integer', 'exists:modules,id'],
             'name' => ['required', 'string', 'max:255'],
             'route_name' => ['nullable', 'string', 'max:255'],
             'icon' => ['nullable', 'string', 'max:50'],
             'order' => ['nullable', 'integer', 'min:1'],
             'is_active' => ['nullable', 'boolean'],
-        ], $this->developmentProgressRules());
+        ];
     }
 
     /**
@@ -76,14 +71,14 @@ class StoreMenuRequest extends FormRequest
      */
     public function attributes(): array
     {
-        return array_merge([
+        return [
             'module_id' => 'Induk Modul',
             'name' => 'Nama Menu',
             'route_name' => 'Nama Rute (Route)',
             'icon' => 'Ikon Menu',
             'order' => 'Urutan',
             'is_active' => 'Status Aktif',
-        ], $this->developmentProgressAttributes());
+        ];
     }
 
     /**
@@ -93,12 +88,12 @@ class StoreMenuRequest extends FormRequest
      */
     public function messages(): array
     {
-        return array_merge([
+        return [
             'module_id.required' => 'Induk modul wajib dipilih.',
             'module_id.exists' => 'Modul yang dipilih tidak ditemukan dalam sistem.',
             'name.required' => 'Nama menu wajib diisi.',
             'name.max' => 'Nama menu tidak boleh melebihi 255 karakter.',
             'order.min' => 'Urutan menu minimal bernilai 1.',
-        ], $this->developmentProgressMessages());
+        ];
     }
 }

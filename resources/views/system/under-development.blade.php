@@ -108,9 +108,48 @@
                             </div>
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span style="color: var(--infora-text-muted);">Implementasi Code:</span>
-                                <span style="color: #f59e0b; font-weight: 500;">Menunggu Controller ({{ $devStatus['progress'] ?? 0 }}%)</span>
+                                <span id="adminDevStageBadge" class="text-amber-500 font-medium">
+                                    <span id="adminDevStageLabel">{{ $devStatus['stage'] ?? 'Tahap Persiapan Modul' }}</span>
+                                    (<span id="adminDevProgressPercent">{{ $devStatus['progress'] }}%</span>)
+                                </span>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                {{-- Checklist Progres Pengembangan Interaktif (Khusus Super Admin) --}}
+                <div
+                    id="adminChecklistCard"
+                    class="p-5 rounded-xl border border-slate-200/80 bg-slate-50/70 mb-4"
+                    data-checklist-url="{{ route('system.under-development.checklist') }}"
+                    data-item-type="{{ $itemType === 'Sub-Menu' ? 'submenu' : 'menu' }}"
+                    data-item-id="{{ $item->id }}"
+                >
+                    <div class="flex items-center justify-between gap-2 mb-3">
+                        <div class="text-sm font-semibold text-slate-800">Checklist Progres Pengembangan</div>
+                        <span class="text-xs font-bold text-sky-600 tabular-nums" id="adminChecklistPercentText">{{ $devStatus['progress'] }}%</span>
+                    </div>
+
+                    <div class="mb-4">
+                        <progress id="adminDevProgressBar" class="infora-progress" value="{{ $devStatus['progress'] }}" max="100"></progress>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-8 gap-2.5">
+                        @foreach ($devStages as $stageKey => $stageMeta)
+                            <label class="flex items-center justify-between gap-2 p-2.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-sky-300 transition-colors text-xs">
+                                <span class="flex items-center gap-2 text-slate-700 font-medium">
+                                    <input
+                                        type="checkbox"
+                                        class="dev-stage-checkbox rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                                        data-stage-key="{{ $stageKey }}"
+                                        data-threshold="{{ $stageMeta['progress'] }}"
+                                        @checked(($devStatus['progress']) >= $stageMeta['progress'])
+                                    >
+                                    <span>{{ $stageMeta['label'] }}</span>
+                                </span>
+                                <span class="badge badge-neutral font-mono">+{{ $stageMeta['weight'] }}%</span>
+                            </label>
+                        @endforeach
                     </div>
                 </div>
 
@@ -163,6 +202,119 @@
                 </div>
             </div>
         </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const card = document.getElementById('adminChecklistCard');
+                if (!card) {
+                    return;
+                }
+
+                const checklistUrl = card.dataset.checklistUrl;
+                const itemType = card.dataset.itemType;
+                const itemId = Number(card.dataset.itemId);
+                const checkboxes = Array.from(card.querySelectorAll('.dev-stage-checkbox'));
+                const barEl = document.getElementById('adminDevProgressBar');
+                const percentEl = document.getElementById('adminDevProgressPercent');
+                const percentTextEl = document.getElementById('adminChecklistPercentText');
+                const stageLabelEl = document.getElementById('adminDevStageLabel');
+                let isUpdating = false;
+
+                function syncUi(data) {
+                    if (!data) {
+                        return;
+                    }
+                    const progress = Math.max(0, Math.min(100, Number(data.progress || 0)));
+                    if (barEl) barEl.value = progress;
+                    if (percentEl) percentEl.textContent = progress + '%';
+                    if (percentTextEl) percentTextEl.textContent = progress + '%';
+                    if (stageLabelEl && data.stage) stageLabelEl.textContent = data.stage;
+
+                    checkboxes.forEach(function(cb) {
+                        const threshold = Number(cb.dataset.threshold || 0);
+                        cb.checked = progress >= threshold;
+                    });
+                }
+
+                checkboxes.forEach(function(checkbox) {
+                    checkbox.addEventListener('change', async function() {
+                        if (isUpdating) {
+                            return;
+                        }
+
+                        isUpdating = true;
+                        checkboxes.forEach(cb => cb.disabled = true);
+                        const isCompleting = checkbox.dataset.stageKey === 'done' && checkbox.checked;
+
+                        if (isCompleting && window.InforaProgress) {
+                            window.InforaProgress.show({
+                                title: 'Mengaktifkan Fitur',
+                                statusText: 'Menyelesaikan status pengembangan...',
+                                detail: 'Memperbarui akses menu dan memuat ulang halaman...',
+                                percent: 55
+                            });
+                        }
+
+                        try {
+                            const response = await fetch(checklistUrl, {
+                                method: 'PATCH',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                },
+                                credentials: 'same-origin',
+                                body: JSON.stringify({
+                                    type: itemType,
+                                    id: itemId,
+                                    stage_key: checkbox.dataset.stageKey,
+                                    checked: checkbox.checked
+                                })
+                            });
+
+                            if (response.ok) {
+                                const payload = await response.json();
+                                syncUi(payload);
+
+                                if (isCompleting) {
+                                    if (window.InforaProgress) {
+                                        window.InforaProgress.set(95, 'Fitur Siap Digunakan', 'Membuka halaman fitur...');
+                                    }
+                                    if (payload?.ready && payload?.redirect_url) {
+                                        window.location.assign(payload.redirect_url);
+                                    } else {
+                                        window.location.reload();
+                                    }
+                                    return;
+                                }
+                            } else {
+                                const errorPayload = await response.json().catch(() => null);
+                                if (errorPayload?.status) {
+                                    syncUi(errorPayload.status);
+                                } else {
+                                    checkbox.checked = !checkbox.checked;
+                                }
+
+                                if (isCompleting && window.InforaProgress) {
+                                    window.InforaProgress.error(
+                                        errorPayload?.message || 'Fitur ini belum siap untuk diaktifkan.'
+                                    );
+                                }
+                            }
+                        } catch (_err) {
+                            if (isCompleting && window.InforaProgress) {
+                                window.InforaProgress.hide();
+                            }
+                            checkbox.checked = !checkbox.checked;
+                        } finally {
+                            isUpdating = false;
+                            checkboxes.forEach(cb => cb.disabled = false);
+                        }
+                    });
+                });
+            });
+        </script>
     @else
         @php
             $moduleCode = Str::upper(Str::slug($module?->name, '-')) . '-' . sprintf('%02d', $item->order);
@@ -237,16 +389,11 @@
                     </div>
 
                     <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
-                        <span id="devNoteLabel">{{ $devStatus['note'] }}</span>
-                        <div class="flex items-center gap-2 shrink-0">
-                            <span id="devUpdatedHuman">Diperbarui {{ $devStatus['updated_human'] }}</span>
-                            <span>&bull;</span>
-                            <span class="font-mono text-slate-500" id="devVersionLabel">{{ $devStatus['version'] }}</span>
-                            <button type="button" id="btnCheckDevStatus" class="btn-secondary btn-sm" data-no-progress title="Periksa pembaruan status fitur sekarang">
-                                <x-icon name="sync" size="12" />
-                                <span>Cek</span>
-                            </button>
-                        </div>
+                        <span id="devUpdatedHuman">Diperbarui {{ $devStatus['updated_human'] }}</span>
+                        <button type="button" id="btnCheckDevStatus" class="btn-secondary btn-sm" data-no-progress title="Periksa pembaruan status fitur sekarang">
+                            <x-icon name="sync" size="12" />
+                            <span>Cek</span>
+                        </button>
                     </div>
 
                     <div id="devReadyBanner" class="hidden mt-3 p-3 rounded-lg bg-emerald-50 border border-emerald-200">
@@ -349,10 +496,8 @@
 
                 const statusUrl = card.dataset.statusUrl;
                 const stageEl = document.getElementById('devStageLabel');
-                const noteEl = document.getElementById('devNoteLabel');
                 const percentEl = document.getElementById('devProgressPercent');
                 const barEl = document.getElementById('devProgressBar');
-                const versionEl = document.getElementById('devVersionLabel');
                 const updatedEl = document.getElementById('devUpdatedHuman');
                 const liveTextEl = document.getElementById('devLiveStatusText');
                 const readyBanner = document.getElementById('devReadyBanner');
@@ -370,10 +515,8 @@
 
                     const progress = Math.max(0, Math.min(100, Number(data.progress || 0)));
                     if (stageEl && data.stage) stageEl.textContent = data.stage;
-                    if (noteEl && data.note) noteEl.textContent = data.note;
                     if (percentEl) percentEl.textContent = progress + '%';
                     if (barEl) barEl.value = progress;
-                    if (versionEl && data.version) versionEl.textContent = data.version;
                     if (updatedEl && data.updated_human) updatedEl.textContent = 'Diperbarui ' + data.updated_human;
 
                     if (data.ready && data.redirect_url) {

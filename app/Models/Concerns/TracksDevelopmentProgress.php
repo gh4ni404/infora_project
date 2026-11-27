@@ -9,11 +9,27 @@ use Illuminate\Support\Facades\Route;
 trait TracksDevelopmentProgress
 {
     /**
-     * Dapatkan URL rute aktif jika rute menu/sub-menu sudah terdaftar di aplikasi.
+     * Daftar tahapan pengembangan berurutan beserta bobot persentase kumulatifnya.
+     *
+     * @var array<string, array{label: string, weight: int, progress: int}>
+     */
+    public const array DEVELOPMENT_STAGES = [
+        'migration' => ['label' => 'Migration', 'weight' => 10, 'progress' => 10],
+        'model' => ['label' => 'Model', 'weight' => 15, 'progress' => 25],
+        'request' => ['label' => 'Form Request', 'weight' => 15, 'progress' => 40],
+        'controller' => ['label' => 'Controller', 'weight' => 15, 'progress' => 55],
+        'route' => ['label' => 'Route', 'weight' => 10, 'progress' => 65],
+        'view' => ['label' => 'View', 'weight' => 20, 'progress' => 85],
+        'test' => ['label' => 'Test', 'weight' => 10, 'progress' => 95],
+        'done' => ['label' => 'Selesai', 'weight' => 5, 'progress' => 100],
+    ];
+
+    /**
+     * Dapatkan URL rute aktif jika progres sudah selesai (100%) dan rute terdaftar di aplikasi.
      */
     public function resolveRegisteredUrl(): ?string
     {
-        if (blank($this->route_name)) {
+        if ((int) $this->dev_progress < 100 || blank($this->route_name)) {
             return null;
         }
 
@@ -50,8 +66,6 @@ trait TracksDevelopmentProgress
      * @return array{
      *     progress: int,
      *     stage: string,
-     *     note: string,
-     *     version: string,
      *     ready: bool,
      *     redirect_url: ?string,
      *     updated_at: ?string,
@@ -69,8 +83,6 @@ trait TracksDevelopmentProgress
                     'route_name',
                     'dev_progress',
                     'dev_stage',
-                    'dev_note',
-                    'dev_version',
                     'updated_at',
                 ]);
 
@@ -81,10 +93,8 @@ trait TracksDevelopmentProgress
                 return [
                     'id' => $record->id,
                     'route_name' => $record->route_name,
-                    'dev_progress' => max(0, min(100, (int) ($record->dev_progress ?? 0))),
+                    'dev_progress' => max(0, min(100, (int) $record->dev_progress)),
                     'dev_stage' => $record->dev_stage,
-                    'dev_note' => $record->dev_note,
-                    'dev_version' => $record->dev_version,
                     'updated_at' => $record->updated_at?->toIso8601String(),
                 ];
             }
@@ -109,21 +119,11 @@ trait TracksDevelopmentProgress
             default => 'Tahap Pengujian & Finalisasi',
         };
 
-        $defaultNote = match (true) {
-            $isReady => 'Implementasi selesai dan rute fitur sudah aktif.',
-            $progress === 0 => 'Menunggu jadwal pengerjaan tim pengembang',
-            $progress < 50 => 'Penyusunan skema data dan alur backend',
-            $progress < 85 => 'Proses sinkronisasi komponen antarmuka',
-            default => 'Uji coba kualitas dan persiapan rilis',
-        };
-
         $updatedAt = $cached['updated_at'] ? Carbon::parse($cached['updated_at']) : null;
 
         return [
             'progress' => $progress,
             'stage' => filled($cached['dev_stage']) && ! $isReady ? (string) $cached['dev_stage'] : $defaultStage,
-            'note' => filled($cached['dev_note']) && ! $isReady ? (string) $cached['dev_note'] : $defaultNote,
-            'version' => filled($cached['dev_version']) ? (string) $cached['dev_version'] : ($isReady ? 'v1.0.0' : 'v0.9-alpha'),
             'ready' => $isReady,
             'redirect_url' => $redirectUrl,
             'updated_at' => $cached['updated_at'],

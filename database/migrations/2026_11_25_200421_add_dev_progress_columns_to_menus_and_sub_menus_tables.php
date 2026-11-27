@@ -23,12 +23,6 @@ return new class extends Migration
                 if (! Schema::hasColumn($tableName, 'dev_stage')) {
                     $table->string('dev_stage', 120)->nullable()->after('dev_progress');
                 }
-                if (! Schema::hasColumn($tableName, 'dev_note')) {
-                    $table->string('dev_note', 255)->nullable()->after('dev_stage');
-                }
-                if (! Schema::hasColumn($tableName, 'dev_version')) {
-                    $table->string('dev_version', 30)->nullable()->after('dev_note');
-                }
             });
         }
     }

@@ -59,8 +59,6 @@ class Menu extends Model
         'is_active',
         'dev_progress',
         'dev_stage',
-        'dev_note',
-        'dev_version',
     ];
 
     /**
@@ -103,14 +101,9 @@ class Menu extends Model
      */
     public function getRouteUrlAttribute(): string
     {
-        if (! blank($this->route_name)) {
-            if (Route::has($this->route_name)) {
-                return route($this->route_name);
-            }
-
-            if (Route::has($this->route_name.'.index')) {
-                return route($this->route_name.'.index');
-            }
+        $registeredUrl = $this->resolveRegisteredUrl();
+        if ($registeredUrl !== null) {
+            return $registeredUrl;
         }
 
         if (Route::has('system.under-development')) {

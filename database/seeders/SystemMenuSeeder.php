@@ -33,6 +33,8 @@ class SystemMenuSeeder extends Seeder
                 'icon' => 'layout-dashboard',
                 'order' => 1,
                 'is_active' => true,
+                'dev_progress' => 100,
+                'dev_stage' => 'Selesai',
             ]
         );
 
@@ -69,6 +71,8 @@ class SystemMenuSeeder extends Seeder
                 'route_name' => 'system.modules.index',
                 'order' => 1,
                 'is_active' => true,
+                'dev_progress' => 100,
+                'dev_stage' => 'Selesai',
             ]
         );
 
@@ -81,6 +85,8 @@ class SystemMenuSeeder extends Seeder
                 'route_name' => 'system.menus.index',
                 'order' => 2,
                 'is_active' => true,
+                'dev_progress' => 100,
+                'dev_stage' => 'Selesai',
             ]
         );
 
@@ -93,6 +99,8 @@ class SystemMenuSeeder extends Seeder
                 'route_name' => 'system.sub-menus.index',
                 'order' => 3,
                 'is_active' => true,
+                'dev_progress' => 100,
+                'dev_stage' => 'Selesai',
             ]
         );
 
@@ -105,6 +113,8 @@ class SystemMenuSeeder extends Seeder
                 'route_name' => 'system.referensi',
                 'order' => 5,
                 'is_active' => true,
+                'dev_progress' => 100,
+                'dev_stage' => 'Selesai',
             ]
         );
 
@@ -123,6 +133,8 @@ class SystemMenuSeeder extends Seeder
                 'icon' => 'folder',
                 'order' => 2,
                 'is_active' => true,
+                'dev_progress' => 100,
+                'dev_stage' => 'Selesai',
             ]
         );
     }
