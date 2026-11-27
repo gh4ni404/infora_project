@@ -262,9 +262,8 @@ test('infora:setup-school sets up core seeders, single school, and admin with wi
         '--skip-optimize' => true,
     ])->assertSuccessful();
 
-    $this->assertDatabaseHas('users', [
+    $this->assertDatabaseMissing('users', [
         'username' => 'superadmin',
-        'user_type' => 'super_admin',
     ]);
 
     $this->assertDatabaseHas('schools', [
