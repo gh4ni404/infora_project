@@ -201,6 +201,10 @@ class UnderDevelopmentController extends Controller
     protected function findMissingComponents(?string $routeName): array
     {
         $cleanRoute = trim((string) $routeName);
+        if (in_array($cleanRoute, ['dashboard', 'dashboard.admin'], true)) {
+            return [];
+        }
+
         if ($cleanRoute === '') {
             return array_values(array_map(
                 fn (array $stage): string => $stage['label'],

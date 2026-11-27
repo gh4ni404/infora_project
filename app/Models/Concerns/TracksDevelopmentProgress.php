@@ -25,11 +25,17 @@ trait TracksDevelopmentProgress
     ];
 
     /**
-     * Dapatkan URL rute aktif jika progres sudah selesai (100%) dan rute terdaftar di aplikasi.
+     * Dapatkan URL rute aktif jika progres sudah selesai (100%) atau rute dikecualikan, dan terdaftar di aplikasi.
      */
     public function resolveRegisteredUrl(): ?string
     {
-        if ((int) $this->dev_progress < 100 || blank($this->route_name)) {
+        if (blank($this->route_name)) {
+            return null;
+        }
+
+        $isExempt = in_array($this->route_name, ['dashboard', 'dashboard.admin'], true);
+
+        if (! $isExempt && (int) $this->dev_progress < 100) {
             return null;
         }
 
