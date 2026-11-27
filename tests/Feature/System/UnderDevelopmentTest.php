@@ -191,7 +191,7 @@ test('under-development page displays real database progress and status endpoint
         ->assertOk()
         ->assertJson([
             'progress' => 95,
-            'stage' => 'Feature Test',
+            'stage' => 'Test',
             'ready' => false,
         ]);
 
@@ -199,7 +199,7 @@ test('under-development page displays real database progress and status endpoint
     $updatedStatusResponse->assertOk()
         ->assertJson([
             'progress' => 95,
-            'stage' => 'Feature Test',
+            'stage' => 'Test',
             'ready' => false,
         ]);
 });
@@ -288,9 +288,9 @@ test('checking selesai fails with 422 and lists missing components when feature 
             'Model',
             'Form Request',
             'Controller',
-            'Route (routes/web.php)',
-            'View (index.blade.php)',
-            'Feature Test'
+            'Route',
+            'View',
+            'Test'
         )
         ->and($menu->fresh()->dev_progress)->toBe(0)
         ->and($menu->fresh()->dev_stage)->toBeNull();
@@ -408,4 +408,32 @@ test('under-development page suggests namespaced controller path for dotted rout
     $response->assertOk();
     $response->assertSee('php artisan make:controller Akademik/JurnalKbmController');
     $response->assertSee("Route::get('/akademik/jurnal-kbm', [JurnalKbmController::class, 'index'])->name('akademik.jurnal-kbm');");
+});
+
+test('dashboard route is exempt from under-development lock and component validation', function () {
+    $module = Module::create(['name' => 'NAVIGASI UTAMA', 'order' => 1, 'is_active' => true]);
+    $dashboardMenu = Menu::create([
+        'module_id' => $module->id,
+        'name' => 'Dashboard',
+        'route_name' => 'dashboard',
+        'order' => 1,
+        'is_active' => true,
+        'dev_progress' => 0,
+    ]);
+
+    expect($dashboardMenu->route_url)->toBe(route('dashboard'));
+
+    $this->actingAs($this->user)
+        ->patchJson(route('system.under-development.checklist'), [
+            'type' => 'menu',
+            'id' => $dashboardMenu->id,
+            'stage_key' => 'done',
+            'checked' => true,
+        ])
+        ->assertOk()
+        ->assertJson([
+            'progress' => 100,
+            'ready' => true,
+            'redirect_url' => route('dashboard'),
+        ]);
 });
