@@ -9,7 +9,6 @@ use Database\Seeders\KecamatanSeeder;
 use Database\Seeders\KelurahanSeeder;
 use Database\Seeders\MenuAccessTemplateSeeder;
 use Database\Seeders\ProvinsiSeeder;
-use Database\Seeders\SuperAdminSeeder;
 use Database\Seeders\SystemMenuSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -78,12 +77,11 @@ class SetupSchoolCommand extends Command
             $this->line('Melewati seluruh proses seeding (--without-seed).');
         } else {
             $coreSeeders = [
-                SuperAdminSeeder::class,
                 SystemMenuSeeder::class,
                 MenuAccessTemplateSeeder::class,
             ];
 
-            $this->info('Mengisi data inti sistem (Super Admin, Menu Navigasi, Template Peran)...');
+            $this->info('Mengisi data inti sistem (Menu Navigasi, Template Peran)...');
             foreach ($coreSeeders as $seederClass) {
                 $this->call('db:seed', [
                     '--class' => $seederClass,

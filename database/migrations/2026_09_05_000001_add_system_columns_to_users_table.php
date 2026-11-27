@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->string('username')->nullable()->unique()->after('name');
-            $table->string('user_type', 30)->default('super_admin')->after('password')->index();
+            $table->string('user_type', 30)->after('password')->index();
             $table->boolean('is_active')->default(true)->after('user_type')->index();
             $table->string('avatar_path')->nullable()->after('is_active');
         });
