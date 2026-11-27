@@ -94,6 +94,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const layoutSidebar = document.getElementById('layoutSidebar');
 
     if (sidebarNavMenu) {
+        const scrollSidebarToCenter = (targetEl) => {
+            if (!targetEl) {
+                return;
+            }
+            const containerRect = sidebarNavMenu.getBoundingClientRect();
+            const targetRect = targetEl.getBoundingClientRect();
+            const offsetFromCenter = (targetRect.top + targetRect.height / 2) - (containerRect.top + containerRect.height / 2);
+
+            if (offsetFromCenter < 16 && targetRect.top >= containerRect.top) {
+                return;
+            }
+
+            sidebarNavMenu.scrollTo({
+                top: sidebarNavMenu.scrollTop + offsetFromCenter,
+                behavior: 'smooth',
+            });
+        };
+
         // Nav group accordion toggling
         const navGroupTriggers = sidebarNavMenu.querySelectorAll('.nav-group-trigger');
         navGroupTriggers.forEach((trigger) => {
@@ -104,6 +122,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
+                const scrollAfterExpand = () => {
+                    const submenuList = group.querySelector('.nav-submenu-list');
+                    if (!submenuList) {
+                        scrollSidebarToCenter(group);
+                        return;
+                    }
+
+                    let done = false;
+                    const finish = () => {
+                        if (done) {
+                            return;
+                        }
+                        done = true;
+                        submenuList.removeEventListener('transitionend', onTransitionEnd);
+                        scrollSidebarToCenter(group);
+                    };
+                    const onTransitionEnd = (ev) => {
+                        if (ev.propertyName === 'max-height') {
+                            finish();
+                        }
+                    };
+
+                    submenuList.addEventListener('transitionend', onTransitionEnd);
+                    setTimeout(finish, 300);
+                };
+
                 // If sidebar is collapsed, expand it first so submenus are accessible
                 if (layoutSidebar && layoutSidebar.classList.contains('is-collapsed')) {
                     layoutSidebar.classList.remove('is-collapsed');
@@ -113,6 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('infora_sidebar_collapsed', 'false');
                     group.classList.add('is-open');
                     trigger.setAttribute('aria-expanded', 'true');
+                    scrollAfterExpand();
 
                     return;
                 }
@@ -120,34 +165,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isOpen = group.classList.toggle('is-open');
                 trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
 
-                // Smoothly adjust scroll position if the opened submenu overflows the visible sidebar bottom
+                // Scroll opened menu group to the center of the sidebar after accordion transition
                 if (isOpen) {
-                    setTimeout(() => {
-                        const groupRect = group.getBoundingClientRect();
-                        const containerRect = sidebarNavMenu.getBoundingClientRect();
-                        const overflowDiff = groupRect.bottom - containerRect.bottom;
-
-                        if (overflowDiff > 0) {
-                            sidebarNavMenu.scrollBy({
-                                top: overflowDiff + 12, // 12px breathing buffer above docked footer
-                                behavior: 'smooth',
-                            });
-                        }
-                    }, 140);
+                    scrollAfterExpand();
                 }
             });
         });
 
-        // Ensure active menu item is comfortably visible within viewport on initial load
+        // Simpan posisi scroll sidebar sebelum pindah halaman agar transisi scroll terasa natural
+        sidebarNavMenu.querySelectorAll('.nav-link-item, .nav-submenu-item').forEach((link) => {
+            link.addEventListener('click', () => {
+                sessionStorage.setItem('infora_sidebar_scroll', String(sidebarNavMenu.scrollTop));
+            });
+        });
+
+        // Pulihkan posisi scroll sebelumnya secara instan, lalu scroll halus ke tengah dari posisi tersebut
+        const savedScrollTop = sessionStorage.getItem('infora_sidebar_scroll');
+        if (savedScrollTop !== null) {
+            sidebarNavMenu.scrollTop = Number(savedScrollTop) || 0;
+            sessionStorage.removeItem('infora_sidebar_scroll');
+        }
+
         const activeMenuItem = sidebarNavMenu.querySelector('.nav-link-item.active, .nav-submenu-item.active');
         if (activeMenuItem) {
-            requestAnimationFrame(() => {
-                const itemRect = activeMenuItem.getBoundingClientRect();
-                const containerRect = sidebarNavMenu.getBoundingClientRect();
-                if (itemRect.bottom > containerRect.bottom || itemRect.top < containerRect.top) {
-                    activeMenuItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-                }
-            });
+            requestAnimationFrame(() => scrollSidebarToCenter(activeMenuItem));
         }
 
         // Search filtering logic
