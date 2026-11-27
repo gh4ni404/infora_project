@@ -59,14 +59,14 @@ beforeEach(function () {
     ]);
 });
 
-test('single-school mode disables web routes for creating or deleting schools', function () {
+test('single-school mode disables web routes for creating schools', function () {
     $school = School::factory()->smk()->create([
         'name' => 'SMK Negeri 1 Bone',
         'npsn' => '40301111',
     ]);
 
     expect(Route::has('master.data-sekolah.store'))->toBeFalse()
-        ->and(Route::has('master.data-sekolah.destroy'))->toBeFalse()
+        ->and(Route::has('master.data-sekolah.destroy'))->toBeTrue()
         ->and(Route::has('master.data-sekolah.sync-admins'))->toBeFalse();
 
     $this->actingAs($this->superAdmin)
@@ -74,10 +74,6 @@ test('single-school mode disables web routes for creating or deleting schools', 
             'name' => 'SMA Negeri 2 Bone',
             'npsn' => '40302222',
         ])
-        ->assertStatus(405);
-
-    $this->actingAs($this->superAdmin)
-        ->delete('/master/data-sekolah/'.$school->id)
         ->assertStatus(405);
 });
 

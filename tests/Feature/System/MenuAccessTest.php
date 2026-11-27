@@ -353,7 +353,7 @@ test('user without dashboard permission cannot access dashboard and is denied', 
 
 test('user with specific view permission can access resource index but cannot create without can_create', function () {
     $module = Module::create(['name' => 'ADMINISTRASI', 'order' => 1, 'is_active' => true]);
-    $menu = Menu::create(['module_id' => $module->id, 'name' => 'Data Jurusan', 'route_name' => 'master.data-jurusan.index', 'order' => 1, 'is_active' => true]);
+    $menu = Menu::create(['module_id' => $module->id, 'name' => 'Data Jurusan', 'route_name' => 'master.data-jurusan.index', 'order' => 1, 'is_active' => true, 'dev_progress' => 100]);
 
     // Beri izin HANYA can_view = true (can_create = false)
     UserMenuPermission::create([
@@ -381,7 +381,7 @@ test('user with can_create permission can perform store action on permitted reso
     $this->guruUser->update(['school_id' => $school->id]);
 
     $module = Module::create(['name' => 'ADMINISTRASI', 'order' => 1, 'is_active' => true]);
-    $menu = Menu::create(['module_id' => $module->id, 'name' => 'Data Jurusan', 'route_name' => 'master.data-jurusan.index', 'order' => 1, 'is_active' => true]);
+    $menu = Menu::create(['module_id' => $module->id, 'name' => 'Data Jurusan', 'route_name' => 'master.data-jurusan.index', 'order' => 1, 'is_active' => true, 'dev_progress' => 100]);
 
     UserMenuPermission::create([
         'user_id' => $this->guruUser->id,
@@ -418,7 +418,7 @@ test('user with can_create permission can perform store action on permitted reso
 
 test('login redirects non-super admin to first allowed menu if dashboard not permitted', function () {
     $module = Module::create(['name' => 'ADMINISTRASI', 'order' => 1, 'is_active' => true]);
-    $menuSekolah = Menu::create(['module_id' => $module->id, 'name' => 'Data Sekolah', 'route_name' => 'master.data-sekolah.index', 'order' => 1, 'is_active' => true]);
+    $menuSekolah = Menu::create(['module_id' => $module->id, 'name' => 'Data Sekolah', 'route_name' => 'master.data-sekolah.index', 'order' => 1, 'is_active' => true, 'dev_progress' => 100]);
 
     // Guru hanya punya izin Data Sekolah, tidak punya Dashboard
     UserMenuPermission::create([

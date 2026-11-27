@@ -296,3 +296,53 @@ test('validation returns informative message when school_type or accreditation r
 
     $invalidResponse->assertSessionHasErrors(['school_type', 'accreditation']);
 });
+
+test('super admin can delete school data', function () {
+    $school = School::factory()->create([
+        'name' => 'SMK Negeri 1 Dihapus',
+        'npsn' => '40399999',
+    ]);
+
+    $response = $this->actingAs($this->superAdmin)
+        ->delete(route('master.data-sekolah.destroy', $school));
+
+    $response->assertRedirect(route('master.data-sekolah.index'));
+    $response->assertSessionHas('success');
+    $this->assertDatabaseMissing('schools', ['id' => $school->id]);
+});
+
+test('non super admin cannot delete school data even with menu delete permission', function () {
+    $school = School::factory()->create([
+        'name' => 'SMA Negeri 1 Dilindungi',
+        'npsn' => '40388888',
+    ]);
+
+    $schoolAdmin = User::factory()->create([
+        'school_id' => $school->id,
+        'user_type' => 'admin',
+        'is_active' => true,
+    ]);
+
+    $module = Module::create(['name' => 'ADMINISTRASI', 'order' => 1, 'is_active' => true]);
+    $menu = Menu::create([
+        'module_id' => $module->id,
+        'name' => 'Data Sekolah',
+        'route_name' => 'master.data-sekolah.index',
+        'order' => 1,
+        'is_active' => true,
+    ]);
+
+    UserMenuPermission::create([
+        'user_id' => $schoolAdmin->id,
+        'menu_id' => $menu->id,
+        'can_view' => true,
+        'can_edit' => true,
+        'can_delete' => true,
+    ]);
+
+    $this->actingAs($schoolAdmin)
+        ->delete(route('master.data-sekolah.destroy', $school))
+        ->assertForbidden();
+
+    $this->assertDatabaseHas('schools', ['id' => $school->id]);
+});

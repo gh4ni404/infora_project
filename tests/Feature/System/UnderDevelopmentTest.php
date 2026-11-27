@@ -151,10 +151,8 @@ test('under-development page displays real database progress and status endpoint
         'route_name' => 'akademik.erapor.unregistered',
         'order' => 1,
         'is_active' => true,
-        'dev_progress' => 65,
-        'dev_stage' => 'Integrasi Penilaian Sumatif',
-        'dev_note' => 'Menunggu finalisasi cetak leger nilai',
-        'dev_version' => 'v0.8-beta',
+        'dev_progress' => 55,
+        'dev_stage' => 'Controller',
     ]);
 
     UserMenuPermission::create([
@@ -165,10 +163,8 @@ test('under-development page displays real database progress and status endpoint
 
     $pageResponse = $this->actingAs($gtkUser)->get(route('system.under-development', ['type' => 'menu', 'id' => $menu->id]));
     $pageResponse->assertOk();
-    $pageResponse->assertSee('65%');
-    $pageResponse->assertSee('Integrasi Penilaian Sumatif');
-    $pageResponse->assertSee('Menunggu finalisasi cetak leger nilai');
-    $pageResponse->assertSee('v0.8-beta');
+    $pageResponse->assertSee('55%');
+    $pageResponse->assertSee('Controller');
     $pageResponse->assertSee('class="infora-progress"', false);
 
     // Polling JSON oleh non-superadmin berhasil dan ter-cache
@@ -176,57 +172,57 @@ test('under-development page displays real database progress and status endpoint
     $statusResponse = $this->actingAs($gtkUser)->getJson($statusUrl);
     $statusResponse->assertOk()
         ->assertJson([
-            'progress' => 65,
-            'stage' => 'Integrasi Penilaian Sumatif',
-            'note' => 'Menunggu finalisasi cetak leger nilai',
-            'version' => 'v0.8-beta',
+            'progress' => 55,
+            'stage' => 'Controller',
             'ready' => false,
             'redirect_url' => null,
         ]);
 
     expect(Cache::has(Menu::developmentCacheKey('menu', $menu->id)))->toBeTrue();
 
-    // Update via MenuController otomatis menginvalidasi cache dan memperbarui respon status
+    // Update via checklist oleh Super Admin otomatis menginvalidasi cache dan memperbarui respon status
     $this->actingAs($this->user)
-        ->put(route('system.menus.update', $menu), [
-            'module_id' => $module->id,
-            'name' => 'E Rapor',
-            'route_name' => 'akademik.erapor.unregistered',
-            'order' => 1,
-            'is_active' => '1',
-            'dev_progress' => 90,
-            'dev_stage' => 'Tahap Uji Coba Final',
-            'dev_note' => 'Pengujian bersama operator kurikulum',
-            'dev_version' => 'v0.9-rc1',
+        ->patchJson(route('system.under-development.checklist'), [
+            'type' => 'menu',
+            'id' => $menu->id,
+            'stage_key' => 'test',
+            'checked' => true,
         ])
-        ->assertRedirect(route('system.menus.index'));
+        ->assertOk()
+        ->assertJson([
+            'progress' => 95,
+            'stage' => 'Feature Test',
+            'ready' => false,
+        ]);
 
     $updatedStatusResponse = $this->actingAs($gtkUser)->getJson($statusUrl);
     $updatedStatusResponse->assertOk()
         ->assertJson([
-            'progress' => 90,
-            'stage' => 'Tahap Uji Coba Final',
-            'note' => 'Pengujian bersama operator kurikulum',
-            'version' => 'v0.9-rc1',
+            'progress' => 95,
+            'stage' => 'Feature Test',
             'ready' => false,
         ]);
 });
 
-test('under-development status and page automatically detect when feature route becomes registered', function () {
+test('under-development status and page stay locked until checklist selesai is checked even when route is registered', function () {
     $gtkUser = User::factory()->create([
         'user_type' => 'guru',
         'is_active' => true,
     ]);
 
-    $module = Module::create(['name' => 'UMUM', 'order' => 1, 'is_active' => true]);
+    $module = Module::create(['name' => 'MASTER DATA', 'order' => 1, 'is_active' => true]);
     $menu = Menu::create([
         'module_id' => $module->id,
-        'name' => 'Profil',
-        'route_name' => 'profile.index',
+        'name' => 'Data Mapel',
+        'route_name' => 'master.data-mapel.index',
         'order' => 1,
         'is_active' => true,
-        'dev_progress' => 50,
+        'dev_progress' => 65,
+        'dev_stage' => 'Route (routes/web.php)',
     ]);
+
+    // Meskipun rute sudah terdaftar, selama belum dicentang Selesai (100%) tetap masuk under-development
+    expect($menu->route_url)->toBe(route('system.under-development', ['type' => 'menu', 'id' => $menu->id]));
 
     $statusResponse = $this->actingAs($gtkUser)->getJson(
         route('system.under-development.status', ['type' => 'menu', 'id' => $menu->id])
@@ -234,15 +230,70 @@ test('under-development status and page automatically detect when feature route 
 
     $statusResponse->assertOk()
         ->assertJson([
-            'progress' => 100,
-            'ready' => true,
-            'redirect_url' => route('profile.index'),
+            'progress' => 65,
+            'ready' => false,
+            'redirect_url' => null,
         ]);
 
-    // Mengunjungi placeholder saat rute sudah terdaftar otomatis redirect ke rute tujuan
+    // Setelah Super Admin mencentang Selesai (done -> 100%) dan seluruh 7 komponen ada, menu bisa diakses
+    $this->actingAs($this->user)
+        ->patchJson(route('system.under-development.checklist'), [
+            'type' => 'menu',
+            'id' => $menu->id,
+            'stage_key' => 'done',
+            'checked' => true,
+        ])
+        ->assertOk()
+        ->assertJson([
+            'progress' => 100,
+            'ready' => true,
+            'redirect_url' => route('master.data-mapel.index'),
+        ]);
+
+    expect($menu->fresh()->route_url)->toBe(route('master.data-mapel.index'));
+
     $this->actingAs($gtkUser)
         ->get(route('system.under-development', ['type' => 'menu', 'id' => $menu->id]))
-        ->assertRedirect(route('profile.index'));
+        ->assertRedirect(route('master.data-mapel.index'));
+});
+
+test('checking selesai fails with 422 and lists missing components when feature is incomplete', function () {
+    $module = Module::create(['name' => 'AKADEMIK', 'order' => 1, 'is_active' => true]);
+    $menu = Menu::create([
+        'module_id' => $module->id,
+        'name' => 'Fitur Belum Siap',
+        'route_name' => 'akademik.fitur-khayalan.index',
+        'order' => 1,
+        'is_active' => true,
+        'dev_progress' => 95,
+        'dev_stage' => 'Feature Test',
+    ]);
+
+    $response = $this->actingAs($this->user)
+        ->patchJson(route('system.under-development.checklist'), [
+            'type' => 'menu',
+            'id' => $menu->id,
+            'stage_key' => 'done',
+            'checked' => true,
+        ]);
+
+    $response->assertUnprocessable()
+        ->assertJsonStructure(['message', 'missing_components', 'status'])
+        ->assertJsonPath('status.progress', 0)
+        ->assertJsonPath('status.stage', 'Tahap Persiapan Modul');
+
+    expect($response->json('message'))->toContain('Fitur ini belum siap karena')
+        ->and($response->json('missing_components'))->toContain(
+            'Migration',
+            'Model',
+            'Form Request',
+            'Controller',
+            'Route (routes/web.php)',
+            'View (index.blade.php)',
+            'Feature Test'
+        )
+        ->and($menu->fresh()->dev_progress)->toBe(0)
+        ->and($menu->fresh()->dev_stage)->toBeNull();
 });
 
 test('under-development status returns 404 for invalid type or missing item', function () {
@@ -255,7 +306,7 @@ test('under-development status returns 404 for invalid type or missing item', fu
         ->assertNotFound();
 });
 
-test('sub-menu update validates and stores development progress metadata', function () {
+test('super admin can check and uncheck checklist stages on submenu and invalidates cache', function () {
     $module = Module::create(['name' => 'KESISWAAN', 'order' => 1, 'is_active' => true]);
     $menu = Menu::create(['module_id' => $module->id, 'name' => 'Bimbingan', 'order' => 1, 'is_active' => true]);
     $subMenu = SubMenu::create([
@@ -266,38 +317,78 @@ test('sub-menu update validates and stores development progress metadata', funct
         'is_active' => true,
     ]);
 
-    // Validasi menolak progress > 100
+    // Centang tahap controller -> 55%
     $this->actingAs($this->user)
-        ->put(route('system.sub-menus.update', $subMenu), [
-            'menu_id' => $menu->id,
-            'name' => 'Konseling',
-            'route_prefix' => 'kesiswaan',
-            'route_suffix' => 'konseling.pending',
-            'dev_progress' => 150,
+        ->patchJson(route('system.under-development.checklist'), [
+            'type' => 'submenu',
+            'id' => $subMenu->id,
+            'stage_key' => 'controller',
+            'checked' => true,
         ])
-        ->assertSessionHasErrors(['dev_progress']);
-
-    // Simpan progress valid
-    $this->actingAs($this->user)
-        ->put(route('system.sub-menus.update', $subMenu), [
-            'menu_id' => $menu->id,
-            'name' => 'Konseling',
-            'route_prefix' => 'kesiswaan',
-            'route_suffix' => 'konseling.pending',
-            'is_active' => '1',
-            'dev_progress' => 45,
-            'dev_stage' => 'Desain Formulir Konseling',
-            'dev_note' => 'Penyusunan validasi catatan BK',
-            'dev_version' => 'v0.5-alpha',
-        ])
-        ->assertRedirect(route('system.sub-menus.index'));
+        ->assertOk()
+        ->assertJson([
+            'progress' => 55,
+            'stage' => 'Controller',
+        ]);
 
     $this->assertDatabaseHas('sub_menus', [
         'id' => $subMenu->id,
-        'dev_progress' => 45,
-        'dev_stage' => 'Desain Formulir Konseling',
-        'dev_version' => 'v0.5-alpha',
+        'dev_progress' => 55,
+        'dev_stage' => 'Controller',
     ]);
+
+    // Lepas centang controller -> mundur ke Form Request (40%)
+    $this->actingAs($this->user)
+        ->patchJson(route('system.under-development.checklist'), [
+            'type' => 'submenu',
+            'id' => $subMenu->id,
+            'stage_key' => 'controller',
+            'checked' => false,
+        ])
+        ->assertOk()
+        ->assertJson([
+            'progress' => 40,
+            'stage' => 'Form Request',
+        ]);
+
+    // Lepas centang migration -> kembali ke 0%
+    $this->actingAs($this->user)
+        ->patchJson(route('system.under-development.checklist'), [
+            'type' => 'submenu',
+            'id' => $subMenu->id,
+            'stage_key' => 'migration',
+            'checked' => false,
+        ])
+        ->assertOk()
+        ->assertJson([
+            'progress' => 0,
+            'stage' => 'Tahap Persiapan Modul',
+        ]);
+});
+
+test('non superadmin cannot update development checklist', function () {
+    $gtkUser = User::factory()->create([
+        'user_type' => 'guru',
+        'is_active' => true,
+    ]);
+
+    $module = Module::create(['name' => 'KESISWAAN', 'order' => 1, 'is_active' => true]);
+    $menu = Menu::create([
+        'module_id' => $module->id,
+        'name' => 'Bimbingan',
+        'route_name' => 'kesiswaan.bimbingan.pending',
+        'order' => 1,
+        'is_active' => true,
+    ]);
+
+    $this->actingAs($gtkUser)
+        ->patchJson(route('system.under-development.checklist'), [
+            'type' => 'menu',
+            'id' => $menu->id,
+            'stage_key' => 'migration',
+            'checked' => true,
+        ])
+        ->assertForbidden();
 });
 
 test('under-development page suggests namespaced controller path for dotted routes', function () {
