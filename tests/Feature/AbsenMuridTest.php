@@ -67,13 +67,13 @@ beforeEach(function () {
 });
 
 test('guest is redirected to login when accessing absen murid', function () {
-    $this->get(route('absen_murid.index'))->assertRedirect(route('login'));
-    $this->get(route('absen_murid.descriptors'))->assertRedirect(route('login'));
+    $this->get(route('absensi-kbm.wajah.index'))->assertRedirect(route('login'));
+    $this->get(route('absensi-kbm.wajah.descriptors'))->assertRedirect(route('login'));
 });
 
 test('unauthorized user without menu permission is forbidden from absen murid', function () {
     $this->actingAs($this->regularUser)
-        ->get(route('absen_murid.index'))
+        ->get(route('absensi-kbm.wajah.index'))
         ->assertForbidden();
 });
 
@@ -82,7 +82,8 @@ test('user with view permission can view absen murid and descriptors but cannot 
     $menu = Menu::create([
         'module_id' => $module->id,
         'name' => 'Absen Murid',
-        'route_name' => 'absen_murid',
+        'route_name' => 'absensi-kbm.wajah',
+        'dev_progress' => 100,
         'icon' => 'scan-face',
         'order' => 2,
         'is_active' => true,
@@ -110,20 +111,20 @@ test('user with view permission can view absen murid and descriptors but cannot 
     ]);
 
     $this->actingAs($this->adminSekolahA)
-        ->get(route('absen_murid.index'))
+        ->get(route('absensi-kbm.wajah.index'))
         ->assertOk()
         ->assertSee('Absen Murid (Face Recognition)')
         ->assertSee('btnToggleVoice')
         ->assertSee('btnTestVoice');
 
     $this->actingAs($this->adminSekolahA)
-        ->getJson(route('absen_murid.descriptors'))
+        ->getJson(route('absensi-kbm.wajah.descriptors'))
         ->assertOk()
         ->assertJsonCount(1, 'students')
         ->assertJsonPath('students.0.nama_lengkap', 'Nadia Putri');
 
     $this->actingAs($this->adminSekolahA)
-        ->postJson(route('absen_murid.store'), [
+        ->postJson(route('absensi-kbm.wajah.store'), [
             'school_id' => $this->schoolA->id,
             'murid_id' => $murid->id,
             'mode' => 'masuk',
@@ -168,7 +169,7 @@ test('descriptors endpoint filters active students with active faces per school 
     ]);
 
     $this->actingAs($this->superAdmin)
-        ->getJson(route('absen_murid.descriptors', [
+        ->getJson(route('absensi-kbm.wajah.descriptors', [
             'school_id' => $this->schoolA->id,
             'kelas_id' => $this->kelasA->id,
         ]))
@@ -204,7 +205,7 @@ test('store records masuk attendance with welcome greeting, snapshot, and active
         'murid_id' => $murid->id,
     ]);
 
-    $response = $this->actingAs($this->superAdmin)->postJson(route('absen_murid.store'), [
+    $response = $this->actingAs($this->superAdmin)->postJson(route('absensi-kbm.wajah.store'), [
         'school_id' => $this->schoolA->id,
         'murid_id' => $murid->id,
         'face_profile_id' => $faceProfile->id,
@@ -231,7 +232,7 @@ test('store records masuk attendance with welcome greeting, snapshot, and active
     Storage::disk('public')->assertExists($attendance->foto_masuk_path);
 
     // Scan kedua di hari yang sama tidak membuat duplikat
-    $duplicateResponse = $this->actingAs($this->superAdmin)->postJson(route('absen_murid.store'), [
+    $duplicateResponse = $this->actingAs($this->superAdmin)->postJson(route('absensi-kbm.wajah.store'), [
         'school_id' => $this->schoolA->id,
         'murid_id' => $murid->id,
         'mode' => 'masuk',
@@ -254,14 +255,14 @@ test('store marks terlambat when check in exceeds jam_batas_masuk and handles pu
     ]);
 
     // Pulang sebelum masuk ditolak
-    $this->actingAs($this->superAdmin)->postJson(route('absen_murid.store'), [
+    $this->actingAs($this->superAdmin)->postJson(route('absensi-kbm.wajah.store'), [
         'school_id' => $this->schoolA->id,
         'murid_id' => $murid->id,
         'mode' => 'pulang',
     ])->assertUnprocessable();
 
     // Masuk melewati batas 07:15 -> terlambat
-    $this->actingAs($this->superAdmin)->postJson(route('absen_murid.store'), [
+    $this->actingAs($this->superAdmin)->postJson(route('absensi-kbm.wajah.store'), [
         'school_id' => $this->schoolA->id,
         'murid_id' => $murid->id,
         'mode' => 'masuk',
@@ -273,7 +274,7 @@ test('store marks terlambat when check in exceeds jam_batas_masuk and handles pu
 
     // Pulang setelah masuk berhasil
     $this->travelTo(now()->setTime(14, 15, 0));
-    $this->actingAs($this->superAdmin)->postJson(route('absen_murid.store'), [
+    $this->actingAs($this->superAdmin)->postJson(route('absensi-kbm.wajah.store'), [
         'school_id' => $this->schoolA->id,
         'murid_id' => $murid->id,
         'mode' => 'pulang',
@@ -290,7 +291,7 @@ test('store validates cross-school murid and invalid input', function () {
         'is_active' => true,
     ]);
 
-    $this->actingAs($this->superAdmin)->postJson(route('absen_murid.store'), [
+    $this->actingAs($this->superAdmin)->postJson(route('absensi-kbm.wajah.store'), [
         'school_id' => $this->schoolA->id,
         'murid_id' => $muridB->id,
         'mode' => 'invalid_mode',
@@ -308,7 +309,7 @@ test('destroy removes attendance record with snapshot and enforces cross-school 
         'is_active' => true,
     ]);
 
-    $this->actingAs($this->superAdmin)->postJson(route('absen_murid.store'), [
+    $this->actingAs($this->superAdmin)->postJson(route('absensi-kbm.wajah.store'), [
         'school_id' => $this->schoolA->id,
         'murid_id' => $muridA->id,
         'mode' => 'masuk',
@@ -319,8 +320,8 @@ test('destroy removes attendance record with snapshot and enforces cross-school 
     $snapshotPath = $absenA->foto_masuk_path;
 
     $this->actingAs($this->superAdmin)
-        ->delete(route('absen_murid.destroy', $absenA))
-        ->assertRedirect(route('absen_murid.index'));
+        ->delete(route('absensi-kbm.wajah.destroy', $absenA))
+        ->assertRedirect(route('absensi-kbm.wajah.index'));
 
     $this->assertDatabaseMissing('absensi_murids', ['id' => $absenA->id]);
     Storage::disk('public')->assertMissing($snapshotPath);
@@ -330,7 +331,8 @@ test('destroy removes attendance record with snapshot and enforces cross-school 
     $menu = Menu::create([
         'module_id' => $module->id,
         'name' => 'Absen Murid',
-        'route_name' => 'absen_murid',
+        'route_name' => 'absensi-kbm.wajah',
+        'dev_progress' => 100,
         'icon' => 'scan-face',
         'order' => 2,
         'is_active' => true,
@@ -349,6 +351,6 @@ test('destroy removes attendance record with snapshot and enforces cross-school 
     ]);
 
     $this->actingAs($this->adminSekolahA)
-        ->delete(route('absen_murid.destroy', $absenB))
+        ->delete(route('absensi-kbm.wajah.destroy', $absenB))
         ->assertForbidden();
 });

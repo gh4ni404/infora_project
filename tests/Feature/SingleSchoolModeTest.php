@@ -115,7 +115,7 @@ test('absen murid descriptors are cached and invalidated when face profile or mu
     ]);
 
     // 1. Panggil descriptors pertama -> mengisi cache
-    $firstResponse = $this->actingAs($this->superAdmin)->getJson(route('absen_murid.descriptors'));
+    $firstResponse = $this->actingAs($this->superAdmin)->getJson(route('absensi-kbm.wajah.descriptors'));
     $firstResponse->assertOk()->assertJsonPath('total_students', 1);
 
     $cacheKey = MuridFaceProfile::descriptorCacheKey($school->id, null);
@@ -123,19 +123,19 @@ test('absen murid descriptors are cached and invalidated when face profile or mu
 
     // 2. Toggle status profil wajah -> cache version ter-increment & data terupdate
     $this->actingAs($this->superAdmin)
-        ->patchJson(route('pendaftaran_muka.toggle-status', $profile))
+        ->patchJson(route('konfigurasi-sekolah.regis-wajah.toggle-status', $profile))
         ->assertOk();
 
-    $secondResponse = $this->actingAs($this->superAdmin)->getJson(route('absen_murid.descriptors'));
+    $secondResponse = $this->actingAs($this->superAdmin)->getJson(route('absensi-kbm.wajah.descriptors'));
     $secondResponse->assertOk()->assertJsonPath('total_students', 0);
 
     // 3. Aktifkan lagi lalu nonaktifkan murid lewat MuridController -> cache ikut ter-invalidasi
     $this->actingAs($this->superAdmin)
-        ->patchJson(route('pendaftaran_muka.toggle-status', $profile))
+        ->patchJson(route('konfigurasi-sekolah.regis-wajah.toggle-status', $profile))
         ->assertOk();
 
     $this->actingAs($this->superAdmin)
-        ->getJson(route('absen_murid.descriptors'))
+        ->getJson(route('absensi-kbm.wajah.descriptors'))
         ->assertOk()
         ->assertJsonPath('total_students', 1);
 
@@ -144,7 +144,7 @@ test('absen murid descriptors are cached and invalidated when face profile or mu
         ->assertRedirect();
 
     $this->actingAs($this->superAdmin)
-        ->getJson(route('absen_murid.descriptors'))
+        ->getJson(route('absensi-kbm.wajah.descriptors'))
         ->assertOk()
         ->assertJsonPath('total_students', 0);
 });

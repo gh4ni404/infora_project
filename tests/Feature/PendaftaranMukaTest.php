@@ -69,13 +69,13 @@ beforeEach(function () {
 });
 
 test('guest is redirected to login when accessing pendaftaran muka', function () {
-    $response = $this->get(route('pendaftaran_muka.index'));
+    $response = $this->get(route('konfigurasi-sekolah.regis-wajah.index'));
 
     $response->assertRedirect(route('login'));
 });
 
 test('unauthorized non-superadmin user without menu permission is forbidden', function () {
-    $response = $this->actingAs($this->regularUser)->get(route('pendaftaran_muka.index'));
+    $response = $this->actingAs($this->regularUser)->get(route('konfigurasi-sekolah.regis-wajah.index'));
 
     $response->assertForbidden();
 });
@@ -90,10 +90,11 @@ test('user with view permission can access pendaftaran muka but cannot store wit
     $menu = Menu::create([
         'module_id' => $module->id,
         'name' => 'Pendaftaran Muka',
-        'route_name' => 'pendaftaran_muka',
+        'route_name' => 'konfigurasi-sekolah.regis-wajah',
         'icon' => 'sparkles',
         'order' => 1,
         'is_active' => true,
+        'dev_progress' => 100,
     ]);
 
     UserMenuPermission::create([
@@ -112,12 +113,12 @@ test('user with view permission can access pendaftaran muka but cannot store wit
     ]);
 
     $this->actingAs($this->adminSekolahA)
-        ->get(route('pendaftaran_muka.index'))
+        ->get(route('konfigurasi-sekolah.regis-wajah.index'))
         ->assertOk()
         ->assertSee('Andi Pratama');
 
     $this->actingAs($this->adminSekolahA)
-        ->post(route('pendaftaran_muka.store'), [
+        ->post(route('konfigurasi-sekolah.regis-wajah.store'), [
             'school_id' => $this->schoolA->id,
             'murid_id' => $murid->id,
             'label' => 'Tampak Depan',
@@ -142,7 +143,7 @@ test('super admin can view pendaftaran muka page with kpi stats and modals', fun
         'label' => 'Tampak Depan',
     ]);
 
-    $response = $this->actingAs($this->superAdmin)->get(route('pendaftaran_muka.index', [
+    $response = $this->actingAs($this->superAdmin)->get(route('konfigurasi-sekolah.regis-wajah.index', [
         'school_id' => $this->schoolA->id,
     ]));
 
@@ -175,7 +176,7 @@ test('tenancy isolation and active status filter apply on pendaftaran muka index
         'is_active' => true,
     ]);
 
-    $response = $this->actingAs($this->superAdmin)->get(route('pendaftaran_muka.index', [
+    $response = $this->actingAs($this->superAdmin)->get(route('konfigurasi-sekolah.regis-wajah.index', [
         'school_id' => $this->schoolA->id,
     ]));
 
@@ -208,7 +209,7 @@ test('search, kelas, and face_status filters work properly', function () {
     ]);
 
     $this->actingAs($this->superAdmin)
-        ->get(route('pendaftaran_muka.index', [
+        ->get(route('konfigurasi-sekolah.regis-wajah.index', [
             'school_id' => $this->schoolA->id,
             'face_status' => 'terdaftar',
         ]))
@@ -216,7 +217,7 @@ test('search, kelas, and face_status filters work properly', function () {
         ->assertViewHas('murids', fn ($murids) => $murids->pluck('nama_lengkap')->all() === ['Budi Hartono']);
 
     $this->actingAs($this->superAdmin)
-        ->get(route('pendaftaran_muka.index', [
+        ->get(route('konfigurasi-sekolah.regis-wajah.index', [
             'school_id' => $this->schoolA->id,
             'face_status' => 'belum',
             'kelas_id' => 'tanpa_kelas',
@@ -236,7 +237,7 @@ test('super admin can store face profile with json descriptor and sync empty mur
         'is_active' => true,
     ]);
 
-    $response = $this->actingAs($this->superAdmin)->post(route('pendaftaran_muka.store'), [
+    $response = $this->actingAs($this->superAdmin)->post(route('konfigurasi-sekolah.regis-wajah.store'), [
         'school_id' => $this->schoolA->id,
         'murid_id' => $murid->id,
         'label' => 'tampak depan',
@@ -246,7 +247,7 @@ test('super admin can store face profile with json descriptor and sync empty mur
         'sync_murid_foto' => 1,
     ]);
 
-    $response->assertRedirect(route('pendaftaran_muka.index'));
+    $response->assertRedirect(route('konfigurasi-sekolah.regis-wajah.index'));
     $response->assertSessionHas('success');
 
     $profile = MuridFaceProfile::where('murid_id', $murid->id)->first();
@@ -278,7 +279,7 @@ test('store does not overwrite existing murid foto_path', function () {
         'is_active' => true,
     ]);
 
-    $this->actingAs($this->superAdmin)->post(route('pendaftaran_muka.store'), [
+    $this->actingAs($this->superAdmin)->post(route('konfigurasi-sekolah.regis-wajah.store'), [
         'school_id' => $this->schoolA->id,
         'murid_id' => $murid->id,
         'label' => 'Agak Kiri',
@@ -304,7 +305,7 @@ test('store validates descriptor length, base64 image, cross-school murid, and m
     ]);
 
     // 1. Descriptor bukan 128 elemen dan foto base64 tidak valid
-    $this->actingAs($this->superAdmin)->post(route('pendaftaran_muka.store'), [
+    $this->actingAs($this->superAdmin)->post(route('konfigurasi-sekolah.regis-wajah.store'), [
         'school_id' => $this->schoolA->id,
         'murid_id' => $muridA->id,
         'label' => 'Tampak Depan',
@@ -313,7 +314,7 @@ test('store validates descriptor length, base64 image, cross-school murid, and m
     ])->assertSessionHasErrors(['foto_base64', 'face_descriptor']);
 
     // 2. Murid lintas sekolah ditolak
-    $this->actingAs($this->superAdmin)->post(route('pendaftaran_muka.store'), [
+    $this->actingAs($this->superAdmin)->post(route('konfigurasi-sekolah.regis-wajah.store'), [
         'school_id' => $this->schoolA->id,
         'murid_id' => $muridB->id,
         'label' => 'Tampak Depan',
@@ -327,7 +328,7 @@ test('store validates descriptor length, base64 image, cross-school murid, and m
         'murid_id' => $muridA->id,
     ]);
 
-    $this->actingAs($this->superAdmin)->post(route('pendaftaran_muka.store'), [
+    $this->actingAs($this->superAdmin)->post(route('konfigurasi-sekolah.regis-wajah.store'), [
         'school_id' => $this->schoolA->id,
         'murid_id' => $muridA->id,
         'label' => 'Sampel Ke-6',
@@ -351,7 +352,7 @@ test('show returns murid face profiles json and protects cross-school IDOR', fun
     ]);
 
     $this->actingAs($this->superAdmin)
-        ->getJson(route('pendaftaran_muka.show', $muridA))
+        ->getJson(route('konfigurasi-sekolah.regis-wajah.show', $muridA))
         ->assertOk()
         ->assertJsonPath('nama_lengkap', 'Fajar Nugroho')
         ->assertJsonPath('active_count', 1)
@@ -364,10 +365,11 @@ test('show returns murid face profiles json and protects cross-school IDOR', fun
     $menu = Menu::create([
         'module_id' => $module->id,
         'name' => 'Pendaftaran Muka',
-        'route_name' => 'pendaftaran_muka',
+        'route_name' => 'konfigurasi-sekolah.regis-wajah',
         'icon' => 'sparkles',
         'order' => 1,
         'is_active' => true,
+        'dev_progress' => 100,
     ]);
     UserMenuPermission::create([
         'user_id' => $this->adminSekolahA->id,
@@ -384,7 +386,7 @@ test('show returns murid face profiles json and protects cross-school IDOR', fun
     ]);
 
     $this->actingAs($this->adminSekolahA)
-        ->getJson(route('pendaftaran_muka.show', $muridB))
+        ->getJson(route('konfigurasi-sekolah.regis-wajah.show', $muridB))
         ->assertForbidden();
 });
 
@@ -398,7 +400,7 @@ test('toggle status and destroy work properly and enforce tenant isolation', fun
     ]);
 
     // Upload lewat store agar file fisik face_murid dan avatar terpisah tersimpan di disk fake
-    $this->actingAs($this->superAdmin)->post(route('pendaftaran_muka.store'), [
+    $this->actingAs($this->superAdmin)->post(route('konfigurasi-sekolah.regis-wajah.store'), [
         'school_id' => $this->schoolA->id,
         'murid_id' => $murid->id,
         'label' => 'Tampak Depan',
@@ -413,13 +415,13 @@ test('toggle status and destroy work properly and enforce tenant isolation', fun
 
     // 1. Toggle status
     $this->actingAs($this->superAdmin)
-        ->patch(route('pendaftaran_muka.toggle-status', $profile))
-        ->assertRedirect(route('pendaftaran_muka.index'));
+        ->patch(route('konfigurasi-sekolah.regis-wajah.toggle-status', $profile))
+        ->assertRedirect(route('konfigurasi-sekolah.regis-wajah.index'));
 
     expect($profile->fresh()->is_active)->toBeFalse();
 
     $this->actingAs($this->superAdmin)
-        ->patch(route('pendaftaran_muka.toggle-status', $profile))
+        ->patch(route('konfigurasi-sekolah.regis-wajah.toggle-status', $profile))
         ->assertRedirect();
 
     expect($profile->fresh()->is_active)->toBeTrue();
@@ -427,8 +429,8 @@ test('toggle status and destroy work properly and enforce tenant isolation', fun
     // 2. Delete sample removes face file but preserves murid profile photo
     $faceFilePath = $profile->foto_path;
     $this->actingAs($this->superAdmin)
-        ->delete(route('pendaftaran_muka.destroy', $profile))
-        ->assertRedirect(route('pendaftaran_muka.index'));
+        ->delete(route('konfigurasi-sekolah.regis-wajah.destroy', $profile))
+        ->assertRedirect(route('konfigurasi-sekolah.regis-wajah.index'));
 
     $this->assertDatabaseMissing('murid_face_profiles', ['id' => $profile->id]);
     Storage::disk('public')->assertMissing($faceFilePath);
@@ -439,10 +441,11 @@ test('toggle status and destroy work properly and enforce tenant isolation', fun
     $menu = Menu::create([
         'module_id' => $module->id,
         'name' => 'Pendaftaran Muka',
-        'route_name' => 'pendaftaran_muka',
+        'route_name' => 'konfigurasi-sekolah.regis-wajah',
         'icon' => 'sparkles',
         'order' => 1,
         'is_active' => true,
+        'dev_progress' => 100,
     ]);
     UserMenuPermission::create([
         'user_id' => $this->adminSekolahA->id,
@@ -458,10 +461,10 @@ test('toggle status and destroy work properly and enforce tenant isolation', fun
     ]);
 
     $this->actingAs($this->adminSekolahA)
-        ->patch(route('pendaftaran_muka.toggle-status', $profileB))
+        ->patch(route('konfigurasi-sekolah.regis-wajah.toggle-status', $profileB))
         ->assertForbidden();
 
     $this->actingAs($this->adminSekolahA)
-        ->delete(route('pendaftaran_muka.destroy', $profileB))
+        ->delete(route('konfigurasi-sekolah.regis-wajah.destroy', $profileB))
         ->assertForbidden();
 });

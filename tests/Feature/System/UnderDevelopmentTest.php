@@ -437,3 +437,30 @@ test('dashboard route is exempt from under-development lock and component valida
             'redirect_url' => route('dashboard'),
         ]);
 });
+
+test('checking selesai resolves components via controller when filenames differ from route name', function () {
+    $module = Module::create(['name' => 'KONFIGURASI SEKOLAH', 'order' => 2, 'is_active' => true]);
+    $menu = Menu::create(['module_id' => $module->id, 'name' => 'Konfigurasi', 'order' => 1, 'is_active' => true]);
+    $subMenu = SubMenu::create([
+        'menu_id' => $menu->id,
+        'name' => 'Pendaftaran Wajah',
+        'route_name' => 'konfigurasi-sekolah.regis-wajah',
+        'order' => 1,
+        'is_active' => true,
+        'dev_progress' => 95,
+    ]);
+
+    $this->actingAs($this->user)
+        ->patchJson(route('system.under-development.checklist'), [
+            'type' => 'submenu',
+            'id' => $subMenu->id,
+            'stage_key' => 'done',
+            'checked' => true,
+        ])
+        ->assertOk()
+        ->assertJson([
+            'progress' => 100,
+            'ready' => true,
+            'redirect_url' => route('konfigurasi-sekolah.regis-wajah.index'),
+        ]);
+});
