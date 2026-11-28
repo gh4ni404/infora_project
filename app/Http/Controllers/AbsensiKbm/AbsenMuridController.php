@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\AbsensiKbm;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\FaceRecognition\StoreAbsenMuridRequest;
 use App\Models\AbsensiMurid;
 use App\Models\Kelas;
@@ -62,7 +63,7 @@ class AbsenMuridController extends Controller
             ->orderBy('nama')
             ->get();
 
-        return view('face-recognition.absen-murid.index', compact(
+        return view('absensi-kbm.deteksi-wajah.index', compact(
             'absensis',
             'recentAttendances',
             'stats',
@@ -288,7 +289,7 @@ class AbsenMuridController extends Controller
         $absensi->delete();
 
         return redirect()
-            ->route('absen_murid.index', $this->schoolRedirectParams($request, $schoolId))
+            ->route('absensi-kbm.wajah.index', $this->schoolRedirectParams($request, $schoolId))
             ->with('success', "Catatan absensi {$nama} berhasil dihapus.");
     }
 

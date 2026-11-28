@@ -4,7 +4,7 @@
     size="lg"
     title="Daftarkan Wajah Murid"
     subtitle="Ambil foto melalui kamera atau unggah gambar untuk mengekstrak vektor wajah 128-dimensi"
-    action="{{ route('pendaftaran_muka.store') }}"
+    action="{{ route('konfigurasi-sekolah.regis-wajah.store') }}"
     form-id="formRegisterFace">
 
     <x-form-input type="hidden" name="school_id" id="register_school_id" :value="$selectedSchoolId" />

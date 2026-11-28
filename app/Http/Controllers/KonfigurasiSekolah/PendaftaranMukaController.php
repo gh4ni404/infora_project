@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\KonfigurasiSekolah;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\FaceRecognition\StoreFaceRegistrationRequest;
 use App\Models\Kelas;
 use App\Models\Murid;
@@ -73,7 +74,7 @@ class PendaftaranMukaController extends Controller
             })
             ->values();
 
-        return view('face-recognition.pendaftaran-muka.index', compact(
+        return view('konfigurasi-sekolah.pendaftaran-wajah.index', compact(
             'murids',
             'totalMuridAktif',
             'sudahTerdaftarCount',
@@ -108,7 +109,7 @@ class PendaftaranMukaController extends Controller
 
         if (! $fotoPath) {
             return redirect()
-                ->route('pendaftaran_muka.index', $this->schoolRedirectParams($request, $murid->school_id))
+                ->route('konfigurasi-sekolah.regis-wajah.index', $this->schoolRedirectParams($request, $murid->school_id))
                 ->with('error', 'Gagal memproses berkas foto wajah. Pastikan ukuran foto tidak melebihi 1MB.');
         }
 
@@ -150,7 +151,7 @@ class PendaftaranMukaController extends Controller
         }
 
         return redirect()
-            ->route('pendaftaran_muka.index', $this->schoolRedirectParams($request, $murid->school_id))
+            ->route('konfigurasi-sekolah.regis-wajah.index', $this->schoolRedirectParams($request, $murid->school_id))
             ->with('success', "Sampel wajah ({$data['label']}) untuk murid {$murid->nama_lengkap} berhasil didaftarkan.");
     }
 
@@ -191,8 +192,8 @@ class PendaftaranMukaController extends Controller
                     'is_active' => (bool) $profile->is_active,
                     'registered_by_name' => $profile->registeredBy?->name ?: 'Sistem',
                     'created_at_formatted' => $profile->created_at?->translatedFormat('d M Y, H:i') ?: '-',
-                    'toggle_url' => route('pendaftaran_muka.toggle-status', $profile),
-                    'delete_url' => route('pendaftaran_muka.destroy', $profile),
+                    'toggle_url' => route('konfigurasi-sekolah.regis-wajah.toggle-status', $profile),
+                    'delete_url' => route('konfigurasi-sekolah.regis-wajah.destroy', $profile),
                 ];
             })->values(),
         ]);
@@ -220,7 +221,7 @@ class PendaftaranMukaController extends Controller
         }
 
         return redirect()
-            ->route('pendaftaran_muka.index', $this->schoolRedirectParams($request, $faceProfile->school_id))
+            ->route('konfigurasi-sekolah.regis-wajah.index', $this->schoolRedirectParams($request, $faceProfile->school_id))
             ->with('success', $message);
     }
 
@@ -249,7 +250,7 @@ class PendaftaranMukaController extends Controller
         }
 
         return redirect()
-            ->route('pendaftaran_muka.index', $this->schoolRedirectParams($request, $schoolId))
+            ->route('konfigurasi-sekolah.regis-wajah.index', $this->schoolRedirectParams($request, $schoolId))
             ->with('success', $message);
     }
 

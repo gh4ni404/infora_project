@@ -34,7 +34,7 @@
 
             <x-slot:actions>
                 @if ($schools->count() > 1)
-                    <form method="GET" action="{{ route('pendaftaran_muka.index') }}" id="schoolFilterForm">
+                    <form method="GET" action="{{ route('konfigurasi-sekolah.regis-wajah.index') }}" id="schoolFilterForm">
                         <x-form-select
                             name="school_id"
                             id="school_id"
@@ -81,7 +81,7 @@
 
         {{-- Tabel Status Pendaftaran Muka Murid --}}
         <x-data-table
-            route="{{ route('pendaftaran_muka.index') }}"
+            route="{{ route('konfigurasi-sekolah.regis-wajah.index') }}"
             search-placeholder="Cari nama lengkap, NISN, atau NIS murid..."
             :per-page="$perPageInput"
             per-page-text="murid"
@@ -229,7 +229,7 @@
                                     action="view"
                                     class="btn-open-manage-faces"
                                     title="Kelola sampel wajah {{ $murid->nama_lengkap }}"
-                                    data-url="{{ route('pendaftaran_muka.show', $murid) }}"
+                                    data-url="{{ route('konfigurasi-sekolah.regis-wajah.show', $murid) }}"
                                     data-murid-id="{{ $murid->id }}"
                                     data-murid-nama="{{ $murid->nama_lengkap }}"
                                 />
@@ -254,8 +254,8 @@
         </x-data-table>
 
         {{-- Dialog Modals --}}
-        @include('face-recognition.pendaftaran-muka.register-modal')
-        @include('face-recognition.pendaftaran-muka.manage-modal')
+        @include('konfigurasi-sekolah.pendaftaran-wajah.register-modal')
+        @include('konfigurasi-sekolah.pendaftaran-wajah.manage-modal')
 
         {{-- Modal Konfirmasi Hapus Sampel Wajah --}}
         <x-modal

@@ -13,8 +13,8 @@
     <div
         id="absenMuridApp"
         data-school-id="{{ $selectedSchoolId }}"
-        data-descriptors-url="{{ route('absen_murid.descriptors') }}"
-        data-store-url="{{ route('absen_murid.store') }}"
+        data-descriptors-url="{{ route('absensi-kbm.wajah.descriptors') }}"
+        data-store-url="{{ route('absensi-kbm.wajah.store') }}"
         data-timezone="{{ config('app.timezone', 'Asia/Makassar') }}"
         data-is-today="{{ $isToday ? '1' : '0' }}"
         data-can-create="{{ $canCreateAbsen ? '1' : '0' }}">
@@ -32,7 +32,7 @@
 
             <x-slot:actions>
                 @if ($schools->count() > 1)
-                    <form method="GET" action="{{ route('absen_murid.index') }}" id="schoolFilterForm">
+                    <form method="GET" action="{{ route('absensi-kbm.wajah.index') }}" id="schoolFilterForm">
                         <x-form-select
                             name="school_id"
                             id="school_id"
@@ -55,7 +55,7 @@
                     <span>Tes Suara</span>
                 </button>
 
-                <a href="{{ route('pendaftaran_muka.index') }}" class="btn-primary" title="Kelola pendaftaran wajah murid">
+                <a href="{{ route('konfigurasi-sekolah.regis-wajah.index') }}" class="btn-primary" title="Kelola pendaftaran wajah murid">
                     <x-icon name="scan-face" size="16" />
                     <span>Daftar Muka</span>
                 </a>
@@ -74,7 +74,7 @@
                 badge-color="warning"
                 action-icon="scan-face"
                 action-title="Daftarkan Wajah Sekarang"
-                :action-href="route('pendaftaran_muka.index')">
+                :action-href="route('konfigurasi-sekolah.regis-wajah.index')">
                 <br>Unit sekolah ini belum memiliki sampel wajah murid yang aktif. Silakan daftarkan minimal 1 wajah murid di menu <strong>Pendaftaran Muka</strong> sebelum memulai pemindaian absensi.
             </x-status-banner>
         @endif
@@ -252,7 +252,7 @@
 
         {{-- Tabel Rekap Absensi Harian --}}
         <x-data-table
-            route="{{ route('absen_murid.index') }}"
+            route="{{ route('absensi-kbm.wajah.index') }}"
             search-placeholder="Cari nama murid, NISN, atau NIS..."
             :per-page="$perPageInput"
             per-page-text="absensi"
@@ -382,7 +382,7 @@
                                     title="Hapus catatan absensi {{ $absen->murid?->nama_lengkap }}"
                                     data-nama="{{ $absen->murid?->nama_lengkap ?: 'Murid' }}"
                                     data-tanggal="{{ $absen->tanggal?->translatedFormat('d M Y') }}"
-                                    data-action="{{ route('absen_murid.destroy', $absen) }}"
+                                    data-action="{{ route('absensi-kbm.wajah.destroy', $absen) }}"
                                 />
                             </x-table-actions>
                         </td>
