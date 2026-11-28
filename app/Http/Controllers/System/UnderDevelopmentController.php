@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use ReflectionClass;
 
 class UnderDevelopmentController extends Controller
 {
@@ -240,12 +241,58 @@ class UnderDevelopmentController extends Controller
         $registeredRoute = Route::getRoutes()->getByName($cleanRoute)
             ?? Route::getRoutes()->getByName($cleanRoute.'.index');
 
+        $controllerClass = $registeredRoute?->getControllerClass();
+        $controllerSource = ($controllerClass && class_exists($controllerClass))
+            ? File::get((new ReflectionClass($controllerClass))->getFileName())
+            : null;
+
+        if ($controllerClass) {
+            $controllerShort = class_basename($controllerClass);
+            if (str_ends_with($controllerShort, 'Controller')) {
+                $entityNames[] = substr($controllerShort, 0, -10);
+                $entityNames = array_values(array_unique($entityNames));
+            }
+        }
+
+        $controllerModels = [];
+        if ($controllerSource && preg_match_all('/^use\s+(App\\\\Models\\\\[A-Za-z0-9_]+);/m', $controllerSource, $modelMatches)) {
+            foreach ($modelMatches[1] as $modelClass) {
+                if (class_exists($modelClass)) {
+                    $controllerModels[] = $modelClass;
+                    $table = (new $modelClass)->getTable();
+                    $snakeNames[] = $table;
+                }
+            }
+            $snakeNames = array_values(array_unique($snakeNames));
+        }
+
+        $hasControllerRequest = false;
+        if ($controllerSource && preg_match_all('/^use\s+(App\\\\Http\\\\Requests\\\\[A-Za-z0-9_\\\\]+Request);/m', $controllerSource, $reqMatches)) {
+            foreach ($reqMatches[1] as $reqClass) {
+                if (class_exists($reqClass)) {
+                    $hasControllerRequest = true;
+                    break;
+                }
+            }
+        }
+
+        $hasControllerView = false;
+        if ($controllerSource && preg_match_all('/view\(\s*[\'"]([a-zA-Z0-9_.-]+)[\'"]/', $controllerSource, $viewMatches)) {
+            foreach ($viewMatches[1] as $viewName) {
+                $viewPath = str_replace('.', '/', $viewName);
+                if (File::exists(resource_path("views/{$viewPath}.blade.php"))) {
+                    $hasControllerView = true;
+                    break;
+                }
+            }
+        }
+
         $hasRoute = $registeredRoute !== null;
         $hasMigration = $this->hasMatchingFile(database_path('migrations'), $snakeNames, '.php');
-        $hasModel = $this->hasEntityFile(app_path('Models'), $entityNames, '.php');
-        $hasRequest = $this->hasRequestFile($entityNames, $namespacePath);
-        $hasController = $this->hasControllerFile($registeredRoute, $entityNames, $namespacePath);
-        $hasView = $this->hasViewFile($segments);
+        $hasModel = $controllerModels !== [] || $this->hasEntityFile(app_path('Models'), $entityNames, '.php');
+        $hasRequest = $hasControllerRequest || $this->hasRequestFile($entityNames, $namespacePath);
+        $hasController = $controllerSource !== null || $this->hasControllerFile($registeredRoute, $entityNames, $namespacePath);
+        $hasView = $hasControllerView || $this->hasViewFile($segments);
         $hasTest = $this->hasEntityFile(base_path('tests/Feature'), $entityNames, 'Test.php', true);
 
         $checks = [
